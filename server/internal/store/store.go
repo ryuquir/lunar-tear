@@ -14,7 +14,7 @@ const (
 
 	starterCharacterID        = int32(1)
 	starterCostumeID          = int32(1)
-	starterWeaponID           = int32(1)
+	starterWeaponID           = int32(100001)
 	starterCompanionID        = int32(1)
 	starterMissionID          = int32(1)
 	starterMainQuestRouteID   = int32(1)
@@ -126,9 +126,9 @@ type UserState struct {
 }
 
 type WeaponStoryState struct {
-	WeaponId               int32
-	ReleasedMaxStoryIndex  int32
-	LatestVersion          int64
+	WeaponId              int32
+	ReleasedMaxStoryIndex int32
+	LatestVersion         int64
 }
 
 type UserSettingState struct {
@@ -436,6 +436,7 @@ type GachaCatalogEntry struct {
 	IsInactive                 bool
 	InformationID              int32
 	GachaMode                  []byte
+	BannerAssetName            string
 }
 
 func New(clock Clock, options ...Option) *Store {
@@ -761,7 +762,13 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 		},
 		Quests:        map[int32]UserQuestState{},
 		QuestMissions: map[QuestMissionKey]UserQuestMissionState{},
-		WeaponStories: make(map[int32]WeaponStoryState),
+		WeaponStories: map[int32]WeaponStoryState{
+			starterWeaponID: {
+				WeaponId:              starterWeaponID,
+				ReleasedMaxStoryIndex: 1,
+				LatestVersion:         nowMillis,
+			},
+		},
 		Missions: map[int32]UserMissionState{
 			starterMissionID: {
 				MissionID:                 starterMissionID,

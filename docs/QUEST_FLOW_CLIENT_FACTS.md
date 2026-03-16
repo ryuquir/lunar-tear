@@ -797,6 +797,80 @@ From dump symbols and existing probes, the client does local checks against:
 
 This means quest flow is not only about RPC ordering. The client also gates behavior on local table state it rebuilds from user-data diffs.
 
+## Scene 13 HalfResult Gate (IsClearedQuestWithQuestId)
+
+Scene 13 is the first scene with `QuestResultTypeHalfResult` (2) in `EntityMQuestSceneTable.json`. The correct flow is:
+
+1. Scene 13 → obtain dialog (EXP, mission clears)
+2. User taps Continue on obtain dialog
+3. Scene 14 (epilogue, `IsMainFlowQuestTarget=false`)
+4. `FinishMainQuest` → complete quest dialog
+
+**Observed behavior:** After the obtain dialog, the client never calls `UpdateMainQuestSceneProgress(14)`, `UpdateMainFlowSceneProgress(14)`, or `SendFinishMainQuestAsync`. Frida logs show `IsClearedQuestWithQuestId(2)` returns `false` and no further RPCs are invoked.
+
+**Constraint:** We cannot clear the quest at scene 13 because that skips the obtain dialog and shows the complete dialog instead.
+
+### Re-evaluation: Options to Satisfy the Gate
+
+1. **Different timing:** Apply the clear only after the obtain dialog is shown. The server does not receive an explicit "obtain dialog dismissed" RPC. The client would need to send a signal (e.g. `UpdateMainQuestSceneProgress(14)` or a new RPC) that we could interpret as "user passed the obtain dialog" — but the client may be gated on `IsClearedQuestWithQuestId(2)=true` before it sends that. Requires further probe data to confirm whether the client attempts any RPC after the obtain dialog.
+
+2. **Client bug:** The client may be wrong to require the quest cleared at HalfResult. If the intended design is "obtain dialog → scene 14 → FinishMainQuest", the client should not gate on `IsClearedQuestWithQuestId` before advancing to scene 14. This would need a client-side fix.
+
+3. **Alternative flag:** There may be another flag (e.g. in `IUserMainQuestProgressStatus` or `IUserQuest`) that the client checks instead of or in addition to `IsClearedQuestWithQuestId`. The probe should be extended to trace what the obtain-dialog Continue handler reads before deciding to advance.
+
+**Next steps:** Use the broadened probe (post-scene-13 event window, `UpdateMainFlowSceneProgress` hooks, obtain-dialog Continue path hooks) to determine whether the client attempts any RPC after the obtain dialog and what it checks before advancing.
+
+### QuestResultType Flow and HasFullResult vs HasHalfResult
+
+**QuestResultType enum** (`dump.cs` line ~776067):
+
+- `UNKNOWN = 0`, `NONE = 1`, `HALF_RESULT = 2`, `FULL_RESULT = 3`
+
+**Where QuestResultType is used:**
+
+- `EntityMQuestScene.QuestResultType` — master data per scene (scene 13 = HALF_RESULT)
+- `Gameplay.PlayResultAsync(bool isRetired, bool isContentStory, QuestResultType questResultType, CancellationToken cxlToken)` — RVA 0x2765E78
+- `Gameplay.IsNeedsWaitCompletedResult(bool isContentStory, QuestResultType questResultType)` — RVA 0x2765F50
+- `QuestResultInParameter.QuestResultType` — passed into result UI (get RVA 0x31E8AF8, set 0x31E8B00)
+- `QuestResultOutParameter.QuestResultType` — get RVA 0x31E8CAC, set 0x31E8CB4
+
+**QuestAcquisitionProduction:**
+
+- `HasFullResult(int questId)` — RVA 0x2B9E0FC. Uses lambda `b__34_1(EntityMQuestScene i)` (RVA 0x2B9E4EC), so it checks scene table rows for FULL_RESULT.
+- **No `HasHalfResult`** — the client has no equivalent method. Only `HasFullResult` and `HasAnyGohobi` exist.
+
+**Implication:** The obtain-dialog flow branches on `HasFullResult` only. For scene 13 (HalfResult), `HasFullResult` returns false. The freeze occurs in the path taken when `HasFullResult` is false. The client may be missing a HalfResult-specific branch or mishandling the case where `questResultType == HALF_RESULT` but `HasFullResult` is false.
+
+**Suggested probe additions:** Hook `Gameplay.PlayResultAsync` and `IsNeedsWaitCompletedResult` to log `questResultType`; hook `QuestResultInParameter.get_QuestResultType` to see what value flows into the result UI.
+
+### Post-HasFullResult False Branch (Assembly at nextRva=0x2b9f7dc)
+
+**First call:** `InMainFlow()` (RVA 0x2C58910) — static bool. The result is combined with HasFullResult via `orn`; the branch depends on both.
+
+After that, the flow checks `[x8+0x24]` (QuestResultType): if 1 (NONE) or 2 (HALF_RESULT), it enters the HalfResult path.
+
+1. **Gate at RVA 0x2B5C40C** — `(questId, 0)` returns bool. If **false** → branch to early complete (state -2). If **true** → continue to step 2.
+2. **AddWeaponUnlockData** (0x2B9E024) — may run before unlock production.
+3. **TryPlayUnlockProductionAsync(questId, false)** (0x2B9A8EC) — creates UniTask, then awaits. If the awaiter `IsCompleted` is false, the state machine registers a continuation and suspends.
+
+**Freeze hypothesis:** The gate returns true for quest 2 at HalfResult, so the client awaits `TryPlayUnlockProductionAsync(2)`. If that UniTask never completes (e.g. no unlock to show but the production still awaits something), the state machine suspends and never resumes.
+
+**Probe hooks added:** `postHasFullResult.gate`, `TryPlayUnlockProductionAsync`, `AddWeaponUnlockData`, UniTask awaiter `IsCompleted` and `register continuation`.
+
+**Observed:** InMainFlow returns true. AddWeaponUnlockData(conditionValue=2) is called, then **process crashes** (java.lang.Error). The crash occurs **inside AddWeaponUnlockData** — not a freeze but a native crash (likely null deref or similar). The gate is reached (we get to AddWeaponUnlockData which is after it); the crash is in AddWeaponUnlockData(2).
+
+**Hypothesis:** AddWeaponUnlockData(conditionValue=2) looks up weapon unlock data. The conditionValue may be `WeaponStoryReleaseConditionGroupId` (EntityMWeaponTable has weapons with `WeaponStoryReleaseConditionGroupId: 2`). The client uses `EntityMWeaponStoryReleaseConditionGroupTable` (not in our master_data). The lookup may return null and the client crashes instead of handling it.
+
+### Server-Side Options
+
+1. **No server fix** — The crash is in client code. The server cannot patch AddWeaponUnlockData.
+2. **Clear at scene 13** — Would skip the obtain dialog and show complete dialog instead (undesired).
+3. **Frida workaround** — Intercept AddWeaponUnlockData and return immediately for conditionValue=2 when at HalfResult, bypassing the crash.
+
+### Frida Workaround (Implemented)
+
+`hooks_scene13_freeze_probe.js` sets `BYPASS_ADD_WEAPON_UNLOCK_CRASH = true` by default. When AddWeaponUnlockData(2) is called at scene 13, `Interceptor.replace` is used to skip the original function and return immediately (no-op), avoiding the crash. Previously, a `pc = lr` redirect was used but the process still crashed (possibly because the caller expected side effects or the redirect was incorrect). Set to `false` to observe the crash for debugging.
+
 ## Practical Reading Order
 
 If you want to reconstruct flow from facts only, the shortest useful order is:

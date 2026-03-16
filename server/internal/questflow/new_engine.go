@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/utils"
 	"sort"
 	"time"
 )
@@ -392,7 +393,7 @@ type NewEngine struct {
 }
 
 func MakeNewEngine() *NewEngine {
-	scenes, err := readJSON[questScene]("EntityMQuestSceneTable.json")
+	scenes, err := utils.ReadJSON[questScene]("EntityMQuestSceneTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -406,17 +407,17 @@ func MakeNewEngine() *NewEngine {
 		return scenes[i].QuestSceneId < scenes[j].QuestSceneId
 	})
 
-	missions, err := readJSON[mission]("EntityMQuestMissionTable.json")
+	missions, err := utils.ReadJSON[mission]("EntityMQuestMissionTable.json")
 	if err != nil {
 		panic(err)
 	}
 
-	quests, err := readJSON[quest]("EntityMQuestTable.json")
+	quests, err := utils.ReadJSON[quest]("EntityMQuestTable.json")
 	if err != nil {
 		panic(err)
 	}
 
-	missionGroups, err := readJSON[missionGroup]("EntityMQuestMissionGroupTable.json")
+	missionGroups, err := utils.ReadJSON[missionGroup]("EntityMQuestMissionGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -430,7 +431,7 @@ func MakeNewEngine() *NewEngine {
 		return missionGroups[i].QuestMissionId < missionGroups[j].QuestMissionId
 	})
 
-	sequences, err := readJSON[mainQuestSequence]("EntityMMainQuestSequenceTable.json")
+	sequences, err := utils.ReadJSON[mainQuestSequence]("EntityMMainQuestSequenceTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -444,17 +445,17 @@ func MakeNewEngine() *NewEngine {
 		return sequences[i].QuestID < sequences[j].QuestID
 	})
 
-	mainQuestChapters, err := readJSON[mainQuestChapter]("EntityMMainQuestChapterTable.json")
+	mainQuestChapters, err := utils.ReadJSON[mainQuestChapter]("EntityMMainQuestChapterTable.json")
 	if err != nil {
 		panic(err)
 	}
 
-	firstClearRewardSwitches, err := readJSON[questFirstClearRewardSwitch]("EntityMQuestFirstClearRewardSwitchTable.json")
+	firstClearRewardSwitches, err := utils.ReadJSON[questFirstClearRewardSwitch]("EntityMQuestFirstClearRewardSwitchTable.json")
 	if err != nil {
 		panic(err)
 	}
 
-	firstClearRewards, err := readJSON[questFirstClearRewardGroup]("EntityMQuestFirstClearRewardGroupTable.json")
+	firstClearRewards, err := utils.ReadJSON[questFirstClearRewardGroup]("EntityMQuestFirstClearRewardGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -468,17 +469,17 @@ func MakeNewEngine() *NewEngine {
 		return firstClearRewards[i].QuestFirstClearRewardType < firstClearRewards[j].QuestFirstClearRewardType
 	})
 
-	missionRewards, err := readJSON[missionReward]("EntityMQuestMissionRewardTable.json")
+	missionRewards, err := utils.ReadJSON[missionReward]("EntityMQuestMissionRewardTable.json")
 	if err != nil {
 		panic(err)
 	}
 
-	weapons, err := readJSON[weaponMaster]("EntityMWeaponTable.json")
+	weapons, err := utils.ReadJSON[weaponMaster]("EntityMWeaponTable.json")
 	if err != nil {
 		panic(err)
 	}
 
-	releaseConditions, err := readJSON[weaponStoryReleaseCondition]("EntityMWeaponStoryReleaseConditionGroupTable.json")
+	releaseConditions, err := utils.ReadJSON[weaponStoryReleaseCondition]("EntityMWeaponStoryReleaseConditionGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -658,6 +659,23 @@ func (e *NewEngine) HandleMainFlowSceneProgress(user *store.UserState, questScen
 	user.MainQuest.CurrentMainQuestRouteID = routeId
 }
 
+func (e *NewEngine) ApplyBootstrap(user *store.UserState, profile store.BootstrapProfile, nowMillis int64) {
+	switch profile {
+	case "", store.BootstrapProfileFresh:
+		return
+	case store.BootstrapProfileMainQuestScene9:
+		sceneID := int32(9)
+		scene, ok := e.sceneById[sceneID]
+		if !ok {
+			panic(fmt.Sprintf("unknown sceneId=%d for ApplyBootstrap", sceneID))
+		}
+		e.initQuestState(user, scene.QuestId)
+		e.HandleMainFlowSceneProgress(user, sceneID)
+	default:
+		panic(fmt.Sprintf("unknown bootstrap profile %q", profile))
+	}
+}
+
 func (e *NewEngine) getLastMainFlowSceneId(questID int32) int32 {
 	sceneIds := e.sceneIdsByQuestId[questID]
 	if len(sceneIds) == 0 {
@@ -697,7 +715,6 @@ func (e *NewEngine) HandleMainQuestSceneProgress(user *store.UserState, questSce
 			nowMillis := time.Now().UnixMilli()
 			e.clearQuestMissions(user, quest.QuestId, nowMillis)
 			e.applyExpRewards(user, quest.QuestId, nowMillis)
-			e.grantWeaponStoryUnlocksForQuestScene(user, quest.QuestId, QuestResultTypeHalfResult, nowMillis)
 		}
 		if scene.QuestResultType == QuestResultTypeFullResult {
 			questState.QuestStateType = store.UserQuestStateTypeCleared
@@ -795,6 +812,14 @@ func (e *NewEngine) grantWeapon(user *store.UserState, weaponID int32, nowMillis
 		Level:               1,
 		AcquisitionDatetime: nowMillis,
 	}
+	weapon, ok := e.weaponById[weaponID]
+	if ok && weapon.WeaponStoryReleaseConditionGroupId != 0 {
+		for _, cond := range e.releaseConditionsByGroupId[weapon.WeaponStoryReleaseConditionGroupId] {
+			if cond.WeaponStoryReleaseConditionType == WeaponStoryReleaseConditionTypeAcquisition {
+				e.grantWeaponStoryUnlock(user, weaponID, cond.StoryIndex, nowMillis)
+			}
+		}
+	}
 }
 
 func (e *NewEngine) grantCompanion(user *store.UserState, companionID int32, nowMillis int64) {
@@ -813,6 +838,20 @@ func (e *NewEngine) grantCompanion(user *store.UserState, companionID int32, now
 }
 
 func (e *NewEngine) grantWeaponStoryUnlock(user *store.UserState, weaponID, storyIndex int32, nowMillis int64) {
+	// Consistency guard: only grant story if weapon exists in IUserWeapon.
+	// Client's GetUnlockWeaponStoryWeapons iterates IUserWeapon; if we send IUserWeaponStory
+	// for a weapon not in IUserWeapon, the client may crash on null lookup.
+	hasWeapon := false
+	for _, row := range user.Weapons {
+		if row.WeaponID == weaponID {
+			hasWeapon = true
+			break
+		}
+	}
+	if !hasWeapon {
+		log.Printf("[NewEngine] grantWeaponStoryUnlock: skipping weaponId=%d (weapon not in user.Weapons)", weaponID)
+		return
+	}
 	if user.WeaponStories == nil {
 		user.WeaponStories = make(map[int32]store.WeaponStoryState)
 	}
@@ -877,6 +916,7 @@ func (e *NewEngine) HandleQuestFinish(user *store.UserState, questID int32, nowM
 	questState := user.Quests[questID]
 	if !questState.IsRewardGranted {
 		e.applyQuestRewards(user, questID, nowMillis)
+		e.grantWeaponStoryUnlocksForQuestScene(user, questID, QuestResultTypeHalfResult, nowMillis)
 		e.grantWeaponStoryUnlocksForQuestScene(user, questID, QuestResultTypeFullResult, nowMillis)
 		questState.IsRewardGranted = true
 	}

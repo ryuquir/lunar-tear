@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gachaloader"
 	"lunar-tear/server/internal/questflow"
 	"lunar-tear/server/internal/service"
 	"lunar-tear/server/internal/store"
@@ -102,9 +103,17 @@ func main() {
 	)
 	questEngine := questflow.MustLoad()
 	newQuestEngine := questflow.MakeNewEngine()
-	userStore := store.New(nil, store.WithBootstrap(store.BootstrapProfile(*bootstrapProfile), questEngine))
+	userStore := store.New(nil, store.WithBootstrap(store.BootstrapProfile(*bootstrapProfile), newQuestEngine))
 	log.Printf("store bootstrap profile: %s", *bootstrapProfile)
 
+	gachaEntries, err := gachaloader.LoadGachaCatalog()
+	if err != nil {
+		log.Fatalf("load gacha catalog: %v", err)
+	}
+	userStore.ReplaceGachaCatalog(gachaEntries)
+	log.Printf("gacha catalog loaded: %d entries", len(gachaEntries))
+
+	pb.RegisterBannerServiceServer(grpcServer, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(grpcServer, service.NewUserServiceServer(userStore))
 	pb.RegisterBattleServiceServer(grpcServer, service.NewBattleServiceServer(userStore))
 	pb.RegisterConfigServiceServer(grpcServer, service.NewConfigServiceServer(*host, int32(*grpcPort), octoURL))

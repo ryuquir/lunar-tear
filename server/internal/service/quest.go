@@ -32,11 +32,13 @@ func NewQuestServiceServer(userStore *store.Store, engine *questflow.Engine, new
 }
 
 func buildSelectedQuestDiff(user store.UserState, tableNames []string) map[string]*pb.DiffData {
-	return userdata.BuildDiffFromTables(userdata.SelectTables(userdata.FullClientTableMap(user), tableNames))
+	tables := userdata.SelectTables(userdata.FullClientTableMap(user), tableNames)
+	return userdata.BuildDiffFromTablesOrdered(tables, tableNames)
 }
 
 func logQuestState(prefix string, user store.UserState) {
-	log.Printf("[QuestService] %s %#v %#v %#v", prefix, user.MainQuest, user.Status, user.Quests)
+	log.Printf("[QuestService] %s MainQuest=%#v Status=%#v Quests=%#v", prefix, user.MainQuest, user.Status, user.Quests)
+	log.Printf("[QuestService] %s Weapons=%#v WeaponStories=%#v", prefix, user.Weapons, user.WeaponStories)
 }
 
 func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, req *pb.UpdateMainFlowSceneProgressRequest) (*pb.UpdateMainFlowSceneProgressResponse, error) {
@@ -77,13 +79,11 @@ func (s *QuestServiceServer) UpdateMainQuestSceneProgress(ctx context.Context, r
 		DiffUserData: buildSelectedQuestDiff(user, []string{
 			"IUserStatus",
 			"IUserCharacter",
-			"IUserCostume",
 			"IUserQuest",
 			"IUserQuestMission",
 			"IUserMainQuestFlowStatus",
 			"IUserMainQuestMainFlowStatus",
 			"IUserMainQuestProgressStatus",
-			"IUserWeaponStory",
 		}),
 	}, nil
 }

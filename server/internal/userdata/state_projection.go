@@ -1,6 +1,7 @@
 package userdata
 
 import (
+	"log"
 	"sort"
 
 	pb "lunar-tear/server/gen/proto"
@@ -196,6 +197,28 @@ func BuildDiffFromTables(tables map[string]string) map[string]*pb.DiffData {
 	return diff
 }
 
+// BuildDiffFromTablesOrdered builds a diff map with tables in the given order.
+// Use when client applies tables in received order and order matters (e.g. IUserWeapon before IUserWeaponStory).
+// Protobuf map serialization order is implementation-defined; this at least ensures we only include
+// the requested tables in the specified sequence when building the map.
+func BuildDiffFromTablesOrdered(tables map[string]string, order []string) map[string]*pb.DiffData {
+	diff := make(map[string]*pb.DiffData, len(order))
+	for _, table := range order {
+		payload, ok := tables[table]
+		if !ok {
+			payload = "[]"
+		}
+		if payload == "" {
+			payload = "[]"
+		}
+		diff[table] = &pb.DiffData{
+			UpdateRecordsJson: payload,
+			DeleteKeysJson:    "[]",
+		}
+	}
+	return diff
+}
+
 func sortedCharacterRecords(user store.UserState) []map[string]any {
 	ids := make([]int, 0, len(user.Characters))
 	for id := range user.Characters {
@@ -243,9 +266,14 @@ func sortedWeaponRecords(user store.UserState) []map[string]any {
 	records := make([]map[string]any, 0, len(keys))
 	for _, key := range keys {
 		row := user.Weapons[key]
+		uuid := row.UserWeaponUUID
+		if uuid == "" {
+			log.Printf("[state_projection] sortedWeaponRecords: using key as fallback for weapon key=%q (empty userWeaponUuid)", key)
+			uuid = key // Defensive: map key IS the userWeaponUuid by design
+		}
 		records = append(records, map[string]any{
 			"userId":              user.UserID,
-			"userWeaponUuid":      row.UserWeaponUUID,
+			"userWeaponUuid":      uuid,
 			"weaponId":            row.WeaponID,
 			"level":               row.Level,
 			"exp":                 row.Exp,
@@ -262,19 +290,28 @@ func sortedWeaponStoryRecords(user store.UserState) []map[string]any {
 	if user.WeaponStories == nil {
 		return []map[string]any{}
 	}
+	// Build set of weaponIds that exist in IUserWeapon - never send IUserWeaponStory
+	// for a weapon not in IUserWeapon (client may crash on null lookup).
+	// Aligned with sortedWeaponRecords: we emit all weapons (key-as-fallback when UserWeaponUUID empty).
+	weaponIdsInWeapons := make(map[int32]bool)
+	for _, row := range user.Weapons {
+		weaponIdsInWeapons[row.WeaponID] = true
+	}
 	weaponIds := make([]int32, 0, len(user.WeaponStories))
 	for weaponId := range user.WeaponStories {
-		weaponIds = append(weaponIds, weaponId)
+		if weaponIdsInWeapons[weaponId] {
+			weaponIds = append(weaponIds, weaponId)
+		}
 	}
 	sort.Slice(weaponIds, func(i, j int) bool { return weaponIds[i] < weaponIds[j] })
 	records := make([]map[string]any, 0, len(weaponIds))
 	for _, weaponId := range weaponIds {
 		row := user.WeaponStories[weaponId]
 		records = append(records, map[string]any{
-			"userId":                 user.UserID,
-			"weaponId":               row.WeaponId,
-			"releasedMaxStoryIndex":  row.ReleasedMaxStoryIndex,
-			"latestVersion":          row.LatestVersion,
+			"userId":                user.UserID,
+			"weaponId":              row.WeaponId,
+			"releasedMaxStoryIndex": row.ReleasedMaxStoryIndex,
+			"latestVersion":         row.LatestVersion,
 		})
 	}
 	return records

@@ -32,9 +32,9 @@ type EntityIUser struct {
 // EntityIUserSetting mirrors EntityIUserSetting [Key(0..2)].
 type EntityIUserSetting struct {
 	_msgpack              struct{} `msgpack:",asArray"`
-	UserId                int64    // Key(0)
-	IsNotifyPurchaseAlert bool     // Key(1)
-	LatestVersion         int64    // Key(2)
+	UserId                int64    `json:"userId"`                // Key(0)
+	IsNotifyPurchaseAlert bool     `json:"isNotifyPurchaseAlert"` // Key(1)
+	LatestVersion         int64    `json:"latestVersion"`         // Key(2)
 }
 
 // EntityIUserTutorialProgress mirrors EntityIUserTutorialProgress [Key(0..4)].
@@ -115,9 +115,9 @@ type EntityIUserStatus struct {
 // EntityIUserGem mirrors EntityIUserGem [Key(0..2)].
 type EntityIUserGem struct {
 	_msgpack struct{} `msgpack:",asArray"`
-	UserId   int64    // Key(0)
-	PaidGem  int32    // Key(1)
-	FreeGem  int32    // Key(2)
+	UserId   int64    `json:"userId"`   // Key(0)
+	PaidGem  int32    `json:"paidGem"`  // Key(1)
+	FreeGem  int32    `json:"freeGem"`  // Key(2)
 }
 
 // EntityIUserProfile mirrors EntityIUserProfile [Key(0..7)].
@@ -214,24 +214,24 @@ type EntityIUserDeck struct {
 // EntityIUserLogin mirrors EntityIUserLogin [Key(0..6)].
 type EntityIUserLogin struct {
 	_msgpack                  struct{} `msgpack:",asArray"`
-	UserId                    int64    // Key(0)
-	TotalLoginCount           int32    // Key(1)
-	ContinualLoginCount       int32    // Key(2)
-	MaxContinualLoginCount    int32    // Key(3)
-	LastLoginDatetime         int64    // Key(4)
-	LastComebackLoginDatetime int64    // Key(5)
-	LatestVersion             int64    // Key(6)
+	UserId                    int64    `json:"userId"`                    // Key(0)
+	TotalLoginCount           int32    `json:"totalLoginCount"`           // Key(1)
+	ContinualLoginCount       int32    `json:"continualLoginCount"`       // Key(2)
+	MaxContinualLoginCount    int32    `json:"maxContinualLoginCount"`    // Key(3)
+	LastLoginDatetime         int64    `json:"lastLoginDatetime"`         // Key(4)
+	LastComebackLoginDatetime int64    `json:"lastComebackLoginDatetime"` // Key(5)
+	LatestVersion             int64    `json:"latestVersion"`             // Key(6)
 }
 
 // EntityIUserLoginBonus mirrors EntityIUserLoginBonus [Key(0..5)].
 type EntityIUserLoginBonus struct {
 	_msgpack                    struct{} `msgpack:",asArray"`
-	UserId                      int64    // Key(0)
-	LoginBonusId                int32    // Key(1)
-	CurrentPageNumber           int32    // Key(2)
-	CurrentStampNumber          int32    // Key(3)
-	LatestRewardReceiveDatetime int64    // Key(4)
-	LatestVersion               int64    // Key(5)
+	UserId                      int64    `json:"userId"`                      // Key(0)
+	LoginBonusId                int32    `json:"loginBonusId"`                // Key(1)
+	CurrentPageNumber           int32    `json:"currentPageNumber"`           // Key(2)
+	CurrentStampNumber          int32    `json:"currentStampNumber"`          // Key(3)
+	LatestRewardReceiveDatetime int64    `json:"latestRewardReceiveDatetime"` // Key(4)
+	LatestVersion               int64    `json:"latestVersion"`               // Key(5)
 }
 
 // EntityIUserMission mirrors EntityIUserMission [Key(0..6)].
@@ -312,7 +312,7 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 	const (
 		starterCharacterID = int32(1)
 		starterCostumeID   = int32(1)
-		starterWeaponID    = int32(1)
+		starterWeaponID    = int32(100001)
 		starterCompanionID = int32(1)
 		starterQuestID     = int32(1)
 		starterMissionID   = int32(1)
@@ -497,6 +497,12 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"clearDatetime":             0,
 		"latestVersion":             0,
 	})
+	userWeaponStoryJSON, _ := encodeJSONMaps(map[string]any{
+		"userId":                userID,
+		"weaponId":              starterWeaponID,
+		"releasedMaxStoryIndex": 1,
+		"latestVersion":         nowMillis,
+	})
 
 	return map[string]string{
 		"user":                             userJSON,
@@ -515,6 +521,7 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"user_tutorial_progress":           userTutorialProgressJSON,
 		"user_quest":                       userQuestJSON,
 		"user_mission":                     userMissionJSON,
+		"user_weapon_story":                userWeaponStoryJSON,
 		"user_main_quest_flow_status":      mainQuestFlowJSON,
 		"user_main_quest_main_flow_status": mainQuestMainFlowJSON,
 		"user_main_quest_progress_status":  mainQuestProgressJSON,
@@ -535,6 +542,7 @@ func DefaultUserDataJSONClientTables(userID int64) map[string]string {
 		"IUserCharacter":               defaultsSnake["user_character"],
 		"IUserCostume":                 defaultsSnake["user_costume"],
 		"IUserWeapon":                  defaultsSnake["user_weapon"],
+		"IUserWeaponStory":             defaultsSnake["user_weapon_story"],
 		"IUserCompanion":               defaultsSnake["user_companion"],
 		"IUserDeckCharacter":           defaultsSnake["user_deck_character"],
 		"IUserDeck":                    defaultsSnake["user_deck"],

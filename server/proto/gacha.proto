@@ -45,15 +45,48 @@ message Gacha {
 	google.protobuf.Timestamp startDatetime = 10;
 	google.protobuf.Timestamp endDatetime = 13;
 	repeated GachaPricePhase gachaPricePhase = 14;
-	int32 relatedMainQuestChapterId = 16;
-	int32 relatedEventQuestChapterId = 17;
-	int32 promotionMovieAssetId = 18;
+	oneof gacha_mode {
+		GachaModeBasic gachaModeBasic = 16;
+		GachaModeStepupComposition gachaModeStepupComposition = 17;
+		GachaModeBoxComposition gachaModeBoxComposition = 18;
+	}
 	int32 gachaMedalId = 19;
 	int32 gachaDecorationType = 20;
 	int32 sortOrder = 21;
 	bool isInactive = 22;
 	int32 informationId = 23;
-	bytes gachaMode = 24;
+	int32 relatedMainQuestChapterId = 24;
+	int32 relatedEventQuestChapterId = 25;
+	int32 promotionMovieAssetId = 26;
+}
+
+message GachaModeBasic {
+	string naviCharacterCommentAssetName = 1;
+	string gachaAssetName = 2;
+}
+
+message GachaModeStepupComposition {
+	int32 gachaStepGroupId = 1;
+	int32 stepNumber = 2;
+	int32 currentStepNumber = 3;
+	string naviCharacterCommentAssetName = 4;
+	string gachaAssetName = 5;
+	int32 currentLoopCount = 6;
+}
+
+message GachaModeBoxComposition {
+	int32 gachaBoxGroupId = 1;
+	int32 boxNumber = 2;
+	int32 currentBoxNumber = 3;
+	bool isCurrentBoxResettable = 4;
+	string naviCharacterCommentAssetName = 5;
+	string gachaAssetName = 6;
+	int32 gachaPricePhaseId = 7;
+	bool isAlreadyDrawn = 8;
+	bool isResettableByDrawingAllTargets = 9;
+	bool isInvalidReset = 10;
+	bool isHideMultipleDrawButton = 11;
+	int32 gachaDescriptionTextId = 12;
 }
 
 message GachaUnlockCondition {

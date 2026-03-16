@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gacha"
 	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
 
@@ -47,6 +48,7 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 		}
 		gachaList = append(gachaList, toProtoGacha(entry))
 	}
+	log.Printf("[GachaService] GetGachaList: returning gachas: %#v", gachaList)
 
 	return &pb.GetGachaListResponse{
 		Gacha:               gachaList,
@@ -130,6 +132,19 @@ func matchesGachaLabel(labels []int32, label int32) bool {
 	return false
 }
 
+func stubGachaPricePhases(gachaID int32) []*pb.GachaPricePhase {
+	phaseID := gachaID*10 + 1
+	return []*pb.GachaPricePhase{{
+		GachaPricePhaseId: phaseID,
+		IsEnabled:         true,
+		PriceType:         12,
+		PriceId:           1,
+		Price:             300,
+		RegularPrice:      300,
+		DrawCount:         1,
+	}}
+}
+
 func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 	return &pb.Gacha{
 		GachaId:                    entry.GachaID,
@@ -138,11 +153,11 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		GachaAutoResetType:         entry.GachaAutoResetType,
 		GachaAutoResetPeriod:       entry.GachaAutoResetPeriod,
 		NextAutoResetDatetime:      timestampOrNil(entry.NextAutoResetDatetime),
-		GachaUnlockCondition:       []*pb.GachaUnlockCondition{},
+		GachaUnlockCondition:       []*pb.GachaUnlockCondition{{GachaUnlockConditionType: gacha.GachaUnlockNone, ConditionValue: 0}},
 		IsUserGachaUnlock:          entry.IsUserGachaUnlock,
 		StartDatetime:              timestampOrNil(entry.StartDatetime),
 		EndDatetime:                timestampOrNil(entry.EndDatetime),
-		GachaPricePhase:            []*pb.GachaPricePhase{},
+		GachaPricePhase:            stubGachaPricePhases(entry.GachaID),
 		RelatedMainQuestChapterId:  entry.RelatedMainQuestChapterID,
 		RelatedEventQuestChapterId: entry.RelatedEventQuestChapterID,
 		PromotionMovieAssetId:      entry.PromotionMovieAssetID,
@@ -151,7 +166,11 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		SortOrder:                  entry.SortOrder,
 		IsInactive:                 entry.IsInactive,
 		InformationId:              entry.InformationID,
-		GachaMode:                  entry.GachaMode,
+		GachaMode: &pb.Gacha_GachaModeBasic{
+			GachaModeBasic: &pb.GachaModeBasic{
+				GachaAssetName: entry.BannerAssetName,
+			},
+		},
 	}
 }
 

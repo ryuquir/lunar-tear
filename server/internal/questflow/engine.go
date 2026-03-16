@@ -1,14 +1,12 @@
 package questflow
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 	"sort"
 
 	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/utils"
 )
 
 type QuestFlowType int32
@@ -153,55 +151,55 @@ type Engine struct {
 }
 
 func MustLoad() *Engine {
-	scenes, err := readJSON[sceneMasterRow]("EntityMQuestSceneTable.json")
+	scenes, err := utils.ReadJSON[sceneMasterRow]("EntityMQuestSceneTable.json")
 	if err != nil {
 		panic(err)
 	}
-	quests, err := readJSON[questMasterRow]("EntityMQuestTable.json")
+	quests, err := utils.ReadJSON[questMasterRow]("EntityMQuestTable.json")
 	if err != nil {
 		panic(err)
 	}
-	sequences, err := readJSON[mainQuestSequenceRow]("EntityMMainQuestSequenceTable.json")
+	sequences, err := utils.ReadJSON[mainQuestSequenceRow]("EntityMMainQuestSequenceTable.json")
 	if err != nil {
 		panic(err)
 	}
-	questMissionGroups, err := readJSON[questMissionGroupRow]("EntityMQuestMissionGroupTable.json")
+	questMissionGroups, err := utils.ReadJSON[questMissionGroupRow]("EntityMQuestMissionGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
-	questMissions, err := readJSON[questMissionRow]("EntityMQuestMissionTable.json")
+	questMissions, err := utils.ReadJSON[questMissionRow]("EntityMQuestMissionTable.json")
 	if err != nil {
 		panic(err)
 	}
-	questMissionRewards, err := readJSON[questMissionRewardRow]("EntityMQuestMissionRewardTable.json")
+	questMissionRewards, err := utils.ReadJSON[questMissionRewardRow]("EntityMQuestMissionRewardTable.json")
 	if err != nil {
 		panic(err)
 	}
-	firstClearRewardGroups, err := readJSON[questFirstClearRewardGroupRow]("EntityMQuestFirstClearRewardGroupTable.json")
+	firstClearRewardGroups, err := utils.ReadJSON[questFirstClearRewardGroupRow]("EntityMQuestFirstClearRewardGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
-	questRelations, err := readJSON[questRelationMainFlowRow]("EntityMQuestRelationMainFlowTable.json")
+	questRelations, err := utils.ReadJSON[questRelationMainFlowRow]("EntityMQuestRelationMainFlowTable.json")
 	if err != nil {
 		panic(err)
 	}
-	releaseConditionLists, err := readJSON[questReleaseConditionListRow]("EntityMQuestReleaseConditionListTable.json")
+	releaseConditionLists, err := utils.ReadJSON[questReleaseConditionListRow]("EntityMQuestReleaseConditionListTable.json")
 	if err != nil {
 		panic(err)
 	}
-	releaseConditionGroups, err := readJSON[questReleaseConditionGroupRow]("EntityMQuestReleaseConditionGroupTable.json")
+	releaseConditionGroups, err := utils.ReadJSON[questReleaseConditionGroupRow]("EntityMQuestReleaseConditionGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
-	releaseConditionQuestClears, err := readJSON[questReleaseConditionQuestClearRow]("EntityMQuestReleaseConditionQuestClearTable.json")
+	releaseConditionQuestClears, err := utils.ReadJSON[questReleaseConditionQuestClearRow]("EntityMQuestReleaseConditionQuestClearTable.json")
 	if err != nil {
 		panic(err)
 	}
-	firstClearRewardSwitches, err := readJSON[questFirstClearRewardSwitchRow]("EntityMQuestFirstClearRewardSwitchTable.json")
+	firstClearRewardSwitches, err := utils.ReadJSON[questFirstClearRewardSwitchRow]("EntityMQuestFirstClearRewardSwitchTable.json")
 	if err != nil {
 		panic(err)
 	}
-	mainQuestChapters, err := readJSON[mainQuestChapterRow]("EntityMMainQuestChapterTable.json")
+	mainQuestChapters, err := utils.ReadJSON[mainQuestChapterRow]("EntityMMainQuestChapterTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -346,19 +344,6 @@ func MustLoad() *Engine {
 	}
 
 	return engine
-}
-
-func readJSON[T any](filename string) ([]T, error) {
-	path := filepath.Join("assets", "master_data", filename)
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", path, err)
-	}
-	var out []T
-	if err := json.Unmarshal(data, &out); err != nil {
-		return nil, fmt.Errorf("unmarshal %s: %w", path, err)
-	}
-	return out, nil
 }
 
 func (e *Engine) ApplyBootstrap(user *store.UserState, profile store.BootstrapProfile, nowMillis int64) {
