@@ -16,6 +16,7 @@ var startedGameStartTables = []string{
 	"IUserCompanion",
 	"IUserDeckCharacter",
 	"IUserDeck",
+	"IUserGem",
 	"IUserMission",
 	"IUserMainQuestFlowStatus",
 	"IUserMainQuestMainFlowStatus",

@@ -437,6 +437,7 @@ type GachaCatalogEntry struct {
 	InformationID              int32
 	GachaMode                  []byte
 	BannerAssetName            string
+	StepupGroupID              int32
 }
 
 func New(clock Clock, options ...Option) *Store {
@@ -607,8 +608,8 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 			LatestVersion:         0,
 		},
 		Gem: UserGemState{
-			PaidGem: 0,
-			FreeGem: 0,
+			PaidGem: 999999,
+			FreeGem: 999999,
 		},
 		Profile: UserProfileState{
 			Name:                            defaultRegisteredName,

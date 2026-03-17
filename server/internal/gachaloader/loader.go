@@ -55,24 +55,29 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 	startDt := now.AddDate(0, 0, -3).UnixMilli()
 	endDt := now.AddDate(0, 0, 3).UnixMilli()
 
-	bestByLabel := make(map[int32]store.GachaCatalogEntry)
+	var entries []store.GachaCatalogEntry
 	for gachaID, banner := range gachaToBanner {
 		medal, hasMedal := gachaToMedal[gachaID]
 		if !hasMedal {
 			continue
 		}
-		sortOrder := banner.SortOrderDesc
-		gachaLabelType := gacha.GachaLabelPremium
-		if strings.Contains(strings.ToLower(banner.BannerAssetName), "limited") {
-			gachaLabelType = gacha.GachaLabelEvent
-		} else if strings.Contains(strings.ToLower(banner.BannerAssetName), "chapter") {
-			gachaLabelType = gacha.GachaLabelChapter
+
+		labelType := gacha.GachaLabelEvent
+		modeType := gacha.GachaModeBox
+		stepupGroupID := gachaID
+
+		// TODO(krettsy): this is a single-step stub; real step-ups need
+		// multiple Gacha entries per group with per-step prices/rewards.
+		if strings.HasPrefix(banner.BannerAssetName, "step_up_") {
+			labelType = gacha.GachaLabelPremium
+			stepupGroupID = gachaID / 1000
 		}
-		entry := store.GachaCatalogEntry{
+
+		entries = append(entries, store.GachaCatalogEntry{
 			GachaID:                    gachaID,
-			GachaLabelType:             gachaLabelType,
-			GachaModeType:              gacha.GachaModeBasic,
-			GachaAutoResetType:         0,
+			GachaLabelType:             labelType,
+			GachaModeType:              modeType,
+			GachaAutoResetType:         gacha.GachaAutoResetNone,
 			GachaAutoResetPeriod:       0,
 			NextAutoResetDatetime:      0,
 			IsUserGachaUnlock:          true,
@@ -82,20 +87,14 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 			RelatedEventQuestChapterID: 0,
 			PromotionMovieAssetID:      0,
 			GachaMedalID:               medal.GachaMedalId,
-			GachaDecorationType:        0,
-			SortOrder:                  sortOrder,
+			GachaDecorationType:        gacha.GachaDecorationNormal,
+			SortOrder:                  banner.SortOrderDesc,
 			IsInactive:                 false,
 			InformationID:              0,
 			GachaMode:                  nil,
 			BannerAssetName:            banner.BannerAssetName,
-		}
-		if existing, ok := bestByLabel[gachaLabelType]; !ok || sortOrder > existing.SortOrder {
-			bestByLabel[gachaLabelType] = entry
-		}
-	}
-	entries := make([]store.GachaCatalogEntry, 0, len(bestByLabel))
-	for _, entry := range bestByLabel {
-		entries = append(entries, entry)
+			StepupGroupID:              stepupGroupID,
+		})
 	}
 	return entries, nil
 }

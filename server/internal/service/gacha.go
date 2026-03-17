@@ -132,32 +132,73 @@ func matchesGachaLabel(labels []int32, label int32) bool {
 	return false
 }
 
-func stubGachaPricePhases(gachaID int32) []*pb.GachaPricePhase {
+var featuredCostumes = []int32{
+	31000, 31001, 31002, 31004, 31005, 31006, 31007, 31008, 31009, 31010,
+	31011, 31012, 31013, 31014, 31015, 31016, 31017, 31018, 31019, 31020,
+}
+
+var featuredWeapons = []int32{
+	210002, 210022, 210032, 210042, 210062, 210072, 210082, 210102,
+	210112, 210122, 210142, 210152, 210162, 210172, 210182, 210192,
+}
+
+func stubPromotionItems(gachaID int32) []*pb.GachaOddsItem {
+	idx := int(gachaID) % len(featuredCostumes)
+	wIdx := int(gachaID) % len(featuredWeapons)
+	return []*pb.GachaOddsItem{
+		{
+			GachaItem: &pb.GachaItem{PossessionType: 1, PossessionId: featuredCostumes[idx], Count: 1, PromotionOrder: 1},
+			IsTarget:  true,
+		},
+		{
+			GachaItem: &pb.GachaItem{PossessionType: 1, PossessionId: featuredCostumes[(idx+1)%len(featuredCostumes)], Count: 1, PromotionOrder: 2},
+			IsTarget:  true,
+		},
+		{
+			GachaItem: &pb.GachaItem{PossessionType: 2, PossessionId: featuredWeapons[wIdx], Count: 1, PromotionOrder: 3},
+			IsTarget:  true,
+		},
+	}
+}
+
+func stubGachaPricePhases(gachaID, modeType int32) []*pb.GachaPricePhase {
 	phaseID := gachaID*10 + 1
+
+	price := int32(3000)
+	drawCount := int32(10)
+	if modeType == gacha.GachaModeStepup {
+		price = 1500
+		drawCount = 10
+	}
+
 	return []*pb.GachaPricePhase{{
 		GachaPricePhaseId: phaseID,
 		IsEnabled:         true,
-		PriceType:         12,
-		PriceId:           1,
-		Price:             300,
-		RegularPrice:      300,
-		DrawCount:         1,
+		EndDatetime:       timestamppb.New(time.Now().AddDate(0, 0, 30)),
+		PriceType:         gacha.PriceTypeGem,
+		Price:             price,
+		RegularPrice:      3000,
+		DrawCount:         drawCount,
+		GachaOddsFixedRarity: &pb.GachaOddsFixedRarity{
+			FixedRarityTypeLowerLimit: 0,
+			FixedCount:               0,
+		},
 	}}
 }
 
 func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
-	return &pb.Gacha{
+	g := &pb.Gacha{
 		GachaId:                    entry.GachaID,
 		GachaLabelType:             entry.GachaLabelType,
 		GachaModeType:              entry.GachaModeType,
 		GachaAutoResetType:         entry.GachaAutoResetType,
 		GachaAutoResetPeriod:       entry.GachaAutoResetPeriod,
-		NextAutoResetDatetime:      timestampOrNil(entry.NextAutoResetDatetime),
+		NextAutoResetDatetime:      safeTimestamp(entry.NextAutoResetDatetime),
 		GachaUnlockCondition:       []*pb.GachaUnlockCondition{{GachaUnlockConditionType: gacha.GachaUnlockNone, ConditionValue: 0}},
 		IsUserGachaUnlock:          entry.IsUserGachaUnlock,
-		StartDatetime:              timestampOrNil(entry.StartDatetime),
-		EndDatetime:                timestampOrNil(entry.EndDatetime),
-		GachaPricePhase:            stubGachaPricePhases(entry.GachaID),
+		StartDatetime:              safeTimestamp(entry.StartDatetime),
+		EndDatetime:                safeTimestamp(entry.EndDatetime),
+		GachaPricePhase:            stubGachaPricePhases(entry.GachaID, entry.GachaModeType),
 		RelatedMainQuestChapterId:  entry.RelatedMainQuestChapterID,
 		RelatedEventQuestChapterId: entry.RelatedEventQuestChapterID,
 		PromotionMovieAssetId:      entry.PromotionMovieAssetID,
@@ -166,12 +207,42 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		SortOrder:                  entry.SortOrder,
 		IsInactive:                 entry.IsInactive,
 		InformationId:              entry.InformationID,
-		GachaMode: &pb.Gacha_GachaModeBasic{
+	}
+
+	phaseID := entry.GachaID*10 + 1
+
+	switch entry.GachaModeType {
+	case gacha.GachaModeBox:
+		g.GachaMode = &pb.Gacha_GachaModeBoxComposition{
+			GachaModeBoxComposition: &pb.GachaModeBoxComposition{
+				GachaBoxGroupId:        entry.StepupGroupID,
+				BoxNumber:              1,
+				CurrentBoxNumber:       1,
+				GachaAssetName:         entry.BannerAssetName,
+				GachaPricePhaseId:      phaseID,
+				PromotionGachaOddsItem: stubPromotionItems(entry.GachaID),
+			},
+		}
+	case gacha.GachaModeStepup:
+		g.GachaMode = &pb.Gacha_GachaModeStepupComposition{
+			GachaModeStepupComposition: &pb.GachaModeStepupComposition{
+				GachaStepGroupId:              entry.StepupGroupID,
+				StepNumber:                    1,
+				CurrentStepNumber:             1,
+				NaviCharacterCommentAssetName: "",
+				GachaAssetName:                entry.BannerAssetName,
+				CurrentLoopCount:              0,
+			},
+		}
+	default:
+		g.GachaMode = &pb.Gacha_GachaModeBasic{
 			GachaModeBasic: &pb.GachaModeBasic{
 				GachaAssetName: entry.BannerAssetName,
 			},
-		},
+		}
 	}
+
+	return g
 }
 
 func toProtoConvertedGachaMedal(state store.ConvertedGachaMedalState) *pb.ConvertedGachaMedal {
@@ -183,12 +254,13 @@ func toProtoConvertedGachaMedal(state store.ConvertedGachaMedalState) *pb.Conver
 		})
 	}
 
-	var obtain *pb.ConsumableItemPossession
+	obtain := &pb.ConsumableItemPossession{
+		ConsumableItemId: 0,
+		Count:            0,
+	}
 	if state.ObtainPossession != nil {
-		obtain = &pb.ConsumableItemPossession{
-			ConsumableItemId: state.ObtainPossession.ConsumableItemID,
-			Count:            state.ObtainPossession.Count,
-		}
+		obtain.ConsumableItemId = state.ObtainPossession.ConsumableItemID
+		obtain.Count = state.ObtainPossession.Count
 	}
 
 	return &pb.ConvertedGachaMedal{
@@ -197,9 +269,9 @@ func toProtoConvertedGachaMedal(state store.ConvertedGachaMedalState) *pb.Conver
 	}
 }
 
-func timestampOrNil(unixMillis int64) *timestamppb.Timestamp {
+func safeTimestamp(unixMillis int64) *timestamppb.Timestamp {
 	if unixMillis == 0 {
-		return nil
+		return &timestamppb.Timestamp{Seconds: 0}
 	}
 	return timestamppb.New(time.UnixMilli(unixMillis))
 }

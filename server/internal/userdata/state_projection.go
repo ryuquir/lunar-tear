@@ -152,7 +152,6 @@ func FirstEntranceClientTableMap(user store.UserState) map[string]string {
 		"IUserCompanion",
 		"IUserDeckCharacter",
 		"IUserDeck",
-		"IUserGem",
 		"IUserTutorialProgress",
 		"IUserQuest",
 		"IUserQuestMission",
