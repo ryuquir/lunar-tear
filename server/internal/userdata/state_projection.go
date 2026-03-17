@@ -3,6 +3,7 @@ package userdata
 import (
 	"log"
 	"sort"
+	"time"
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/store"
@@ -112,6 +113,8 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userGimmickOrnamentProgressJSON, _ := encodeJSONMaps(sortedGimmickOrnamentProgressRecords(user)...)
 	userGimmickSequenceJSON, _ := encodeJSONMaps(sortedGimmickSequenceRecords(user)...)
 	userGimmickUnlockJSON, _ := encodeJSONMaps(sortedGimmickUnlockRecords(user)...)
+	userMaterialJSON, _ := encodeJSONMaps(sortedMaterialRecords(user)...)
+	userConsumableItemJSON, _ := encodeJSONMaps(sortedConsumableItemRecords(user)...)
 
 	return map[string]string{
 		"IUser":                        userJSON,
@@ -140,6 +143,8 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserGimmickOrnamentProgress": userGimmickOrnamentProgressJSON,
 		"IUserGimmickSequence":         userGimmickSequenceJSON,
 		"IUserGimmickUnlock":           userGimmickUnlockJSON,
+		"IUserMaterial":                userMaterialJSON,
+		"IUserConsumableItem":          userConsumableItemJSON,
 	}
 }
 
@@ -164,6 +169,8 @@ func FirstEntranceClientTableMap(user store.UserState) map[string]string {
 		"IUserGimmickOrnamentProgress",
 		"IUserGimmickSequence",
 		"IUserGimmickUnlock",
+		"IUserMaterial",
+		"IUserConsumableItem",
 	} {
 		tables[table] = "[]"
 	}
@@ -557,6 +564,48 @@ func sortedGimmickUnlockRecords(user store.UserState) []map[string]any {
 			"gimmickId":                 row.Key.GimmickId,
 			"isUnlocked":                row.IsUnlocked,
 			"latestVersion":             row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedMaterialRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.Materials))
+	for id := range user.Materials {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	nowMillis := time.Now().UnixMilli()
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":                    user.UserId,
+			"materialId":               int32(id),
+			"count":                    user.Materials[int32(id)],
+			"firstAcquisitionDatetime": nowMillis,
+			"latestVersion":            nowMillis,
+		})
+	}
+	return records
+}
+
+func sortedConsumableItemRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.ConsumableItems))
+	for id := range user.ConsumableItems {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	nowMillis := time.Now().UnixMilli()
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":                   user.UserId,
+			"consumableItemId":         int32(id),
+			"count":                    user.ConsumableItems[int32(id)],
+			"firstAcquisitionDatetime": nowMillis,
+			"latestVersion":            nowMillis,
 		})
 	}
 	return records

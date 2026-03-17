@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/cageornamentloader"
 	"lunar-tear/server/internal/gachaloader"
 	"lunar-tear/server/internal/questflow"
 	"lunar-tear/server/internal/service"
@@ -114,6 +115,8 @@ func main() {
 	userStore.ReplaceGachaCatalog(gachaEntries)
 	log.Printf("gacha catalog loaded: %d entries", len(gachaEntries))
 
+	cageOrnamentCatalog := cageornamentloader.LoadCatalog()
+
 	pb.RegisterBannerServiceServer(grpcServer, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(grpcServer, service.NewUserServiceServer(userStore))
 	pb.RegisterBattleServiceServer(grpcServer, service.NewBattleServiceServer(userStore))
@@ -126,6 +129,7 @@ func main() {
 	pb.RegisterGimmickServiceServer(grpcServer, service.NewGimmickServiceServer(userStore))
 	pb.RegisterQuestServiceServer(grpcServer, service.NewQuestServiceServer(userStore, questEngine))
 	pb.RegisterNotificationServiceServer(grpcServer, service.NewNotificationServiceServer(userStore))
+	pb.RegisterCageOrnamentServiceServer(grpcServer, service.NewCageOrnamentServiceServer(userStore, cageOrnamentCatalog))
 
 	reflection.Register(grpcServer)
 

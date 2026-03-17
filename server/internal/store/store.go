@@ -2,10 +2,13 @@ package store
 
 import (
 	"fmt"
+	"log"
 	"maps"
 	"strings"
 	"sync"
 	"time"
+
+	"lunar-tear/server/internal/model"
 )
 
 const (
@@ -103,17 +106,35 @@ type UserState struct {
 	Gacha         GachaState
 	Notifications NotificationState
 
-	Characters     map[int32]CharacterState
-	Costumes       map[string]CostumeState
-	Weapons        map[string]WeaponState
-	Companions     map[string]CompanionState
-	DeckCharacters map[string]DeckCharacterState
-	Decks          map[DeckKey]DeckState
-	Quests         map[int32]UserQuestState
-	QuestMissions  map[QuestMissionKey]UserQuestMissionState
-	Missions       map[int32]UserMissionState
-	WeaponStories  map[int32]WeaponStoryState
-	Gimmick        GimmickState
+	Characters          map[int32]CharacterState
+	Costumes            map[string]CostumeState
+	Weapons             map[string]WeaponState
+	Companions          map[string]CompanionState
+	DeckCharacters      map[string]DeckCharacterState
+	Decks               map[DeckKey]DeckState
+	Quests              map[int32]UserQuestState
+	QuestMissions       map[QuestMissionKey]UserQuestMissionState
+	Missions            map[int32]UserMissionState
+	WeaponStories       map[int32]WeaponStoryState
+	Gimmick             GimmickState
+	CageOrnamentRewards map[int32]CageOrnamentRewardState
+	ConsumableItems     map[int32]int32
+	Materials           map[int32]int32
+}
+
+func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
+	switch possessionType {
+	case model.PossessionTypeMaterial:
+		user.Materials[possessionId] += count
+	case model.PossessionTypeConsumableItem:
+		user.ConsumableItems[possessionId] += count
+	case model.PossessionTypePaidGem:
+		user.Gem.PaidGem += count
+	case model.PossessionTypeFreeGem:
+		user.Gem.FreeGem += count
+	default:
+		log.Printf("[GrantPossession] unhandled type=%d id=%d count=%d", possessionType, possessionId, count)
+	}
 }
 
 type WeaponStoryState struct {
@@ -360,6 +381,11 @@ type GimmickUnlockState struct {
 	LatestVersion int64
 }
 
+type CageOrnamentRewardState struct {
+	CageOrnamentId int32
+	LatestVersion  int64
+}
+
 type NotificationState struct {
 	GiftNotReceiveCount       int32
 	FriendRequestReceiveCount int32
@@ -598,8 +624,8 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 			LatestVersion:         0,
 		},
 		Gem: UserGemState{
-			PaidGem: 999999,
-			FreeGem: 999999,
+			PaidGem: 10000,
+			FreeGem: 10000,
 		},
 		Profile: UserProfileState{
 			Name:                            defaultRegisteredName,
@@ -776,6 +802,9 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 			Sequences:        make(map[GimmickSequenceKey]GimmickSequenceState),
 			Unlocks:          make(map[GimmickKey]GimmickUnlockState),
 		},
+		CageOrnamentRewards: make(map[int32]CageOrnamentRewardState),
+		ConsumableItems:     make(map[int32]int32),
+		Materials:           make(map[int32]int32),
 	}
 	if bootstrapper != nil {
 		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
@@ -801,6 +830,9 @@ func (u UserState) clone() UserState {
 		Sequences:        maps.Clone(u.Gimmick.Sequences),
 		Unlocks:          maps.Clone(u.Gimmick.Unlocks),
 	}
+	out.CageOrnamentRewards = maps.Clone(u.CageOrnamentRewards)
+	out.ConsumableItems = maps.Clone(u.ConsumableItems)
+	out.Materials = maps.Clone(u.Materials)
 	out.Gacha = GachaState{
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,

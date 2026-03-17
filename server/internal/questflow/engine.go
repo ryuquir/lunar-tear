@@ -3,10 +3,12 @@ package questflow
 import (
 	"fmt"
 	"log"
-	"lunar-tear/server/internal/store"
-	"lunar-tear/server/internal/utils"
 	"sort"
 	"time"
+
+	"lunar-tear/server/internal/model"
+	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/utils"
 )
 
 type QuestFlowType int32
@@ -193,33 +195,11 @@ type mission struct {
 	QuestMissionConditionValueGroupId int32                     `json:"QuestMissionConditionValueGroupId"`
 }
 
-type PossessionType int
-
-const (
-	PossessionTypeUnknown           PossessionType = 0
-	PossessionTypeCostume           PossessionType = 1
-	PossessionTypeWeapon            PossessionType = 2
-	PossessionTypeCompanion         PossessionType = 3
-	PossessionTypeParts             PossessionType = 4
-	PossessionTypeMaterial          PossessionType = 5
-	PossessionTypeConsumableItem    PossessionType = 6
-	PossessionTypeCostumeEnhanced   PossessionType = 7
-	PossessionTypeWeaponEnhanced    PossessionType = 8
-	PossessionTypeCompanionEnhanced PossessionType = 9
-	PossessionTypePartsEnhanced     PossessionType = 10
-	PossessionTypePaidGem           PossessionType = 11
-	PossessionTypeFreeGem           PossessionType = 12
-	PossessionTypeImportantItem     PossessionType = 13
-	PossessionTypeThought           PossessionType = 14
-	PossessionTypeMissionPassPoint  PossessionType = 15
-	PossessionTypePremiumItem       PossessionType = 16
-)
-
 type missionReward struct {
-	QuestMissionRewardId int32          `json:"QuestMissionRewardId"`
-	PossessionType       PossessionType `json:"PossessionType"`
-	PossessionId         int32          `json:"PossessionId"`
-	Count                int32          `json:"Count"`
+	QuestMissionRewardId int32                `json:"QuestMissionRewardId"`
+	PossessionType       model.PossessionType `json:"PossessionType"`
+	PossessionId         int32                `json:"PossessionId"`
+	Count                int32                `json:"Count"`
 }
 
 type mainQuestSequence struct {
@@ -246,13 +226,13 @@ type questFirstClearRewardSwitch struct {
 }
 
 type questFirstClearRewardGroup struct {
-	QuestFirstClearRewardGroupId int32          `json:"QuestFirstClearRewardGroupId"`
-	QuestFirstClearRewardType    int32          `json:"QuestFirstClearRewardType"`
-	SortOrder                    int32          `json:"SortOrder"`
-	PossessionType               PossessionType `json:"PossessionType"`
-	PossessionId                 int32          `json:"PossessionId"`
-	Count                        int32          `json:"Count"`
-	IsPickup                     bool           `json:"IsPickup"`
+	QuestFirstClearRewardGroupId int32                `json:"QuestFirstClearRewardGroupId"`
+	QuestFirstClearRewardType    int32                `json:"QuestFirstClearRewardType"`
+	SortOrder                    int32                `json:"SortOrder"`
+	PossessionType               model.PossessionType `json:"PossessionType"`
+	PossessionId                 int32                `json:"PossessionId"`
+	Count                        int32                `json:"Count"`
+	IsPickup                     bool                 `json:"IsPickup"`
 }
 
 type WeaponStoryReleaseConditionType int32
@@ -282,7 +262,7 @@ type weaponMaster struct {
 }
 
 type RewardGrant struct {
-	PossessionType PossessionType
+	PossessionType model.PossessionType
 	PossessionId   int32
 	Count          int32
 }
@@ -797,18 +777,20 @@ func (e *Engine) applyQuestRewards(user *store.UserState, questId int32, nowMill
 	}
 }
 
-func (e *Engine) applyRewardPossession(user *store.UserState, possType PossessionType, possId, count int32, nowMillis int64) {
+func (e *Engine) applyRewardPossession(user *store.UserState, possType model.PossessionType, possId, count int32, nowMillis int64) {
 	switch possType {
-	case PossessionTypeFreeGem:
+	case model.PossessionTypeFreeGem:
 		user.Gem.FreeGem += count
-	case PossessionTypePaidGem:
+	case model.PossessionTypePaidGem:
 		user.Gem.PaidGem += count
-	case PossessionTypeCostume:
+	case model.PossessionTypeCostume:
 		e.grantCostume(user, possId, nowMillis)
-	case PossessionTypeWeapon:
+	case model.PossessionTypeWeapon:
 		e.grantWeapon(user, possId, nowMillis)
-	case PossessionTypeCompanion:
+	case model.PossessionTypeCompanion:
 		e.grantCompanion(user, possId, nowMillis)
+	case model.PossessionTypeMaterial, model.PossessionTypeConsumableItem:
+		store.GrantPossession(user, possType, possId, count)
 	default:
 		log.Printf("[Engine] unsupported reward possession: type=%d id=%d count=%d", possType, possId, count)
 	}
@@ -904,7 +886,7 @@ func (e *Engine) grantWeaponStoryUnlocksForQuestScene(user *store.UserState, que
 		}
 		rewardGroupId := e.firstClearRewardGroupId(user, questMeta)
 		for _, reward := range e.firstClearRewardsByGroupId[rewardGroupId] {
-			if reward.PossessionType != PossessionTypeWeapon {
+			if reward.PossessionType != model.PossessionTypeWeapon {
 				continue
 			}
 			weaponId := reward.PossessionId
