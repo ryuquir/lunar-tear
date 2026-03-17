@@ -9,26 +9,26 @@ import (
 )
 
 const (
-	defaultUUID   = "default-user"
-	defaultUserID = int64(1001)
+	defaultUUId   = "default-user"
+	defaultUserId = int64(1001)
 
-	starterCharacterID        = int32(1)
-	starterCostumeID          = int32(1)
-	starterWeaponID           = int32(100001)
-	starterCompanionID        = int32(1)
-	starterMissionID          = int32(1)
-	starterMainQuestRouteID   = int32(1)
-	starterMainQuestSeasonID  = int32(1)
+	starterCharacterId        = int32(1)
+	starterCostumeId          = int32(1)
+	starterWeaponId           = int32(100001)
+	starterCompanionId        = int32(1)
+	starterMissionId          = int32(1)
+	starterMainQuestRouteId   = int32(1)
+	starterMainQuestSeasonId  = int32(1)
 	starterQuestDeckType      = int32(1)
 	missionInProgress         = int32(1)
 	defaultGiftPossessionType = int32(12) // FREE_GEM
 	defaultGiftCount          = int32(300)
 
-	starterCostumeUUID       = "starter-costume-0001"
-	starterWeaponUUID        = "starter-weapon-0001"
-	starterCompanionUUID     = "starter-companion-0001"
-	starterDeckCharacterUUID = "starter-deck-character-0001"
-	defaultGiftUUIDPrefix    = "default-gift"
+	starterCostumeUUId       = "starter-costume-0001"
+	starterWeaponUUId        = "starter-weapon-0001"
+	starterCompanionUUId     = "starter-companion-0001"
+	starterDeckCharacterUUId = "starter-deck-character-0001"
+	defaultGiftUUIdPrefix    = "default-gift"
 
 	defaultRegisteredName = "Un-regist User Name"
 	startedProfileName    = "Lunar Tear"
@@ -41,52 +41,43 @@ const (
 
 type Clock func() time.Time
 
-type BootstrapProfile string
-
-const (
-	BootstrapProfileFresh           BootstrapProfile = "fresh"
-	BootstrapProfileMainQuestScene9 BootstrapProfile = "main-quest-scene-9"
-)
-
 type Option func(*Store)
 
 type Bootstrapper interface {
-	ApplyBootstrap(user *UserState, profile BootstrapProfile, nowMillis int64)
+	ApplyBootstrap(user *UserState, sceneId int32, nowMillis int64)
 }
 
 type Store struct {
 	mu               sync.RWMutex
 	clock            Clock
-	bootstrapProfile BootstrapProfile
+	bootstrapSceneId int32
 	bootstrapper     Bootstrapper
-	nextUserID       int64
+	nextUserId       int64
 	users            map[int64]*UserState
-	userIDsByUUID    map[string]int64
-	sessionToUserID  map[string]int64
+	userIdsByUuid    map[string]int64
+	sessionToUserId  map[string]int64
 	sessions         map[string]SessionState
 	gachaCatalog     map[int32]GachaCatalogEntry
 }
 
-func WithBootstrap(profile BootstrapProfile, bootstrapper Bootstrapper) Option {
+func WithBootstrap(sceneId int32, bootstrapper Bootstrapper) Option {
 	return func(s *Store) {
-		if profile != "" {
-			s.bootstrapProfile = profile
-		}
+		s.bootstrapSceneId = sceneId
 		s.bootstrapper = bootstrapper
 	}
 }
 
 type SessionState struct {
 	SessionKey string
-	UserID     int64
-	UUID       string
+	UserId     int64
+	Uuid       string
 	ExpireAt   time.Time
 }
 
 type UserState struct {
-	UserID              int64
-	UUID                string
-	PlayerID            int64
+	UserId              int64
+	Uuid                string
+	PlayerId            int64
 	OsType              int32
 	PlatformType        int32
 	UserRestrictionType int32
@@ -154,8 +145,8 @@ type UserProfileState struct {
 	NameUpdateDatetime              int64
 	Message                         string
 	MessageUpdateDatetime           int64
-	FavoriteCostumeID               int32
-	FavoriteCostumeIDUpdateDatetime int64
+	FavoriteCostumeId               int32
+	FavoriteCostumeIdUpdateDatetime int64
 	LatestVersion                   int64
 }
 
@@ -169,7 +160,7 @@ type UserLoginState struct {
 }
 
 type UserLoginBonusState struct {
-	LoginBonusID                int32
+	LoginBonusId                int32
 	CurrentPageNumber           int32
 	CurrentStampNumber          int32
 	LatestRewardReceiveDatetime int64
@@ -177,27 +168,27 @@ type UserLoginBonusState struct {
 }
 
 type CharacterState struct {
-	CharacterID   int32
+	CharacterId   int32
 	Level         int32
 	Exp           int32
 	LatestVersion int64
 }
 
 type CostumeState struct {
-	UserCostumeUUID     string
-	CostumeID           int32
+	UserCostumeUuid     string
+	CostumeId           int32
 	LimitBreakCount     int32
 	Level               int32
 	Exp                 int32
-	HeadupDisplayViewID int32
+	HeadupDisplayViewId int32
 	AcquisitionDatetime int64
 	AwakenCount         int32
 	LatestVersion       int64
 }
 
 type WeaponState struct {
-	UserWeaponUUID      string
-	WeaponID            int32
+	UserWeaponUuid      string
+	WeaponId            int32
 	Level               int32
 	Exp                 int32
 	LimitBreakCount     int32
@@ -207,21 +198,21 @@ type WeaponState struct {
 }
 
 type CompanionState struct {
-	UserCompanionUUID   string
-	CompanionID         int32
-	HeadupDisplayViewID int32
+	UserCompanionUuid   string
+	CompanionId         int32
+	HeadupDisplayViewId int32
 	Level               int32
 	AcquisitionDatetime int64
 	LatestVersion       int64
 }
 
 type DeckCharacterState struct {
-	UserDeckCharacterUUID string
-	UserCostumeUUID       string
-	MainUserWeaponUUID    string
-	UserCompanionUUID     string
+	UserDeckCharacterUuid string
+	UserCostumeUuid       string
+	MainUserWeaponUuid    string
+	UserCompanionUuid     string
 	Power                 int32
-	UserThoughtUUID       string
+	UserThoughtUuid       string
 	LatestVersion         int64
 }
 
@@ -233,9 +224,9 @@ type DeckKey struct {
 type DeckState struct {
 	DeckType                int32
 	UserDeckNumber          int32
-	UserDeckCharacterUUID01 string
-	UserDeckCharacterUUID02 string
-	UserDeckCharacterUUID03 string
+	UserDeckCharacterUuid01 string
+	UserDeckCharacterUuid02 string
+	UserDeckCharacterUuid03 string
 	Name                    string
 	Power                   int32
 	LatestVersion           int64
@@ -244,20 +235,20 @@ type DeckState struct {
 type TutorialProgressState struct {
 	TutorialType  int32
 	ProgressPhase int32
-	ChoiceID      int32
+	ChoiceId      int32
 	LatestVersion int64
 }
 
 type MainQuestState struct {
 	CurrentQuestFlowType     int32
-	CurrentMainQuestRouteID  int32
-	CurrentQuestSceneID      int32
-	HeadQuestSceneID         int32
+	CurrentMainQuestRouteId  int32
+	CurrentQuestSceneId      int32
+	HeadQuestSceneId         int32
 	IsReachedLastQuestScene  bool
-	ProgressQuestSceneID     int32
-	ProgressHeadQuestSceneID int32
+	ProgressQuestSceneId     int32
+	ProgressHeadQuestSceneId int32
 	ProgressQuestFlowType    int32
-	MainQuestSeasonID        int32
+	MainQuestSeasonId        int32
 	LatestVersion            int64
 }
 
@@ -282,7 +273,7 @@ const (
 )
 
 type UserQuestState struct {
-	QuestID             int32
+	QuestId             int32
 	QuestStateType      UserQuestStateType
 	IsBattleOnly        bool
 	LatestStartDatetime int64
@@ -295,13 +286,13 @@ type UserQuestState struct {
 }
 
 type QuestMissionKey struct {
-	QuestID        int32
-	QuestMissionID int32
+	QuestId        int32
+	QuestMissionId int32
 }
 
 type UserQuestMissionState struct {
-	QuestID             int32
-	QuestMissionID      int32
+	QuestId             int32
+	QuestMissionId      int32
 	ProgressValue       int32
 	IsClear             bool
 	LatestClearDatetime int64
@@ -309,7 +300,7 @@ type UserQuestMissionState struct {
 }
 
 type UserMissionState struct {
-	MissionID                 int32
+	MissionId                 int32
 	StartDatetime             int64
 	ProgressValue             int32
 	MissionProgressStatusType int32
@@ -318,20 +309,20 @@ type UserMissionState struct {
 }
 
 type GimmickSequenceKey struct {
-	GimmickSequenceScheduleID int32
-	GimmickSequenceID         int32
+	GimmickSequenceScheduleId int32
+	GimmickSequenceId         int32
 }
 
 type GimmickKey struct {
-	GimmickSequenceScheduleID int32
-	GimmickSequenceID         int32
-	GimmickID                 int32
+	GimmickSequenceScheduleId int32
+	GimmickSequenceId         int32
+	GimmickId                 int32
 }
 
 type GimmickOrnamentKey struct {
-	GimmickSequenceScheduleID int32
-	GimmickSequenceID         int32
-	GimmickID                 int32
+	GimmickSequenceScheduleId int32
+	GimmickSequenceId         int32
+	GimmickId                 int32
 	GimmickOrnamentIndex      int32
 }
 
@@ -382,17 +373,17 @@ type GiftState struct {
 
 type GiftCommonState struct {
 	PossessionType        int32
-	PossessionID          int32
+	PossessionId          int32
 	Count                 int32
 	GrantDatetime         int64
-	DescriptionGiftTextID int32
+	DescriptionGiftTextId int32
 	EquipmentData         []byte
 }
 
 type NotReceivedGiftState struct {
 	GiftCommon         GiftCommonState
 	ExpirationDatetime int64
-	UserGiftUUID       string
+	UserGiftUuid       string
 }
 
 type ReceivedGiftState struct {
@@ -413,12 +404,12 @@ type ConvertedGachaMedalState struct {
 }
 
 type ConsumableItemState struct {
-	ConsumableItemID int32
+	ConsumableItemId int32
 	Count            int32
 }
 
 type GachaCatalogEntry struct {
-	GachaID                    int32
+	GachaId                    int32
 	GachaLabelType             int32
 	GachaModeType              int32
 	GachaAutoResetType         int32
@@ -427,17 +418,17 @@ type GachaCatalogEntry struct {
 	IsUserGachaUnlock          bool
 	StartDatetime              int64
 	EndDatetime                int64
-	RelatedMainQuestChapterID  int32
-	RelatedEventQuestChapterID int32
-	PromotionMovieAssetID      int32
-	GachaMedalID               int32
+	RelatedMainQuestChapterId  int32
+	RelatedEventQuestChapterId int32
+	PromotionMovieAssetId      int32
+	GachaMedalId               int32
 	GachaDecorationType        int32
 	SortOrder                  int32
 	IsInactive                 bool
-	InformationID              int32
+	InformationId              int32
 	GachaMode                  []byte
 	BannerAssetName            string
-	StepupGroupID              int32
+	StepupGroupId              int32
 }
 
 func New(clock Clock, options ...Option) *Store {
@@ -446,14 +437,13 @@ func New(clock Clock, options ...Option) *Store {
 	}
 
 	store := &Store{
-		clock:            clock,
-		bootstrapProfile: BootstrapProfileFresh,
-		nextUserID:       defaultUserID,
-		users:            make(map[int64]*UserState),
-		userIDsByUUID:    make(map[string]int64),
-		sessionToUserID:  make(map[string]int64),
-		sessions:         make(map[string]SessionState),
-		gachaCatalog:     make(map[int32]GachaCatalogEntry),
+		clock:           clock,
+		nextUserId:      defaultUserId,
+		users:           make(map[int64]*UserState),
+		userIdsByUuid:   make(map[string]int64),
+		sessionToUserId: make(map[string]int64),
+		sessions:        make(map[string]SessionState),
+		gachaCatalog:    make(map[int32]GachaCatalogEntry),
 	}
 	for _, option := range options {
 		option(store)
@@ -465,52 +455,52 @@ func (s *Store) EnsureUser(uuid string) UserState {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	return s.getOrCreateLocked(normalizeUUID(uuid)).clone()
+	return s.getOrCreateLocked(normalizeUUId(uuid)).clone()
 }
 
 func (s *Store) CreateSession(uuid string, ttl time.Duration) (UserState, SessionState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	user := s.getOrCreateLocked(normalizeUUID(uuid))
+	user := s.getOrCreateLocked(normalizeUUId(uuid))
 	now := s.clock()
 	session := SessionState{
-		SessionKey: fmt.Sprintf("session_%d_%d", user.UserID, now.UnixNano()),
-		UserID:     user.UserID,
-		UUID:       user.UUID,
+		SessionKey: fmt.Sprintf("session_%d_%d", user.UserId, now.UnixNano()),
+		UserId:     user.UserId,
+		Uuid:       user.Uuid,
 		ExpireAt:   now.Add(ttl),
 	}
 
-	s.sessionToUserID[session.SessionKey] = user.UserID
+	s.sessionToUserId[session.SessionKey] = user.UserId
 	s.sessions[session.SessionKey] = session
 
 	return user.clone(), session
 }
 
-func (s *Store) ResolveUserID(sessionKey string) (int64, bool) {
+func (s *Store) ResolveUserId(sessionKey string) (int64, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	userID, ok := s.sessionToUserID[sessionKey]
-	return userID, ok
+	userId, ok := s.sessionToUserId[sessionKey]
+	return userId, ok
 }
 
-func (s *Store) SnapshotUser(userID int64) (UserState, bool) {
+func (s *Store) SnapshotUser(userId int64) (UserState, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	user, ok := s.users[userID]
+	user, ok := s.users[userId]
 	if !ok {
 		return UserState{}, false
 	}
 	return user.clone(), true
 }
 
-func (s *Store) UpdateUser(userID int64, mutate func(*UserState)) (UserState, bool) {
+func (s *Store) UpdateUser(userId int64, mutate func(*UserState)) (UserState, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	user, ok := s.users[userID]
+	user, ok := s.users[userId]
 	if !ok {
 		return UserState{}, false
 	}
@@ -518,24 +508,24 @@ func (s *Store) UpdateUser(userID int64, mutate func(*UserState)) (UserState, bo
 	return user.clone(), true
 }
 
-func (s *Store) DefaultUserID() int64 {
+func (s *Store) DefaultUserId() int64 {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	if _, ok := s.users[defaultUserID]; ok {
-		return defaultUserID
+	if _, ok := s.users[defaultUserId]; ok {
+		return defaultUserId
 	}
 	if len(s.users) == 0 {
-		return defaultUserID
+		return defaultUserId
 	}
 
-	var minUserID int64
-	for userID := range s.users {
-		if minUserID == 0 || userID < minUserID {
-			minUserID = userID
+	var minUserId int64
+	for userId := range s.users {
+		if minUserId == 0 || userId < minUserId {
+			minUserId = userId
 		}
 	}
-	return minUserID
+	return minUserId
 }
 
 func (s *Store) SnapshotGachaCatalog() []GachaCatalogEntry {
@@ -555,37 +545,37 @@ func (s *Store) ReplaceGachaCatalog(entries []GachaCatalogEntry) {
 
 	s.gachaCatalog = make(map[int32]GachaCatalogEntry, len(entries))
 	for _, entry := range entries {
-		s.gachaCatalog[entry.GachaID] = cloneGachaCatalogEntry(entry)
+		s.gachaCatalog[entry.GachaId] = cloneGachaCatalogEntry(entry)
 	}
 }
 
-func normalizeUUID(uuid string) string {
+func normalizeUUId(uuid string) string {
 	uuid = strings.TrimSpace(uuid)
 	if uuid == "" {
-		return defaultUUID
+		return defaultUUId
 	}
 	return uuid
 }
 
 func (s *Store) getOrCreateLocked(uuid string) *UserState {
-	if userID, ok := s.userIDsByUUID[uuid]; ok {
-		return s.users[userID]
+	if userId, ok := s.userIdsByUuid[uuid]; ok {
+		return s.users[userId]
 	}
 
-	userID := s.nextUserID
-	s.nextUserID++
+	userId := s.nextUserId
+	s.nextUserId++
 
-	user := seedUserState(userID, uuid, s.clock().UnixMilli(), s.bootstrapProfile, s.bootstrapper)
-	s.users[userID] = user
-	s.userIDsByUUID[uuid] = userID
+	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.bootstrapper)
+	s.users[userId] = user
+	s.userIdsByUuid[uuid] = userId
 	return user
 }
 
-func seedUserState(userID int64, uuid string, nowMillis int64, profile BootstrapProfile, bootstrapper Bootstrapper) *UserState {
+func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bootstrapper Bootstrapper) *UserState {
 	user := &UserState{
-		UserID:               userID,
-		UUID:                 uuid,
-		PlayerID:             userID,
+		UserId:               userId,
+		Uuid:                 uuid,
+		PlayerId:             userId,
 		OsType:               2,
 		PlatformType:         2,
 		UserRestrictionType:  0,
@@ -616,8 +606,8 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 			NameUpdateDatetime:              nowMillis,
 			Message:                         "",
 			MessageUpdateDatetime:           nowMillis,
-			FavoriteCostumeID:               0,
-			FavoriteCostumeIDUpdateDatetime: nowMillis,
+			FavoriteCostumeId:               0,
+			FavoriteCostumeIdUpdateDatetime: nowMillis,
 			LatestVersion:                   0,
 		},
 		Login: UserLoginState{
@@ -629,7 +619,7 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 			LatestVersion:             0,
 		},
 		LoginBonus: UserLoginBonusState{
-			LoginBonusID:                1,
+			LoginBonusId:                1,
 			CurrentPageNumber:           1,
 			CurrentStampNumber:          0,
 			LatestRewardReceiveDatetime: 0,
@@ -638,7 +628,7 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 		Tutorial: TutorialProgressState{
 			TutorialType:  1,
 			ProgressPhase: 0,
-			ChoiceID:      0,
+			ChoiceId:      0,
 			LatestVersion: 0,
 		},
 		Battle: BattleState{
@@ -657,14 +647,14 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 				{
 					GiftCommon: GiftCommonState{
 						PossessionType:        defaultGiftPossessionType,
-						PossessionID:          0,
+						PossessionId:          0,
 						Count:                 defaultGiftCount,
 						GrantDatetime:         nowMillis,
-						DescriptionGiftTextID: 0,
+						DescriptionGiftTextId: 0,
 						EquipmentData:         nil,
 					},
 					ExpirationDatetime: nowMillis + int64((7*24*time.Hour)/time.Millisecond),
-					UserGiftUUID:       fmt.Sprintf("%s-%d-1", defaultGiftUUIDPrefix, userID),
+					UserGiftUuid:       fmt.Sprintf("%s-%d-1", defaultGiftUUIdPrefix, userId),
 				},
 			},
 			Received: []ReceivedGiftState{},
@@ -680,14 +670,14 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 		},
 		MainQuest: MainQuestState{
 			CurrentQuestFlowType:     0,
-			CurrentMainQuestRouteID:  starterMainQuestRouteID,
-			CurrentQuestSceneID:      0,
-			HeadQuestSceneID:         0,
+			CurrentMainQuestRouteId:  starterMainQuestRouteId,
+			CurrentQuestSceneId:      0,
+			HeadQuestSceneId:         0,
 			IsReachedLastQuestScene:  false,
-			ProgressQuestSceneID:     0,
-			ProgressHeadQuestSceneID: 0,
+			ProgressQuestSceneId:     0,
+			ProgressHeadQuestSceneId: 0,
 			ProgressQuestFlowType:    0,
-			MainQuestSeasonID:        starterMainQuestSeasonID,
+			MainQuestSeasonId:        starterMainQuestSeasonId,
 			LatestVersion:            0,
 		},
 		Notifications: NotificationState{
@@ -696,30 +686,30 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 			IsExistUnreadInformation:  false,
 		},
 		Characters: map[int32]CharacterState{
-			starterCharacterID: {
-				CharacterID:   starterCharacterID,
+			starterCharacterId: {
+				CharacterId:   starterCharacterId,
 				Level:         1,
 				Exp:           0,
 				LatestVersion: 0,
 			},
 		},
 		Costumes: map[string]CostumeState{
-			starterCostumeUUID: {
-				UserCostumeUUID:     starterCostumeUUID,
-				CostumeID:           starterCostumeID,
+			starterCostumeUUId: {
+				UserCostumeUuid:     starterCostumeUUId,
+				CostumeId:           starterCostumeId,
 				LimitBreakCount:     0,
 				Level:               1,
 				Exp:                 0,
-				HeadupDisplayViewID: 0,
+				HeadupDisplayViewId: 0,
 				AcquisitionDatetime: nowMillis,
 				AwakenCount:         0,
 				LatestVersion:       0,
 			},
 		},
 		Weapons: map[string]WeaponState{
-			starterWeaponUUID: {
-				UserWeaponUUID:      starterWeaponUUID,
-				WeaponID:            starterWeaponID,
+			starterWeaponUUId: {
+				UserWeaponUuid:      starterWeaponUUId,
+				WeaponId:            starterWeaponId,
 				Level:               1,
 				Exp:                 0,
 				LimitBreakCount:     0,
@@ -729,23 +719,23 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 			},
 		},
 		Companions: map[string]CompanionState{
-			starterCompanionUUID: {
-				UserCompanionUUID:   starterCompanionUUID,
-				CompanionID:         starterCompanionID,
-				HeadupDisplayViewID: 0,
+			starterCompanionUUId: {
+				UserCompanionUuid:   starterCompanionUUId,
+				CompanionId:         starterCompanionId,
+				HeadupDisplayViewId: 0,
 				Level:               1,
 				AcquisitionDatetime: nowMillis,
 				LatestVersion:       0,
 			},
 		},
 		DeckCharacters: map[string]DeckCharacterState{
-			starterDeckCharacterUUID: {
-				UserDeckCharacterUUID: starterDeckCharacterUUID,
-				UserCostumeUUID:       starterCostumeUUID,
-				MainUserWeaponUUID:    starterWeaponUUID,
-				UserCompanionUUID:     starterCompanionUUID,
+			starterDeckCharacterUUId: {
+				UserDeckCharacterUuid: starterDeckCharacterUUId,
+				UserCostumeUuid:       starterCostumeUUId,
+				MainUserWeaponUuid:    starterWeaponUUId,
+				UserCompanionUuid:     starterCompanionUUId,
 				Power:                 100,
-				UserThoughtUUID:       "",
+				UserThoughtUuid:       "",
 				LatestVersion:         0,
 			},
 		},
@@ -753,9 +743,9 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 			{DeckType: starterQuestDeckType, UserDeckNumber: 1}: {
 				DeckType:                starterQuestDeckType,
 				UserDeckNumber:          1,
-				UserDeckCharacterUUID01: starterDeckCharacterUUID,
-				UserDeckCharacterUUID02: "",
-				UserDeckCharacterUUID03: "",
+				UserDeckCharacterUuid01: starterDeckCharacterUUId,
+				UserDeckCharacterUuid02: "",
+				UserDeckCharacterUuid03: "",
 				Name:                    "Deck 1",
 				Power:                   100,
 				LatestVersion:           0,
@@ -764,15 +754,15 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 		Quests:        map[int32]UserQuestState{},
 		QuestMissions: map[QuestMissionKey]UserQuestMissionState{},
 		WeaponStories: map[int32]WeaponStoryState{
-			starterWeaponID: {
-				WeaponId:              starterWeaponID,
+			starterWeaponId: {
+				WeaponId:              starterWeaponId,
 				ReleasedMaxStoryIndex: 1,
 				LatestVersion:         nowMillis,
 			},
 		},
 		Missions: map[int32]UserMissionState{
-			starterMissionID: {
-				MissionID:                 starterMissionID,
+			starterMissionId: {
+				MissionId:                 starterMissionId,
 				StartDatetime:             nowMillis,
 				ProgressValue:             0,
 				MissionProgressStatusType: missionInProgress,
@@ -788,7 +778,7 @@ func seedUserState(userID int64, uuid string, nowMillis int64, profile Bootstrap
 		},
 	}
 	if bootstrapper != nil {
-		bootstrapper.ApplyBootstrap(user, profile, nowMillis)
+		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
 	}
 	return user
 }
@@ -858,14 +848,14 @@ func cloneNotReceivedGifts(gifts []NotReceivedGiftState) []NotReceivedGiftState 
 		out[i] = NotReceivedGiftState{
 			GiftCommon: GiftCommonState{
 				PossessionType:        gift.GiftCommon.PossessionType,
-				PossessionID:          gift.GiftCommon.PossessionID,
+				PossessionId:          gift.GiftCommon.PossessionId,
 				Count:                 gift.GiftCommon.Count,
 				GrantDatetime:         gift.GiftCommon.GrantDatetime,
-				DescriptionGiftTextID: gift.GiftCommon.DescriptionGiftTextID,
+				DescriptionGiftTextId: gift.GiftCommon.DescriptionGiftTextId,
 				EquipmentData:         append([]byte(nil), gift.GiftCommon.EquipmentData...),
 			},
 			ExpirationDatetime: gift.ExpirationDatetime,
-			UserGiftUUID:       gift.UserGiftUUID,
+			UserGiftUuid:       gift.UserGiftUuid,
 		}
 	}
 	return out
@@ -877,10 +867,10 @@ func cloneReceivedGifts(gifts []ReceivedGiftState) []ReceivedGiftState {
 		out[i] = ReceivedGiftState{
 			GiftCommon: GiftCommonState{
 				PossessionType:        gift.GiftCommon.PossessionType,
-				PossessionID:          gift.GiftCommon.PossessionID,
+				PossessionId:          gift.GiftCommon.PossessionId,
 				Count:                 gift.GiftCommon.Count,
 				GrantDatetime:         gift.GiftCommon.GrantDatetime,
-				DescriptionGiftTextID: gift.GiftCommon.DescriptionGiftTextID,
+				DescriptionGiftTextId: gift.GiftCommon.DescriptionGiftTextId,
 				EquipmentData:         append([]byte(nil), gift.GiftCommon.EquipmentData...),
 			},
 			ReceivedDatetime: gift.ReceivedDatetime,

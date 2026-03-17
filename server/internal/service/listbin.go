@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -102,7 +101,7 @@ func skipProtoField(wireType int, data []byte, offset int) (int, bool) {
 	}
 }
 
-func parseListBinEntry(data []byte) (objectID string, entry listBinEntry, ok bool) {
+func parseListBinEntry(data []byte) (objectId string, entry listBinEntry, ok bool) {
 	i := 0
 	for i < len(data) {
 		tag, n := readVarint(data[i:])
@@ -154,7 +153,7 @@ func parseListBinEntry(data []byte) (objectID string, entry listBinEntry, ok boo
 			if vn == 0 || length <= 0 || i+vn+length > len(data) {
 				return "", listBinEntry{}, false
 			}
-			objectID = string(data[i+vn : i+vn+length])
+			objectId = string(data[i+vn : i+vn+length])
 			i += vn + length
 		default:
 			next, ok := skipProtoField(wireType, data, i)
@@ -165,10 +164,10 @@ func parseListBinEntry(data []byte) (objectID string, entry listBinEntry, ok boo
 		}
 	}
 
-	if objectID == "" || entry.Path == "" {
+	if objectId == "" || entry.Path == "" {
 		return "", listBinEntry{}, false
 	}
-	return objectID, entry, true
+	return objectId, entry, true
 }
 
 // parseListBin reads list.bin and builds object_id (6-byte string) → entry (path, size, md5).
@@ -191,9 +190,9 @@ func parseListBin(data []byte) listBinIndex {
 				break
 			}
 			entryBytes := data[i+vn : i+vn+length]
-			objectID, entry, ok := parseListBinEntry(entryBytes)
+			objectId, entry, ok := parseListBinEntry(entryBytes)
 			if ok {
-				idx[objectID] = entry
+				idx[objectId] = entry
 				i += vn + length
 				continue
 			}
@@ -208,44 +207,6 @@ func parseListBin(data []byte) listBinIndex {
 	return idx
 }
 
-// listRevisions returns revision dir names that have list.bin, sorted descending (newer first).
-func listRevisions() []string {
-	dir := filepath.Join("assets", "revisions")
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return []string{"0"}
-	}
-	var revs []string
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		name := e.Name()
-		if name == "" || name == "." || name == ".." {
-			continue
-		}
-		listPath := filepath.Join(dir, name, "list.bin")
-		if _, err := os.Stat(listPath); err != nil {
-			continue
-		}
-		revs = append(revs, name)
-	}
-	if len(revs) == 0 {
-		return []string{"0"}
-	}
-	sort.Slice(revs, func(i, j int) bool {
-		// Prefer numeric sort descending so 817 is tried before 0.
-		ri, errI := strconv.Atoi(revs[i])
-		rj, errJ := strconv.Atoi(revs[j])
-		if errI == nil && errJ == nil {
-			return ri > rj
-		}
-		return revs[i] > revs[j]
-	})
-	return revs
-}
-
-// loadListBinIndex loads or returns cached index for the given revision.
 func loadListBinIndex(revision string) (listBinIndex, bool) {
 	listBinCacheMu.RLock()
 	idx, ok := listBinCache[revision]
@@ -288,8 +249,6 @@ func loadListBinIndex(revision string) (listBinIndex, bool) {
 	return idx, true
 }
 
-// loadInfoIndex loads or returns cached from-name → duplicate target map from info.json.
-// Returns nil if file missing or invalid; caller should treat as no mappings.
 func loadInfoIndex(revision string) map[string]infoAlias {
 	infoCacheMu.RLock()
 	m, ok := infoCache[revision]
@@ -354,8 +313,6 @@ func loadInfoIndex(revision string) map[string]infoAlias {
 	return m
 }
 
-// pathStrToFullPaths builds full file paths for a list.bin path string (')' as segment separator).
-// Returns the primary path and fallbacks with locale segments ja/ko replaced by en for "global" variant.
 func pathStrToFullPaths(revision, assetType, pathStr string) []string {
 	fsPath := strings.ReplaceAll(pathStr, ")", "/")
 	if strings.Contains(fsPath, "..") || filepath.IsAbs(fsPath) || strings.HasPrefix(fsPath, "/") {
@@ -413,26 +370,15 @@ func duplicateCandidatePath(candidate assetCandidate, assetType, targetRevision,
 	return filepath.Join("assets", "revisions", targetRevision, assetType, filepath.Dir(rel), targetBaseName)
 }
 
-// objectIDToFilePath resolves object_id and type (assetbundle|resources) to a file path under assets/revisions/{revision}/
-// and the size from list.bin (0 if not present). pathFromList uses ')' as segment separator; we convert to '/' and add extension for assetbundle.
-// Returns empty path and false if not found or path would escape (traversal).
-func objectIDToFilePath(revision, assetType, objectID string) (filePath string, size int64, ok bool) {
-	candidates, size, ok := objectIDToFilePathCandidates(revision, assetType, objectID)
-	if !ok || len(candidates) == 0 {
-		return "", 0, false
-	}
-	return candidates[0].Path, size, true
-}
-
-// objectIDToFilePathCandidates returns candidate file paths for the object: list.bin path, locale fallbacks
+// objectIdToFilePathCandidates returns candidate file paths for the object: list.bin path, locale fallbacks
 // (ja/ko -> en), then info.json duplicate mappings (from-name -> to-name, possibly in a different revision).
 // Callers should try each path until one exists on disk.
-func objectIDToFilePathCandidates(revision, assetType, objectID string) (candidates []assetCandidate, size int64, ok bool) {
+func objectIdToFilePathCandidates(revision, assetType, objectId string) (candidates []assetCandidate, size int64, ok bool) {
 	idx, ok := loadListBinIndex(revision)
 	if !ok || idx == nil {
 		return nil, 0, false
 	}
-	entry, ok := idx[objectID]
+	entry, ok := idx[objectId]
 	if !ok || entry.Path == "" {
 		return nil, 0, false
 	}

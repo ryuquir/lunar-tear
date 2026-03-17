@@ -24,11 +24,11 @@ func NewGimmickServiceServer(userStore *store.Store) *GimmickServiceServer {
 func (s *GimmickServiceServer) UpdateSequence(ctx context.Context, req *pb.UpdateSequenceRequest) (*pb.UpdateSequenceResponse, error) {
 	log.Printf("[GimmickService] UpdateSequence: scheduleId=%d sequenceId=%d",
 		req.GimmickSequenceScheduleId, req.GimmickSequenceId)
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		key := store.GimmickSequenceKey{
-			GimmickSequenceScheduleID: req.GimmickSequenceScheduleId,
-			GimmickSequenceID:         req.GimmickSequenceId,
+			GimmickSequenceScheduleId: req.GimmickSequenceScheduleId,
+			GimmickSequenceId:         req.GimmickSequenceId,
 		}
 		sequence := user.Gimmick.Sequences[key]
 		sequence.Key = key
@@ -42,13 +42,13 @@ func (s *GimmickServiceServer) UpdateSequence(ctx context.Context, req *pb.Updat
 func (s *GimmickServiceServer) UpdateGimmickProgress(ctx context.Context, req *pb.UpdateGimmickProgressRequest) (*pb.UpdateGimmickProgressResponse, error) {
 	log.Printf("[GimmickService] UpdateGimmickProgress: scheduleId=%d sequenceId=%d gimmickId=%d ornamentIndex=%d progressValueBit=%d flowType=%d",
 		req.GimmickSequenceScheduleId, req.GimmickSequenceId, req.GimmickId, req.GimmickOrnamentIndex, req.ProgressValueBit, req.FlowType)
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := time.Now().UnixMilli()
 		progressKey := store.GimmickKey{
-			GimmickSequenceScheduleID: req.GimmickSequenceScheduleId,
-			GimmickSequenceID:         req.GimmickSequenceId,
-			GimmickID:                 req.GimmickId,
+			GimmickSequenceScheduleId: req.GimmickSequenceScheduleId,
+			GimmickSequenceId:         req.GimmickSequenceId,
+			GimmickId:                 req.GimmickId,
 		}
 		progress := user.Gimmick.Progress[progressKey]
 		progress.Key = progressKey
@@ -56,9 +56,9 @@ func (s *GimmickServiceServer) UpdateGimmickProgress(ctx context.Context, req *p
 		user.Gimmick.Progress[progressKey] = progress
 
 		ornamentKey := store.GimmickOrnamentKey{
-			GimmickSequenceScheduleID: req.GimmickSequenceScheduleId,
-			GimmickSequenceID:         req.GimmickSequenceId,
-			GimmickID:                 req.GimmickId,
+			GimmickSequenceScheduleId: req.GimmickSequenceScheduleId,
+			GimmickSequenceId:         req.GimmickSequenceId,
+			GimmickId:                 req.GimmickId,
 			GimmickOrnamentIndex:      req.GimmickOrnamentIndex,
 		}
 		ornament := user.Gimmick.OrnamentProgress[ornamentKey]
@@ -80,8 +80,8 @@ func (s *GimmickServiceServer) UpdateGimmickProgress(ctx context.Context, req *p
 
 func (s *GimmickServiceServer) InitSequenceSchedule(ctx context.Context, _ *emptypb.Empty) (*pb.InitSequenceScheduleResponse, error) {
 	log.Printf("[GimmickService] InitSequenceSchedule")
-	userID := currentUserID(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userID)
+	userId := currentUserId(ctx, s.store)
+	user, ok := s.store.SnapshotUser(userId)
 	if !ok {
 		user = s.store.EnsureUser("")
 	}
@@ -92,13 +92,13 @@ func (s *GimmickServiceServer) InitSequenceSchedule(ctx context.Context, _ *empt
 
 func (s *GimmickServiceServer) Unlock(ctx context.Context, req *pb.UnlockRequest) (*pb.UnlockResponse, error) {
 	log.Printf("[GimmickService] Unlock: gimmickKeys=%d", len(req.GimmickKey))
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		for _, item := range req.GimmickKey {
 			key := store.GimmickKey{
-				GimmickSequenceScheduleID: item.GimmickSequenceScheduleId,
-				GimmickSequenceID:         item.GimmickSequenceId,
-				GimmickID:                 item.GimmickId,
+				GimmickSequenceScheduleId: item.GimmickSequenceScheduleId,
+				GimmickSequenceId:         item.GimmickSequenceId,
+				GimmickId:                 item.GimmickId,
 			}
 			unlock := user.Gimmick.Unlocks[key]
 			unlock.Key = key

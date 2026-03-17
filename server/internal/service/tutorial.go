@@ -21,11 +21,11 @@ func NewTutorialServiceServer(userStore *store.Store) *TutorialServiceServer {
 
 func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb.SetTutorialProgressRequest) (*pb.SetTutorialProgressResponse, error) {
 	log.Printf("[TutorialService] SetTutorialProgress: type=%d phase=%d choice=%d", req.TutorialType, req.ProgressPhase, req.ChoiceId)
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		user.Tutorial.TutorialType = req.TutorialType
 		user.Tutorial.ProgressPhase = req.ProgressPhase
-		user.Tutorial.ChoiceID = req.ChoiceId
+		user.Tutorial.ChoiceId = req.ChoiceId
 	})
 	return &pb.SetTutorialProgressResponse{
 		TutorialChoiceReward: []*pb.TutorialChoiceReward{},
@@ -35,8 +35,8 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 
 func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Context, req *pb.SetTutorialProgressAndReplaceDeckRequest) (*pb.SetTutorialProgressAndReplaceDeckResponse, error) {
 	log.Printf("[TutorialService] SetTutorialProgressAndReplaceDeck: type=%d phase=%d deckType=%d", req.TutorialType, req.ProgressPhase, req.DeckType)
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		user.Tutorial.TutorialType = req.TutorialType
 		user.Tutorial.ProgressPhase = req.ProgressPhase
 
@@ -50,9 +50,9 @@ func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Co
 		if deck.Power == 0 {
 			deck.Power = 100
 		}
-		if deck.UserDeckCharacterUUID01 == "" {
-			for deckCharacterID := range user.DeckCharacters {
-				deck.UserDeckCharacterUUID01 = deckCharacterID
+		if deck.UserDeckCharacterUuid01 == "" {
+			for deckCharacterId := range user.DeckCharacters {
+				deck.UserDeckCharacterUuid01 = deckCharacterId
 				break
 			}
 		}

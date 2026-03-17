@@ -26,11 +26,11 @@ func (s *BannerServiceServer) GetMamaBanner(ctx context.Context, req *pb.GetMama
 	var termLimited []*pb.GachaBanner
 	var latestChapter *pb.GachaBanner
 	for _, entry := range catalog {
-		log.Printf("[BannerService] GetMamaBanner: entry gachaId=%d label=%d asset=%q", entry.GachaID, entry.GachaLabelType, entry.BannerAssetName)
+		log.Printf("[BannerService] GetMamaBanner: entry gachaId=%d label=%d asset=%q", entry.GachaId, entry.GachaLabelType, entry.BannerAssetName)
 		b := &pb.GachaBanner{
 			GachaLabelType: entry.GachaLabelType,
 			GachaAssetName: entry.BannerAssetName,
-			GachaId:        entry.GachaID,
+			GachaId:        entry.GachaId,
 		}
 		switch entry.GachaLabelType {
 		case gacha.GachaLabelEvent, gacha.GachaLabelPremium:

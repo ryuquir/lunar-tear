@@ -27,14 +27,14 @@ func NewGiftServiceServer(userStore *store.Store) *GiftServiceServer {
 func (s *GiftServiceServer) ReceiveGift(ctx context.Context, req *pb.ReceiveGiftRequest) (*pb.ReceiveGiftResponse, error) {
 	log.Printf("[GiftService] ReceiveGift: giftUuids=%d", len(req.UserGiftUuid))
 
-	userID := currentUserID(ctx, s.store)
+	userId := currentUserId(ctx, s.store)
 	received := make([]string, 0, len(req.UserGiftUuid))
-	_, ok := s.store.UpdateUser(userID, func(user *store.UserState) {
+	_, ok := s.store.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := time.Now().UnixMilli()
 		remaining := make([]store.NotReceivedGiftState, 0, len(user.Gifts.NotReceived))
 		for _, gift := range user.Gifts.NotReceived {
-			if slices.Contains(req.UserGiftUuid, gift.UserGiftUUID) {
-				received = append(received, gift.UserGiftUUID)
+			if slices.Contains(req.UserGiftUuid, gift.UserGiftUuid) {
+				received = append(received, gift.UserGiftUuid)
 				user.Gifts.Received = append(user.Gifts.Received, store.ReceivedGiftState{
 					GiftCommon:       gift.GiftCommon,
 					ReceivedDatetime: nowMillis,
@@ -67,8 +67,8 @@ func (s *GiftServiceServer) GetGiftList(ctx context.Context, req *pb.GetGiftList
 	log.Printf("[GiftService] GetGiftList: rewardKinds=%v expirationType=%d ascending=%v nextCursor=%d previousCursor=%d getCount=%d",
 		req.RewardKindType, req.ExpirationType, req.IsAscendingSort, req.NextCursor, req.PreviousCursor, req.GetCount)
 
-	userID := currentUserID(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userID)
+	userId := currentUserId(ctx, s.store)
+	user, ok := s.store.SnapshotUser(userId)
 	if !ok {
 		user = s.store.EnsureUser("")
 	}
@@ -89,7 +89,7 @@ func (s *GiftServiceServer) GetGiftList(ctx context.Context, req *pb.GetGiftList
 		items = append(items, &pb.NotReceivedGift{
 			GiftCommon:         toProtoGiftCommon(gift.GiftCommon),
 			ExpirationDatetime: timestampOrNilGift(gift.ExpirationDatetime),
-			UserGiftUuid:       gift.UserGiftUUID,
+			UserGiftUuid:       gift.UserGiftUuid,
 		})
 	}
 
@@ -104,8 +104,8 @@ func (s *GiftServiceServer) GetGiftList(ctx context.Context, req *pb.GetGiftList
 
 func (s *GiftServiceServer) GetGiftReceiveHistoryList(ctx context.Context, req *emptypb.Empty) (*pb.GetGiftReceiveHistoryListResponse, error) {
 	log.Printf("[GiftService] GetGiftReceiveHistoryList")
-	userID := currentUserID(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userID)
+	userId := currentUserId(ctx, s.store)
+	user, ok := s.store.SnapshotUser(userId)
 	if !ok {
 		user = s.store.EnsureUser("")
 	}
@@ -126,10 +126,10 @@ func (s *GiftServiceServer) GetGiftReceiveHistoryList(ctx context.Context, req *
 func toProtoGiftCommon(gift store.GiftCommonState) *pb.GiftCommon {
 	return &pb.GiftCommon{
 		PossessionType:        gift.PossessionType,
-		PossessionId:          gift.PossessionID,
+		PossessionId:          gift.PossessionId,
 		Count:                 gift.Count,
 		GrantDatetime:         timestampOrNilGift(gift.GrantDatetime),
-		DescriptionGiftTextId: gift.DescriptionGiftTextID,
+		DescriptionGiftTextId: gift.DescriptionGiftTextId,
 		EquipmentData:         gift.EquipmentData,
 	}
 }

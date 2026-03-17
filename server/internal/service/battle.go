@@ -21,8 +21,8 @@ func NewBattleServiceServer(userStore *store.Store) *BattleServiceServer {
 
 func (s *BattleServiceServer) StartWave(ctx context.Context, req *pb.StartWaveRequest) (*pb.StartWaveResponse, error) {
 	log.Printf("[BattleService] StartWave: userParty=%d npcParty=%d", len(req.UserPartyInitialInfoList), len(req.NpcPartyInitialInfoList))
-	userID := currentUserID(ctx, s.store)
-	s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	s.store.UpdateUser(userId, func(user *store.UserState) {
 		user.Battle.IsActive = true
 		user.Battle.StartCount++
 		user.Battle.LastStartedAt = time.Now().UnixMilli()
@@ -37,8 +37,8 @@ func (s *BattleServiceServer) StartWave(ctx context.Context, req *pb.StartWaveRe
 func (s *BattleServiceServer) FinishWave(ctx context.Context, req *pb.FinishWaveRequest) (*pb.FinishWaveResponse, error) {
 	log.Printf("[BattleService] FinishWave: battleBinary=%d userParty=%d npcParty=%d elapsedFrames=%d",
 		len(req.BattleBinary), len(req.UserPartyResultInfoList), len(req.NpcPartyResultInfoList), req.ElapsedFrameCount)
-	userID := currentUserID(ctx, s.store)
-	s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	s.store.UpdateUser(userId, func(user *store.UserState) {
 		user.Battle.IsActive = false
 		user.Battle.FinishCount++
 		user.Battle.LastFinishedAt = time.Now().UnixMilli()

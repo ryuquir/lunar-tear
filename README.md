@@ -129,7 +129,7 @@ go run ./cmd/lunar-tear \
   --grpc-port 7777 \
   --http-port 8080 \
   --host 10.0.2.2 \
-  --bootstrap-profile fresh
+  --scene 13
 ```
 
 Default behavior:
@@ -142,7 +142,7 @@ Important flags:
 - `--host` - hostname/IP given to the client.
 - `--grpc-port` - main gRPC port.
 - `--http-port` - HTTP/Octo port.
-- `--bootstrap-profile` - initial user state profile (`fresh`, `main-quest-scene-9`).
+- `--scene` - bootstrap new users to scene N (omit or 0 for fresh start).
 
 ### Optional: Regenerate protobuf stubs
 

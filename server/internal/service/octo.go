@@ -243,15 +243,15 @@ func (s *OctoHTTPServer) serveOctoV1List(w http.ResponseWriter, r *http.Request,
 // serveUnsoAsset serves asset bundle or resource for URLs like /resource-bundle-server/unso-{version}-{type}/{object_id}.
 func (s *OctoHTTPServer) serveUnsoAsset(w http.ResponseWriter, r *http.Request, path string) {
 	parts := strings.Split(strings.Trim(path, "/"), "/")
-	var segment, objectID string
+	var segment, objectId string
 	for i, p := range parts {
 		if strings.HasPrefix(p, "unso-") && i+1 < len(parts) {
 			segment = p
-			objectID = parts[i+1]
+			objectId = parts[i+1]
 			break
 		}
 	}
-	if segment == "" || objectID == "" {
+	if segment == "" || objectId == "" {
 		log.Printf("[HTTP] Asset request malformed: %s", path)
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.WriteHeader(http.StatusNotFound)
@@ -273,9 +273,9 @@ func (s *OctoHTTPServer) serveUnsoAsset(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	activeRevision := s.revisions.Active(r.RemoteAddr)
-	resolution, ok := s.resolver.Resolve(objectID, assetType, activeRevision)
+	resolution, ok := s.resolver.Resolve(objectId, assetType, activeRevision)
 	if !ok {
-		log.Printf("[HTTP] Asset not found: %s (object_id=%s type=%s active_revision=%s) no candidates", path, objectID, assetType, activeRevision)
+		log.Printf("[HTTP] Asset not found: %s (object_id=%s type=%s active_revision=%s) no candidates", path, objectId, assetType, activeRevision)
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -316,7 +316,7 @@ func (s *OctoHTTPServer) serveUnsoAsset(w http.ResponseWriter, r *http.Request, 
 			}
 			if !strings.EqualFold(actualMD5, candidate.ExpectedMD5) {
 				md5Mismatches = append(md5Mismatches, candidate.Revision+":"+candidate.Path+" ["+candidate.Source+"] expected="+candidate.ExpectedMD5+" actual="+actualMD5)
-				log.Printf("[HTTP] Asset md5 mismatch: object_id=%s type=%s path=%s expected=%s actual=%s active_revision=%s list_revision=%s resolved_revision=%s source=%s", objectID, assetType, candidate.Path, candidate.ExpectedMD5, actualMD5, resolution.ActiveRevision, resolution.ListRevision, candidate.Revision, candidate.Source)
+				log.Printf("[HTTP] Asset md5 mismatch: object_id=%s type=%s path=%s expected=%s actual=%s active_revision=%s list_revision=%s resolved_revision=%s source=%s", objectId, assetType, candidate.Path, candidate.ExpectedMD5, actualMD5, resolution.ActiveRevision, resolution.ListRevision, candidate.Revision, candidate.Source)
 				f.Close()
 				continue
 			}
@@ -328,9 +328,9 @@ func (s *OctoHTTPServer) serveUnsoAsset(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	if len(md5Mismatches) > 0 {
-		log.Printf("[HTTP] Asset md5 mismatches: object_id=%s type=%s active_revision=%s list_revision=%s mismatches=%v", objectID, assetType, resolution.ActiveRevision, resolution.ListRevision, md5Mismatches)
+		log.Printf("[HTTP] Asset md5 mismatches: object_id=%s type=%s active_revision=%s list_revision=%s mismatches=%v", objectId, assetType, resolution.ActiveRevision, resolution.ListRevision, md5Mismatches)
 	}
-	log.Printf("[HTTP] Asset not found: %s (object_id=%s type=%s active_revision=%s list_revision=%s) tried paths: %v", path, objectID, assetType, resolution.ActiveRevision, resolution.ListRevision, triedPaths)
+	log.Printf("[HTTP] Asset not found: %s (object_id=%s type=%s active_revision=%s list_revision=%s) tried paths: %v", path, objectId, assetType, resolution.ActiveRevision, resolution.ListRevision, triedPaths)
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusNotFound)
 }

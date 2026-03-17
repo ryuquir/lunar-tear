@@ -27,12 +27,6 @@ var startedGameStartTables = []string{
 	"IUserTutorialProgress",
 }
 
-var mainQuestDiffTables = []string{
-	"IUserMainQuestFlowStatus",
-	"IUserMainQuestMainFlowStatus",
-	"IUserMainQuestProgressStatus",
-}
-
 var gimmickDiffTables = []string{
 	"IUserGimmick",
 	"IUserGimmickOrnamentProgress",
@@ -40,21 +34,21 @@ var gimmickDiffTables = []string{
 	"IUserGimmickUnlock",
 }
 
-func currentUserID(ctx context.Context, userStore *store.Store) int64 {
+func currentUserId(ctx context.Context, userStore *store.Store) int64 {
 	if userStore == nil {
 		return 0
 	}
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if vals := md.Get("x-session-key"); len(vals) > 0 {
-			if userID, ok := userStore.ResolveUserID(vals[0]); ok {
-				return userID
+			if userId, ok := userStore.ResolveUserId(vals[0]); ok {
+				return userId
 			}
 		}
 	}
 
-	defaultUserID := userStore.DefaultUserID()
-	if _, ok := userStore.SnapshotUser(defaultUserID); ok {
-		return defaultUserID
+	defaultUserId := userStore.DefaultUserId()
+	if _, ok := userStore.SnapshotUser(defaultUserId); ok {
+		return defaultUserId
 	}
-	return userStore.EnsureUser("").UserID
+	return userStore.EnsureUser("").UserId
 }

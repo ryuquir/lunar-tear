@@ -16,19 +16,15 @@ import (
 
 type QuestServiceServer struct {
 	pb.UnimplementedQuestServiceServer
-	store     *store.Store
-	engine    *questflow.Engine
-	newEngine *questflow.NewEngine
+	store  *store.Store
+	engine *questflow.Engine
 }
 
-func NewQuestServiceServer(userStore *store.Store, engine *questflow.Engine, newEngine *questflow.NewEngine) *QuestServiceServer {
+func NewQuestServiceServer(userStore *store.Store, engine *questflow.Engine) *QuestServiceServer {
 	if engine == nil {
 		panic("quest flow engine is required")
 	}
-	if newEngine == nil {
-		panic("new quest flow engine is required")
-	}
-	return &QuestServiceServer{store: userStore, engine: engine, newEngine: newEngine}
+	return &QuestServiceServer{store: userStore, engine: engine}
 }
 
 func buildSelectedQuestDiff(user store.UserState, tableNames []string) map[string]*pb.DiffData {
@@ -44,9 +40,9 @@ func logQuestState(prefix string, user store.UserState) {
 func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, req *pb.UpdateMainFlowSceneProgressRequest) (*pb.UpdateMainFlowSceneProgressResponse, error) {
 	log.Printf("[QuestService] UpdateMainFlowSceneProgress: questSceneId=%d", req.QuestSceneId)
 
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
-		s.newEngine.HandleMainFlowSceneProgress(user, req.QuestSceneId)
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		s.engine.HandleMainFlowSceneProgress(user, req.QuestSceneId)
 	})
 	logQuestState("UpdateMainFlowSceneProgress state", user)
 
@@ -70,9 +66,9 @@ func (s *QuestServiceServer) UpdateReplayFlowSceneProgress(ctx context.Context, 
 func (s *QuestServiceServer) UpdateMainQuestSceneProgress(ctx context.Context, req *pb.UpdateMainQuestSceneProgressRequest) (*pb.UpdateMainQuestSceneProgressResponse, error) {
 	log.Printf("[QuestService] UpdateMainQuestSceneProgress: questSceneId=%d", req.QuestSceneId)
 
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
-		s.newEngine.HandleMainQuestSceneProgress(user, req.QuestSceneId)
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		s.engine.HandleMainQuestSceneProgress(user, req.QuestSceneId)
 	})
 	logQuestState("UpdateMainQuestSceneProgress state", user)
 	return &pb.UpdateMainQuestSceneProgressResponse{
@@ -91,10 +87,10 @@ func (s *QuestServiceServer) UpdateMainQuestSceneProgress(ctx context.Context, r
 func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMainQuestRequest) (*pb.StartMainQuestResponse, error) {
 	log.Printf("[QuestService] StartMainQuest: %+v", req)
 
-	userID := currentUserID(ctx, s.store)
+	userId := currentUserId(ctx, s.store)
 	nowMillis := time.Now().UnixMilli()
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
-		s.newEngine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, nowMillis)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, nowMillis)
 	})
 	logQuestState("StartMainQuest state", user)
 
@@ -131,10 +127,10 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 		req.QuestId, req.IsMainFlow, req.IsRetired, req.StorySkipType)
 
 	nowMillis := time.Now().UnixMilli()
-	userID := currentUserID(ctx, s.store)
+	userId := currentUserId(ctx, s.store)
 	var outcome questflow.FinishOutcome
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
-		outcome = s.newEngine.HandleQuestFinish(user, req.QuestId, nowMillis)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		outcome = s.engine.HandleQuestFinish(user, req.QuestId, nowMillis)
 	})
 	logQuestState("FinishMainQuest state", user)
 
@@ -169,8 +165,8 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 func (s *QuestServiceServer) RestartMainQuest(ctx context.Context, req *pb.RestartMainQuestRequest) (*pb.RestartMainQuestResponse, error) {
 	log.Printf("[QuestService] RestartMainQuest: questId=%d isMainFlow=%v", req.QuestId, req.IsMainFlow)
 
-	userID := currentUserID(ctx, s.store)
-	user, _ := s.store.UpdateUser(userID, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.store)
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		s.engine.HandleQuestRestart(user, req.QuestId, time.Now().UnixMilli())
 	})
 	logQuestState("RestartMainQuest state", user)

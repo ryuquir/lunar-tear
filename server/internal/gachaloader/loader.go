@@ -56,25 +56,25 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 	endDt := now.AddDate(0, 0, 3).UnixMilli()
 
 	var entries []store.GachaCatalogEntry
-	for gachaID, banner := range gachaToBanner {
-		medal, hasMedal := gachaToMedal[gachaID]
+	for gachaId, banner := range gachaToBanner {
+		medal, hasMedal := gachaToMedal[gachaId]
 		if !hasMedal {
 			continue
 		}
 
 		labelType := gacha.GachaLabelEvent
 		modeType := gacha.GachaModeBox
-		stepupGroupID := gachaID
+		stepupGroupId := gachaId
 
 		// TODO(krettsy): this is a single-step stub; real step-ups need
 		// multiple Gacha entries per group with per-step prices/rewards.
 		if strings.HasPrefix(banner.BannerAssetName, "step_up_") {
 			labelType = gacha.GachaLabelPremium
-			stepupGroupID = gachaID / 1000
+			stepupGroupId = gachaId / 1000
 		}
 
 		entries = append(entries, store.GachaCatalogEntry{
-			GachaID:                    gachaID,
+			GachaId:                    gachaId,
 			GachaLabelType:             labelType,
 			GachaModeType:              modeType,
 			GachaAutoResetType:         gacha.GachaAutoResetNone,
@@ -83,17 +83,17 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 			IsUserGachaUnlock:          true,
 			StartDatetime:              startDt,
 			EndDatetime:                endDt,
-			RelatedMainQuestChapterID:  0,
-			RelatedEventQuestChapterID: 0,
-			PromotionMovieAssetID:      0,
-			GachaMedalID:               medal.GachaMedalId,
+			RelatedMainQuestChapterId:  0,
+			RelatedEventQuestChapterId: 0,
+			PromotionMovieAssetId:      0,
+			GachaMedalId:               medal.GachaMedalId,
 			GachaDecorationType:        gacha.GachaDecorationNormal,
 			SortOrder:                  banner.SortOrderDesc,
 			IsInactive:                 false,
-			InformationID:              0,
+			InformationId:              0,
 			GachaMode:                  nil,
 			BannerAssetName:            banner.BannerAssetName,
-			StepupGroupID:              stepupGroupID,
+			StepupGroupId:              stepupGroupId,
 		})
 	}
 	return entries, nil

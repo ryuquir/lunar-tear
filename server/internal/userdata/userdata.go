@@ -115,9 +115,9 @@ type EntityIUserStatus struct {
 // EntityIUserGem mirrors EntityIUserGem [Key(0..2)].
 type EntityIUserGem struct {
 	_msgpack struct{} `msgpack:",asArray"`
-	UserId   int64    `json:"userId"`   // Key(0)
-	PaidGem  int32    `json:"paidGem"`  // Key(1)
-	FreeGem  int32    `json:"freeGem"`  // Key(2)
+	UserId   int64    `json:"userId"`  // Key(0)
+	PaidGem  int32    `json:"paidGem"` // Key(1)
+	FreeGem  int32    `json:"freeGem"` // Key(2)
 }
 
 // EntityIUserProfile mirrors EntityIUserProfile [Key(0..7)].
@@ -283,19 +283,19 @@ func encodeJSONMaps(records ...map[string]any) (string, error) {
 // DefaultUserData returns pre-built user data tables for a fresh user.
 // We provide BOTH msgpack-encoded (base64) and plain JSON variants.
 // The server tries msgpack first; if the client doesn't accept it, switch to JSON.
-func DefaultUserData(userID int64) map[string]string {
+func DefaultUserData(userId int64) map[string]string {
 	now := time.Now().Unix()
 
 	userRecord, _ := EncodeRecords(&EntityIUser{
-		UserId:           userID,
-		PlayerId:         userID,
+		UserId:           userId,
+		PlayerId:         userId,
 		OsType:           2,
 		PlatformType:     2,
 		RegisterDatetime: now,
 	})
 
 	settingRecord, _ := EncodeRecords(&EntityIUserSetting{
-		UserId: userID,
+		UserId: userId,
 	})
 
 	data := map[string]string{
@@ -307,28 +307,28 @@ func DefaultUserData(userID int64) map[string]string {
 
 // DefaultUserDataJSON returns user data as plain JSON.
 // Verified: client accepts JSON format and parses it correctly.
-func DefaultUserDataJSON(userID int64) map[string]string {
+func DefaultUserDataJSON(userId int64) map[string]string {
 	nowMillis := time.Now().UnixMilli()
 	const (
-		starterCharacterID = int32(1)
-		starterCostumeID   = int32(1)
-		starterWeaponID    = int32(100001)
-		starterCompanionID = int32(1)
-		starterQuestID     = int32(1)
-		starterMissionID   = int32(1)
+		starterCharacterId = int32(1)
+		starterCostumeId   = int32(1)
+		starterWeaponId    = int32(100001)
+		starterCompanionId = int32(1)
+		starterQuestId     = int32(1)
+		starterMissionId   = int32(1)
 		questDeckType      = int32(1)
-		mainQuestRouteID   = int32(1)
+		mainQuestRouteId   = int32(1)
 		missionInProgress  = int32(1)
 	)
 	const (
-		starterCostumeUUID       = "starter-costume-0001"
-		starterWeaponUUID        = "starter-weapon-0001"
-		starterCompanionUUID     = "starter-companion-0001"
-		starterDeckCharacterUUID = "starter-deck-character-0001"
+		starterCostumeUUId       = "starter-costume-0001"
+		starterWeaponUUId        = "starter-weapon-0001"
+		starterCompanionUUId     = "starter-companion-0001"
+		starterDeckCharacterUUId = "starter-deck-character-0001"
 	)
 	userJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              userID,
-		"playerId":            userID,
+		"userId":              userId,
+		"playerId":            userId,
 		"osType":              2,
 		"platformType":        2,
 		"userRestrictionType": 0,
@@ -337,39 +337,39 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":       0,
 	})
 	userSettingJSON, _ := encodeJSONRecords(&EntityIUserSetting{
-		UserId:                userID,
+		UserId:                userId,
 		IsNotifyPurchaseAlert: false,
 		LatestVersion:         0,
 	})
 	mainQuestFlowJSON, _ := encodeJSONMaps(map[string]any{
-		"userId": userID,
+		"userId": userId,
 		// Keep route progression seeded, but do not advertise an in-progress main quest.
 		"currentQuestFlowType": 0,
 		"latestVersion":        0,
 	})
 	mainQuestMainFlowJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                  userID,
-		"currentMainQuestRouteId": mainQuestRouteID,
+		"userId":                  userId,
+		"currentMainQuestRouteId": mainQuestRouteId,
 		"currentQuestSceneId":     0,
 		"headQuestSceneId":        0,
 		"isReachedLastQuestScene": false,
 		"latestVersion":           0,
 	})
 	mainQuestProgressJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":               userID,
+		"userId":               userId,
 		"currentQuestSceneId":  0,
 		"headQuestSceneId":     0,
 		"currentQuestFlowType": 0,
 		"latestVersion":        0,
 	})
 	mainQuestSeasonRouteJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":            userID,
+		"userId":            userId,
 		"mainQuestSeasonId": 1,
-		"mainQuestRouteId":  mainQuestRouteID,
+		"mainQuestRouteId":  mainQuestRouteId,
 		"latestVersion":     0,
 	})
 	userStatusJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                userID,
+		"userId":                userId,
 		"level":                 1,
 		"exp":                   0,
 		"staminaMilliValue":     60000,
@@ -377,12 +377,12 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":         0,
 	})
 	userGemJSON, _ := encodeJSONRecords(&EntityIUserGem{
-		UserId:  userID,
+		UserId:  userId,
 		PaidGem: 0,
 		FreeGem: 0,
 	})
 	userProfileJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                userID,
+		"userId":                userId,
 		"name":                  "Lunar Tear",
 		"nameUpdateDatetime":    nowMillis,
 		"message":               "",
@@ -393,16 +393,16 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":                   0,
 	})
 	userCharacterJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":        userID,
-		"characterId":   starterCharacterID,
+		"userId":        userId,
+		"characterId":   starterCharacterId,
 		"level":         1,
 		"exp":           0,
 		"latestVersion": 0,
 	})
 	userCostumeJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              userID,
-		"userCostumeUuid":     starterCostumeUUID,
-		"costumeId":           starterCostumeID,
+		"userId":              userId,
+		"userCostumeUuid":     starterCostumeUUId,
+		"costumeId":           starterCostumeId,
 		"limitBreakCount":     0,
 		"level":               1,
 		"exp":                 0,
@@ -412,9 +412,9 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":       0,
 	})
 	userWeaponJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              userID,
-		"userWeaponUuid":      starterWeaponUUID,
-		"weaponId":            starterWeaponID,
+		"userId":              userId,
+		"userWeaponUuid":      starterWeaponUUId,
+		"weaponId":            starterWeaponId,
 		"level":               1,
 		"exp":                 0,
 		"limitBreakCount":     0,
@@ -423,29 +423,29 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":       0,
 	})
 	userCompanionJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              userID,
-		"userCompanionUuid":   starterCompanionUUID,
-		"companionId":         starterCompanionID,
+		"userId":              userId,
+		"userCompanionUuid":   starterCompanionUUId,
+		"companionId":         starterCompanionId,
 		"headupDisplayViewId": 0,
 		"level":               1,
 		"acquisitionDatetime": nowMillis,
 		"latestVersion":       0,
 	})
 	userDeckCharacterJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                userID,
-		"userDeckCharacterUuid": starterDeckCharacterUUID,
-		"userCostumeUuid":       starterCostumeUUID,
-		"mainUserWeaponUuid":    starterWeaponUUID,
-		"userCompanionUuid":     starterCompanionUUID,
+		"userId":                userId,
+		"userDeckCharacterUuid": starterDeckCharacterUUId,
+		"userCostumeUuid":       starterCostumeUUId,
+		"mainUserWeaponUuid":    starterWeaponUUId,
+		"userCompanionUuid":     starterCompanionUUId,
 		"power":                 100,
 		"userThoughtUuid":       "",
 		"latestVersion":         0,
 	})
 	userDeckJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                  userID,
+		"userId":                  userId,
 		"deckType":                questDeckType,
 		"userDeckNumber":          1,
-		"userDeckCharacterUuid01": starterDeckCharacterUUID,
+		"userDeckCharacterUuid01": starterDeckCharacterUUId,
 		"userDeckCharacterUuid02": "",
 		"userDeckCharacterUuid03": "",
 		"name":                    "Deck 1",
@@ -453,7 +453,7 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":           0,
 	})
 	userLoginJSON, _ := encodeJSONRecords(&EntityIUserLogin{
-		UserId:                    userID,
+		UserId:                    userId,
 		TotalLoginCount:           1,
 		ContinualLoginCount:       1,
 		MaxContinualLoginCount:    1,
@@ -462,7 +462,7 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		LatestVersion:             0,
 	})
 	userLoginBonusJSON, _ := encodeJSONRecords(&EntityIUserLoginBonus{
-		UserId:                      userID,
+		UserId:                      userId,
 		LoginBonusId:                1,
 		CurrentPageNumber:           1,
 		CurrentStampNumber:          0,
@@ -470,15 +470,15 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		LatestVersion:               0,
 	})
 	userTutorialProgressJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":        userID,
+		"userId":        userId,
 		"tutorialType":  1,
 		"progressPhase": 0,
 		"choiceId":      0,
 		"latestVersion": 0,
 	})
 	userQuestJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              userID,
-		"questId":             starterQuestID,
+		"userId":              userId,
+		"questId":             starterQuestId,
 		"questStateType":      0,
 		"isBattleOnly":        false,
 		"latestStartDatetime": nowMillis,
@@ -489,8 +489,8 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":       0,
 	})
 	userMissionJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                    userID,
-		"missionId":                 starterMissionID,
+		"userId":                    userId,
+		"missionId":                 starterMissionId,
 		"startDatetime":             nowMillis,
 		"progressValue":             0,
 		"missionProgressStatusType": missionInProgress,
@@ -498,8 +498,8 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 		"latestVersion":             0,
 	})
 	userWeaponStoryJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                userID,
-		"weaponId":              starterWeaponID,
+		"userId":                userId,
+		"weaponId":              starterWeaponId,
 		"releasedMaxStoryIndex": 1,
 		"latestVersion":         nowMillis,
 	})
@@ -531,8 +531,8 @@ func DefaultUserDataJSON(userID int64) map[string]string {
 
 // DefaultUserDataJSONClientTables returns the same data as DefaultUserDataJSON,
 // but keyed by the IUser* names used by the client append/diff helpers.
-func DefaultUserDataJSONClientTables(userID int64) map[string]string {
-	defaultsSnake := DefaultUserDataJSON(userID)
+func DefaultUserDataJSONClientTables(userId int64) map[string]string {
+	defaultsSnake := DefaultUserDataJSON(userId)
 	return map[string]string{
 		"IUser":                        defaultsSnake["user"],
 		"IUserSetting":                 defaultsSnake["user_setting"],
@@ -561,15 +561,15 @@ func DefaultUserDataJSONClientTables(userID int64) map[string]string {
 // FirstEntranceUserDataJSONClientTables returns a pre-GameStart baseline.
 // Keep only core account rows that title/login can plausibly need, while leaving
 // gameplay progression and starter party data empty until GameStart.
-func FirstEntranceUserDataJSONClientTables(userID int64) map[string]string {
-	tables := DefaultUserDataJSONClientTables(userID)
+func FirstEntranceUserDataJSONClientTables(userId int64) map[string]string {
+	tables := DefaultUserDataJSONClientTables(userId)
 	nowMillis := time.Now().UnixMilli()
 	// Runtime ctor(Dictionary<string, object>) reads these keys as raw objects and
 	// immediately passes them to MPDateTime.ConvertMPDateTime(object), so they must
 	// stay plain unix-millis scalars here, not nested maps.
 	userJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              userID,
-		"playerId":            userID,
+		"userId":              userId,
+		"playerId":            userId,
 		"osType":              2,
 		"platformType":        2,
 		"userRestrictionType": 0,
@@ -578,7 +578,7 @@ func FirstEntranceUserDataJSONClientTables(userID int64) map[string]string {
 		"latestVersion":       0,
 	})
 	userStatusJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                userID,
+		"userId":                userId,
 		"level":                 1,
 		"exp":                   0,
 		"staminaMilliValue":     60000,
@@ -586,7 +586,7 @@ func FirstEntranceUserDataJSONClientTables(userID int64) map[string]string {
 		"latestVersion":         0,
 	})
 	userProfileJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                          userID,
+		"userId":                          userId,
 		"name":                            "Un-regist User Name",
 		"nameUpdateDatetime":              nowMillis,
 		"message":                         "",
@@ -596,7 +596,7 @@ func FirstEntranceUserDataJSONClientTables(userID int64) map[string]string {
 		"latestVersion":                   0,
 	})
 	userLoginJSON, _ := encodeJSONRecords(&EntityIUserLogin{
-		UserId:                    userID,
+		UserId:                    userId,
 		TotalLoginCount:           1,
 		ContinualLoginCount:       1,
 		MaxContinualLoginCount:    1,
@@ -605,12 +605,12 @@ func FirstEntranceUserDataJSONClientTables(userID int64) map[string]string {
 		LatestVersion:             0,
 	})
 	userSettingJSON, _ := encodeJSONRecords(&EntityIUserSetting{
-		UserId:                userID,
+		UserId:                userId,
 		IsNotifyPurchaseAlert: false,
 		LatestVersion:         0,
 	})
 	userLoginBonusJSON, _ := encodeJSONRecords(&EntityIUserLoginBonus{
-		UserId:                      userID,
+		UserId:                      userId,
 		LoginBonusId:                1,
 		CurrentPageNumber:           1,
 		CurrentStampNumber:          0,

@@ -32,11 +32,11 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 		if catalog[i].SortOrder != catalog[j].SortOrder {
 			return catalog[i].SortOrder < catalog[j].SortOrder
 		}
-		return catalog[i].GachaID < catalog[j].GachaID
+		return catalog[i].GachaId < catalog[j].GachaId
 	})
 
-	userID := currentUserID(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userID)
+	userId := currentUserId(ctx, s.store)
+	user, ok := s.store.SnapshotUser(userId)
 	if !ok {
 		user = s.store.EnsureUser("")
 	}
@@ -61,18 +61,18 @@ func (s *GachaServiceServer) GetGacha(ctx context.Context, req *pb.GetGachaReque
 	log.Printf("[GachaService] GetGacha: ids=%v", req.GachaId)
 
 	catalog := s.store.SnapshotGachaCatalog()
-	byID := make(map[int32]*pb.Gacha, len(req.GachaId))
-	for _, wantedID := range req.GachaId {
+	byId := make(map[int32]*pb.Gacha, len(req.GachaId))
+	for _, wantedId := range req.GachaId {
 		for _, entry := range catalog {
-			if entry.GachaID == wantedID {
-				byID[wantedID] = toProtoGacha(entry)
+			if entry.GachaId == wantedId {
+				byId[wantedId] = toProtoGacha(entry)
 				break
 			}
 		}
 	}
 
 	return &pb.GetGachaResponse{
-		Gacha:        byID,
+		Gacha:        byId,
 		DiffUserData: mock.EmptyDiff(),
 	}, nil
 }
@@ -98,8 +98,8 @@ func (s *GachaServiceServer) ResetBoxGacha(ctx context.Context, req *pb.ResetBox
 
 func (s *GachaServiceServer) GetRewardGacha(ctx context.Context, req *emptypb.Empty) (*pb.GetRewardGachaResponse, error) {
 	log.Printf("[GachaService] GetRewardGacha")
-	userID := currentUserID(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userID)
+	userId := currentUserId(ctx, s.store)
+	user, ok := s.store.SnapshotUser(userId)
 	if !ok {
 		user = s.store.EnsureUser("")
 	}
@@ -142,9 +142,9 @@ var featuredWeapons = []int32{
 	210112, 210122, 210142, 210152, 210162, 210172, 210182, 210192,
 }
 
-func stubPromotionItems(gachaID int32) []*pb.GachaOddsItem {
-	idx := int(gachaID) % len(featuredCostumes)
-	wIdx := int(gachaID) % len(featuredWeapons)
+func stubPromotionItems(gachaId int32) []*pb.GachaOddsItem {
+	idx := int(gachaId) % len(featuredCostumes)
+	wIdx := int(gachaId) % len(featuredWeapons)
 	return []*pb.GachaOddsItem{
 		{
 			GachaItem: &pb.GachaItem{PossessionType: 1, PossessionId: featuredCostumes[idx], Count: 1, PromotionOrder: 1},
@@ -161,8 +161,8 @@ func stubPromotionItems(gachaID int32) []*pb.GachaOddsItem {
 	}
 }
 
-func stubGachaPricePhases(gachaID, modeType int32) []*pb.GachaPricePhase {
-	phaseID := gachaID*10 + 1
+func stubGachaPricePhases(gachaId, modeType int32) []*pb.GachaPricePhase {
+	phaseId := gachaId*10 + 1
 
 	price := int32(3000)
 	drawCount := int32(10)
@@ -172,7 +172,7 @@ func stubGachaPricePhases(gachaID, modeType int32) []*pb.GachaPricePhase {
 	}
 
 	return []*pb.GachaPricePhase{{
-		GachaPricePhaseId: phaseID,
+		GachaPricePhaseId: phaseId,
 		IsEnabled:         true,
 		EndDatetime:       timestamppb.New(time.Now().AddDate(0, 0, 30)),
 		PriceType:         gacha.PriceTypeGem,
@@ -181,14 +181,14 @@ func stubGachaPricePhases(gachaID, modeType int32) []*pb.GachaPricePhase {
 		DrawCount:         drawCount,
 		GachaOddsFixedRarity: &pb.GachaOddsFixedRarity{
 			FixedRarityTypeLowerLimit: 0,
-			FixedCount:               0,
+			FixedCount:                0,
 		},
 	}}
 }
 
 func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 	g := &pb.Gacha{
-		GachaId:                    entry.GachaID,
+		GachaId:                    entry.GachaId,
 		GachaLabelType:             entry.GachaLabelType,
 		GachaModeType:              entry.GachaModeType,
 		GachaAutoResetType:         entry.GachaAutoResetType,
@@ -198,35 +198,35 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		IsUserGachaUnlock:          entry.IsUserGachaUnlock,
 		StartDatetime:              safeTimestamp(entry.StartDatetime),
 		EndDatetime:                safeTimestamp(entry.EndDatetime),
-		GachaPricePhase:            stubGachaPricePhases(entry.GachaID, entry.GachaModeType),
-		RelatedMainQuestChapterId:  entry.RelatedMainQuestChapterID,
-		RelatedEventQuestChapterId: entry.RelatedEventQuestChapterID,
-		PromotionMovieAssetId:      entry.PromotionMovieAssetID,
-		GachaMedalId:               entry.GachaMedalID,
+		GachaPricePhase:            stubGachaPricePhases(entry.GachaId, entry.GachaModeType),
+		RelatedMainQuestChapterId:  entry.RelatedMainQuestChapterId,
+		RelatedEventQuestChapterId: entry.RelatedEventQuestChapterId,
+		PromotionMovieAssetId:      entry.PromotionMovieAssetId,
+		GachaMedalId:               entry.GachaMedalId,
 		GachaDecorationType:        entry.GachaDecorationType,
 		SortOrder:                  entry.SortOrder,
 		IsInactive:                 entry.IsInactive,
-		InformationId:              entry.InformationID,
+		InformationId:              entry.InformationId,
 	}
 
-	phaseID := entry.GachaID*10 + 1
+	phaseId := entry.GachaId*10 + 1
 
 	switch entry.GachaModeType {
 	case gacha.GachaModeBox:
 		g.GachaMode = &pb.Gacha_GachaModeBoxComposition{
 			GachaModeBoxComposition: &pb.GachaModeBoxComposition{
-				GachaBoxGroupId:        entry.StepupGroupID,
+				GachaBoxGroupId:        entry.StepupGroupId,
 				BoxNumber:              1,
 				CurrentBoxNumber:       1,
 				GachaAssetName:         entry.BannerAssetName,
-				GachaPricePhaseId:      phaseID,
-				PromotionGachaOddsItem: stubPromotionItems(entry.GachaID),
+				GachaPricePhaseId:      phaseId,
+				PromotionGachaOddsItem: stubPromotionItems(entry.GachaId),
 			},
 		}
 	case gacha.GachaModeStepup:
 		g.GachaMode = &pb.Gacha_GachaModeStepupComposition{
 			GachaModeStepupComposition: &pb.GachaModeStepupComposition{
-				GachaStepGroupId:              entry.StepupGroupID,
+				GachaStepGroupId:              entry.StepupGroupId,
 				StepNumber:                    1,
 				CurrentStepNumber:             1,
 				NaviCharacterCommentAssetName: "",
@@ -249,7 +249,7 @@ func toProtoConvertedGachaMedal(state store.ConvertedGachaMedalState) *pb.Conver
 	items := make([]*pb.ConsumableItemPossession, 0, len(state.ConvertedMedalPossession))
 	for _, item := range state.ConvertedMedalPossession {
 		items = append(items, &pb.ConsumableItemPossession{
-			ConsumableItemId: item.ConsumableItemID,
+			ConsumableItemId: item.ConsumableItemId,
 			Count:            item.Count,
 		})
 	}
@@ -259,7 +259,7 @@ func toProtoConvertedGachaMedal(state store.ConvertedGachaMedalState) *pb.Conver
 		Count:            0,
 	}
 	if state.ObtainPossession != nil {
-		obtain.ConsumableItemId = state.ObtainPossession.ConsumableItemID
+		obtain.ConsumableItemId = state.ObtainPossession.ConsumableItemId
 		obtain.Count = state.ObtainPossession.Count
 	}
 

@@ -68,24 +68,24 @@ func (t *revisionTracker) Active(clientAddr string) string {
 	return revision
 }
 
-func (r *assetResolver) Resolve(objectID, assetType, activeRevision string) (assetResolution, bool) {
+func (r *assetResolver) Resolve(objectId, assetType, activeRevision string) (assetResolution, bool) {
 	start := time.Now()
 	resolution := assetResolution{ActiveRevision: activeRevision}
 	revision := activeRevision
 
-	candidates, listSize, ok := objectIDToFilePathCandidates(revision, assetType, objectID)
+	candidates, listSize, ok := objectIdToFilePathCandidates(revision, assetType, objectId)
 	if ok && len(candidates) > 0 {
 		resolution.ListRevision = revision
 		resolution.ListSize = listSize
 		resolution.Candidates = candidates
 		if elapsed := time.Since(start); elapsed > 100*time.Millisecond {
-			log.Printf("[HTTP] Asset resolve slow: object_id=%s type=%s active_revision=%s list_revision=%s elapsed=%s", objectID, assetType, activeRevision, revision, elapsed)
+			log.Printf("[HTTP] Asset resolve slow: object_id=%s type=%s active_revision=%s list_revision=%s elapsed=%s", objectId, assetType, activeRevision, revision, elapsed)
 		}
 		return resolution, true
 	}
 
 	if elapsed := time.Since(start); elapsed > 100*time.Millisecond {
-		log.Printf("[HTTP] Asset resolve miss: object_id=%s type=%s active_revision=%s elapsed=%s", objectID, assetType, activeRevision, elapsed)
+		log.Printf("[HTTP] Asset resolve miss: object_id=%s type=%s active_revision=%s elapsed=%s", objectId, assetType, activeRevision, elapsed)
 	}
 	return resolution, false
 }

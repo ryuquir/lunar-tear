@@ -39,8 +39,8 @@ func (s *DataServiceServer) GetUserDataNameV2(ctx context.Context, _ *emptypb.Em
 func (s *DataServiceServer) GetUserData(ctx context.Context, req *pb.UserDataGetRequest) (*pb.UserDataGetResponse, error) {
 	log.Printf("[DataService] GetUserData: tables=%v", req.TableName)
 
-	userID := currentUserID(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userID)
+	userId := currentUserId(ctx, s.store)
+	user, ok := s.store.SnapshotUser(userId)
 	if !ok {
 		user = s.store.EnsureUser("")
 	}

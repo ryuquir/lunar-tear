@@ -43,7 +43,7 @@ func main() {
 	httpPort := flag.Int("http-port", 8080, "HTTP server port (Octo API)")
 	host := flag.String("host", "127.0.0.1", "hostname the client will connect to")
 	resourcesBaseURL := flag.String("resources-base-url", "", "Resources base URL for list.bin rewrite (must be exactly 43 chars); empty = derive from host (so client uses our server for assets)")
-	bootstrapProfile := flag.String("bootstrap-profile", string(store.BootstrapProfileFresh), "Initial store bootstrap profile (fresh, main-quest-scene-9)")
+	scene := flag.Int("scene", 0, "Bootstrap to scene N (0 = fresh start)")
 	flag.Parse()
 
 	// Octo base URL: client uses this to fetch list and will see rewritten asset URLs if resourcesBaseURL is set
@@ -101,10 +101,11 @@ func main() {
 		grpc.UnaryInterceptor(loggingInterceptor),
 		grpc.UnknownServiceHandler(loggingUnknownService),
 	)
-	questEngine := questflow.MustLoad()
-	newQuestEngine := questflow.MakeNewEngine()
-	userStore := store.New(nil, store.WithBootstrap(store.BootstrapProfile(*bootstrapProfile), newQuestEngine))
-	log.Printf("store bootstrap profile: %s", *bootstrapProfile)
+	questEngine := questflow.MakeEngine()
+	userStore := store.New(nil, store.WithBootstrap(int32(*scene), questEngine))
+	if *scene != 0 {
+		log.Printf("bootstrap scene: %d", *scene)
+	}
 
 	gachaEntries, err := gachaloader.LoadGachaCatalog()
 	if err != nil {
@@ -123,7 +124,7 @@ func main() {
 	pb.RegisterGiftServiceServer(grpcServer, service.NewGiftServiceServer(userStore))
 	pb.RegisterGamePlayServiceServer(grpcServer, service.NewGameplayServiceServer())
 	pb.RegisterGimmickServiceServer(grpcServer, service.NewGimmickServiceServer(userStore))
-	pb.RegisterQuestServiceServer(grpcServer, service.NewQuestServiceServer(userStore, questEngine, newQuestEngine))
+	pb.RegisterQuestServiceServer(grpcServer, service.NewQuestServiceServer(userStore, questEngine))
 	pb.RegisterNotificationServiceServer(grpcServer, service.NewNotificationServiceServer(userStore))
 
 	reflection.Register(grpcServer)

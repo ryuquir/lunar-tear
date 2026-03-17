@@ -10,8 +10,8 @@ import (
 
 func FullClientTableMap(user store.UserState) map[string]string {
 	userJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":              user.UserID,
-		"playerId":            user.PlayerID,
+		"userId":              user.UserId,
+		"playerId":            user.PlayerId,
 		"osType":              user.OsType,
 		"platformType":        user.PlatformType,
 		"userRestrictionType": user.UserRestrictionType,
@@ -20,12 +20,12 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"latestVersion":       user.LatestVersion,
 	})
 	userSettingJSON, _ := encodeJSONRecords(&EntityIUserSetting{
-		UserId:                user.UserID,
+		UserId:                user.UserId,
 		IsNotifyPurchaseAlert: user.Setting.IsNotifyPurchaseAlert,
 		LatestVersion:         user.Setting.LatestVersion,
 	})
 	userStatusJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                user.UserID,
+		"userId":                user.UserId,
 		"level":                 user.Status.Level,
 		"exp":                   user.Status.Exp,
 		"staminaMilliValue":     user.Status.StaminaMilliValue,
@@ -33,22 +33,22 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"latestVersion":         user.Status.LatestVersion,
 	})
 	userGemJSON, _ := encodeJSONRecords(&EntityIUserGem{
-		UserId:  user.UserID,
+		UserId:  user.UserId,
 		PaidGem: user.Gem.PaidGem,
 		FreeGem: user.Gem.FreeGem,
 	})
 	userProfileJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                          user.UserID,
+		"userId":                          user.UserId,
 		"name":                            user.Profile.Name,
 		"nameUpdateDatetime":              user.Profile.NameUpdateDatetime,
 		"message":                         user.Profile.Message,
 		"messageUpdateDatetime":           user.Profile.MessageUpdateDatetime,
-		"favoriteCostumeId":               user.Profile.FavoriteCostumeID,
-		"favoriteCostumeIdUpdateDatetime": user.Profile.FavoriteCostumeIDUpdateDatetime,
+		"favoriteCostumeId":               user.Profile.FavoriteCostumeId,
+		"favoriteCostumeIdUpdateDatetime": user.Profile.FavoriteCostumeIdUpdateDatetime,
 		"latestVersion":                   user.Profile.LatestVersion,
 	})
 	userLoginJSON, _ := encodeJSONRecords(&EntityIUserLogin{
-		UserId:                    user.UserID,
+		UserId:                    user.UserId,
 		TotalLoginCount:           user.Login.TotalLoginCount,
 		ContinualLoginCount:       user.Login.ContinualLoginCount,
 		MaxContinualLoginCount:    user.Login.MaxContinualLoginCount,
@@ -57,44 +57,44 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		LatestVersion:             user.Login.LatestVersion,
 	})
 	userLoginBonusJSON, _ := encodeJSONRecords(&EntityIUserLoginBonus{
-		UserId:                      user.UserID,
-		LoginBonusId:                user.LoginBonus.LoginBonusID,
+		UserId:                      user.UserId,
+		LoginBonusId:                user.LoginBonus.LoginBonusId,
 		CurrentPageNumber:           user.LoginBonus.CurrentPageNumber,
 		CurrentStampNumber:          user.LoginBonus.CurrentStampNumber,
 		LatestRewardReceiveDatetime: user.LoginBonus.LatestRewardReceiveDatetime,
 		LatestVersion:               user.LoginBonus.LatestVersion,
 	})
 	userTutorialProgressJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":        user.UserID,
+		"userId":        user.UserId,
 		"tutorialType":  user.Tutorial.TutorialType,
 		"progressPhase": user.Tutorial.ProgressPhase,
-		"choiceId":      user.Tutorial.ChoiceID,
+		"choiceId":      user.Tutorial.ChoiceId,
 		"latestVersion": user.Tutorial.LatestVersion,
 	})
 	mainQuestFlowJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":               user.UserID,
+		"userId":               user.UserId,
 		"currentQuestFlowType": user.MainQuest.CurrentQuestFlowType,
 		"latestVersion":        user.MainQuest.LatestVersion,
 	})
 	mainQuestMainFlowJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":                  user.UserID,
-		"currentMainQuestRouteId": user.MainQuest.CurrentMainQuestRouteID,
-		"currentQuestSceneId":     user.MainQuest.CurrentQuestSceneID,
-		"headQuestSceneId":        user.MainQuest.HeadQuestSceneID,
+		"userId":                  user.UserId,
+		"currentMainQuestRouteId": user.MainQuest.CurrentMainQuestRouteId,
+		"currentQuestSceneId":     user.MainQuest.CurrentQuestSceneId,
+		"headQuestSceneId":        user.MainQuest.HeadQuestSceneId,
 		"isReachedLastQuestScene": user.MainQuest.IsReachedLastQuestScene,
 		"latestVersion":           user.MainQuest.LatestVersion,
 	})
 	mainQuestProgressJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":               user.UserID,
-		"currentQuestSceneId":  user.MainQuest.ProgressQuestSceneID,
-		"headQuestSceneId":     user.MainQuest.ProgressHeadQuestSceneID,
+		"userId":               user.UserId,
+		"currentQuestSceneId":  user.MainQuest.ProgressQuestSceneId,
+		"headQuestSceneId":     user.MainQuest.ProgressHeadQuestSceneId,
 		"currentQuestFlowType": user.MainQuest.ProgressQuestFlowType,
 		"latestVersion":        user.MainQuest.LatestVersion,
 	})
 	mainQuestSeasonRouteJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":            user.UserID,
-		"mainQuestSeasonId": user.MainQuest.MainQuestSeasonID,
-		"mainQuestRouteId":  user.MainQuest.CurrentMainQuestRouteID,
+		"userId":            user.UserId,
+		"mainQuestSeasonId": user.MainQuest.MainQuestSeasonId,
+		"mainQuestRouteId":  user.MainQuest.CurrentMainQuestRouteId,
 		"latestVersion":     user.MainQuest.LatestVersion,
 	})
 
@@ -229,8 +229,8 @@ func sortedCharacterRecords(user store.UserState) []map[string]any {
 	for _, id := range ids {
 		row := user.Characters[int32(id)]
 		records = append(records, map[string]any{
-			"userId":        user.UserID,
-			"characterId":   row.CharacterID,
+			"userId":        user.UserId,
+			"characterId":   row.CharacterId,
 			"level":         row.Level,
 			"exp":           row.Exp,
 			"latestVersion": row.LatestVersion,
@@ -245,13 +245,13 @@ func sortedCostumeRecords(user store.UserState) []map[string]any {
 	for _, key := range keys {
 		row := user.Costumes[key]
 		records = append(records, map[string]any{
-			"userId":              user.UserID,
-			"userCostumeUuid":     row.UserCostumeUUID,
-			"costumeId":           row.CostumeID,
+			"userId":              user.UserId,
+			"userCostumeUuid":     row.UserCostumeUuid,
+			"costumeId":           row.CostumeId,
 			"limitBreakCount":     row.LimitBreakCount,
 			"level":               row.Level,
 			"exp":                 row.Exp,
-			"headupDisplayViewId": row.HeadupDisplayViewID,
+			"headupDisplayViewId": row.HeadupDisplayViewId,
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"awakenCount":         row.AwakenCount,
 			"latestVersion":       row.LatestVersion,
@@ -265,15 +265,15 @@ func sortedWeaponRecords(user store.UserState) []map[string]any {
 	records := make([]map[string]any, 0, len(keys))
 	for _, key := range keys {
 		row := user.Weapons[key]
-		uuid := row.UserWeaponUUID
+		uuid := row.UserWeaponUuid
 		if uuid == "" {
 			log.Printf("[state_projection] sortedWeaponRecords: using key as fallback for weapon key=%q (empty userWeaponUuid)", key)
 			uuid = key // Defensive: map key IS the userWeaponUuid by design
 		}
 		records = append(records, map[string]any{
-			"userId":              user.UserID,
+			"userId":              user.UserId,
 			"userWeaponUuid":      uuid,
-			"weaponId":            row.WeaponID,
+			"weaponId":            row.WeaponId,
 			"level":               row.Level,
 			"exp":                 row.Exp,
 			"limitBreakCount":     row.LimitBreakCount,
@@ -291,10 +291,10 @@ func sortedWeaponStoryRecords(user store.UserState) []map[string]any {
 	}
 	// Build set of weaponIds that exist in IUserWeapon - never send IUserWeaponStory
 	// for a weapon not in IUserWeapon (client may crash on null lookup).
-	// Aligned with sortedWeaponRecords: we emit all weapons (key-as-fallback when UserWeaponUUID empty).
+	// Aligned with sortedWeaponRecords: we emit all weapons (key-as-fallback when UserWeaponUuid empty).
 	weaponIdsInWeapons := make(map[int32]bool)
 	for _, row := range user.Weapons {
-		weaponIdsInWeapons[row.WeaponID] = true
+		weaponIdsInWeapons[row.WeaponId] = true
 	}
 	weaponIds := make([]int32, 0, len(user.WeaponStories))
 	for weaponId := range user.WeaponStories {
@@ -307,7 +307,7 @@ func sortedWeaponStoryRecords(user store.UserState) []map[string]any {
 	for _, weaponId := range weaponIds {
 		row := user.WeaponStories[weaponId]
 		records = append(records, map[string]any{
-			"userId":                user.UserID,
+			"userId":                user.UserId,
 			"weaponId":              row.WeaponId,
 			"releasedMaxStoryIndex": row.ReleasedMaxStoryIndex,
 			"latestVersion":         row.LatestVersion,
@@ -322,10 +322,10 @@ func sortedCompanionRecords(user store.UserState) []map[string]any {
 	for _, key := range keys {
 		row := user.Companions[key]
 		records = append(records, map[string]any{
-			"userId":              user.UserID,
-			"userCompanionUuid":   row.UserCompanionUUID,
-			"companionId":         row.CompanionID,
-			"headupDisplayViewId": row.HeadupDisplayViewID,
+			"userId":              user.UserId,
+			"userCompanionUuid":   row.UserCompanionUuid,
+			"companionId":         row.CompanionId,
+			"headupDisplayViewId": row.HeadupDisplayViewId,
 			"level":               row.Level,
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"latestVersion":       row.LatestVersion,
@@ -340,13 +340,13 @@ func sortedDeckCharacterRecords(user store.UserState) []map[string]any {
 	for _, key := range keys {
 		row := user.DeckCharacters[key]
 		records = append(records, map[string]any{
-			"userId":                user.UserID,
-			"userDeckCharacterUuid": row.UserDeckCharacterUUID,
-			"userCostumeUuid":       row.UserCostumeUUID,
-			"mainUserWeaponUuid":    row.MainUserWeaponUUID,
-			"userCompanionUuid":     row.UserCompanionUUID,
+			"userId":                user.UserId,
+			"userDeckCharacterUuid": row.UserDeckCharacterUuid,
+			"userCostumeUuid":       row.UserCostumeUuid,
+			"mainUserWeaponUuid":    row.MainUserWeaponUuid,
+			"userCompanionUuid":     row.UserCompanionUuid,
 			"power":                 row.Power,
-			"userThoughtUuid":       row.UserThoughtUUID,
+			"userThoughtUuid":       row.UserThoughtUuid,
 			"latestVersion":         row.LatestVersion,
 		})
 	}
@@ -369,12 +369,12 @@ func sortedDeckRecords(user store.UserState) []map[string]any {
 	for _, key := range keys {
 		row := user.Decks[key]
 		records = append(records, map[string]any{
-			"userId":                  user.UserID,
+			"userId":                  user.UserId,
 			"deckType":                row.DeckType,
 			"userDeckNumber":          row.UserDeckNumber,
-			"userDeckCharacterUuid01": row.UserDeckCharacterUUID01,
-			"userDeckCharacterUuid02": row.UserDeckCharacterUUID02,
-			"userDeckCharacterUuid03": row.UserDeckCharacterUUID03,
+			"userDeckCharacterUuid01": row.UserDeckCharacterUuid01,
+			"userDeckCharacterUuid02": row.UserDeckCharacterUuid02,
+			"userDeckCharacterUuid03": row.UserDeckCharacterUuid03,
 			"name":                    row.Name,
 			"power":                   row.Power,
 			"latestVersion":           row.LatestVersion,
@@ -394,8 +394,8 @@ func sortedQuestRecords(user store.UserState) []map[string]any {
 	for _, id := range ids {
 		row := user.Quests[int32(id)]
 		records = append(records, map[string]any{
-			"userId":              user.UserID,
-			"questId":             row.QuestID,
+			"userId":              user.UserId,
+			"questId":             row.QuestId,
 			"questStateType":      row.QuestStateType,
 			"isBattleOnly":        row.IsBattleOnly,
 			"latestStartDatetime": row.LatestStartDatetime,
@@ -415,19 +415,19 @@ func sortedQuestMissionRecords(user store.UserState) []map[string]any {
 		keys = append(keys, key)
 	}
 	sort.Slice(keys, func(i, j int) bool {
-		if keys[i].QuestID != keys[j].QuestID {
-			return keys[i].QuestID < keys[j].QuestID
+		if keys[i].QuestId != keys[j].QuestId {
+			return keys[i].QuestId < keys[j].QuestId
 		}
-		return keys[i].QuestMissionID < keys[j].QuestMissionID
+		return keys[i].QuestMissionId < keys[j].QuestMissionId
 	})
 
 	records := make([]map[string]any, 0, len(keys))
 	for _, key := range keys {
 		row := user.QuestMissions[key]
 		records = append(records, map[string]any{
-			"userId":              user.UserID,
-			"questId":             row.QuestID,
-			"questMissionId":      row.QuestMissionID,
+			"userId":              user.UserId,
+			"questId":             row.QuestId,
+			"questMissionId":      row.QuestMissionId,
 			"progressValue":       row.ProgressValue,
 			"isClear":             row.IsClear,
 			"latestClearDatetime": row.LatestClearDatetime,
@@ -448,8 +448,8 @@ func sortedMissionRecords(user store.UserState) []map[string]any {
 	for _, id := range ids {
 		row := user.Missions[int32(id)]
 		records = append(records, map[string]any{
-			"userId":                    user.UserID,
-			"missionId":                 row.MissionID,
+			"userId":                    user.UserId,
+			"missionId":                 row.MissionId,
 			"startDatetime":             row.StartDatetime,
 			"progressValue":             row.ProgressValue,
 			"missionProgressStatusType": row.MissionProgressStatusType,
@@ -473,10 +473,10 @@ func sortedGimmickRecords(user store.UserState) []map[string]any {
 	for _, key := range keys {
 		row := user.Gimmick.Progress[key]
 		records = append(records, map[string]any{
-			"userId":                    user.UserID,
-			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleID,
-			"gimmickSequenceId":         row.Key.GimmickSequenceID,
-			"gimmickId":                 row.Key.GimmickID,
+			"userId":                    user.UserId,
+			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleId,
+			"gimmickSequenceId":         row.Key.GimmickSequenceId,
+			"gimmickId":                 row.Key.GimmickId,
 			"isGimmickCleared":          row.IsGimmickCleared,
 			"startDatetime":             row.StartDatetime,
 			"latestVersion":             row.LatestVersion,
@@ -498,10 +498,10 @@ func sortedGimmickOrnamentProgressRecords(user store.UserState) []map[string]any
 	for _, key := range keys {
 		row := user.Gimmick.OrnamentProgress[key]
 		records = append(records, map[string]any{
-			"userId":                    user.UserID,
-			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleID,
-			"gimmickSequenceId":         row.Key.GimmickSequenceID,
-			"gimmickId":                 row.Key.GimmickID,
+			"userId":                    user.UserId,
+			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleId,
+			"gimmickSequenceId":         row.Key.GimmickSequenceId,
+			"gimmickId":                 row.Key.GimmickId,
 			"gimmickOrnamentIndex":      row.Key.GimmickOrnamentIndex,
 			"progressValueBit":          row.ProgressValueBit,
 			"baseDatetime":              row.BaseDatetime,
@@ -517,19 +517,19 @@ func sortedGimmickSequenceRecords(user store.UserState) []map[string]any {
 		keys = append(keys, key)
 	}
 	sort.Slice(keys, func(i, j int) bool {
-		if keys[i].GimmickSequenceScheduleID != keys[j].GimmickSequenceScheduleID {
-			return keys[i].GimmickSequenceScheduleID < keys[j].GimmickSequenceScheduleID
+		if keys[i].GimmickSequenceScheduleId != keys[j].GimmickSequenceScheduleId {
+			return keys[i].GimmickSequenceScheduleId < keys[j].GimmickSequenceScheduleId
 		}
-		return keys[i].GimmickSequenceID < keys[j].GimmickSequenceID
+		return keys[i].GimmickSequenceId < keys[j].GimmickSequenceId
 	})
 
 	records := make([]map[string]any, 0, len(keys))
 	for _, key := range keys {
 		row := user.Gimmick.Sequences[key]
 		records = append(records, map[string]any{
-			"userId":                    user.UserID,
-			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleID,
-			"gimmickSequenceId":         row.Key.GimmickSequenceID,
+			"userId":                    user.UserId,
+			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleId,
+			"gimmickSequenceId":         row.Key.GimmickSequenceId,
 			"isGimmickSequenceCleared":  row.IsGimmickSequenceCleared,
 			"clearDatetime":             row.ClearDatetime,
 			"latestVersion":             row.LatestVersion,
@@ -551,10 +551,10 @@ func sortedGimmickUnlockRecords(user store.UserState) []map[string]any {
 	for _, key := range keys {
 		row := user.Gimmick.Unlocks[key]
 		records = append(records, map[string]any{
-			"userId":                    user.UserID,
-			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleID,
-			"gimmickSequenceId":         row.Key.GimmickSequenceID,
-			"gimmickId":                 row.Key.GimmickID,
+			"userId":                    user.UserId,
+			"gimmickSequenceScheduleId": row.Key.GimmickSequenceScheduleId,
+			"gimmickSequenceId":         row.Key.GimmickSequenceId,
+			"gimmickId":                 row.Key.GimmickId,
 			"isUnlocked":                row.IsUnlocked,
 			"latestVersion":             row.LatestVersion,
 		})
@@ -572,22 +572,22 @@ func sortedStringKeys[T any](rows map[string]T) []string {
 }
 
 func compareGimmickKey(a, b store.GimmickKey) int {
-	if a.GimmickSequenceScheduleID != b.GimmickSequenceScheduleID {
-		if a.GimmickSequenceScheduleID < b.GimmickSequenceScheduleID {
+	if a.GimmickSequenceScheduleId != b.GimmickSequenceScheduleId {
+		if a.GimmickSequenceScheduleId < b.GimmickSequenceScheduleId {
 			return -1
 		}
 		return 1
 	}
-	if a.GimmickSequenceID != b.GimmickSequenceID {
-		if a.GimmickSequenceID < b.GimmickSequenceID {
+	if a.GimmickSequenceId != b.GimmickSequenceId {
+		if a.GimmickSequenceId < b.GimmickSequenceId {
 			return -1
 		}
 		return 1
 	}
-	if a.GimmickID < b.GimmickID {
+	if a.GimmickId < b.GimmickId {
 		return -1
 	}
-	if a.GimmickID > b.GimmickID {
+	if a.GimmickId > b.GimmickId {
 		return 1
 	}
 	return 0
@@ -596,14 +596,14 @@ func compareGimmickKey(a, b store.GimmickKey) int {
 func compareGimmickOrnamentKey(a, b store.GimmickOrnamentKey) int {
 	if cmp := compareGimmickKey(
 		store.GimmickKey{
-			GimmickSequenceScheduleID: a.GimmickSequenceScheduleID,
-			GimmickSequenceID:         a.GimmickSequenceID,
-			GimmickID:                 a.GimmickID,
+			GimmickSequenceScheduleId: a.GimmickSequenceScheduleId,
+			GimmickSequenceId:         a.GimmickSequenceId,
+			GimmickId:                 a.GimmickId,
 		},
 		store.GimmickKey{
-			GimmickSequenceScheduleID: b.GimmickSequenceScheduleID,
-			GimmickSequenceID:         b.GimmickSequenceID,
-			GimmickID:                 b.GimmickID,
+			GimmickSequenceScheduleId: b.GimmickSequenceScheduleId,
+			GimmickSequenceId:         b.GimmickSequenceId,
+			GimmickId:                 b.GimmickId,
 		},
 	); cmp != 0 {
 		return cmp
