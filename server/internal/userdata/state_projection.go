@@ -158,32 +158,32 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		// Deck-related tables needed by DeckOrganizationCache.SetupCache.
 		// Empty for now (no server-side state), but must exist so the client's
 		// MemoryDatabase has non-null table references during diff application.
-		"IUserDeckPartsGroup":                  "[]",
-		"IUserDeckSubWeaponGroup":              "[]",
-		"IUserDeckCharacterDressupCostume":     "[]",
-		"IUserDeckTypeNote":                    userDeckTypeNoteJSON,
-		"IUserDeckLimitContentRestricted":      "[]",
+		"IUserDeckPartsGroup":              "[]",
+		"IUserDeckSubWeaponGroup":          "[]",
+		"IUserDeckCharacterDressupCostume": "[]",
+		"IUserDeckTypeNote":                userDeckTypeNoteJSON,
+		"IUserDeckLimitContentRestricted":  "[]",
 
 		// Costume sub-tables accessed by CreateDataOutgameCostume.
-		"IUserCostumeActiveSkill":              userCostumeActiveSkillJSON,
-		"IUserCostumeAwakenStatusUp":           "[]",
-		"IUserCostumeLevelBonusReleaseStatus":  "[]",
-		"IUserCostumeLotteryEffect":            "[]",
-		"IUserCostumeLotteryEffectAbility":     "[]",
-		"IUserCostumeLotteryEffectStatusUp":    "[]",
-		"IUserCostumeLotteryEffectPending":     "[]",
+		"IUserCostumeActiveSkill":             userCostumeActiveSkillJSON,
+		"IUserCostumeAwakenStatusUp":          "[]",
+		"IUserCostumeLevelBonusReleaseStatus": "[]",
+		"IUserCostumeLotteryEffect":           "[]",
+		"IUserCostumeLotteryEffectAbility":    "[]",
+		"IUserCostumeLotteryEffectStatusUp":   "[]",
+		"IUserCostumeLotteryEffectPending":    "[]",
 
 		// Weapon sub-tables.
-		"IUserWeaponNote":                      userWeaponNoteJSON,
-		"IUserWeaponAbility":                   "[]",
-		"IUserWeaponSkill":                     "[]",
-		"IUserWeaponAwaken":                    "[]",
+		"IUserWeaponNote":    userWeaponNoteJSON,
+		"IUserWeaponAbility": "[]",
+		"IUserWeaponSkill":   "[]",
+		"IUserWeaponAwaken":  "[]",
 
 		// Parts/memory sub-tables.
-		"IUserPartsGroupNote":                  "[]",
-		"IUserPartsPreset":                     "[]",
-		"IUserPartsPresetTag":                  "[]",
-		"IUserPartsStatusSub":                  "[]",
+		"IUserPartsGroupNote": "[]",
+		"IUserPartsPreset":    "[]",
+		"IUserPartsPresetTag": "[]",
+		"IUserPartsStatusSub": "[]",
 	}
 }
 
@@ -662,7 +662,7 @@ func sortedMaterialRecords(user store.UserState) []map[string]any {
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
-			"userId":                    user.UserId,
+			"userId":                   user.UserId,
 			"materialId":               int32(id),
 			"count":                    user.Materials[int32(id)],
 			"firstAcquisitionDatetime": nowMillis,

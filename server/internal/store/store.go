@@ -797,9 +797,9 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 			FriendRequestReceiveCount: 0,
 			IsExistUnreadInformation:  false,
 		},
-		Characters:     make(map[int32]CharacterState),
-		Costumes:       make(map[string]CostumeState),
-		Weapons:        make(map[string]WeaponState),
+		Characters: make(map[int32]CharacterState),
+		Costumes:   make(map[string]CostumeState),
+		Weapons:    make(map[string]WeaponState),
 		Companions: map[string]CompanionState{
 			starterCompanionUUId: {
 				UserCompanionUuid:   starterCompanionUUId,

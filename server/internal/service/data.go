@@ -129,7 +129,7 @@ func defaultTableNames() []string {
 		"IUserImportantItem",
 		"IUserLimitedOpen",
 		// "IUserLogin",
-		// "IUserLoginBonus",
+		"IUserLoginBonus",
 		"IUserMainQuestFlowStatus",
 		"IUserMainQuestMainFlowStatus",
 		"IUserMainQuestProgressStatus",
