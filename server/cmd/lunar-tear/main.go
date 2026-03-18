@@ -130,6 +130,7 @@ func main() {
 	pb.RegisterQuestServiceServer(grpcServer, service.NewQuestServiceServer(userStore, questEngine))
 	pb.RegisterNotificationServiceServer(grpcServer, service.NewNotificationServiceServer(userStore))
 	pb.RegisterCageOrnamentServiceServer(grpcServer, service.NewCageOrnamentServiceServer(userStore, cageOrnamentCatalog))
+	pb.RegisterDeckServiceServer(grpcServer, service.NewDeckServiceServer(userStore))
 
 	reflection.Register(grpcServer)
 

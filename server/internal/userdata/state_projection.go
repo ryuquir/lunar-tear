@@ -104,6 +104,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userWeaponJSON, _ := encodeJSONMaps(sortedWeaponRecords(user)...)
 	userWeaponStoryJSON, _ := encodeJSONMaps(sortedWeaponStoryRecords(user)...)
 	userCompanionJSON, _ := encodeJSONMaps(sortedCompanionRecords(user)...)
+	userThoughtJSON, _ := encodeJSONMaps(sortedThoughtRecords(user)...)
 	userDeckCharacterJSON, _ := encodeJSONMaps(sortedDeckCharacterRecords(user)...)
 	userDeckJSON, _ := encodeJSONMaps(sortedDeckRecords(user)...)
 	userQuestJSON, _ := encodeJSONMaps(sortedQuestRecords(user)...)
@@ -115,6 +116,10 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userGimmickUnlockJSON, _ := encodeJSONMaps(sortedGimmickUnlockRecords(user)...)
 	userMaterialJSON, _ := encodeJSONMaps(sortedMaterialRecords(user)...)
 	userConsumableItemJSON, _ := encodeJSONMaps(sortedConsumableItemRecords(user)...)
+	userPartsJSON, _ := encodeJSONMaps(sortedPartsRecords(user)...)
+	userImportantItemJSON, _ := encodeJSONMaps(sortedImportantItemRecords(user)...)
+	userCostumeActiveSkillJSON, _ := encodeJSONMaps(sortedCostumeActiveSkillRecords(user)...)
+	userDeckTypeNoteJSON, _ := encodeJSONMaps(sortedDeckTypeNoteRecords(user)...)
 
 	return map[string]string{
 		"IUser":                        userJSON,
@@ -127,6 +132,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserWeapon":                  userWeaponJSON,
 		"IUserWeaponStory":             userWeaponStoryJSON,
 		"IUserCompanion":               userCompanionJSON,
+		"IUserThought":                 userThoughtJSON,
 		"IUserDeckCharacter":           userDeckCharacterJSON,
 		"IUserDeck":                    userDeckJSON,
 		"IUserLogin":                   userLoginJSON,
@@ -145,6 +151,32 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserGimmickUnlock":           userGimmickUnlockJSON,
 		"IUserMaterial":                userMaterialJSON,
 		"IUserConsumableItem":          userConsumableItemJSON,
+		"IUserParts":                   userPartsJSON,
+		"IUserImportantItem":           userImportantItemJSON,
+
+		// Deck-related tables needed by DeckOrganizationCache.SetupCache.
+		// Empty for now (no server-side state), but must exist so the client's
+		// MemoryDatabase has non-null table references during diff application.
+		"IUserDeckPartsGroup":                  "[]",
+		"IUserDeckSubWeaponGroup":              "[]",
+		"IUserDeckCharacterDressupCostume":     "[]",
+		"IUserDeckTypeNote":                    userDeckTypeNoteJSON,
+		"IUserDeckLimitContentRestricted":      "[]",
+
+		// Costume sub-tables accessed by CreateDataOutgameCostume.
+		"IUserCostumeActiveSkill":              userCostumeActiveSkillJSON,
+		"IUserCostumeAwakenStatusUp":           "[]",
+		"IUserCostumeLevelBonusReleaseStatus":  "[]",
+		"IUserCostumeLotteryEffect":            "[]",
+		"IUserCostumeLotteryEffectAbility":     "[]",
+		"IUserCostumeLotteryEffectStatusUp":    "[]",
+		"IUserCostumeLotteryEffectPending":     "[]",
+
+		// Parts/memory sub-tables.
+		"IUserPartsGroupNote":                  "[]",
+		"IUserPartsPreset":                     "[]",
+		"IUserPartsPresetTag":                  "[]",
+		"IUserPartsStatusSub":                  "[]",
 	}
 }
 
@@ -171,6 +203,8 @@ func FirstEntranceClientTableMap(user store.UserState) map[string]string {
 		"IUserGimmickUnlock",
 		"IUserMaterial",
 		"IUserConsumableItem",
+		"IUserParts",
+		"IUserImportantItem",
 	} {
 		tables[table] = "[]"
 	}
@@ -334,6 +368,22 @@ func sortedCompanionRecords(user store.UserState) []map[string]any {
 			"companionId":         row.CompanionId,
 			"headupDisplayViewId": row.HeadupDisplayViewId,
 			"level":               row.Level,
+			"acquisitionDatetime": row.AcquisitionDatetime,
+			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedThoughtRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.Thoughts)
+	records := make([]map[string]any, 0, len(keys))
+	for _, key := range keys {
+		row := user.Thoughts[key]
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"userThoughtUuid":     row.UserThoughtUuid,
+			"thoughtId":           row.ThoughtId,
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"latestVersion":       row.LatestVersion,
 		})
@@ -606,6 +656,80 @@ func sortedConsumableItemRecords(user store.UserState) []map[string]any {
 			"count":                    user.ConsumableItems[int32(id)],
 			"firstAcquisitionDatetime": nowMillis,
 			"latestVersion":            nowMillis,
+		})
+	}
+	return records
+}
+
+func sortedPartsRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.Parts)
+	records := make([]map[string]any, 0, len(keys))
+	for _, key := range keys {
+		row := user.Parts[key]
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"userPartsUuid":       row.UserPartsUuid,
+			"partsId":             row.PartsId,
+			"level":               row.Level,
+			"acquisitionDatetime": row.AcquisitionDatetime,
+			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedImportantItemRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.ImportantItems))
+	for id := range user.ImportantItems {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	nowMillis := time.Now().UnixMilli()
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":                   user.UserId,
+			"importantItemId":          int32(id),
+			"count":                    user.ImportantItems[int32(id)],
+			"firstAcquisitionDatetime": nowMillis,
+			"latestVersion":            nowMillis,
+		})
+	}
+	return records
+}
+
+func sortedCostumeActiveSkillRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.CostumeActiveSkills)
+	records := make([]map[string]any, 0, len(keys))
+	for _, key := range keys {
+		row := user.CostumeActiveSkills[key]
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"userCostumeUuid":     row.UserCostumeUuid,
+			"level":               row.Level,
+			"acquisitionDatetime": row.AcquisitionDatetime,
+			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedDeckTypeNoteRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.DeckTypeNotes))
+	for id := range user.DeckTypeNotes {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.DeckTypeNotes[int32(id)]
+		records = append(records, map[string]any{
+			"userId":        user.UserId,
+			"deckType":      row.DeckType,
+			"maxDeckPower":  row.MaxDeckPower,
+			"latestVersion": row.LatestVersion,
 		})
 	}
 	return records

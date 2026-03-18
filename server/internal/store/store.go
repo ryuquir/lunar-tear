@@ -15,8 +15,8 @@ const (
 	defaultUUId   = "default-user"
 	defaultUserId = int64(1001)
 
-	starterCharacterId        = int32(1)
-	starterCostumeId          = int32(1)
+	starterCharacterId        = int32(1001)
+	starterCostumeId          = int32(24003)
 	starterWeaponId           = int32(100001)
 	starterCompanionId        = int32(1)
 	starterMissionId          = int32(1)
@@ -110,6 +110,7 @@ type UserState struct {
 	Costumes            map[string]CostumeState
 	Weapons             map[string]WeaponState
 	Companions          map[string]CompanionState
+	Thoughts            map[string]ThoughtState
 	DeckCharacters      map[string]DeckCharacterState
 	Decks               map[DeckKey]DeckState
 	Quests              map[int32]UserQuestState
@@ -120,6 +121,10 @@ type UserState struct {
 	CageOrnamentRewards map[int32]CageOrnamentRewardState
 	ConsumableItems     map[int32]int32
 	Materials           map[int32]int32
+	Parts               map[string]PartsState
+	ImportantItems      map[int32]int32
+	CostumeActiveSkills map[string]CostumeActiveSkillState
+	DeckTypeNotes       map[int32]DeckTypeNoteState
 }
 
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
@@ -132,6 +137,8 @@ func GrantPossession(user *UserState, possessionType model.PossessionType, posse
 		user.Gem.PaidGem += count
 	case model.PossessionTypeFreeGem:
 		user.Gem.FreeGem += count
+	case model.PossessionTypeImportantItem:
+		user.ImportantItems[possessionId] += count
 	default:
 		log.Printf("[GrantPossession] unhandled type=%d id=%d count=%d", possessionType, possessionId, count)
 	}
@@ -227,6 +234,13 @@ type CompanionState struct {
 	LatestVersion       int64
 }
 
+type ThoughtState struct {
+	UserThoughtUuid     string
+	ThoughtId           int32
+	AcquisitionDatetime int64
+	LatestVersion       int64
+}
+
 type DeckCharacterState struct {
 	UserDeckCharacterUuid string
 	UserCostumeUuid       string
@@ -251,6 +265,19 @@ type DeckState struct {
 	Name                    string
 	Power                   int32
 	LatestVersion           int64
+}
+
+type CostumeActiveSkillState struct {
+	UserCostumeUuid     string
+	Level               int32
+	AcquisitionDatetime int64
+	LatestVersion       int64
+}
+
+type DeckTypeNoteState struct {
+	DeckType      int32
+	MaxDeckPower  int32
+	LatestVersion int64
 }
 
 type TutorialProgressState struct {
@@ -384,6 +411,14 @@ type GimmickUnlockState struct {
 type CageOrnamentRewardState struct {
 	CageOrnamentId int32
 	LatestVersion  int64
+}
+
+type PartsState struct {
+	UserPartsUuid       string
+	PartsId             int32
+	Level               int32
+	AcquisitionDatetime int64
+	LatestVersion       int64
 }
 
 type NotificationState struct {
@@ -805,6 +840,24 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 		CageOrnamentRewards: make(map[int32]CageOrnamentRewardState),
 		ConsumableItems:     make(map[int32]int32),
 		Materials:           make(map[int32]int32),
+		Thoughts:            make(map[string]ThoughtState),
+		Parts:               make(map[string]PartsState),
+		ImportantItems:      make(map[int32]int32),
+		CostumeActiveSkills: map[string]CostumeActiveSkillState{
+			starterCostumeUUId: {
+				UserCostumeUuid:     starterCostumeUUId,
+				Level:               1,
+				AcquisitionDatetime: nowMillis,
+				LatestVersion:       0,
+			},
+		},
+		DeckTypeNotes: map[int32]DeckTypeNoteState{
+			starterQuestDeckType: {
+				DeckType:      starterQuestDeckType,
+				MaxDeckPower:  100,
+				LatestVersion: 0,
+			},
+		},
 	}
 	if bootstrapper != nil {
 		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
@@ -818,6 +871,7 @@ func (u UserState) clone() UserState {
 	out.Costumes = maps.Clone(u.Costumes)
 	out.Weapons = maps.Clone(u.Weapons)
 	out.Companions = maps.Clone(u.Companions)
+	out.Thoughts = maps.Clone(u.Thoughts)
 	out.DeckCharacters = maps.Clone(u.DeckCharacters)
 	out.Decks = maps.Clone(u.Decks)
 	out.Quests = maps.Clone(u.Quests)
@@ -833,6 +887,10 @@ func (u UserState) clone() UserState {
 	out.CageOrnamentRewards = maps.Clone(u.CageOrnamentRewards)
 	out.ConsumableItems = maps.Clone(u.ConsumableItems)
 	out.Materials = maps.Clone(u.Materials)
+	out.Parts = maps.Clone(u.Parts)
+	out.ImportantItems = maps.Clone(u.ImportantItems)
+	out.CostumeActiveSkills = maps.Clone(u.CostumeActiveSkills)
+	out.DeckTypeNotes = maps.Clone(u.DeckTypeNotes)
 	out.Gacha = GachaState{
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,

@@ -379,6 +379,7 @@ type Engine struct {
 	missionIdsByQuestId                map[int32][]int32
 	routeIdByQuestId                   map[int32]int32
 	sceneIdsByQuestId                  map[int32][]int32
+	orderedQuestIds                    []int32
 	firstClearRewardsByGroupId         map[int32][]questFirstClearRewardGroup
 	firstClearRewardSwitchesByQuestId  map[int32][]questFirstClearRewardSwitch
 	missionRewardsByMissionId          map[int32][]missionReward
@@ -535,6 +536,21 @@ func MakeEngine() *Engine {
 		}
 	}
 
+	sort.Slice(mainQuestChapters, func(i, j int) bool {
+		return mainQuestChapters[i].SortOrder < mainQuestChapters[j].SortOrder
+	})
+	sequencesByGroupId := make(map[int32][]mainQuestSequence)
+	for _, seq := range sequences {
+		sequencesByGroupId[seq.MainQuestSequenceId] = append(
+			sequencesByGroupId[seq.MainQuestSequenceId], seq,
+		)
+	}
+	for _, chapter := range mainQuestChapters {
+		for _, seq := range sequencesByGroupId[chapter.MainQuestSequenceGroupId] {
+			engine.orderedQuestIds = append(engine.orderedQuestIds, seq.QuestId)
+		}
+	}
+
 	for _, reward := range firstClearRewards {
 		engine.firstClearRewardsByGroupId[reward.QuestFirstClearRewardGroupId] = append(
 			engine.firstClearRewardsByGroupId[reward.QuestFirstClearRewardGroupId],
@@ -662,8 +678,36 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 	if !ok {
 		panic(fmt.Sprintf("unknown sceneId=%d for ApplyBootstrap", sceneId))
 	}
-	e.initQuestState(user, scene.QuestId)
-	e.HandleMainFlowSceneProgress(user, sceneId)
+	targetQuestId := scene.QuestId
+
+	for _, questId := range e.orderedQuestIds {
+		if questId == targetQuestId {
+			break
+		}
+
+		quest, ok := e.questById[questId]
+		if !ok {
+			continue
+		}
+
+		e.HandleQuestStart(user, questId, false, nowMillis)
+		if isMainQuestPlayable(quest) {
+			for _, sid := range e.sceneIdsByQuestId[questId] {
+				e.HandleMainFlowSceneProgress(user, sid)
+				e.HandleMainQuestSceneProgress(user, sid)
+			}
+			e.HandleQuestFinish(user, questId, nowMillis)
+		}
+	}
+
+	e.HandleQuestStart(user, targetQuestId, false, nowMillis)
+	for _, sid := range e.sceneIdsByQuestId[targetQuestId] {
+		e.HandleMainFlowSceneProgress(user, sid)
+		e.HandleMainQuestSceneProgress(user, sid)
+		if sid == sceneId {
+			break
+		}
+	}
 }
 
 func (e *Engine) HandleQuestRestart(user *store.UserState, questId int32, nowMillis int64) {
@@ -789,7 +833,11 @@ func (e *Engine) applyRewardPossession(user *store.UserState, possType model.Pos
 		e.grantWeapon(user, possId, nowMillis)
 	case model.PossessionTypeCompanion:
 		e.grantCompanion(user, possId, nowMillis)
-	case model.PossessionTypeMaterial, model.PossessionTypeConsumableItem:
+	case model.PossessionTypeParts:
+		e.grantParts(user, possId, nowMillis)
+	case model.PossessionTypeCostumeEnhanced:
+		e.grantCostume(user, possId, nowMillis)
+	case model.PossessionTypeMaterial, model.PossessionTypeConsumableItem, model.PossessionTypeImportantItem:
 		store.GrantPossession(user, possType, possId, count)
 	default:
 		log.Printf("[Engine] unsupported reward possession: type=%d id=%d count=%d", possType, possId, count)
@@ -806,6 +854,11 @@ func (e *Engine) grantCostume(user *store.UserState, costumeId int32, nowMillis 
 	user.Costumes[key] = store.CostumeState{
 		UserCostumeUuid:     key,
 		CostumeId:           costumeId,
+		Level:               1,
+		AcquisitionDatetime: nowMillis,
+	}
+	user.CostumeActiveSkills[key] = store.CostumeActiveSkillState{
+		UserCostumeUuid:     key,
 		Level:               1,
 		AcquisitionDatetime: nowMillis,
 	}
@@ -844,6 +897,21 @@ func (e *Engine) grantCompanion(user *store.UserState, companionId int32, nowMil
 	user.Companions[key] = store.CompanionState{
 		UserCompanionUuid:   key,
 		CompanionId:         companionId,
+		Level:               1,
+		AcquisitionDatetime: nowMillis,
+	}
+}
+
+func (e *Engine) grantParts(user *store.UserState, partsId int32, nowMillis int64) {
+	for _, row := range user.Parts {
+		if row.PartsId == partsId {
+			return
+		}
+	}
+	key := fmt.Sprintf("reward-parts-%d", partsId)
+	user.Parts[key] = store.PartsState{
+		UserPartsUuid:       key,
+		PartsId:             partsId,
 		Level:               1,
 		AcquisitionDatetime: nowMillis,
 	}
