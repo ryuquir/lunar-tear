@@ -120,6 +120,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userImportantItemJSON, _ := encodeJSONMaps(sortedImportantItemRecords(user)...)
 	userCostumeActiveSkillJSON, _ := encodeJSONMaps(sortedCostumeActiveSkillRecords(user)...)
 	userDeckTypeNoteJSON, _ := encodeJSONMaps(sortedDeckTypeNoteRecords(user)...)
+	userWeaponNoteJSON, _ := encodeJSONMaps(sortedWeaponNoteRecords(user)...)
 
 	return map[string]string{
 		"IUser":                        userJSON,
@@ -172,6 +173,12 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserCostumeLotteryEffectStatusUp":    "[]",
 		"IUserCostumeLotteryEffectPending":     "[]",
 
+		// Weapon sub-tables.
+		"IUserWeaponNote":                      userWeaponNoteJSON,
+		"IUserWeaponAbility":                   "[]",
+		"IUserWeaponSkill":                     "[]",
+		"IUserWeaponAwaken":                    "[]",
+
 		// Parts/memory sub-tables.
 		"IUserPartsGroupNote":                  "[]",
 		"IUserPartsPreset":                     "[]",
@@ -205,6 +212,10 @@ func FirstEntranceClientTableMap(user store.UserState) map[string]string {
 		"IUserConsumableItem",
 		"IUserParts",
 		"IUserImportantItem",
+		"IUserWeaponNote",
+		"IUserWeaponStory",
+		"IUserCostumeActiveSkill",
+		"IUserDeckTypeNote",
 	} {
 		tables[table] = "[]"
 	}
@@ -352,6 +363,27 @@ func sortedWeaponStoryRecords(user store.UserState) []map[string]any {
 			"weaponId":              row.WeaponId,
 			"releasedMaxStoryIndex": row.ReleasedMaxStoryIndex,
 			"latestVersion":         row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedWeaponNoteRecords(user store.UserState) []map[string]any {
+	weaponIds := make([]int32, 0, len(user.WeaponNotes))
+	for id := range user.WeaponNotes {
+		weaponIds = append(weaponIds, id)
+	}
+	sort.Slice(weaponIds, func(i, j int) bool { return weaponIds[i] < weaponIds[j] })
+	records := make([]map[string]any, 0, len(weaponIds))
+	for _, id := range weaponIds {
+		row := user.WeaponNotes[id]
+		records = append(records, map[string]any{
+			"userId":                   user.UserId,
+			"weaponId":                 row.WeaponId,
+			"maxLevel":                 row.MaxLevel,
+			"maxLimitBreakCount":       row.MaxLimitBreakCount,
+			"firstAcquisitionDatetime": row.FirstAcquisitionDatetime,
+			"latestVersion":            row.LatestVersion,
 		})
 	}
 	return records

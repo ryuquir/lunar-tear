@@ -256,6 +256,18 @@ type weaponStoryReleaseCondition struct {
 	WeaponStoryReleaseConditionOperationGroupId int32                           `json:"WeaponStoryReleaseConditionOperationGroupId"`
 }
 
+type sceneGrant struct {
+	QuestSceneId   int32                `json:"QuestSceneId"`
+	PossessionType model.PossessionType `json:"PossessionType"`
+	PossessionId   int32                `json:"PossessionId"`
+	Count          int32                `json:"Count"`
+}
+
+type costumeMaster struct {
+	CostumeId   int32 `json:"CostumeId"`
+	CharacterId int32 `json:"CharacterId"`
+}
+
 type weaponMaster struct {
 	WeaponId                           int32 `json:"WeaponId"`
 	WeaponStoryReleaseConditionGroupId int32 `json:"WeaponStoryReleaseConditionGroupId"`
@@ -386,6 +398,8 @@ type Engine struct {
 	weaponById                         map[int32]weaponMaster
 	weaponIdsByReleaseConditionGroupId map[int32][]int32
 	releaseConditionsByGroupId         map[int32][]weaponStoryReleaseCondition
+	costumeById                        map[int32]costumeMaster
+	sceneGrantsBySceneId               map[int32][]sceneGrant
 }
 
 func MakeEngine() *Engine {
@@ -480,6 +494,16 @@ func MakeEngine() *Engine {
 		panic(err)
 	}
 
+	costumeMasters, err := utils.ReadJSON[costumeMaster]("EntityMCostumeTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	sceneGrants, err := utils.ReadJSON[sceneGrant]("EntityMUserQuestSceneGrantPossessionTable.json")
+	if err != nil {
+		panic(err)
+	}
+
 	engine := &Engine{
 		sceneById:                          make(map[int32]questScene, len(scenes)),
 		missionById:                        make(map[int32]mission, len(missions)),
@@ -493,6 +517,8 @@ func MakeEngine() *Engine {
 		weaponById:                         make(map[int32]weaponMaster, len(weapons)),
 		weaponIdsByReleaseConditionGroupId: make(map[int32][]int32),
 		releaseConditionsByGroupId:         make(map[int32][]weaponStoryReleaseCondition),
+		costumeById:                        make(map[int32]costumeMaster, len(costumeMasters)),
+		sceneGrantsBySceneId:               make(map[int32][]sceneGrant),
 	}
 
 	for _, scene := range scenes {
@@ -589,6 +615,17 @@ func MakeEngine() *Engine {
 		)
 	}
 
+	for _, cm := range costumeMasters {
+		engine.costumeById[cm.CostumeId] = cm
+	}
+
+	for _, sg := range sceneGrants {
+		engine.sceneGrantsBySceneId[sg.QuestSceneId] = append(
+			engine.sceneGrantsBySceneId[sg.QuestSceneId],
+			sg,
+		)
+	}
+
 	return engine
 }
 
@@ -648,7 +685,17 @@ func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattle
 	user.Quests[questId] = questState
 }
 
-func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId int32) {
+func (e *Engine) applySceneGrants(user *store.UserState, questSceneId int32, nowMillis int64) {
+	grants, ok := e.sceneGrantsBySceneId[questSceneId]
+	if !ok {
+		return
+	}
+	for _, g := range grants {
+		e.applyRewardPossession(user, g.PossessionType, g.PossessionId, g.Count, nowMillis)
+	}
+}
+
+func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
 	scene, ok := e.sceneById[questSceneId]
 	if !ok {
 		panic(fmt.Sprintf("unknown sceneId=%d for HandleMainFlowSceneProgress", questSceneId))
@@ -668,6 +715,8 @@ func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId
 		panic(fmt.Sprintf("unknown questId=%d for HandleMainFlowSceneProgress setting currentMainQuestRouteId", quest.QuestId))
 	}
 	user.MainQuest.CurrentMainQuestRouteId = routeId
+
+	e.applySceneGrants(user, questSceneId, nowMillis)
 }
 
 func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis int64) {
@@ -691,18 +740,18 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 		}
 
 		e.HandleQuestStart(user, questId, false, nowMillis)
+		for _, sid := range e.sceneIdsByQuestId[questId] {
+			e.HandleMainFlowSceneProgress(user, sid, nowMillis)
+			e.HandleMainQuestSceneProgress(user, sid)
+		}
 		if isMainQuestPlayable(quest) {
-			for _, sid := range e.sceneIdsByQuestId[questId] {
-				e.HandleMainFlowSceneProgress(user, sid)
-				e.HandleMainQuestSceneProgress(user, sid)
-			}
 			e.HandleQuestFinish(user, questId, nowMillis)
 		}
 	}
 
 	e.HandleQuestStart(user, targetQuestId, false, nowMillis)
 	for _, sid := range e.sceneIdsByQuestId[targetQuestId] {
-		e.HandleMainFlowSceneProgress(user, sid)
+		e.HandleMainFlowSceneProgress(user, sid, nowMillis)
 		e.HandleMainQuestSceneProgress(user, sid)
 		if sid == sceneId {
 			break
@@ -850,6 +899,14 @@ func (e *Engine) grantCostume(user *store.UserState, costumeId int32, nowMillis 
 			return
 		}
 	}
+	if cm, ok := e.costumeById[costumeId]; ok {
+		if _, exists := user.Characters[cm.CharacterId]; !exists {
+			user.Characters[cm.CharacterId] = store.CharacterState{
+				CharacterId: cm.CharacterId,
+				Level:       1,
+			}
+		}
+	}
 	key := fmt.Sprintf("reward-costume-%d", costumeId)
 	user.Costumes[key] = store.CostumeState{
 		UserCostumeUuid:     key,
@@ -876,6 +933,15 @@ func (e *Engine) grantWeapon(user *store.UserState, weaponId int32, nowMillis in
 		WeaponId:            weaponId,
 		Level:               1,
 		AcquisitionDatetime: nowMillis,
+	}
+	if _, exists := user.WeaponNotes[weaponId]; !exists {
+		user.WeaponNotes[weaponId] = store.WeaponNoteState{
+			WeaponId:                 weaponId,
+			MaxLevel:                 1,
+			MaxLimitBreakCount:       0,
+			FirstAcquisitionDatetime: nowMillis,
+			LatestVersion:            nowMillis,
+		}
 	}
 	weapon, ok := e.weaponById[weaponId]
 	if ok && weapon.WeaponStoryReleaseConditionGroupId != 0 {

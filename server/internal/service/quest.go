@@ -42,7 +42,7 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		s.engine.HandleMainFlowSceneProgress(user, req.QuestSceneId)
+		s.engine.HandleMainFlowSceneProgress(user, req.QuestSceneId, time.Now().UnixMilli())
 	})
 	logQuestState("UpdateMainFlowSceneProgress state", user)
 
@@ -52,6 +52,13 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 			"IUserMainQuestMainFlowStatus",
 			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
+			"IUserCharacter",
+			"IUserCostume",
+			"IUserCostumeActiveSkill",
+			"IUserWeapon",
+			"IUserWeaponNote",
+			"IUserWeaponStory",
+			"IUserCompanion",
 		}),
 	}, nil
 }
@@ -155,7 +162,9 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 			"IUserGem",
 			"IUserCharacter",
 			"IUserCostume",
+			"IUserCostumeActiveSkill",
 			"IUserWeapon",
+			"IUserWeaponNote",
 			"IUserWeaponStory",
 			"IUserCompanion",
 		}),

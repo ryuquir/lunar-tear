@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"maps"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -15,23 +16,16 @@ const (
 	defaultUUId   = "default-user"
 	defaultUserId = int64(1001)
 
-	starterCharacterId        = int32(1001)
-	starterCostumeId          = int32(24003)
-	starterWeaponId           = int32(100001)
 	starterCompanionId        = int32(1)
 	starterMissionId          = int32(1)
 	starterMainQuestRouteId   = int32(1)
 	starterMainQuestSeasonId  = int32(1)
-	starterQuestDeckType      = int32(1)
 	missionInProgress         = int32(1)
 	defaultGiftPossessionType = int32(12) // FREE_GEM
 	defaultGiftCount          = int32(300)
 
-	starterCostumeUUId       = "starter-costume-0001"
-	starterWeaponUUId        = "starter-weapon-0001"
-	starterCompanionUUId     = "starter-companion-0001"
-	starterDeckCharacterUUId = "starter-deck-character-0001"
-	defaultGiftUUIdPrefix    = "default-gift"
+	starterCompanionUUId  = "starter-companion-0001"
+	defaultGiftUUIdPrefix = "default-gift"
 
 	defaultRegisteredName = "Un-regist User Name"
 	startedProfileName    = "Lunar Tear"
@@ -125,6 +119,7 @@ type UserState struct {
 	ImportantItems      map[int32]int32
 	CostumeActiveSkills map[string]CostumeActiveSkillState
 	DeckTypeNotes       map[int32]DeckTypeNoteState
+	WeaponNotes         map[int32]WeaponNoteState
 }
 
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
@@ -144,10 +139,66 @@ func GrantPossession(user *UserState, possessionType model.PossessionType, posse
 	}
 }
 
+func EnsureDefaultDeck(user *UserState, nowMillis int64) {
+	if len(user.Costumes) == 0 || len(user.Decks) > 0 {
+		return
+	}
+
+	costumeUuid := firstSortedKey(user.Costumes)
+	weaponUuid := firstSortedKey(user.Weapons)
+	companionUuid := firstSortedKey(user.Companions)
+
+	dcUuid := "default-deck-character-0001"
+	user.DeckCharacters[dcUuid] = DeckCharacterState{
+		UserDeckCharacterUuid: dcUuid,
+		UserCostumeUuid:       costumeUuid,
+		MainUserWeaponUuid:    weaponUuid,
+		UserCompanionUuid:     companionUuid,
+		Power:                 100,
+		LatestVersion:         nowMillis,
+	}
+	user.Decks[DeckKey{DeckType: 1, UserDeckNumber: 1}] = DeckState{
+		DeckType:                1,
+		UserDeckNumber:          1,
+		UserDeckCharacterUuid01: dcUuid,
+		Name:                    "Deck 1",
+		Power:                   100,
+		LatestVersion:           nowMillis,
+	}
+
+	if _, exists := user.DeckTypeNotes[int32(1)]; !exists {
+		user.DeckTypeNotes[int32(1)] = DeckTypeNoteState{
+			DeckType:      1,
+			MaxDeckPower:  100,
+			LatestVersion: nowMillis,
+		}
+	}
+}
+
+func firstSortedKey[V any](m map[string]V) string {
+	if len(m) == 0 {
+		return ""
+	}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys[0]
+}
+
 type WeaponStoryState struct {
 	WeaponId              int32
 	ReleasedMaxStoryIndex int32
 	LatestVersion         int64
+}
+
+type WeaponNoteState struct {
+	WeaponId                 int32
+	MaxLevel                 int32
+	MaxLimitBreakCount       int32
+	FirstAcquisitionDatetime int64
+	LatestVersion            int64
 }
 
 type UserSettingState struct {
@@ -746,39 +797,9 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 			FriendRequestReceiveCount: 0,
 			IsExistUnreadInformation:  false,
 		},
-		Characters: map[int32]CharacterState{
-			starterCharacterId: {
-				CharacterId:   starterCharacterId,
-				Level:         1,
-				Exp:           0,
-				LatestVersion: 0,
-			},
-		},
-		Costumes: map[string]CostumeState{
-			starterCostumeUUId: {
-				UserCostumeUuid:     starterCostumeUUId,
-				CostumeId:           starterCostumeId,
-				LimitBreakCount:     0,
-				Level:               1,
-				Exp:                 0,
-				HeadupDisplayViewId: 0,
-				AcquisitionDatetime: nowMillis,
-				AwakenCount:         0,
-				LatestVersion:       0,
-			},
-		},
-		Weapons: map[string]WeaponState{
-			starterWeaponUUId: {
-				UserWeaponUuid:      starterWeaponUUId,
-				WeaponId:            starterWeaponId,
-				Level:               1,
-				Exp:                 0,
-				LimitBreakCount:     0,
-				IsProtected:         false,
-				AcquisitionDatetime: nowMillis,
-				LatestVersion:       0,
-			},
-		},
+		Characters:     make(map[int32]CharacterState),
+		Costumes:       make(map[string]CostumeState),
+		Weapons:        make(map[string]WeaponState),
 		Companions: map[string]CompanionState{
 			starterCompanionUUId: {
 				UserCompanionUuid:   starterCompanionUUId,
@@ -789,38 +810,11 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 				LatestVersion:       0,
 			},
 		},
-		DeckCharacters: map[string]DeckCharacterState{
-			starterDeckCharacterUUId: {
-				UserDeckCharacterUuid: starterDeckCharacterUUId,
-				UserCostumeUuid:       starterCostumeUUId,
-				MainUserWeaponUuid:    starterWeaponUUId,
-				UserCompanionUuid:     starterCompanionUUId,
-				Power:                 100,
-				UserThoughtUuid:       "",
-				LatestVersion:         0,
-			},
-		},
-		Decks: map[DeckKey]DeckState{
-			{DeckType: starterQuestDeckType, UserDeckNumber: 1}: {
-				DeckType:                starterQuestDeckType,
-				UserDeckNumber:          1,
-				UserDeckCharacterUuid01: starterDeckCharacterUUId,
-				UserDeckCharacterUuid02: "",
-				UserDeckCharacterUuid03: "",
-				Name:                    "Deck 1",
-				Power:                   100,
-				LatestVersion:           0,
-			},
-		},
-		Quests:        map[int32]UserQuestState{},
-		QuestMissions: map[QuestMissionKey]UserQuestMissionState{},
-		WeaponStories: map[int32]WeaponStoryState{
-			starterWeaponId: {
-				WeaponId:              starterWeaponId,
-				ReleasedMaxStoryIndex: 1,
-				LatestVersion:         nowMillis,
-			},
-		},
+		DeckCharacters: make(map[string]DeckCharacterState),
+		Decks:          make(map[DeckKey]DeckState),
+		Quests:         make(map[int32]UserQuestState),
+		QuestMissions:  make(map[QuestMissionKey]UserQuestMissionState),
+		WeaponStories:  make(map[int32]WeaponStoryState),
 		Missions: map[int32]UserMissionState{
 			starterMissionId: {
 				MissionId:                 starterMissionId,
@@ -843,25 +837,14 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 		Thoughts:            make(map[string]ThoughtState),
 		Parts:               make(map[string]PartsState),
 		ImportantItems:      make(map[int32]int32),
-		CostumeActiveSkills: map[string]CostumeActiveSkillState{
-			starterCostumeUUId: {
-				UserCostumeUuid:     starterCostumeUUId,
-				Level:               1,
-				AcquisitionDatetime: nowMillis,
-				LatestVersion:       0,
-			},
-		},
-		DeckTypeNotes: map[int32]DeckTypeNoteState{
-			starterQuestDeckType: {
-				DeckType:      starterQuestDeckType,
-				MaxDeckPower:  100,
-				LatestVersion: 0,
-			},
-		},
+		CostumeActiveSkills: make(map[string]CostumeActiveSkillState),
+		DeckTypeNotes:       make(map[int32]DeckTypeNoteState),
+		WeaponNotes:         make(map[int32]WeaponNoteState),
 	}
 	if bootstrapper != nil {
 		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
 	}
+	EnsureDefaultDeck(user, nowMillis)
 	return user
 }
 
@@ -891,6 +874,7 @@ func (u UserState) clone() UserState {
 	out.ImportantItems = maps.Clone(u.ImportantItems)
 	out.CostumeActiveSkills = maps.Clone(u.CostumeActiveSkills)
 	out.DeckTypeNotes = maps.Clone(u.DeckTypeNotes)
+	out.WeaponNotes = maps.Clone(u.WeaponNotes)
 	out.Gacha = GachaState{
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,

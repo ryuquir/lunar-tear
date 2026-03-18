@@ -25,6 +25,10 @@ var startedGameStartTables = []string{
 	"IUserQuest",
 	"IUserQuestMission",
 	"IUserTutorialProgress",
+	"IUserWeaponNote",
+	"IUserWeaponStory",
+	"IUserCostumeActiveSkill",
+	"IUserDeckTypeNote",
 }
 
 var gimmickDiffTables = []string{
