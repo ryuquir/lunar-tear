@@ -122,6 +122,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userDeckTypeNoteJSON, _ := encodeJSONMaps(sortedDeckTypeNoteRecords(user)...)
 	userDeckSubWeaponGroupJSON, _ := encodeJSONMaps(sortedDeckSubWeaponGroupRecords(user)...)
 	userWeaponNoteJSON, _ := encodeJSONMaps(sortedWeaponNoteRecords(user)...)
+	userNaviCutInJSON, _ := encodeJSONMaps(sortedNaviCutInRecords(user)...)
 
 	return map[string]string{
 		"IUser":                        userJSON,
@@ -185,6 +186,8 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserPartsPreset":    "[]",
 		"IUserPartsPresetTag": "[]",
 		"IUserPartsStatusSub": "[]",
+
+		"IUserNaviCutIn": userNaviCutInJSON,
 	}
 }
 
@@ -385,6 +388,22 @@ func sortedWeaponNoteRecords(user store.UserState) []map[string]any {
 			"maxLimitBreakCount":       row.MaxLimitBreakCount,
 			"firstAcquisitionDatetime": row.FirstAcquisitionDatetime,
 			"latestVersion":            row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedNaviCutInRecords(user store.UserState) []map[string]any {
+	ids := make([]int32, 0, len(user.NaviCutInPlayed))
+	for id := range user.NaviCutInPlayed {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":      user.UserId,
+			"naviCutInId": id,
 		})
 	}
 	return records

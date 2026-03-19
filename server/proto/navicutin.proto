@@ -6,7 +6,7 @@ import "proto/data.proto";
 
 package apb.api.navicutin;
 
-service NavicutinService {
+service NaviCutInService {
 	rpc RegisterPlayed (RegisterPlayedRequest) returns (RegisterPlayedResponse);
 }
 

@@ -119,6 +119,7 @@ type UserState struct {
 	DeckTypeNotes       map[int32]DeckTypeNoteState
 	WeaponNotes         map[int32]WeaponNoteState
 	DeckSubWeapons      map[string][]string // userDeckCharacterUuid -> ordered sub-weapon UUIDs
+	NaviCutInPlayed     map[int32]bool
 }
 
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
@@ -839,6 +840,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 		CostumeActiveSkills: make(map[string]CostumeActiveSkillState),
 		DeckTypeNotes:       make(map[int32]DeckTypeNoteState),
 		WeaponNotes:         make(map[int32]WeaponNoteState),
+		NaviCutInPlayed:     make(map[int32]bool),
 	}
 	if bootstrapper != nil {
 		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
@@ -875,6 +877,7 @@ func (u UserState) clone() UserState {
 	out.CostumeActiveSkills = maps.Clone(u.CostumeActiveSkills)
 	out.DeckTypeNotes = maps.Clone(u.DeckTypeNotes)
 	out.WeaponNotes = maps.Clone(u.WeaponNotes)
+	out.NaviCutInPlayed = maps.Clone(u.NaviCutInPlayed)
 	out.Gacha = GachaState{
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,

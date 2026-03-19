@@ -134,6 +134,7 @@ func main() {
 	pb.RegisterCageOrnamentServiceServer(grpcServer, service.NewCageOrnamentServiceServer(userStore, cageOrnamentCatalog))
 	pb.RegisterDeckServiceServer(grpcServer, service.NewDeckServiceServer(userStore))
 	pb.RegisterLoginBonusServiceServer(grpcServer, service.NewLoginBonusServiceServer(userStore, loginBonusCatalog))
+	pb.RegisterNaviCutInServiceServer(grpcServer, service.NewNaviCutInServiceServer(userStore))
 
 	reflection.Register(grpcServer)
 
