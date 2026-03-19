@@ -19,6 +19,23 @@ func NewDeckServiceServer(userStore *store.Store) *DeckServiceServer {
 	return &DeckServiceServer{store: userStore}
 }
 
+func (s *DeckServiceServer) UpdateName(ctx context.Context, req *pb.UpdateNameRequest) (*pb.UpdateNameResponse, error) {
+	log.Printf("[DeckService] UpdateName: deckType=%d deckNumber=%d name=%q", req.DeckType, req.UserDeckNumber, req.Name)
+	userId := currentUserId(ctx, s.store)
+
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		deckKey := store.DeckKey{DeckType: req.DeckType, UserDeckNumber: req.UserDeckNumber}
+		deck := user.Decks[deckKey]
+		deck.Name = req.Name
+		user.Decks[deckKey] = deck
+	})
+
+	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{"IUserDeck"})
+	return &pb.UpdateNameResponse{
+		DiffUserData: userdata.BuildDiffFromTables(result),
+	}, nil
+}
+
 func (s *DeckServiceServer) RefreshDeckPower(ctx context.Context, req *pb.RefreshDeckPowerRequest) (*pb.RefreshDeckPowerResponse, error) {
 	log.Printf("[DeckService] RefreshDeckPower: deckType=%d deckNumber=%d", req.DeckType, req.UserDeckNumber)
 	userId := currentUserId(ctx, s.store)
@@ -99,6 +116,9 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 	}
 	userId := currentUserId(ctx, s.store)
 
+	oldUser, _ := s.store.SnapshotUser(userId)
+	oldSubWeapons := userdata.DeckSubWeaponRecords(oldUser)
+
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		if req.Deck == nil {
 			return
@@ -106,11 +126,18 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 		store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), time.Now().UnixMilli())
 	})
 
+	newSubWeapons := userdata.DeckSubWeaponRecords(user)
+	subWeaponDeleteKeys := userdata.ComputeDeleteKeys(oldSubWeapons, newSubWeapons,
+		[]string{"userId", "userDeckCharacterUuid", "sortOrder"})
+
 	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
 		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup",
 	})
-	log.Printf("[DeckService] ReplaceDeck response IUserDeckSubWeaponGroup: %s", result["IUserDeckSubWeaponGroup"])
+	log.Printf("[DeckService] ReplaceDeck response IUserDeckSubWeaponGroup: %s deleteKeys: %s",
+		result["IUserDeckSubWeaponGroup"], subWeaponDeleteKeys)
 	return &pb.ReplaceDeckResponse{
-		DiffUserData: userdata.BuildDiffFromTables(result),
+		DiffUserData: userdata.NewDiffSet(result).
+			WithDeletes("IUserDeckSubWeaponGroup", subWeaponDeleteKeys).
+			Build(),
 	}, nil
 }

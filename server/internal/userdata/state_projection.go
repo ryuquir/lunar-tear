@@ -784,6 +784,10 @@ func sortedDeckTypeNoteRecords(user store.UserState) []map[string]any {
 	return records
 }
 
+func DeckSubWeaponRecords(user store.UserState) []map[string]any {
+	return sortedDeckSubWeaponGroupRecords(user)
+}
+
 func sortedDeckSubWeaponGroupRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.DeckSubWeapons)
 	records := make([]map[string]any, 0)
