@@ -566,10 +566,12 @@ func MakeEngine() *Engine {
 
 	for _, scene := range scenes {
 		engine.sceneById[scene.QuestSceneId] = scene
-		engine.sceneIdsByQuestId[scene.QuestId] = append(
-			engine.sceneIdsByQuestId[scene.QuestId],
-			scene.QuestSceneId,
-		)
+		if scene.QuestSceneId < 999000000 {
+			engine.sceneIdsByQuestId[scene.QuestId] = append(
+				engine.sceneIdsByQuestId[scene.QuestId],
+				scene.QuestSceneId,
+			)
+		}
 	}
 
 	for _, mission := range missions {
@@ -802,10 +804,8 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 		}
 	}
 
-	e.HandleQuestStart(user, targetQuestId, false, nowMillis)
 	for _, sid := range e.sceneIdsByQuestId[targetQuestId] {
 		e.HandleMainFlowSceneProgress(user, sid, nowMillis)
-		e.HandleMainQuestSceneProgress(user, sid)
 		if sid == sceneId {
 			break
 		}
