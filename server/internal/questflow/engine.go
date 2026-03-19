@@ -804,6 +804,7 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 		}
 	}
 
+	e.initQuestState(user, targetQuestId)
 	for _, sid := range e.sceneIdsByQuestId[targetQuestId] {
 		e.HandleMainFlowSceneProgress(user, sid, nowMillis)
 		if sid == sceneId {
