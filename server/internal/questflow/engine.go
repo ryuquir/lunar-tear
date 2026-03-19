@@ -266,11 +266,23 @@ type sceneGrant struct {
 type costumeMaster struct {
 	CostumeId   int32 `json:"CostumeId"`
 	CharacterId int32 `json:"CharacterId"`
+	RarityType  int32 `json:"RarityType"`
+}
+
+type costumeRarityRow struct {
+	RarityType                                  int32 `json:"RarityType"`
+	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
 }
 
 type weaponMaster struct {
 	WeaponId                           int32 `json:"WeaponId"`
 	WeaponStoryReleaseConditionGroupId int32 `json:"WeaponStoryReleaseConditionGroupId"`
+}
+
+type numericalParameterMapRow struct {
+	NumericalParameterMapId int32 `json:"NumericalParameterMapId"`
+	ParameterKey            int32 `json:"ParameterKey"`
+	ParameterValue          int32 `json:"ParameterValue"`
 }
 
 type RewardGrant struct {
@@ -400,6 +412,9 @@ type Engine struct {
 	releaseConditionsByGroupId         map[int32][]weaponStoryReleaseCondition
 	costumeById                        map[int32]costumeMaster
 	sceneGrantsBySceneId               map[int32][]sceneGrant
+	userExpThresholds                  []int32
+	characterExpThresholds             []int32
+	costumeExpByRarity                 map[int32][]int32
 }
 
 func MakeEngine() *Engine {
@@ -499,9 +514,34 @@ func MakeEngine() *Engine {
 		panic(err)
 	}
 
+	costumeRarities, err := utils.ReadJSON[costumeRarityRow]("EntityMCostumeRarityTable.json")
+	if err != nil {
+		panic(err)
+	}
+
 	sceneGrants, err := utils.ReadJSON[sceneGrant]("EntityMUserQuestSceneGrantPossessionTable.json")
 	if err != nil {
 		panic(err)
+	}
+
+	paramMapRows, err := utils.ReadJSON[numericalParameterMapRow]("EntityMNumericalParameterMapTable.json")
+	if err != nil {
+		panic(err)
+	}
+	buildExpThresholds := func(mapId int32) []int32 {
+		maxKey := int32(0)
+		for _, r := range paramMapRows {
+			if r.NumericalParameterMapId == mapId && r.ParameterKey > maxKey {
+				maxKey = r.ParameterKey
+			}
+		}
+		thresholds := make([]int32, maxKey+1)
+		for _, r := range paramMapRows {
+			if r.NumericalParameterMapId == mapId {
+				thresholds[r.ParameterKey] = r.ParameterValue
+			}
+		}
+		return thresholds
 	}
 
 	engine := &Engine{
@@ -519,6 +559,9 @@ func MakeEngine() *Engine {
 		releaseConditionsByGroupId:         make(map[int32][]weaponStoryReleaseCondition),
 		costumeById:                        make(map[int32]costumeMaster, len(costumeMasters)),
 		sceneGrantsBySceneId:               make(map[int32][]sceneGrant),
+		userExpThresholds:                  buildExpThresholds(1),
+		characterExpThresholds:             buildExpThresholds(31),
+		costumeExpByRarity:                 buildCostumeExpByRarity(costumeRarities, buildExpThresholds),
 	}
 
 	for _, scene := range scenes {
@@ -728,10 +771,14 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 		panic(fmt.Sprintf("unknown sceneId=%d for ApplyBootstrap", sceneId))
 	}
 	targetQuestId := scene.QuestId
+	targetRouteId := e.routeIdByQuestId[targetQuestId]
 
 	for _, questId := range e.orderedQuestIds {
 		if questId == targetQuestId {
 			break
+		}
+		if e.routeIdByQuestId[questId] != targetRouteId {
+			continue
 		}
 
 		quest, ok := e.questById[questId]
@@ -817,7 +864,6 @@ func (e *Engine) HandleMainQuestSceneProgress(user *store.UserState, questSceneI
 		if scene.QuestResultType == QuestResultTypeHalfResult {
 			nowMillis := time.Now().UnixMilli()
 			e.clearQuestMissions(user, quest.QuestId, nowMillis)
-			e.applyExpRewards(user, quest.QuestId, nowMillis)
 		}
 		if scene.QuestResultType == QuestResultTypeFullResult {
 			questState.QuestStateType = store.UserQuestStateTypeCleared
@@ -833,6 +879,28 @@ func (e *Engine) HandleMainQuestSceneProgress(user *store.UserState, questSceneI
 	}
 }
 
+func buildCostumeExpByRarity(rarities []costumeRarityRow, buildThresholds func(int32) []int32) map[int32][]int32 {
+	m := make(map[int32][]int32, len(rarities))
+	for _, r := range rarities {
+		if _, ok := m[r.RarityType]; !ok {
+			m[r.RarityType] = buildThresholds(r.RequiredExpForLevelUpNumericalParameterMapId)
+		}
+	}
+	return m
+}
+
+func levelFromExp(exp int32, thresholds []int32) int32 {
+	level := int32(1)
+	for lvl := 1; lvl < len(thresholds); lvl++ {
+		if exp >= thresholds[lvl] {
+			level = int32(lvl)
+		} else {
+			break
+		}
+	}
+	return level
+}
+
 func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis int64) {
 	questMeta, ok := e.questById[questId]
 	if !ok {
@@ -840,21 +908,34 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 	}
 
 	user.Status.Exp += questMeta.UserExp
+	user.Status.Level = levelFromExp(user.Status.Exp, e.userExpThresholds)
+	log.Printf("[applyExpRewards] questId=%d user: +%d exp -> total=%d level=%d", questId, questMeta.UserExp, user.Status.Exp, user.Status.Level)
 
 	if questMeta.CharacterExp != 0 {
 		for id, row := range user.Characters {
 			row.Exp += questMeta.CharacterExp
+			row.Level = levelFromExp(row.Exp, e.characterExpThresholds)
 			user.Characters[id] = row
+			log.Printf("[applyExpRewards] questId=%d character=%d: +%d exp -> total=%d level=%d", questId, id, questMeta.CharacterExp, row.Exp, row.Level)
 		}
 	}
 
 	if questMeta.CostumeExp != 0 {
 		for key, row := range user.Costumes {
 			row.Exp += questMeta.CostumeExp
+			cm, ok := e.costumeById[row.CostumeId]
+			if ok {
+				if thresholds, ok := e.costumeExpByRarity[cm.RarityType]; ok {
+					row.Level = levelFromExp(row.Exp, thresholds)
+				}
+			}
 			user.Costumes[key] = row
+			log.Printf("[applyExpRewards] questId=%d costume=%d (key=%s): +%d exp -> total=%d level=%d", questId, row.CostumeId, key, questMeta.CostumeExp, row.Exp, row.Level)
 		}
 	}
 }
+
+const goldConsumableItemId int32 = 1
 
 func (e *Engine) applyQuestRewards(user *store.UserState, questId int32, nowMillis int64) {
 	questMeta, ok := e.questById[questId]
@@ -863,6 +944,11 @@ func (e *Engine) applyQuestRewards(user *store.UserState, questId int32, nowMill
 	}
 
 	e.applyExpRewards(user, questId, nowMillis)
+
+	if questMeta.Gold != 0 {
+		user.ConsumableItems[goldConsumableItemId] += questMeta.Gold
+		log.Printf("[applyQuestRewards] questId=%d gold: +%d -> total=%d", questId, questMeta.Gold, user.ConsumableItems[goldConsumableItemId])
+	}
 
 	rewardGroupId := e.firstClearRewardGroupId(user, questMeta)
 	for _, reward := range e.firstClearRewardsByGroupId[rewardGroupId] {

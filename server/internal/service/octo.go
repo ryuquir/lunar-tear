@@ -17,6 +17,33 @@ import (
 const termsVersionMarker = "###123###"
 const privacyVersionMarker = "###123###"
 
+const informationPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lunar Tear</title>
+<style>
+  body { margin:0; padding:40px 20px; font-family:"Noto Sans",sans-serif;
+         background:#0a0a0f; color:#d4cfc6; text-align:center; }
+  h1   { font-size:1.4em; letter-spacing:.15em; color:#e8e0d0; margin-bottom:4px; }
+  .sub { font-size:.75em; color:#888; margin-bottom:32px; }
+  .sep { width:60px; border:none; border-top:1px solid #333; margin:24px auto; }
+  p    { font-size:.85em; line-height:1.6; color:#999; max-width:360px; margin:0 auto 12px; }
+  a    { color:#a0c4e8; text-decoration:none; }
+</style>
+</head>
+<body>
+  <h1>LUNAR TEAR</h1>
+  <div class="sub">Private Preservation Server</div>
+  <hr class="sep">
+  <p>A community effort to keep NieR Re[in]carnation playable after official service ended.</p>
+  <p>This server is not affiliated with or endorsed by SQUARE ENIX or Applibot.</p>
+  <hr class="sep">
+  <p style="font-size:.7em;color:#666;">&copy; SQUARE ENIX / Applibot — All game assets belong to their respective owners.</p>
+</body>
+</html>`
+
 // resourcesURLOriginal is the base URL embedded in list.bin; must be replaced with same-length (43 bytes) when rewriting.
 const resourcesURLOriginal = "https://resources.app.nierreincarnation.com"
 
@@ -159,6 +186,14 @@ func (s *OctoHTTPServer) handleAll(w http.ResponseWriter, r *http.Request) {
 	// Asset bundle requests (from list.bin URLs: .../unso-{v}-{type}/{o}?generation=...&alt=media)
 	if strings.Contains(path, "/unso-") {
 		s.serveUnsoAsset(w, r, path)
+		return
+	}
+
+	// In-game information / news page
+	if strings.Contains(path, "/information") {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(200)
+		w.Write([]byte(informationPage))
 		return
 	}
 

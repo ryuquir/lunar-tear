@@ -16,7 +16,6 @@ const (
 	defaultUUId   = "default-user"
 	defaultUserId = int64(1001)
 
-	starterCompanionId        = int32(1)
 	starterMissionId          = int32(1)
 	starterMainQuestRouteId   = int32(1)
 	starterMainQuestSeasonId  = int32(1)
@@ -24,7 +23,6 @@ const (
 	defaultGiftPossessionType = int32(12) // FREE_GEM
 	defaultGiftCount          = int32(300)
 
-	starterCompanionUUId  = "starter-companion-0001"
 	defaultGiftUUIdPrefix = "default-gift"
 
 	defaultRegisteredName = "Un-regist User Name"
@@ -120,6 +118,7 @@ type UserState struct {
 	CostumeActiveSkills map[string]CostumeActiveSkillState
 	DeckTypeNotes       map[int32]DeckTypeNoteState
 	WeaponNotes         map[int32]WeaponNoteState
+	DeckSubWeapons      map[string][]string // userDeckCharacterUuid -> ordered sub-weapon UUIDs
 }
 
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
@@ -316,6 +315,14 @@ type DeckState struct {
 	Name                    string
 	Power                   int32
 	LatestVersion           int64
+}
+
+type DeckCharacterInput struct {
+	UserCostumeUuid    string
+	MainUserWeaponUuid string
+	SubWeaponUuids     []string
+	UserCompanionUuid  string
+	UserThoughtUuid    string
 }
 
 type CostumeActiveSkillState struct {
@@ -800,18 +807,10 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 		Characters: make(map[int32]CharacterState),
 		Costumes:   make(map[string]CostumeState),
 		Weapons:    make(map[string]WeaponState),
-		Companions: map[string]CompanionState{
-			starterCompanionUUId: {
-				UserCompanionUuid:   starterCompanionUUId,
-				CompanionId:         starterCompanionId,
-				HeadupDisplayViewId: 0,
-				Level:               1,
-				AcquisitionDatetime: nowMillis,
-				LatestVersion:       0,
-			},
-		},
+		Companions: make(map[string]CompanionState),
 		DeckCharacters: make(map[string]DeckCharacterState),
 		Decks:          make(map[DeckKey]DeckState),
+		DeckSubWeapons: make(map[string][]string),
 		Quests:         make(map[int32]UserQuestState),
 		QuestMissions:  make(map[QuestMissionKey]UserQuestMissionState),
 		WeaponStories:  make(map[int32]WeaponStoryState),
@@ -856,6 +855,7 @@ func (u UserState) clone() UserState {
 	out.Companions = maps.Clone(u.Companions)
 	out.Thoughts = maps.Clone(u.Thoughts)
 	out.DeckCharacters = maps.Clone(u.DeckCharacters)
+	out.DeckSubWeapons = maps.Clone(u.DeckSubWeapons)
 	out.Decks = maps.Clone(u.Decks)
 	out.Quests = maps.Clone(u.Quests)
 	out.QuestMissions = maps.Clone(u.QuestMissions)
@@ -951,4 +951,40 @@ func cloneReceivedGifts(gifts []ReceivedGiftState) []ReceivedGiftState {
 		}
 	}
 	return out
+}
+
+func ApplyDeckReplacement(user *UserState, deckType, userDeckNumber int32, slots []DeckCharacterInput, nowMillis int64) {
+	deckKey := DeckKey{DeckType: deckType, UserDeckNumber: userDeckNumber}
+	deck := user.Decks[deckKey]
+	deck.DeckType = deckType
+	deck.UserDeckNumber = userDeckNumber
+	if deck.Name == "" {
+		deck.Name = fmt.Sprintf("Deck %d", userDeckNumber)
+	}
+	if deck.Power == 0 {
+		deck.Power = 100
+	}
+
+	uuids := []*string{&deck.UserDeckCharacterUuid01, &deck.UserDeckCharacterUuid02, &deck.UserDeckCharacterUuid03}
+	for i, uuid := range uuids {
+		if i >= len(slots) || slots[i].UserCostumeUuid == "" {
+			*uuid = ""
+			continue
+		}
+		slot := slots[i]
+		dcUuid := fmt.Sprintf("deck-%d-%d-%d", deckType, userDeckNumber, i+1)
+		dc := user.DeckCharacters[dcUuid]
+		dc.UserDeckCharacterUuid = dcUuid
+		dc.UserCostumeUuid = slot.UserCostumeUuid
+		dc.MainUserWeaponUuid = slot.MainUserWeaponUuid
+		dc.UserCompanionUuid = slot.UserCompanionUuid
+		dc.UserThoughtUuid = slot.UserThoughtUuid
+		dc.LatestVersion = nowMillis
+		user.DeckCharacters[dcUuid] = dc
+		user.DeckSubWeapons[dcUuid] = slot.SubWeaponUuids
+		*uuid = dcUuid
+	}
+
+	deck.LatestVersion = nowMillis
+	user.Decks[deckKey] = deck
 }

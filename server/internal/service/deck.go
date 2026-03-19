@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"time"
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/store"
@@ -64,6 +65,52 @@ func (s *DeckServiceServer) RefreshDeckPower(ctx context.Context, req *pb.Refres
 		"IUserDeck", "IUserDeckCharacter", "IUserDeckTypeNote",
 	})
 	return &pb.RefreshDeckPowerResponse{
+		DiffUserData: userdata.BuildDiffFromTables(result),
+	}, nil
+}
+
+func deckSlotsFromProto(deck *pb.Deck) []store.DeckCharacterInput {
+	slots := make([]store.DeckCharacterInput, 3)
+	for i, ch := range []*pb.DeckCharacter{deck.Character01, deck.Character02, deck.Character03} {
+		if ch == nil {
+			continue
+		}
+		slots[i] = store.DeckCharacterInput{
+			UserCostumeUuid:    ch.UserCostumeUuid,
+			MainUserWeaponUuid: ch.MainUserWeaponUuid,
+			SubWeaponUuids:     ch.SubUserWeaponUuid,
+			UserCompanionUuid:  ch.UserCompanionUuid,
+			UserThoughtUuid:    ch.UserThoughtUuid,
+		}
+	}
+	return slots
+}
+
+func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeckRequest) (*pb.ReplaceDeckResponse, error) {
+	log.Printf("[DeckService] ReplaceDeck: deckType=%d deckNumber=%d", req.DeckType, req.UserDeckNumber)
+	if req.Deck != nil {
+		for i, ch := range []*pb.DeckCharacter{req.Deck.Character01, req.Deck.Character02, req.Deck.Character03} {
+			if ch == nil {
+				continue
+			}
+			log.Printf("[DeckService] ReplaceDeck slot %d: costume=%s mainWeapon=%s subWeapons=%v companion=%s thought=%s",
+				i+1, ch.UserCostumeUuid, ch.MainUserWeaponUuid, ch.SubUserWeaponUuid, ch.UserCompanionUuid, ch.UserThoughtUuid)
+		}
+	}
+	userId := currentUserId(ctx, s.store)
+
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		if req.Deck == nil {
+			return
+		}
+		store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), time.Now().UnixMilli())
+	})
+
+	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
+		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup",
+	})
+	log.Printf("[DeckService] ReplaceDeck response IUserDeckSubWeaponGroup: %s", result["IUserDeckSubWeaponGroup"])
+	return &pb.ReplaceDeckResponse{
 		DiffUserData: userdata.BuildDiffFromTables(result),
 	}, nil
 }

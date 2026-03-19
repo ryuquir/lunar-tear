@@ -120,6 +120,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userImportantItemJSON, _ := encodeJSONMaps(sortedImportantItemRecords(user)...)
 	userCostumeActiveSkillJSON, _ := encodeJSONMaps(sortedCostumeActiveSkillRecords(user)...)
 	userDeckTypeNoteJSON, _ := encodeJSONMaps(sortedDeckTypeNoteRecords(user)...)
+	userDeckSubWeaponGroupJSON, _ := encodeJSONMaps(sortedDeckSubWeaponGroupRecords(user)...)
 	userWeaponNoteJSON, _ := encodeJSONMaps(sortedWeaponNoteRecords(user)...)
 
 	return map[string]string{
@@ -159,7 +160,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		// Empty for now (no server-side state), but must exist so the client's
 		// MemoryDatabase has non-null table references during diff application.
 		"IUserDeckPartsGroup":              "[]",
-		"IUserDeckSubWeaponGroup":          "[]",
+		"IUserDeckSubWeaponGroup":          userDeckSubWeaponGroupJSON,
 		"IUserDeckCharacterDressupCostume": "[]",
 		"IUserDeckTypeNote":                userDeckTypeNoteJSON,
 		"IUserDeckLimitContentRestricted":  "[]",
@@ -763,6 +764,23 @@ func sortedDeckTypeNoteRecords(user store.UserState) []map[string]any {
 			"maxDeckPower":  row.MaxDeckPower,
 			"latestVersion": row.LatestVersion,
 		})
+	}
+	return records
+}
+
+func sortedDeckSubWeaponGroupRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.DeckSubWeapons)
+	records := make([]map[string]any, 0)
+	for _, dcUuid := range keys {
+		for sortOrder, weaponUuid := range user.DeckSubWeapons[dcUuid] {
+			records = append(records, map[string]any{
+				"userId":                user.UserId,
+				"userDeckCharacterUuid": dcUuid,
+				"userWeaponUuid":        weaponUuid,
+				"sortOrder":             int32(sortOrder + 1),
+				"latestVersion":         user.DeckCharacters[dcUuid].LatestVersion,
+			})
+		}
 	}
 	return records
 }

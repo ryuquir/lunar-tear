@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -58,52 +57,16 @@ func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Co
 		user.Tutorial.TutorialType = req.TutorialType
 		user.Tutorial.ProgressPhase = req.ProgressPhase
 
-		nowMillis := time.Now().UnixMilli()
-		deckKey := store.DeckKey{DeckType: req.DeckType, UserDeckNumber: req.UserDeckNumber}
-		deck := user.Decks[deckKey]
-		deck.DeckType = req.DeckType
-		deck.UserDeckNumber = req.UserDeckNumber
-		if deck.Name == "" {
-			deck.Name = "Deck 1"
-		}
-		if deck.Power == 0 {
-			deck.Power = 100
-		}
-
 		if req.Deck != nil {
-			slots := []*pb.DeckCharacter{req.Deck.Character01, req.Deck.Character02, req.Deck.Character03}
-			uuids := []*string{&deck.UserDeckCharacterUuid01, &deck.UserDeckCharacterUuid02, &deck.UserDeckCharacterUuid03}
-			for i, slot := range slots {
-				if slot == nil || slot.UserCostumeUuid == "" {
-					*uuids[i] = ""
-					continue
-				}
-				dcUuid := fmt.Sprintf("deck-%d-%d-%d", req.DeckType, req.UserDeckNumber, i+1)
-				dc := user.DeckCharacters[dcUuid]
-				dc.UserDeckCharacterUuid = dcUuid
-				dc.UserCostumeUuid = slot.UserCostumeUuid
-				dc.MainUserWeaponUuid = slot.MainUserWeaponUuid
-				dc.UserCompanionUuid = slot.UserCompanionUuid
-				dc.UserThoughtUuid = slot.UserThoughtUuid
-				dc.LatestVersion = nowMillis
-				user.DeckCharacters[dcUuid] = dc
-				*uuids[i] = dcUuid
-			}
-		} else if deck.UserDeckCharacterUuid01 == "" {
-			for dcId := range user.DeckCharacters {
-				deck.UserDeckCharacterUuid01 = dcId
-				break
-			}
+			store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), time.Now().UnixMilli())
 		}
-
-		deck.LatestVersion = nowMillis
-		user.Decks[deckKey] = deck
 	})
 	return &pb.SetTutorialProgressAndReplaceDeckResponse{
 		DiffUserData: userdata.BuildDiffFromTables(userdata.SelectTables(userdata.FullClientTableMap(user), []string{
 			"IUserTutorialProgress",
 			"IUserDeck",
 			"IUserDeckCharacter",
+			"IUserDeckSubWeaponGroup",
 		})),
 	}, nil
 }

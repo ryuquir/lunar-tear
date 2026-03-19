@@ -29,6 +29,8 @@ var startedGameStartTables = []string{
 	"IUserWeaponStory",
 	"IUserCostumeActiveSkill",
 	"IUserDeckTypeNote",
+	"IUserDeckSubWeaponGroup",
+	"IUserDeckPartsGroup",
 }
 
 var gimmickDiffTables = []string{
