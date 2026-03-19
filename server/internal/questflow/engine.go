@@ -774,7 +774,7 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 	}
 	scene, ok := e.sceneById[sceneId]
 	if !ok {
-		panic(fmt.Sprintf("unknown sceneId=%d for ApplyBootstrap", sceneId))
+		log.Fatalf("[ApplyBootstrap] unknown sceneId=%d for ApplyBootstrap", sceneId)
 	}
 	targetQuestId := scene.QuestId
 	targetRouteId := e.routeIdByQuestId[targetQuestId]
@@ -798,7 +798,7 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 			e.HandleMainQuestSceneProgress(user, sid)
 		}
 		if isMainQuestPlayable(quest) {
-			e.HandleQuestFinish(user, questId, nowMillis)
+			e.HandleQuestFinish(user, questId, false, nowMillis)
 		}
 	}
 
@@ -1143,7 +1143,7 @@ func (e *Engine) grantWeaponStoryUnlocksForQuestScene(user *store.UserState, que
 	}
 }
 
-func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, nowMillis int64) FinishOutcome {
+func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
 	_, ok := e.questById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleQuestFinish", questId))
@@ -1152,7 +1152,7 @@ func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, nowMill
 	outcome := e.evaluateFinishOutcome(user, questId)
 
 	questState := user.Quests[questId]
-	if !questState.IsRewardGranted {
+	if !questState.IsRewardGranted && !isRetired {
 		e.applyQuestRewards(user, questId, nowMillis)
 		e.grantWeaponStoryUnlocksForQuestScene(user, questId, QuestResultTypeHalfResult, nowMillis)
 		e.grantWeaponStoryUnlocksForQuestScene(user, questId, QuestResultTypeFullResult, nowMillis)

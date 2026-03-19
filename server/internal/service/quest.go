@@ -59,6 +59,9 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 			"IUserWeaponNote",
 			"IUserWeaponStory",
 			"IUserCompanion",
+			"IUserConsumableItem",
+			"IUserMaterial",
+			"IUserImportantItem",
 		}),
 	}, nil
 }
@@ -138,7 +141,7 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 	userId := currentUserId(ctx, s.store)
 	var outcome questflow.FinishOutcome
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		outcome = s.engine.HandleQuestFinish(user, req.QuestId, nowMillis)
+		outcome = s.engine.HandleQuestFinish(user, req.QuestId, req.IsRetired, nowMillis)
 	})
 	logQuestState("FinishMainQuest state", user)
 
@@ -168,6 +171,9 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 			"IUserWeaponNote",
 			"IUserWeaponStory",
 			"IUserCompanion",
+			"IUserConsumableItem",
+			"IUserMaterial",
+			"IUserImportantItem",
 		}),
 	}, nil
 }
