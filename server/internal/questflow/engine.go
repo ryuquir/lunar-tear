@@ -270,7 +270,7 @@ type costumeMaster struct {
 }
 
 type costumeRarityRow struct {
-	RarityType                                  int32 `json:"RarityType"`
+	RarityType                                   int32 `json:"RarityType"`
 	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
 }
 
@@ -708,6 +708,12 @@ func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattle
 	}
 
 	e.initQuestState(user, questId)
+
+	if quest.Stamina > 0 {
+		user.Status.StaminaMilliValue = max(user.Status.StaminaMilliValue-quest.Stamina*1000, 0)
+		user.Status.StaminaUpdateDatetime = nowMillis
+		log.Printf("[HandleQuestStart] questId=%d stamina cost=%d -> remaining=%d", questId, quest.Stamina, user.Status.StaminaMilliValue)
+	}
 
 	questState := user.Quests[questId]
 	if questState.QuestStateType == store.UserQuestStateTypeCleared {

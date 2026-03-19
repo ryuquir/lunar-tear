@@ -44,22 +44,9 @@ func (s *DataServiceServer) GetUserData(ctx context.Context, req *pb.UserDataGet
 	if !ok {
 		user = s.store.EnsureUser("")
 	}
+
 	defaults := userdata.FirstEntranceClientTableMap(user)
 	result := userdata.SelectTables(defaults, req.TableName)
-
-	for _, table := range req.TableName {
-		if data, ok := result[table]; ok && data != "" && data != "[]" {
-			log.Printf("[DataService]   %s -> (len=%d)", table, len(data))
-			if table == "IUser" {
-				log.Printf("[DataService]   %s payload=%s", table, data)
-			}
-		} else {
-			// Important: keep the key present with an empty JSON array.
-			// Client deserializes each value as List<object>.
-			log.Printf("[DataService]   %s -> []", table)
-		}
-	}
-
 	return &pb.UserDataGetResponse{
 		UserDataJson: result,
 	}, nil

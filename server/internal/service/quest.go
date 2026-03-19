@@ -104,6 +104,7 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 	return &pb.StartMainQuestResponse{
 		BattleDropReward: []*pb.BattleDropReward{},
 		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserStatus",
 			"IUserQuest",
 			"IUserQuestMission",
 			"IUserMainQuestFlowStatus",
