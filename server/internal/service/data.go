@@ -54,11 +54,6 @@ func (s *DataServiceServer) GetUserData(ctx context.Context, req *pb.UserDataGet
 
 func defaultTableNames() []string {
 	return []string{
-		// Extracted from nier-rein-apps DarkUserDataDatabaseBuilderAppendHelper
-		// (parsers/appenders/differs keys). The client should only request these keys.
-		// Keep most first-entrance core account rows out of the GetUserData phase
-		// for now. `IUser` is re-enabled so the client can rebuild a coherent local
-		// player state (notably `PlayerId`) after sync.
 		"IUser",
 		"IUserApple",
 		"IUserAutoSaleSettingDetail",
