@@ -24,9 +24,11 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 	log.Printf("[TutorialService] SetTutorialProgress: type=%d phase=%d choice=%d", req.TutorialType, req.ProgressPhase, req.ChoiceId)
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		user.Tutorial.TutorialType = req.TutorialType
-		user.Tutorial.ProgressPhase = req.ProgressPhase
-		user.Tutorial.ChoiceId = req.ChoiceId
+		user.Tutorials[req.TutorialType] = store.TutorialProgressState{
+			TutorialType:  req.TutorialType,
+			ProgressPhase: req.ProgressPhase,
+			ChoiceId:      req.ChoiceId,
+		}
 		if req.TutorialType == int32(model.TutorialTypeMenuFirst) ||
 			req.TutorialType == int32(model.TutorialTypeMenuSecond) {
 			store.EnsureDefaultDeck(user, time.Now().UnixMilli())
@@ -54,9 +56,10 @@ func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Co
 	log.Printf("[TutorialService] SetTutorialProgressAndReplaceDeck: type=%d phase=%d deckType=%d deckNumber=%d", req.TutorialType, req.ProgressPhase, req.DeckType, req.UserDeckNumber)
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		user.Tutorial.TutorialType = req.TutorialType
-		user.Tutorial.ProgressPhase = req.ProgressPhase
-
+		user.Tutorials[req.TutorialType] = store.TutorialProgressState{
+			TutorialType:  req.TutorialType,
+			ProgressPhase: req.ProgressPhase,
+		}
 		if req.Deck != nil {
 			store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), time.Now().UnixMilli())
 		}

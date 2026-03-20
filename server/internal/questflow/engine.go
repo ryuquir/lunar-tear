@@ -396,6 +396,18 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 	return outcome
 }
 
+type tutorialUnlockCondition struct {
+	TutorialType                int32 `json:"TutorialType"`
+	TutorialUnlockConditionType int32 `json:"TutorialUnlockConditionType"`
+	ConditionValue              int32 `json:"ConditionValue"`
+}
+
+const (
+	tutorialUnlockFunctionReleased         = 1
+	tutorialUnlockReachSpecifiedQuestScene = 2
+	tutorialUnlockUntilReachSpecifiedScene = 3
+)
+
 type Engine struct {
 	sceneById                          map[int32]questScene
 	missionById                        map[int32]mission
@@ -412,6 +424,7 @@ type Engine struct {
 	releaseConditionsByGroupId         map[int32][]weaponStoryReleaseCondition
 	costumeById                        map[int32]costumeMaster
 	sceneGrantsBySceneId               map[int32][]sceneGrant
+	tutorialUnlockConditions           []tutorialUnlockCondition
 	userExpThresholds                  []int32
 	characterExpThresholds             []int32
 	costumeExpByRarity                 map[int32][]int32
@@ -524,6 +537,11 @@ func MakeEngine() *Engine {
 		panic(err)
 	}
 
+	tutorialUnlockConds, err := utils.ReadJSON[tutorialUnlockCondition]("EntityMTutorialUnlockConditionTable.json")
+	if err != nil {
+		panic(err)
+	}
+
 	paramMapRows, err := utils.ReadJSON[numericalParameterMapRow]("EntityMNumericalParameterMapTable.json")
 	if err != nil {
 		panic(err)
@@ -559,6 +577,7 @@ func MakeEngine() *Engine {
 		releaseConditionsByGroupId:         make(map[int32][]weaponStoryReleaseCondition),
 		costumeById:                        make(map[int32]costumeMaster, len(costumeMasters)),
 		sceneGrantsBySceneId:               make(map[int32][]sceneGrant),
+		tutorialUnlockConditions:           tutorialUnlockConds,
 		userExpThresholds:                  buildExpThresholds(1),
 		characterExpThresholds:             buildExpThresholds(31),
 		costumeExpByRarity:                 buildCostumeExpByRarity(costumeRarities, buildExpThresholds),
@@ -566,12 +585,10 @@ func MakeEngine() *Engine {
 
 	for _, scene := range scenes {
 		engine.sceneById[scene.QuestSceneId] = scene
-		if scene.QuestSceneId < 999000000 {
-			engine.sceneIdsByQuestId[scene.QuestId] = append(
-				engine.sceneIdsByQuestId[scene.QuestId],
-				scene.QuestSceneId,
-			)
-		}
+		engine.sceneIdsByQuestId[scene.QuestId] = append(
+			engine.sceneIdsByQuestId[scene.QuestId],
+			scene.QuestSceneId,
+		)
 	}
 
 	for _, mission := range missions {
@@ -810,6 +827,33 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 		if sid == sceneId {
 			break
 		}
+	}
+
+	e.advanceTutorialForBootstrap(user, sceneId)
+}
+
+func (e *Engine) advanceTutorialForBootstrap(user *store.UserState, bootstrapSceneId int32) {
+	added := 0
+	for _, cond := range e.tutorialUnlockConditions {
+		satisfied := false
+		switch cond.TutorialUnlockConditionType {
+		case tutorialUnlockReachSpecifiedQuestScene:
+			satisfied = bootstrapSceneId >= cond.ConditionValue
+		case tutorialUnlockUntilReachSpecifiedScene:
+			satisfied = bootstrapSceneId >= cond.ConditionValue
+		}
+		if satisfied {
+			if _, exists := user.Tutorials[cond.TutorialType]; !exists {
+				user.Tutorials[cond.TutorialType] = store.TutorialProgressState{
+					TutorialType:  cond.TutorialType,
+					ProgressPhase: 99999,
+				}
+				added++
+			}
+		}
+	}
+	if added > 0 {
+		log.Printf("[ApplyBootstrap] marked %d tutorials as completed for scene=%d", added, bootstrapSceneId)
 	}
 }
 

@@ -91,7 +91,7 @@ type UserState struct {
 	Profile       UserProfileState
 	Login         UserLoginState
 	LoginBonus    UserLoginBonusState
-	Tutorial      TutorialProgressState
+	Tutorials     map[int32]TutorialProgressState
 	MainQuest     MainQuestState
 	Battle        BattleState
 	Gifts         GiftState
@@ -745,11 +745,8 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 			LatestRewardReceiveDatetime: 0,
 			LatestVersion:               0,
 		},
-		Tutorial: TutorialProgressState{
-			TutorialType:  1,
-			ProgressPhase: 0,
-			ChoiceId:      0,
-			LatestVersion: 0,
+		Tutorials: map[int32]TutorialProgressState{
+			1: {TutorialType: 1},
 		},
 		Battle: BattleState{
 			IsActive:              false,
@@ -851,6 +848,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 
 func (u UserState) clone() UserState {
 	out := u
+	out.Tutorials = maps.Clone(u.Tutorials)
 	out.Characters = maps.Clone(u.Characters)
 	out.Costumes = maps.Clone(u.Costumes)
 	out.Weapons = maps.Clone(u.Weapons)

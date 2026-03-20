@@ -65,13 +65,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		LatestRewardReceiveDatetime: user.LoginBonus.LatestRewardReceiveDatetime,
 		LatestVersion:               user.LoginBonus.LatestVersion,
 	})
-	userTutorialProgressJSON, _ := encodeJSONMaps(map[string]any{
-		"userId":        user.UserId,
-		"tutorialType":  user.Tutorial.TutorialType,
-		"progressPhase": user.Tutorial.ProgressPhase,
-		"choiceId":      user.Tutorial.ChoiceId,
-		"latestVersion": user.Tutorial.LatestVersion,
-	})
+	userTutorialProgressJSON, _ := encodeJSONMaps(sortedTutorialRecords(user)...)
 	mainQuestFlowJSON, _ := encodeJSONMaps(map[string]any{
 		"userId":               user.UserId,
 		"currentQuestFlowType": user.MainQuest.CurrentQuestFlowType,
@@ -269,6 +263,27 @@ func BuildDiffFromTablesOrdered(tables map[string]string, order []string) map[st
 		}
 	}
 	return diff
+}
+
+func sortedTutorialRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.Tutorials))
+	for id := range user.Tutorials {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.Tutorials[int32(id)]
+		records = append(records, map[string]any{
+			"userId":        user.UserId,
+			"tutorialType":  row.TutorialType,
+			"progressPhase": row.ProgressPhase,
+			"choiceId":      row.ChoiceId,
+			"latestVersion": row.LatestVersion,
+		})
+	}
+	return records
 }
 
 func sortedCharacterRecords(user store.UserState) []map[string]any {

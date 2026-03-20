@@ -1,9 +1,3 @@
-// Package userdata builds user data payloads for the NieR Reincarnation client.
-//
-// Today the active path is plain JSON arrays of objects, which the client-side
-// DarkUserDataDatabaseBuilderAppendHelper turns into typed entities via
-// JObject.ToObject<EntityIUser*>. The older base64+MessagePack helpers are kept
-// around for experiments, but are not the default path.
 package userdata
 
 import (
@@ -52,7 +46,7 @@ type EntityIUserQuest struct {
 	_msgpack            struct{} `msgpack:",asArray"`
 	UserId              int64    // Key(0)
 	QuestId             int32    // Key(1)
-	QuestStateType      int32    // Key(2) — 3 = Cleared
+	QuestStateType      int32    // Key(2) — 2 = Cleared
 	IsBattleOnly        bool     // Key(3)
 	LatestStartDatetime int64    // Key(4) — unix millis
 	ClearCount          int32    // Key(5)
