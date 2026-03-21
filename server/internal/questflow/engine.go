@@ -1049,6 +1049,7 @@ func (e *Engine) grantCostume(user *store.UserState, costumeId int32, nowMillis 
 		UserCostumeUuid:     key,
 		CostumeId:           costumeId,
 		Level:               1,
+		HeadupDisplayViewId: 1,
 		AcquisitionDatetime: nowMillis,
 	}
 	user.CostumeActiveSkills[key] = store.CostumeActiveSkillState{
@@ -1101,6 +1102,7 @@ func (e *Engine) grantCompanion(user *store.UserState, companionId int32, nowMil
 		UserCompanionUuid:   key,
 		CompanionId:         companionId,
 		Level:               1,
+		HeadupDisplayViewId: 1,
 		AcquisitionDatetime: nowMillis,
 	}
 }
