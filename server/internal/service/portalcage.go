@@ -12,18 +12,19 @@ import (
 
 type PortalCageServiceServer struct {
 	pb.UnimplementedPortalCageServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewPortalCageServiceServer(userStore *store.Store) *PortalCageServiceServer {
-	return &PortalCageServiceServer{store: userStore}
+func NewPortalCageServiceServer(users store.UserRepository, sessions store.SessionRepository) *PortalCageServiceServer {
+	return &PortalCageServiceServer{users: users, sessions: sessions}
 }
 
 func (s *PortalCageServiceServer) UpdatePortalCageSceneProgress(ctx context.Context, req *pb.UpdatePortalCageSceneProgressRequest) (*pb.UpdatePortalCageSceneProgressResponse, error) {
 	log.Printf("[PortalCageService] UpdatePortalCageSceneProgress: portalCageSceneId=%d", req.PortalCageSceneId)
 
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		now := gametime.NowMillis()
 		user.PortalCageStatus.IsCurrentProgress = true
 		user.PortalCageStatus.LatestVersion = now

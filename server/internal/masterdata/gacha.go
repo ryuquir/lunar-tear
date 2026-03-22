@@ -1,11 +1,11 @@
-package gachaloader
+package masterdata
 
 import (
 	"fmt"
 	"strings"
 
-	"lunar-tear/server/internal/gacha"
 	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/utils"
 )
@@ -62,14 +62,14 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 			continue
 		}
 
-		labelType := gacha.GachaLabelEvent
-		modeType := gacha.GachaModeBox
+		labelType := model.GachaLabelEvent
+		modeType := model.GachaModeBox
 		stepupGroupId := gachaId
 
 		// TODO(krettsy): this is a single-step stub; real step-ups need
 		// multiple Gacha entries per group with per-step prices/rewards.
 		if strings.HasPrefix(banner.BannerAssetName, "step_up_") {
-			labelType = gacha.GachaLabelPremium
+			labelType = model.GachaLabelPremium
 			stepupGroupId = gachaId / 1000
 		}
 
@@ -77,7 +77,7 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 			GachaId:                    gachaId,
 			GachaLabelType:             labelType,
 			GachaModeType:              modeType,
-			GachaAutoResetType:         gacha.GachaAutoResetNone,
+			GachaAutoResetType:         model.GachaAutoResetNone,
 			GachaAutoResetPeriod:       0,
 			NextAutoResetDatetime:      0,
 			IsUserGachaUnlock:          true,
@@ -87,7 +87,7 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 			RelatedEventQuestChapterId: 0,
 			PromotionMovieAssetId:      0,
 			GachaMedalId:               medal.GachaMedalId,
-			GachaDecorationType:        gacha.GachaDecorationNormal,
+			GachaDecorationType:        model.GachaDecorationNormal,
 			SortOrder:                  banner.SortOrderDesc,
 			IsInactive:                 false,
 			InformationId:              0,

@@ -13,11 +13,12 @@ import (
 
 type DataServiceServer struct {
 	pb.UnimplementedDataServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewDataServiceServer(userStore *store.Store) *DataServiceServer {
-	return &DataServiceServer{store: userStore}
+func NewDataServiceServer(users store.UserRepository, sessions store.SessionRepository) *DataServiceServer {
+	return &DataServiceServer{users: users, sessions: sessions}
 }
 
 func (s *DataServiceServer) GetLatestMasterDataVersion(ctx context.Context, _ *emptypb.Empty) (*pb.MasterDataGetLatestVersionResponse, error) {
@@ -39,10 +40,10 @@ func (s *DataServiceServer) GetUserDataNameV2(ctx context.Context, _ *emptypb.Em
 func (s *DataServiceServer) GetUserData(ctx context.Context, req *pb.UserDataGetRequest) (*pb.UserDataGetResponse, error) {
 	log.Printf("[DataService] GetUserData: tables=%v", req.TableName)
 
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		user = s.store.EnsureUser("")
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		user, _ = s.users.EnsureUser("")
 	}
 
 	defaults := userdata.FirstEntranceClientTableMap(user)

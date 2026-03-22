@@ -13,17 +13,18 @@ import (
 
 type TutorialServiceServer struct {
 	pb.UnimplementedTutorialServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewTutorialServiceServer(userStore *store.Store) *TutorialServiceServer {
-	return &TutorialServiceServer{store: userStore}
+func NewTutorialServiceServer(users store.UserRepository, sessions store.SessionRepository) *TutorialServiceServer {
+	return &TutorialServiceServer{users: users, sessions: sessions}
 }
 
 func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb.SetTutorialProgressRequest) (*pb.SetTutorialProgressResponse, error) {
 	log.Printf("[TutorialService] SetTutorialProgress: type=%d phase=%d choice=%d", req.TutorialType, req.ProgressPhase, req.ChoiceId)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.Tutorials[req.TutorialType] = store.TutorialProgressState{
 			TutorialType:  req.TutorialType,
 			ProgressPhase: req.ProgressPhase,
@@ -54,8 +55,8 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 
 func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Context, req *pb.SetTutorialProgressAndReplaceDeckRequest) (*pb.SetTutorialProgressAndReplaceDeckResponse, error) {
 	log.Printf("[TutorialService] SetTutorialProgressAndReplaceDeck: type=%d phase=%d deckType=%d deckNumber=%d", req.TutorialType, req.ProgressPhase, req.DeckType, req.UserDeckNumber)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.Tutorials[req.TutorialType] = store.TutorialProgressState{
 			TutorialType:  req.TutorialType,
 			ProgressPhase: req.ProgressPhase,

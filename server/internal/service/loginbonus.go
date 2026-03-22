@@ -8,7 +8,7 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
-	"lunar-tear/server/internal/loginbonusloader"
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 
@@ -17,19 +17,20 @@ import (
 
 type LoginBonusServiceServer struct {
 	pb.UnimplementedLoginBonusServiceServer
-	store   *store.Store
-	catalog *loginbonusloader.Catalog
+	users    store.UserRepository
+	sessions store.SessionRepository
+	catalog  *masterdata.LoginBonusCatalog
 }
 
-func NewLoginBonusServiceServer(userStore *store.Store, catalog *loginbonusloader.Catalog) *LoginBonusServiceServer {
-	return &LoginBonusServiceServer{store: userStore, catalog: catalog}
+func NewLoginBonusServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.LoginBonusCatalog) *LoginBonusServiceServer {
+	return &LoginBonusServiceServer{users: users, sessions: sessions, catalog: catalog}
 }
 
 func (s *LoginBonusServiceServer) ReceiveStamp(ctx context.Context, req *emptypb.Empty) (*pb.ReceiveStampResponse, error) {
 	log.Printf("[LoginBonusService] ReceiveStamp")
-	userId := currentUserId(ctx, s.store)
+	userId := currentUserId(ctx, s.users, s.sessions)
 
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		now := gametime.NowMillis()
 		nextStamp := user.LoginBonus.CurrentStampNumber + 1
 

@@ -9,7 +9,6 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
-	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 
@@ -21,11 +20,12 @@ import (
 
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewUserServiceServer(userStore *store.Store) *UserServiceServer {
-	return &UserServiceServer{store: userStore}
+func NewUserServiceServer(users store.UserRepository, sessions store.SessionRepository) *UserServiceServer {
+	return &UserServiceServer{users: users, sessions: sessions}
 }
 
 func setCommonResponseTrailers(ctx context.Context, diff map[string]*pb.DiffData, includeUpdateNames bool) {
@@ -49,7 +49,10 @@ func setCommonResponseTrailers(ctx context.Context, diff map[string]*pb.DiffData
 }
 
 func (s *UserServiceServer) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) (*pb.RegisterUserResponse, error) {
-	user := s.store.EnsureUser(req.Uuid)
+	user, err := s.users.EnsureUser(req.Uuid)
+	if err != nil {
+		return nil, fmt.Errorf("ensure user: %w", err)
+	}
 	log.Printf("[UserService] RegisterUser: uuid=%s terminalId=%s -> userId=%d", req.Uuid, req.TerminalId, user.UserId)
 
 	return &pb.RegisterUserResponse{
@@ -62,7 +65,10 @@ func (s *UserServiceServer) RegisterUser(ctx context.Context, req *pb.RegisterUs
 func (s *UserServiceServer) Auth(ctx context.Context, req *pb.AuthUserRequest) (*pb.AuthUserResponse, error) {
 	log.Printf("[UserService] Auth: uuid=%s", req.Uuid)
 
-	user, session := s.store.CreateSession(req.Uuid, 24*time.Hour)
+	user, session, err := s.sessions.CreateSession(req.Uuid, 24*time.Hour)
+	if err != nil {
+		return nil, fmt.Errorf("create session: %w", err)
+	}
 
 	return &pb.AuthUserResponse{
 		SessionKey:     session.SessionKey,
@@ -82,8 +88,8 @@ func (s *UserServiceServer) GameStart(ctx context.Context, _ *emptypb.Empty) (*p
 		}
 	}
 
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
 		user.GameStartDatetime = nowMillis
 		if user.Profile.Name == "Un-regist User Name" {
@@ -104,18 +110,21 @@ func (s *UserServiceServer) GameStart(ctx context.Context, _ *emptypb.Empty) (*p
 
 func (s *UserServiceServer) TransferUser(ctx context.Context, req *pb.TransferUserRequest) (*pb.TransferUserResponse, error) {
 	log.Printf("[UserService] TransferUser")
-	user := s.store.EnsureUser(req.Uuid)
+	user, err := s.users.EnsureUser(req.Uuid)
+	if err != nil {
+		return nil, fmt.Errorf("ensure user: %w", err)
+	}
 	return &pb.TransferUserResponse{
 		UserId:       user.UserId,
 		Signature:    "transferred-sig",
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *UserServiceServer) SetUserName(ctx context.Context, req *pb.SetUserNameRequest) (*pb.SetUserNameResponse, error) {
 	log.Printf("[UserService] SetUserName: %s", req.Name)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
 		user.Profile.Name = req.Name
 		user.Profile.NameUpdateDatetime = nowMillis
@@ -127,8 +136,8 @@ func (s *UserServiceServer) SetUserName(ctx context.Context, req *pb.SetUserName
 
 func (s *UserServiceServer) SetUserMessage(ctx context.Context, req *pb.SetUserMessageRequest) (*pb.SetUserMessageResponse, error) {
 	log.Printf("[UserService] SetUserMessage: %s", req.Message)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
 		user.Profile.Message = req.Message
 		user.Profile.MessageUpdateDatetime = nowMillis
@@ -140,8 +149,8 @@ func (s *UserServiceServer) SetUserMessage(ctx context.Context, req *pb.SetUserM
 
 func (s *UserServiceServer) SetUserFavoriteCostumeId(ctx context.Context, req *pb.SetUserFavoriteCostumeIdRequest) (*pb.SetUserFavoriteCostumeIdResponse, error) {
 	log.Printf("[UserService] SetUserFavoriteCostumeId: %d", req.FavoriteCostumeId)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
 		user.Profile.FavoriteCostumeId = req.FavoriteCostumeId
 		user.Profile.FavoriteCostumeIdUpdateDatetime = nowMillis
@@ -155,11 +164,11 @@ func (s *UserServiceServer) GetUserProfile(ctx context.Context, req *pb.GetUserP
 	log.Printf("[UserService] GetUserProfile: playerId=%d", req.PlayerId)
 	userId := req.PlayerId
 	if userId == 0 {
-		userId = currentUserId(ctx, s.store)
+		userId = currentUserId(ctx, s.users, s.sessions)
 	}
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		return &pb.GetUserProfileResponse{DiffUserData: mock.EmptyDiff()}, nil
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		return &pb.GetUserProfileResponse{DiffUserData: userdata.EmptyDiff()}, nil
 	}
 
 	deckCharacters := []*pb.ProfileDeckCharacter{}
@@ -198,42 +207,42 @@ func (s *UserServiceServer) GetUserProfile(ctx context.Context, req *pb.GetUserP
 			HistoryItem:              []*pb.PlayHistoryItem{},
 			HistoryCategoryGraphItem: []*pb.PlayHistoryCategoryGraphItem{},
 		},
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *UserServiceServer) SetBirthYearMonth(ctx context.Context, req *pb.SetBirthYearMonthRequest) (*pb.SetBirthYearMonthResponse, error) {
 	log.Printf("[UserService] SetBirthYearMonth: %d/%d", req.BirthYear, req.BirthMonth)
-	userId := currentUserId(ctx, s.store)
-	s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	_, _ = s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.BirthYear = req.BirthYear
 		user.BirthMonth = req.BirthMonth
 	})
-	return &pb.SetBirthYearMonthResponse{DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.SetBirthYearMonthResponse{DiffUserData: userdata.EmptyDiff()}, nil
 }
 
 func (s *UserServiceServer) GetBirthYearMonth(ctx context.Context, _ *emptypb.Empty) (*pb.GetBirthYearMonthResponse, error) {
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		return &pb.GetBirthYearMonthResponse{BirthYear: mock.DefaultBirthYear, BirthMonth: mock.DefaultBirthMonth, DiffUserData: mock.EmptyDiff()}, nil
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		return &pb.GetBirthYearMonthResponse{BirthYear: 2000, BirthMonth: 1, DiffUserData: userdata.EmptyDiff()}, nil
 	}
-	return &pb.GetBirthYearMonthResponse{BirthYear: user.BirthYear, BirthMonth: user.BirthMonth, DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.GetBirthYearMonthResponse{BirthYear: user.BirthYear, BirthMonth: user.BirthMonth, DiffUserData: userdata.EmptyDiff()}, nil
 }
 
 func (s *UserServiceServer) GetChargeMoney(ctx context.Context, _ *emptypb.Empty) (*pb.GetChargeMoneyResponse, error) {
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		return &pb.GetChargeMoneyResponse{ChargeMoneyThisMonth: mock.DefaultChargeMoneyThisMonth, DiffUserData: mock.EmptyDiff()}, nil
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		return &pb.GetChargeMoneyResponse{ChargeMoneyThisMonth: 0, DiffUserData: userdata.EmptyDiff()}, nil
 	}
-	return &pb.GetChargeMoneyResponse{ChargeMoneyThisMonth: user.ChargeMoneyThisMonth, DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.GetChargeMoneyResponse{ChargeMoneyThisMonth: user.ChargeMoneyThisMonth, DiffUserData: userdata.EmptyDiff()}, nil
 }
 
 func (s *UserServiceServer) SetUserSetting(ctx context.Context, req *pb.SetUserSettingRequest) (*pb.SetUserSettingResponse, error) {
 	log.Printf("[UserService] SetUserSetting: isNotifyPurchaseAlert=%v", req.IsNotifyPurchaseAlert)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.Setting.IsNotifyPurchaseAlert = req.IsNotifyPurchaseAlert
 	})
 	return &pb.SetUserSettingResponse{
@@ -242,22 +251,22 @@ func (s *UserServiceServer) SetUserSetting(ctx context.Context, req *pb.SetUserS
 }
 
 func (s *UserServiceServer) GetAndroidArgs(ctx context.Context, req *pb.GetAndroidArgsRequest) (*pb.GetAndroidArgsResponse, error) {
-	return &pb.GetAndroidArgsResponse{Nonce: "Mama", ApiKey: "1234567890", DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.GetAndroidArgsResponse{Nonce: "Mama", ApiKey: "1234567890", DiffUserData: userdata.EmptyDiff()}, nil
 }
 
 func (s *UserServiceServer) GetBackupToken(ctx context.Context, req *pb.GetBackupTokenRequest) (*pb.GetBackupTokenResponse, error) {
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		return &pb.GetBackupTokenResponse{BackupToken: mock.DefaultBackupToken, DiffUserData: mock.EmptyDiff()}, nil
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		return &pb.GetBackupTokenResponse{BackupToken: "mock-backup-token", DiffUserData: userdata.EmptyDiff()}, nil
 	}
-	return &pb.GetBackupTokenResponse{BackupToken: user.BackupToken, DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.GetBackupTokenResponse{BackupToken: user.BackupToken, DiffUserData: userdata.EmptyDiff()}, nil
 }
 
 func (s *UserServiceServer) CheckTransferSetting(ctx context.Context, _ *emptypb.Empty) (*pb.CheckTransferSettingResponse, error) {
-	return &pb.CheckTransferSettingResponse{DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.CheckTransferSettingResponse{DiffUserData: userdata.EmptyDiff()}, nil
 }
 
 func (s *UserServiceServer) GetUserGamePlayNote(ctx context.Context, req *pb.GetUserGamePlayNoteRequest) (*pb.GetUserGamePlayNoteResponse, error) {
-	return &pb.GetUserGamePlayNoteResponse{DiffUserData: mock.EmptyDiff()}, nil
+	return &pb.GetUserGamePlayNoteResponse{DiffUserData: userdata.EmptyDiff()}, nil
 }

@@ -5,23 +5,23 @@ import (
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
-	"lunar-tear/server/internal/gacha"
-	"lunar-tear/server/internal/mock"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/userdata"
 )
 
 type BannerServiceServer struct {
 	pb.UnimplementedBannerServiceServer
-	store *store.Store
+	gacha store.GachaRepository
 }
 
-func NewBannerServiceServer(userStore *store.Store) *BannerServiceServer {
-	return &BannerServiceServer{store: userStore}
+func NewBannerServiceServer(gacha store.GachaRepository) *BannerServiceServer {
+	return &BannerServiceServer{gacha: gacha}
 }
 
 func (s *BannerServiceServer) GetMamaBanner(ctx context.Context, req *pb.GetMamaBannerRequest) (*pb.GetMamaBannerResponse, error) {
 	log.Printf("[BannerService] GetMamaBanner")
-	catalog := s.store.SnapshotGachaCatalog()
+	catalog, _ := s.gacha.SnapshotCatalog()
 	log.Printf("[BannerService] GetMamaBanner: catalog size=%d", len(catalog))
 	var termLimited []*pb.GachaBanner
 	var latestChapter *pb.GachaBanner
@@ -33,9 +33,9 @@ func (s *BannerServiceServer) GetMamaBanner(ctx context.Context, req *pb.GetMama
 			GachaId:        entry.GachaId,
 		}
 		switch entry.GachaLabelType {
-		case gacha.GachaLabelEvent, gacha.GachaLabelPremium:
+		case model.GachaLabelEvent, model.GachaLabelPremium:
 			termLimited = append(termLimited, b)
-		case gacha.GachaLabelChapter:
+		case model.GachaLabelChapter:
 			latestChapter = b
 		}
 	}
@@ -43,6 +43,6 @@ func (s *BannerServiceServer) GetMamaBanner(ctx context.Context, req *pb.GetMama
 		TermLimitedGacha:   termLimited,
 		LatestChapterGacha: latestChapter,
 		IsExistUnreadPop:   false,
-		DiffUserData:       mock.EmptyDiff(),
+		DiffUserData:       userdata.EmptyDiff(),
 	}, nil
 }

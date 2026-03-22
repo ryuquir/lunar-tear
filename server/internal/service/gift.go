@@ -9,8 +9,8 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
-	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/userdata"
 
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -18,19 +18,20 @@ import (
 
 type GiftServiceServer struct {
 	pb.UnimplementedGiftServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewGiftServiceServer(userStore *store.Store) *GiftServiceServer {
-	return &GiftServiceServer{store: userStore}
+func NewGiftServiceServer(users store.UserRepository, sessions store.SessionRepository) *GiftServiceServer {
+	return &GiftServiceServer{users: users, sessions: sessions}
 }
 
 func (s *GiftServiceServer) ReceiveGift(ctx context.Context, req *pb.ReceiveGiftRequest) (*pb.ReceiveGiftResponse, error) {
 	log.Printf("[GiftService] ReceiveGift: giftUuids=%d", len(req.UserGiftUuid))
 
-	userId := currentUserId(ctx, s.store)
+	userId := currentUserId(ctx, s.users, s.sessions)
 	received := make([]string, 0, len(req.UserGiftUuid))
-	_, ok := s.store.UpdateUser(userId, func(user *store.UserState) {
+	_, err := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
 		remaining := make([]store.NotReceivedGiftState, 0, len(user.Gifts.NotReceived))
 		for _, gift := range user.Gifts.NotReceived {
@@ -47,12 +48,12 @@ func (s *GiftServiceServer) ReceiveGift(ctx context.Context, req *pb.ReceiveGift
 		user.Gifts.NotReceived = remaining
 		user.Notifications.GiftNotReceiveCount = int32(len(user.Gifts.NotReceived))
 	})
-	if !ok {
+	if err != nil {
 		return &pb.ReceiveGiftResponse{
 			ReceivedGiftUuid: []string{},
 			ExpiredGiftUuid:  []string{},
 			OverflowGiftUuid: []string{},
-			DiffUserData:     mock.EmptyDiff(),
+			DiffUserData:     userdata.EmptyDiff(),
 		}, nil
 	}
 
@@ -60,7 +61,7 @@ func (s *GiftServiceServer) ReceiveGift(ctx context.Context, req *pb.ReceiveGift
 		ReceivedGiftUuid: received,
 		ExpiredGiftUuid:  []string{},
 		OverflowGiftUuid: []string{},
-		DiffUserData:     mock.EmptyDiff(),
+		DiffUserData:     userdata.EmptyDiff(),
 	}, nil
 }
 
@@ -68,10 +69,10 @@ func (s *GiftServiceServer) GetGiftList(ctx context.Context, req *pb.GetGiftList
 	log.Printf("[GiftService] GetGiftList: rewardKinds=%v expirationType=%d ascending=%v nextCursor=%d previousCursor=%d getCount=%d",
 		req.RewardKindType, req.ExpirationType, req.IsAscendingSort, req.NextCursor, req.PreviousCursor, req.GetCount)
 
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		user = s.store.EnsureUser("")
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		user, _ = s.users.EnsureUser("")
 	}
 
 	gifts := append([]store.NotReceivedGiftState(nil), user.Gifts.NotReceived...)
@@ -99,16 +100,16 @@ func (s *GiftServiceServer) GetGiftList(ctx context.Context, req *pb.GetGiftList
 		TotalPageCount: pageCount(len(user.Gifts.NotReceived), int(req.GetCount)),
 		NextCursor:     0,
 		PreviousCursor: 0,
-		DiffUserData:   mock.EmptyDiff(),
+		DiffUserData:   userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *GiftServiceServer) GetGiftReceiveHistoryList(ctx context.Context, req *emptypb.Empty) (*pb.GetGiftReceiveHistoryListResponse, error) {
 	log.Printf("[GiftService] GetGiftReceiveHistoryList")
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		user = s.store.EnsureUser("")
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		user, _ = s.users.EnsureUser("")
 	}
 
 	items := make([]*pb.ReceivedGift, 0, len(user.Gifts.Received))
@@ -120,7 +121,7 @@ func (s *GiftServiceServer) GetGiftReceiveHistoryList(ctx context.Context, req *
 	}
 	return &pb.GetGiftReceiveHistoryListResponse{
 		Gift:         items,
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
 

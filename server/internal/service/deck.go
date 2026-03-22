@@ -12,18 +12,19 @@ import (
 
 type DeckServiceServer struct {
 	pb.UnimplementedDeckServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewDeckServiceServer(userStore *store.Store) *DeckServiceServer {
-	return &DeckServiceServer{store: userStore}
+func NewDeckServiceServer(users store.UserRepository, sessions store.SessionRepository) *DeckServiceServer {
+	return &DeckServiceServer{users: users, sessions: sessions}
 }
 
 func (s *DeckServiceServer) UpdateName(ctx context.Context, req *pb.UpdateNameRequest) (*pb.UpdateNameResponse, error) {
 	log.Printf("[DeckService] UpdateName: deckType=%d deckNumber=%d name=%q", req.DeckType, req.UserDeckNumber, req.Name)
-	userId := currentUserId(ctx, s.store)
+	userId := currentUserId(ctx, s.users, s.sessions)
 
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		deckKey := store.DeckKey{DeckType: req.DeckType, UserDeckNumber: req.UserDeckNumber}
 		deck := user.Decks[deckKey]
 		deck.Name = req.Name
@@ -38,9 +39,9 @@ func (s *DeckServiceServer) UpdateName(ctx context.Context, req *pb.UpdateNameRe
 
 func (s *DeckServiceServer) RefreshDeckPower(ctx context.Context, req *pb.RefreshDeckPowerRequest) (*pb.RefreshDeckPowerResponse, error) {
 	log.Printf("[DeckService] RefreshDeckPower: deckType=%d deckNumber=%d", req.DeckType, req.UserDeckNumber)
-	userId := currentUserId(ctx, s.store)
+	userId := currentUserId(ctx, s.users, s.sessions)
 
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		if req.DeckPower == nil {
 			log.Printf("[DeckService] RefreshDeckPower: deckPower is nil")
 			return
@@ -114,12 +115,12 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 				i+1, ch.UserCostumeUuid, ch.MainUserWeaponUuid, ch.SubUserWeaponUuid, ch.UserCompanionUuid, ch.UserThoughtUuid)
 		}
 	}
-	userId := currentUserId(ctx, s.store)
+	userId := currentUserId(ctx, s.users, s.sessions)
 
-	oldUser, _ := s.store.SnapshotUser(userId)
+	oldUser, _ := s.users.SnapshotUser(userId)
 	oldSubWeapons := userdata.DeckSubWeaponRecords(oldUser)
 
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		if req.Deck == nil {
 			return
 		}

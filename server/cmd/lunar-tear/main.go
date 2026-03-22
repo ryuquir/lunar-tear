@@ -1,60 +1,25 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"fmt"
 	"log"
-	"net"
-	"net/http"
 	"strconv"
 
-	pb "lunar-tear/server/gen/proto"
-	"lunar-tear/server/internal/cageornamentloader"
 	"lunar-tear/server/internal/gametime"
-	"lunar-tear/server/internal/gachaloader"
-	"lunar-tear/server/internal/loginbonusloader"
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/questflow"
-	"lunar-tear/server/internal/service"
-	"lunar-tear/server/internal/store"
-
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
+	"lunar-tear/server/internal/store/memory"
 )
 
-// loggingListener wraps a net.Listener and logs every accepted connection.
-type loggingListener struct {
-	net.Listener
-}
-
-func (l loggingListener) Accept() (net.Conn, error) {
-	conn, err := l.Listener.Accept()
-	if err != nil {
-		log.Printf("[gRPC] Accept error: %v", err)
-		return nil, err
-	}
-	log.Printf("[gRPC] New connection from %v", conn.RemoteAddr())
-	return conn, nil
-}
-
 func main() {
-	grpcPort := flag.Int("grpc-port", 7777, "gRPC server port")
 	httpPort := flag.Int("http-port", 8080, "HTTP server port (Octo API)")
 	host := flag.String("host", "127.0.0.1", "hostname the client will connect to")
 	resourcesBaseURL := flag.String("resources-base-url", "", "Resources base URL for list.bin rewrite (must be exactly 43 chars); empty = derive from host (so client uses our server for assets)")
 	scene := flag.Int("scene", 0, "Bootstrap to scene N (0 = fresh start)")
 	flag.Parse()
 
-	// Octo base URL: client uses this to fetch list and will see rewritten asset URLs if resourcesBaseURL is set
 	octoURL := "http://" + *host + ":" + strconv.Itoa(*httpPort)
 	if *resourcesBaseURL == "" {
-		// Default: rewrite list.bin so asset base URL points to our server (must be exactly 43 chars for protobuf).
-		// Use http:// so the client uses plain HTTP; our server does not speak TLS on this port.
 		candidate := "http://" + *host + ":" + strconv.Itoa(*httpPort) + "/resource-bundle-server"
 		if len(candidate) == 43 {
 			*resourcesBaseURL = candidate
@@ -65,127 +30,23 @@ func main() {
 		*resourcesBaseURL = ""
 	}
 
-	// Start HTTP server for Octo API and general game HTTP (HTTP/1.1 + HTTP/2 cleartext)
-	octoServer := service.NewOctoHTTPServer(*resourcesBaseURL)
-	h2s := &http2.Server{}
-	octoHandler := h2c.NewHandler(octoServer.Handler(), h2s)
-	go func() {
-		log.Printf("Octo HTTP server listening on :%d (HTTP/1.1 + h2c)", *httpPort)
-		srv := &http.Server{Addr: fmt.Sprintf(":%d", *httpPort), Handler: octoHandler}
-		http2.ConfigureServer(srv, h2s)
-		if err := srv.ListenAndServe(); err != nil {
-			log.Fatalf("HTTP server on %d failed: %v", *httpPort, err)
-		}
-	}()
-	// Also listen on port 80 for plain HTTP requests (game web API)
-	go func() {
-		log.Printf("HTTP server also listening on :80 (HTTP/1.1 + h2c)")
-		srv80 := &http.Server{Addr: ":80", Handler: octoHandler}
-		http2.ConfigureServer(srv80, h2s)
-		if err := srv80.ListenAndServe(); err != nil {
-			log.Printf("HTTP server on :80 failed (non-fatal): %v", err)
-		}
-	}()
-	// Start gRPC server (plaintext — client TLS is disabled via Frida / APK patches)
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *grpcPort))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	lis = loggingListener{Listener: lis}
+	go startHTTP(*httpPort, *resourcesBaseURL)
 
-	// Also listen gRPC on 443 when client uses host-only patch (default port 443)
-	lis443, err443 := net.Listen("tcp", ":443")
-	if err443 != nil {
-		log.Printf("gRPC on :443 skipped (need sudo or port in use): %v", err443)
-	} else {
-		lis443 = loggingListener{Listener: lis443}
-	}
-
-	grpcServer := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(loggingInterceptor, timeSyncInterceptor),
-		grpc.UnknownServiceHandler(loggingUnknownService),
-	)
 	questEngine := questflow.MakeEngine()
-	userStore := store.New(gametime.Now, store.WithBootstrap(int32(*scene), questEngine))
+	userStore := memory.New(gametime.Now, memory.WithBootstrap(int32(*scene), questEngine))
 	if *scene != 0 {
 		log.Printf("bootstrap scene: %d", *scene)
 	}
 
-	gachaEntries, err := gachaloader.LoadGachaCatalog()
+	gachaEntries, err := masterdata.LoadGachaCatalog()
 	if err != nil {
 		log.Fatalf("load gacha catalog: %v", err)
 	}
-	userStore.ReplaceGachaCatalog(gachaEntries)
+	userStore.ReplaceCatalog(gachaEntries)
 	log.Printf("gacha catalog loaded: %d entries", len(gachaEntries))
 
-	cageOrnamentCatalog := cageornamentloader.LoadCatalog()
-	loginBonusCatalog := loginbonusloader.LoadCatalog()
+	cageOrnamentCatalog := masterdata.LoadCageOrnamentCatalog()
+	loginBonusCatalog := masterdata.LoadLoginBonusCatalog()
 
-	pb.RegisterBannerServiceServer(grpcServer, service.NewBannerServiceServer(userStore))
-	pb.RegisterUserServiceServer(grpcServer, service.NewUserServiceServer(userStore))
-	pb.RegisterBattleServiceServer(grpcServer, service.NewBattleServiceServer(userStore))
-	pb.RegisterConfigServiceServer(grpcServer, service.NewConfigServiceServer(*host, int32(*grpcPort), octoURL))
-	pb.RegisterDataServiceServer(grpcServer, service.NewDataServiceServer(userStore))
-	pb.RegisterTutorialServiceServer(grpcServer, service.NewTutorialServiceServer(userStore))
-	pb.RegisterGachaServiceServer(grpcServer, service.NewGachaServiceServer(userStore))
-	pb.RegisterGiftServiceServer(grpcServer, service.NewGiftServiceServer(userStore))
-	pb.RegisterGamePlayServiceServer(grpcServer, service.NewGameplayServiceServer())
-	pb.RegisterGimmickServiceServer(grpcServer, service.NewGimmickServiceServer(userStore))
-	pb.RegisterQuestServiceServer(grpcServer, service.NewQuestServiceServer(userStore, questEngine))
-	pb.RegisterNotificationServiceServer(grpcServer, service.NewNotificationServiceServer(userStore))
-	pb.RegisterCageOrnamentServiceServer(grpcServer, service.NewCageOrnamentServiceServer(userStore, cageOrnamentCatalog))
-	pb.RegisterDeckServiceServer(grpcServer, service.NewDeckServiceServer(userStore))
-	pb.RegisterLoginBonusServiceServer(grpcServer, service.NewLoginBonusServiceServer(userStore, loginBonusCatalog))
-	pb.RegisterNaviCutInServiceServer(grpcServer, service.NewNaviCutInServiceServer(userStore))
-	pb.RegisterDokanServiceServer(grpcServer, service.NewDokanServiceServer(userStore))
-	pb.RegisterPortalCageServiceServer(grpcServer, service.NewPortalCageServiceServer(userStore))
-
-	reflection.Register(grpcServer)
-
-	log.Printf("gRPC server listening on :%d", *grpcPort)
-	if lis443 != nil {
-		go grpcServer.Serve(lis443)
-		log.Printf("gRPC server also listening on :443 (for host-only patched client)")
-	}
-	log.Printf("client host address: %s:%d", *host, *grpcPort)
-
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-}
-
-func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	log.Printf(">>> %s", info.FullMethod)
-	resp, err := handler(ctx, req)
-	if err != nil {
-		log.Printf("<<< %s ERROR: %v", info.FullMethod, err)
-	} else {
-		log.Printf("<<< %s OK", info.FullMethod)
-	}
-	return resp, err
-}
-
-func timeSyncInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	resp, err := handler(ctx, req)
-	switch info.FullMethod {
-	case "/apb.api.user.UserService/Auth",
-		"/apb.api.user.UserService/RegisterUser",
-		"/apb.api.user.UserService/TransferUser":
-	default:
-		grpc.SetTrailer(ctx, metadata.Pairs(
-			"x-apb-response-datetime", fmt.Sprintf("%d", gametime.NowMillis()),
-		))
-	}
-	return resp, err
-}
-
-func loggingUnknownService(_ any, stream grpc.ServerStream) error {
-	fullMethod, ok := grpc.MethodFromServerStream(stream)
-	if !ok {
-		fullMethod = "<unknown>"
-	}
-	log.Printf(">>> %s", fullMethod)
-	err := status.Errorf(codes.Unimplemented, "unknown service or method %s", fullMethod)
-	log.Printf("<<< %s ERROR: %v", fullMethod, err)
-	return err
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog)
 }

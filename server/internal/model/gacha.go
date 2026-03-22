@@ -1,4 +1,4 @@
-package gacha
+package model
 
 const (
 	GachaLabelUnknown    int32 = 0

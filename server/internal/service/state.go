@@ -43,21 +43,19 @@ var gimmickDiffTables = []string{
 	"IUserGimmickUnlock",
 }
 
-func currentUserId(ctx context.Context, userStore *store.Store) int64 {
-	if userStore == nil {
-		return 0
-	}
+func currentUserId(ctx context.Context, users store.UserRepository, sessions store.SessionRepository) int64 {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if vals := md.Get("x-session-key"); len(vals) > 0 {
-			if userId, ok := userStore.ResolveUserId(vals[0]); ok {
+			if userId, err := sessions.ResolveUserId(vals[0]); err == nil {
 				return userId
 			}
 		}
 	}
 
-	defaultUserId := userStore.DefaultUserId()
-	if _, ok := userStore.SnapshotUser(defaultUserId); ok {
-		return defaultUserId
+	defaultId, _ := users.DefaultUserId()
+	if _, err := users.SnapshotUser(defaultId); err == nil {
+		return defaultId
 	}
-	return userStore.EnsureUser("").UserId
+	user, _ := users.EnsureUser("")
+	return user.UserId
 }

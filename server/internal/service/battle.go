@@ -6,23 +6,24 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
-	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/userdata"
 )
 
 type BattleServiceServer struct {
 	pb.UnimplementedBattleServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewBattleServiceServer(userStore *store.Store) *BattleServiceServer {
-	return &BattleServiceServer{store: userStore}
+func NewBattleServiceServer(users store.UserRepository, sessions store.SessionRepository) *BattleServiceServer {
+	return &BattleServiceServer{users: users, sessions: sessions}
 }
 
 func (s *BattleServiceServer) StartWave(ctx context.Context, req *pb.StartWaveRequest) (*pb.StartWaveResponse, error) {
 	log.Printf("[BattleService] StartWave: userParty=%d npcParty=%d", len(req.UserPartyInitialInfoList), len(req.NpcPartyInitialInfoList))
-	userId := currentUserId(ctx, s.store)
-	s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.Battle.IsActive = true
 		user.Battle.StartCount++
 		user.Battle.LastStartedAt = gametime.NowMillis()
@@ -30,15 +31,15 @@ func (s *BattleServiceServer) StartWave(ctx context.Context, req *pb.StartWaveRe
 		user.Battle.LastNpcPartyCount = int32(len(req.NpcPartyInitialInfoList))
 	})
 	return &pb.StartWaveResponse{
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *BattleServiceServer) FinishWave(ctx context.Context, req *pb.FinishWaveRequest) (*pb.FinishWaveResponse, error) {
 	log.Printf("[BattleService] FinishWave: battleBinary=%d userParty=%d npcParty=%d elapsedFrames=%d",
 		len(req.BattleBinary), len(req.UserPartyResultInfoList), len(req.NpcPartyResultInfoList), req.ElapsedFrameCount)
-	userId := currentUserId(ctx, s.store)
-	s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.Battle.IsActive = false
 		user.Battle.FinishCount++
 		user.Battle.LastFinishedAt = gametime.NowMillis()
@@ -48,6 +49,6 @@ func (s *BattleServiceServer) FinishWave(ctx context.Context, req *pb.FinishWave
 		user.Battle.LastElapsedFrameCount = req.ElapsedFrameCount
 	})
 	return &pb.FinishWaveResponse{
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }

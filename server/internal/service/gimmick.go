@@ -14,18 +14,19 @@ import (
 
 type GimmickServiceServer struct {
 	pb.UnimplementedGimmickServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewGimmickServiceServer(userStore *store.Store) *GimmickServiceServer {
-	return &GimmickServiceServer{store: userStore}
+func NewGimmickServiceServer(users store.UserRepository, sessions store.SessionRepository) *GimmickServiceServer {
+	return &GimmickServiceServer{users: users, sessions: sessions}
 }
 
 func (s *GimmickServiceServer) UpdateSequence(ctx context.Context, req *pb.UpdateSequenceRequest) (*pb.UpdateSequenceResponse, error) {
 	log.Printf("[GimmickService] UpdateSequence: scheduleId=%d sequenceId=%d",
 		req.GimmickSequenceScheduleId, req.GimmickSequenceId)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		key := store.GimmickSequenceKey{
 			GimmickSequenceScheduleId: req.GimmickSequenceScheduleId,
 			GimmickSequenceId:         req.GimmickSequenceId,
@@ -42,8 +43,8 @@ func (s *GimmickServiceServer) UpdateSequence(ctx context.Context, req *pb.Updat
 func (s *GimmickServiceServer) UpdateGimmickProgress(ctx context.Context, req *pb.UpdateGimmickProgressRequest) (*pb.UpdateGimmickProgressResponse, error) {
 	log.Printf("[GimmickService] UpdateGimmickProgress: scheduleId=%d sequenceId=%d gimmickId=%d ornamentIndex=%d progressValueBit=%d flowType=%d",
 		req.GimmickSequenceScheduleId, req.GimmickSequenceId, req.GimmickId, req.GimmickOrnamentIndex, req.ProgressValueBit, req.FlowType)
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
 		progressKey := store.GimmickKey{
 			GimmickSequenceScheduleId: req.GimmickSequenceScheduleId,
@@ -80,10 +81,10 @@ func (s *GimmickServiceServer) UpdateGimmickProgress(ctx context.Context, req *p
 
 func (s *GimmickServiceServer) InitSequenceSchedule(ctx context.Context, _ *emptypb.Empty) (*pb.InitSequenceScheduleResponse, error) {
 	log.Printf("[GimmickService] InitSequenceSchedule")
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		user = s.store.EnsureUser("")
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		user, _ = s.users.EnsureUser("")
 	}
 	return &pb.InitSequenceScheduleResponse{
 		DiffUserData: userdata.BuildDiffFromTables(userdata.SelectTables(userdata.FullClientTableMap(user), gimmickDiffTables)),
@@ -92,8 +93,8 @@ func (s *GimmickServiceServer) InitSequenceSchedule(ctx context.Context, _ *empt
 
 func (s *GimmickServiceServer) Unlock(ctx context.Context, req *pb.UnlockRequest) (*pb.UnlockResponse, error) {
 	log.Printf("[GimmickService] Unlock: gimmickKeys=%d", len(req.GimmickKey))
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		for _, item := range req.GimmickKey {
 			key := store.GimmickKey{
 				GimmickSequenceScheduleId: item.GimmickSequenceScheduleId,

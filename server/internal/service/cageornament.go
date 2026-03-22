@@ -5,8 +5,7 @@ import (
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
-	"lunar-tear/server/internal/cageornamentloader"
-	"lunar-tear/server/internal/mock"
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
@@ -14,12 +13,13 @@ import (
 
 type CageOrnamentServiceServer struct {
 	pb.UnimplementedCageOrnamentServiceServer
-	store   *store.Store
-	catalog *cageornamentloader.Catalog
+	users    store.UserRepository
+	sessions store.SessionRepository
+	catalog  *masterdata.CageOrnamentCatalog
 }
 
-func NewCageOrnamentServiceServer(userStore *store.Store, catalog *cageornamentloader.Catalog) *CageOrnamentServiceServer {
-	return &CageOrnamentServiceServer{store: userStore, catalog: catalog}
+func NewCageOrnamentServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.CageOrnamentCatalog) *CageOrnamentServiceServer {
+	return &CageOrnamentServiceServer{users: users, sessions: sessions, catalog: catalog}
 }
 
 func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.ReceiveRewardRequest) (*pb.ReceiveRewardResponse, error) {
@@ -30,8 +30,8 @@ func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.R
 		log.Fatalf("[CageOrnamentService] ReceiveReward: no reward for cageOrnamentId=%d", req.CageOrnamentId)
 	}
 
-	userId := currentUserId(ctx, s.store)
-	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.CageOrnamentRewards[req.CageOrnamentId] = store.CageOrnamentRewardState{
 			CageOrnamentId: req.CageOrnamentId,
 		}
@@ -58,6 +58,6 @@ func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.R
 func (s *CageOrnamentServiceServer) RecordAccess(ctx context.Context, req *pb.RecordAccessRequest) (*pb.RecordAccessResponse, error) {
 	log.Printf("[CageOrnamentService] RecordAccess: cageOrnamentId=%d", req.CageOrnamentId)
 	return &pb.RecordAccessResponse{
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }

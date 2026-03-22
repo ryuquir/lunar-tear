@@ -11,22 +11,23 @@ import (
 
 type NaviCutInServiceServer struct {
 	pb.UnimplementedNaviCutInServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewNaviCutInServiceServer(userStore *store.Store) *NaviCutInServiceServer {
-	return &NaviCutInServiceServer{store: userStore}
+func NewNaviCutInServiceServer(users store.UserRepository, sessions store.SessionRepository) *NaviCutInServiceServer {
+	return &NaviCutInServiceServer{users: users, sessions: sessions}
 }
 
 func (s *NaviCutInServiceServer) RegisterPlayed(ctx context.Context, req *pb.RegisterPlayedRequest) (*pb.RegisterPlayedResponse, error) {
 	log.Printf("[NaviCutInService] RegisterPlayed: naviCutId=%d", req.NaviCutId)
 
-	userId := currentUserId(ctx, s.store)
-	snapshot, ok := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.NaviCutInPlayed[req.NaviCutId] = true
 	})
-	if !ok {
-		snapshot = s.store.EnsureUser("")
+	if err != nil {
+		snapshot, _ = s.users.EnsureUser("")
 	}
 
 	tables := userdata.FullClientTableMap(snapshot)

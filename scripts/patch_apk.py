@@ -209,13 +209,11 @@ def main():
     p.add_argument("apk_dir", help="Path to apktool-decompiled APK directory")
     p.add_argument("--server-ip", required=True, help="Server IP (e.g. 10.0.2.2)")
     p.add_argument("--http-port", type=int, default=8080, help="HTTP port (default 8080)")
-    p.add_argument("--grpc-port", type=int, default=7777, help="gRPC port (default 7777)")
     args = p.parse_args()
 
     apk = args.apk_dir.rstrip("/")
     ip = args.server_ip
     hp = args.http_port
-    gp = args.grpc_port
 
     meta = os.path.join(apk, "assets/bin/Data/Managed/Metadata/global-metadata.dat")
     so = os.path.join(apk, "lib/arm64-v8a/libil2cpp.so")

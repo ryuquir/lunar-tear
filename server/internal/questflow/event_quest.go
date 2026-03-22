@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 )
 
@@ -23,7 +24,7 @@ func (e *Engine) HandleEventQuestStart(user *store.UserState, eventQuestChapterI
 
 	questState := user.Quests[questId]
 	questState.IsBattleOnly = isBattleOnly
-	questState.QuestStateType = store.UserQuestStateTypeActive
+	questState.QuestStateType = model.UserQuestStateTypeActive
 	questState.LatestStartDatetime = nowMillis
 	user.Quests[questId] = questState
 
@@ -46,8 +47,8 @@ func (e *Engine) HandleEventQuestFinish(user *store.UserState, eventQuestChapter
 	questState := user.Quests[questId]
 	if !questState.IsRewardGranted && !isRetired {
 		e.applyQuestRewards(user, questId, nowMillis)
-		e.grantWeaponStoryUnlocksForQuestScene(user, questId, QuestResultTypeHalfResult, nowMillis)
-		e.grantWeaponStoryUnlocksForQuestScene(user, questId, QuestResultTypeFullResult, nowMillis)
+		e.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
+		e.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
 		questState.IsRewardGranted = true
 	}
 	if !isRetired {
@@ -55,7 +56,7 @@ func (e *Engine) HandleEventQuestFinish(user *store.UserState, eventQuestChapter
 			e.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
 		}
 	}
-	questState.QuestStateType = store.UserQuestStateTypeCleared
+	questState.QuestStateType = model.UserQuestStateTypeCleared
 	questState.ClearCount++
 	questState.DailyClearCount++
 	questState.LastClearDatetime = nowMillis
@@ -91,7 +92,7 @@ func (e *Engine) HandleEventQuestSceneProgress(user *store.UserState, questScene
 
 	e.applySceneGrants(user, questSceneId, nowMillis)
 
-	if scene.QuestResultType == QuestResultTypeHalfResult {
+	if scene.QuestResultType == model.QuestResultTypeHalfResult {
 		e.clearQuestMissions(user, scene.QuestId, nowMillis)
 	}
 }

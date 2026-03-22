@@ -11,24 +11,25 @@ import (
 
 type DokanServiceServer struct {
 	pb.UnimplementedDokanServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
 }
 
-func NewDokanServiceServer(userStore *store.Store) *DokanServiceServer {
-	return &DokanServiceServer{store: userStore}
+func NewDokanServiceServer(users store.UserRepository, sessions store.SessionRepository) *DokanServiceServer {
+	return &DokanServiceServer{users: users, sessions: sessions}
 }
 
 func (s *DokanServiceServer) RegisterDokanConfirmed(ctx context.Context, req *pb.RegisterDokanConfirmedRequest) (*pb.RegisterDokanConfirmedResponse, error) {
 	log.Printf("[DokanService] RegisterDokanConfirmed: dokanIds=%v", req.DokanId)
 
-	userId := currentUserId(ctx, s.store)
-	snapshot, ok := s.store.UpdateUser(userId, func(user *store.UserState) {
+	userId := currentUserId(ctx, s.users, s.sessions)
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
 		for _, id := range req.DokanId {
 			user.DokanConfirmed[id] = true
 		}
 	})
-	if !ok {
-		snapshot = s.store.EnsureUser("")
+	if err != nil {
+		snapshot, _ = s.users.EnsureUser("")
 	}
 
 	tables := userdata.FullClientTableMap(snapshot)

@@ -7,10 +7,10 @@ import (
 	"time"
 
 	pb "lunar-tear/server/gen/proto"
-	"lunar-tear/server/internal/gacha"
 	"lunar-tear/server/internal/gametime"
-	"lunar-tear/server/internal/mock"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/userdata"
 
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -18,17 +18,19 @@ import (
 
 type GachaServiceServer struct {
 	pb.UnimplementedGachaServiceServer
-	store *store.Store
+	users    store.UserRepository
+	sessions store.SessionRepository
+	gacha    store.GachaRepository
 }
 
-func NewGachaServiceServer(userStore *store.Store) *GachaServiceServer {
-	return &GachaServiceServer{store: userStore}
+func NewGachaServiceServer(users store.UserRepository, sessions store.SessionRepository, gacha store.GachaRepository) *GachaServiceServer {
+	return &GachaServiceServer{users: users, sessions: sessions, gacha: gacha}
 }
 
 func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaListRequest) (*pb.GetGachaListResponse, error) {
 	log.Printf("[GachaService] GetGachaList: labels=%v", req.GachaLabelType)
 
-	catalog := s.store.SnapshotGachaCatalog()
+	catalog, _ := s.gacha.SnapshotCatalog()
 	sort.Slice(catalog, func(i, j int) bool {
 		if catalog[i].SortOrder != catalog[j].SortOrder {
 			return catalog[i].SortOrder < catalog[j].SortOrder
@@ -36,10 +38,10 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 		return catalog[i].GachaId < catalog[j].GachaId
 	})
 
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		user = s.store.EnsureUser("")
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		user, _ = s.users.EnsureUser("")
 	}
 
 	gachaList := make([]*pb.Gacha, 0, len(catalog))
@@ -54,14 +56,14 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 	return &pb.GetGachaListResponse{
 		Gacha:               gachaList,
 		ConvertedGachaMedal: toProtoConvertedGachaMedal(user.Gacha.ConvertedGachaMedal),
-		DiffUserData:        mock.EmptyDiff(),
+		DiffUserData:        userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *GachaServiceServer) GetGacha(ctx context.Context, req *pb.GetGachaRequest) (*pb.GetGachaResponse, error) {
 	log.Printf("[GachaService] GetGacha: ids=%v", req.GachaId)
 
-	catalog := s.store.SnapshotGachaCatalog()
+	catalog, _ := s.gacha.SnapshotCatalog()
 	byId := make(map[int32]*pb.Gacha, len(req.GachaId))
 	for _, wantedId := range req.GachaId {
 		for _, entry := range catalog {
@@ -74,7 +76,7 @@ func (s *GachaServiceServer) GetGacha(ctx context.Context, req *pb.GetGachaReque
 
 	return &pb.GetGachaResponse{
 		Gacha:        byId,
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
 
@@ -85,7 +87,7 @@ func (s *GachaServiceServer) Draw(ctx context.Context, req *pb.DrawRequest) (*pb
 		GachaResult:        []*pb.DrawGachaOddsItem{},
 		GachaBonus:         []*pb.GachaBonus{},
 		MenuGachaBadgeInfo: []*pb.MenuGachaBadgeInfo{},
-		DiffUserData:       mock.EmptyDiff(),
+		DiffUserData:       userdata.EmptyDiff(),
 	}, nil
 }
 
@@ -93,23 +95,23 @@ func (s *GachaServiceServer) ResetBoxGacha(ctx context.Context, req *pb.ResetBox
 	log.Printf("[GachaService] ResetBoxGacha: gachaId=%d", req.GachaId)
 	return &pb.ResetBoxGachaResponse{
 		Gacha:        nil,
-		DiffUserData: mock.EmptyDiff(),
+		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *GachaServiceServer) GetRewardGacha(ctx context.Context, req *emptypb.Empty) (*pb.GetRewardGachaResponse, error) {
 	log.Printf("[GachaService] GetRewardGacha")
-	userId := currentUserId(ctx, s.store)
-	user, ok := s.store.SnapshotUser(userId)
-	if !ok {
-		user = s.store.EnsureUser("")
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		user, _ = s.users.EnsureUser("")
 	}
 
 	return &pb.GetRewardGachaResponse{
 		Available:              user.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: user.Gacha.TodaysCurrentDrawCount,
 		DailyMaxCount:          user.Gacha.DailyMaxCount,
-		DiffUserData:           mock.EmptyDiff(),
+		DiffUserData:           userdata.EmptyDiff(),
 	}, nil
 }
 
@@ -117,7 +119,7 @@ func (s *GachaServiceServer) RewardDraw(ctx context.Context, req *pb.RewardDrawR
 	log.Printf("[GachaService] RewardDraw: placement=%q reward=%q amount=%q", req.PlacementName, req.RewardName, req.RewardAmount)
 	return &pb.RewardDrawResponse{
 		RewardGachaResult: []*pb.RewardGachaItem{},
-		DiffUserData:      mock.EmptyDiff(),
+		DiffUserData:      userdata.EmptyDiff(),
 	}, nil
 }
 
@@ -167,7 +169,7 @@ func stubGachaPricePhases(gachaId, modeType int32) []*pb.GachaPricePhase {
 
 	price := int32(3000)
 	drawCount := int32(10)
-	if modeType == gacha.GachaModeStepup {
+	if modeType == model.GachaModeStepup {
 		price = 1500
 		drawCount = 10
 	}
@@ -176,7 +178,7 @@ func stubGachaPricePhases(gachaId, modeType int32) []*pb.GachaPricePhase {
 		GachaPricePhaseId: phaseId,
 		IsEnabled:         true,
 		EndDatetime:       timestamppb.New(gametime.Now().AddDate(0, 0, 30)),
-		PriceType:         gacha.PriceTypeGem,
+		PriceType:         model.PriceTypeGem,
 		Price:             price,
 		RegularPrice:      3000,
 		DrawCount:         drawCount,
@@ -195,7 +197,7 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		GachaAutoResetType:         entry.GachaAutoResetType,
 		GachaAutoResetPeriod:       entry.GachaAutoResetPeriod,
 		NextAutoResetDatetime:      safeTimestamp(entry.NextAutoResetDatetime),
-		GachaUnlockCondition:       []*pb.GachaUnlockCondition{{GachaUnlockConditionType: gacha.GachaUnlockNone, ConditionValue: 0}},
+		GachaUnlockCondition:       []*pb.GachaUnlockCondition{{GachaUnlockConditionType: model.GachaUnlockNone, ConditionValue: 0}},
 		IsUserGachaUnlock:          entry.IsUserGachaUnlock,
 		StartDatetime:              safeTimestamp(entry.StartDatetime),
 		EndDatetime:                safeTimestamp(entry.EndDatetime),
@@ -213,7 +215,7 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 	phaseId := entry.GachaId*10 + 1
 
 	switch entry.GachaModeType {
-	case gacha.GachaModeBox:
+	case model.GachaModeBox:
 		g.GachaMode = &pb.Gacha_GachaModeBoxComposition{
 			GachaModeBoxComposition: &pb.GachaModeBoxComposition{
 				GachaBoxGroupId:        entry.StepupGroupId,
@@ -224,7 +226,7 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 				PromotionGachaOddsItem: stubPromotionItems(entry.GachaId),
 			},
 		}
-	case gacha.GachaModeStepup:
+	case model.GachaModeStepup:
 		g.GachaMode = &pb.Gacha_GachaModeStepupComposition{
 			GachaModeStepupComposition: &pb.GachaModeStepupComposition{
 				GachaStepGroupId:              entry.StepupGroupId,

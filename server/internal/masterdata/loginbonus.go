@@ -1,12 +1,11 @@
-package loginbonusloader
+package masterdata
 
 import (
 	"log"
-
 	"lunar-tear/server/internal/utils"
 )
 
-type stamp struct {
+type loginBonusStamp struct {
 	LoginBonusId         int32 `json:"LoginBonusId"`
 	LowerPageNumber      int32 `json:"LowerPageNumber"`
 	StampNumber          int32 `json:"StampNumber"`
@@ -15,38 +14,38 @@ type stamp struct {
 	RewardCount          int32 `json:"RewardCount"`
 }
 
-type stampKey struct {
+type loginBonusStampKey struct {
 	LoginBonusId    int32
 	LowerPageNumber int32
 	StampNumber     int32
 }
 
-type RewardEntry struct {
+type LoginBonusReward struct {
 	PossessionType int32
 	PossessionId   int32
 	Count          int32
 }
 
-type Catalog struct {
-	stamps map[stampKey]RewardEntry
+type LoginBonusCatalog struct {
+	stamps map[loginBonusStampKey]LoginBonusReward
 }
 
-func (c *Catalog) LookupStampReward(loginBonusId, pageNumber, stampNumber int32) (RewardEntry, bool) {
-	entry, ok := c.stamps[stampKey{loginBonusId, pageNumber, stampNumber}]
+func (c *LoginBonusCatalog) LookupStampReward(loginBonusId, pageNumber, stampNumber int32) (LoginBonusReward, bool) {
+	entry, ok := c.stamps[loginBonusStampKey{loginBonusId, pageNumber, stampNumber}]
 	return entry, ok
 }
 
-func LoadCatalog() *Catalog {
-	stamps, err := utils.ReadJSON[stamp]("EntityMLoginBonusStampTable.json")
+func LoadLoginBonusCatalog() *LoginBonusCatalog {
+	stamps, err := utils.ReadJSON[loginBonusStamp]("EntityMLoginBonusStampTable.json")
 	if err != nil {
 		log.Fatalf("load login bonus stamp table: %v", err)
 	}
 
-	cat := &Catalog{
-		stamps: make(map[stampKey]RewardEntry, len(stamps)),
+	cat := &LoginBonusCatalog{
+		stamps: make(map[loginBonusStampKey]LoginBonusReward, len(stamps)),
 	}
 	for _, s := range stamps {
-		cat.stamps[stampKey{s.LoginBonusId, s.LowerPageNumber, s.StampNumber}] = RewardEntry{
+		cat.stamps[loginBonusStampKey{s.LoginBonusId, s.LowerPageNumber, s.StampNumber}] = LoginBonusReward{
 			PossessionType: s.RewardPossessionType,
 			PossessionId:   s.RewardPossessionId,
 			Count:          s.RewardCount,

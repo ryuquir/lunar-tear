@@ -1,62 +1,61 @@
-package cageornamentloader
+package masterdata
 
 import (
 	"log"
-
 	"lunar-tear/server/internal/utils"
 )
 
-type ornament struct {
+type cageOrnament struct {
 	CageOrnamentId       int32 `json:"CageOrnamentId"`
 	CageOrnamentRewardId int32 `json:"CageOrnamentRewardId"`
 }
 
-type reward struct {
+type cageOrnamentRewardRow struct {
 	CageOrnamentRewardId int32 `json:"CageOrnamentRewardId"`
 	PossessionType       int32 `json:"PossessionType"`
 	PossessionId         int32 `json:"PossessionId"`
 	Count                int32 `json:"Count"`
 }
 
-type RewardEntry struct {
+type CageOrnamentReward struct {
 	PossessionType int32
 	PossessionId   int32
 	Count          int32
 }
 
-type Catalog struct {
+type CageOrnamentCatalog struct {
 	ornamentToRewardId map[int32]int32
-	rewards            map[int32]RewardEntry
+	rewards            map[int32]CageOrnamentReward
 }
 
-func (c *Catalog) LookupReward(cageOrnamentId int32) (RewardEntry, bool) {
+func (c *CageOrnamentCatalog) LookupReward(cageOrnamentId int32) (CageOrnamentReward, bool) {
 	rewardId, ok := c.ornamentToRewardId[cageOrnamentId]
 	if !ok || rewardId == 0 {
-		return RewardEntry{}, false
+		return CageOrnamentReward{}, false
 	}
 	entry, ok := c.rewards[rewardId]
 	return entry, ok
 }
 
-func LoadCatalog() *Catalog {
-	ornaments, err := utils.ReadJSON[ornament]("EntityMCageOrnamentTable.json")
+func LoadCageOrnamentCatalog() *CageOrnamentCatalog {
+	ornaments, err := utils.ReadJSON[cageOrnament]("EntityMCageOrnamentTable.json")
 	if err != nil {
 		log.Fatalf("load cage ornament table: %v", err)
 	}
-	rewards, err := utils.ReadJSON[reward]("EntityMCageOrnamentRewardTable.json")
+	rewards, err := utils.ReadJSON[cageOrnamentRewardRow]("EntityMCageOrnamentRewardTable.json")
 	if err != nil {
 		log.Fatalf("load cage ornament reward table: %v", err)
 	}
 
-	cat := &Catalog{
+	cat := &CageOrnamentCatalog{
 		ornamentToRewardId: make(map[int32]int32, len(ornaments)),
-		rewards:            make(map[int32]RewardEntry, len(rewards)),
+		rewards:            make(map[int32]CageOrnamentReward, len(rewards)),
 	}
 	for _, o := range ornaments {
 		cat.ornamentToRewardId[o.CageOrnamentId] = o.CageOrnamentRewardId
 	}
 	for _, r := range rewards {
-		cat.rewards[r.CageOrnamentRewardId] = RewardEntry{
+		cat.rewards[r.CageOrnamentRewardId] = CageOrnamentReward{
 			PossessionType: r.PossessionType,
 			PossessionId:   r.PossessionId,
 			Count:          r.Count,

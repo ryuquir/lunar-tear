@@ -1,0 +1,125 @@
+package userdata
+
+import (
+	"sort"
+
+	"lunar-tear/server/internal/store"
+)
+
+func sortedQuestRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.Quests))
+	for id := range user.Quests {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.Quests[int32(id)]
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"questId":             row.QuestId,
+			"questStateType":      row.QuestStateType,
+			"isBattleOnly":        row.IsBattleOnly,
+			"latestStartDatetime": row.LatestStartDatetime,
+			"clearCount":          row.ClearCount,
+			"dailyClearCount":     row.DailyClearCount,
+			"lastClearDatetime":   row.LastClearDatetime,
+			"shortestClearFrames": row.ShortestClearFrames,
+			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedQuestMissionRecords(user store.UserState) []map[string]any {
+	keys := make([]store.QuestMissionKey, 0, len(user.QuestMissions))
+	for key := range user.QuestMissions {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].QuestId != keys[j].QuestId {
+			return keys[i].QuestId < keys[j].QuestId
+		}
+		return keys[i].QuestMissionId < keys[j].QuestMissionId
+	})
+	records := make([]map[string]any, 0, len(keys))
+	for _, key := range keys {
+		row := user.QuestMissions[key]
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"questId":             row.QuestId,
+			"questMissionId":      row.QuestMissionId,
+			"progressValue":       row.ProgressValue,
+			"isClear":             row.IsClear,
+			"latestClearDatetime": row.LatestClearDatetime,
+			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func init() {
+	register("IUserQuest", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedQuestRecords(user)...)
+		return s
+	})
+	register("IUserQuestMission", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedQuestMissionRecords(user)...)
+		return s
+	})
+	register("IUserMainQuestFlowStatus", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":               user.UserId,
+			"currentQuestFlowType": user.MainQuest.CurrentQuestFlowType,
+			"latestVersion":        user.MainQuest.LatestVersion,
+		})
+		return s
+	})
+	register("IUserMainQuestMainFlowStatus", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":                  user.UserId,
+			"currentMainQuestRouteId": user.MainQuest.CurrentMainQuestRouteId,
+			"currentQuestSceneId":     user.MainQuest.CurrentQuestSceneId,
+			"headQuestSceneId":        user.MainQuest.HeadQuestSceneId,
+			"isReachedLastQuestScene": user.MainQuest.IsReachedLastQuestScene,
+			"latestVersion":           user.MainQuest.LatestVersion,
+		})
+		return s
+	})
+	register("IUserMainQuestProgressStatus", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":               user.UserId,
+			"currentQuestSceneId":  user.MainQuest.ProgressQuestSceneId,
+			"headQuestSceneId":     user.MainQuest.ProgressHeadQuestSceneId,
+			"currentQuestFlowType": user.MainQuest.ProgressQuestFlowType,
+			"latestVersion":        user.MainQuest.LatestVersion,
+		})
+		return s
+	})
+	register("IUserMainQuestSeasonRoute", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":            user.UserId,
+			"mainQuestSeasonId": user.MainQuest.MainQuestSeasonId,
+			"mainQuestRouteId":  user.MainQuest.CurrentMainQuestRouteId,
+			"latestVersion":     user.MainQuest.LatestVersion,
+		})
+		return s
+	})
+	register("IUserEventQuestProgressStatus", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":                     user.UserId,
+			"currentEventQuestChapterId": user.EventQuest.CurrentEventQuestChapterId,
+			"currentQuestId":             user.EventQuest.CurrentQuestId,
+			"currentQuestSceneId":        user.EventQuest.CurrentQuestSceneId,
+			"headQuestSceneId":           user.EventQuest.HeadQuestSceneId,
+			"latestVersion":              user.EventQuest.LatestVersion,
+		})
+		return s
+	})
+	registerStatic(
+		"IUserEventQuestDailyGroupCompleteReward",
+		"IUserEventQuestLabyrinthSeason",
+		"IUserEventQuestLabyrinthStage",
+		"IUserEventQuestTowerAccumulationReward",
+	)
+}

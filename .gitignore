@@ -6,6 +6,8 @@ server/bin/
 server/tmp/
 server/lunar-tear
 
+__pycache__/
+
 frida/build/
 node_modules/
 

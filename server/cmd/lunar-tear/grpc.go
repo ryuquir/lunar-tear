@@ -1,0 +1,116 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net"
+
+	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/masterdata"
+	"lunar-tear/server/internal/questflow"
+	"lunar-tear/server/internal/service"
+	"lunar-tear/server/internal/store/memory"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+)
+
+type loggingListener struct {
+	net.Listener
+}
+
+func (l loggingListener) Accept() (net.Conn, error) {
+	conn, err := l.Listener.Accept()
+	if err != nil {
+		log.Printf("[gRPC] Accept error: %v", err)
+		return nil, err
+	}
+	log.Printf("[gRPC] New connection from %v", conn.RemoteAddr())
+	return conn, nil
+}
+
+func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog) {
+	lis, err := net.Listen("tcp", ":443")
+	if err != nil {
+		log.Fatalf("failed to listen on :443: %v", err)
+	}
+	lis = loggingListener{Listener: lis}
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(loggingInterceptor, timeSyncInterceptor),
+		grpc.UnknownServiceHandler(loggingUnknownService),
+	)
+
+	registerServices(grpcServer, host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog)
+
+	reflection.Register(grpcServer)
+
+	log.Printf("gRPC server listening on :443")
+	log.Printf("client host address: %s:443", host)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func registerServices(srv *grpc.Server, host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog) {
+	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
+	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
+	pb.RegisterBattleServiceServer(srv, service.NewBattleServiceServer(userStore, userStore))
+	pb.RegisterConfigServiceServer(srv, service.NewConfigServiceServer(host, int32(443), octoURL))
+	pb.RegisterDataServiceServer(srv, service.NewDataServiceServer(userStore, userStore))
+	pb.RegisterTutorialServiceServer(srv, service.NewTutorialServiceServer(userStore, userStore))
+	pb.RegisterGachaServiceServer(srv, service.NewGachaServiceServer(userStore, userStore, userStore))
+	pb.RegisterGiftServiceServer(srv, service.NewGiftServiceServer(userStore, userStore))
+	pb.RegisterGamePlayServiceServer(srv, service.NewGameplayServiceServer())
+	pb.RegisterGimmickServiceServer(srv, service.NewGimmickServiceServer(userStore, userStore))
+	pb.RegisterQuestServiceServer(srv, service.NewQuestServiceServer(userStore, userStore, questEngine))
+	pb.RegisterNotificationServiceServer(srv, service.NewNotificationServiceServer(userStore, userStore))
+	pb.RegisterCageOrnamentServiceServer(srv, service.NewCageOrnamentServiceServer(userStore, userStore, cageOrnamentCatalog))
+	pb.RegisterDeckServiceServer(srv, service.NewDeckServiceServer(userStore, userStore))
+	pb.RegisterLoginBonusServiceServer(srv, service.NewLoginBonusServiceServer(userStore, userStore, loginBonusCatalog))
+	pb.RegisterNaviCutInServiceServer(srv, service.NewNaviCutInServiceServer(userStore, userStore))
+	pb.RegisterDokanServiceServer(srv, service.NewDokanServiceServer(userStore, userStore))
+	pb.RegisterPortalCageServiceServer(srv, service.NewPortalCageServiceServer(userStore, userStore))
+}
+
+func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	log.Printf(">>> %s", info.FullMethod)
+	resp, err := handler(ctx, req)
+	if err != nil {
+		log.Printf("<<< %s ERROR: %v", info.FullMethod, err)
+	} else {
+		log.Printf("<<< %s OK", info.FullMethod)
+	}
+	return resp, err
+}
+
+func timeSyncInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	resp, err := handler(ctx, req)
+	switch info.FullMethod {
+	case "/apb.api.user.UserService/Auth",
+		"/apb.api.user.UserService/RegisterUser",
+		"/apb.api.user.UserService/TransferUser":
+	default:
+		grpc.SetTrailer(ctx, metadata.Pairs(
+			"x-apb-response-datetime", fmt.Sprintf("%d", gametime.NowMillis()),
+		))
+	}
+	return resp, err
+}
+
+func loggingUnknownService(_ any, stream grpc.ServerStream) error {
+	fullMethod, ok := grpc.MethodFromServerStream(stream)
+	if !ok {
+		fullMethod = "<unknown>"
+	}
+	log.Printf(">>> %s", fullMethod)
+	err := status.Errorf(codes.Unimplemented, "unknown service or method %s", fullMethod)
+	log.Printf("<<< %s ERROR: %v", fullMethod, err)
+	return err
+}
