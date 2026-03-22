@@ -132,6 +132,14 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userWeaponNoteJSON, _ := encodeJSONMaps(sortedWeaponNoteRecords(user)...)
 	userNaviCutInJSON, _ := encodeJSONMaps(sortedNaviCutInRecords(user)...)
 	userDokanJSON, _ := encodeJSONMaps(sortedDokanRecords(user)...)
+	userEventQuestProgressJSON, _ := encodeJSONMaps(map[string]any{
+		"userId":                     user.UserId,
+		"currentEventQuestChapterId": user.EventQuest.CurrentEventQuestChapterId,
+		"currentQuestId":             user.EventQuest.CurrentQuestId,
+		"currentQuestSceneId":        user.EventQuest.CurrentQuestSceneId,
+		"headQuestSceneId":           user.EventQuest.HeadQuestSceneId,
+		"latestVersion":              user.EventQuest.LatestVersion,
+	})
 
 	return map[string]string{
 		"IUser":                        userJSON,
@@ -199,7 +207,12 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserNaviCutIn":                   userNaviCutInJSON,
 		"IUserDokan":                       userDokanJSON,
 		"IUserPortalCageStatus":            userPortalCageStatusJSON,
-		"IUserEventQuestGuerrillaFreeOpen": userGuerrillaFreeOpenJSON,
+		"IUserEventQuestGuerrillaFreeOpen":           userGuerrillaFreeOpenJSON,
+		"IUserEventQuestProgressStatus":              userEventQuestProgressJSON,
+		"IUserEventQuestDailyGroupCompleteReward":    "[]",
+		"IUserEventQuestLabyrinthSeason":             "[]",
+		"IUserEventQuestLabyrinthStage":              "[]",
+		"IUserEventQuestTowerAccumulationReward":     "[]",
 	}
 }
 
