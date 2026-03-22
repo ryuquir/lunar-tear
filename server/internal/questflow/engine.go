@@ -9,17 +9,17 @@ import (
 )
 
 type questScene struct {
-	QuestSceneId          int32                `json:"QuestSceneId"`
-	QuestId               int32                `json:"QuestId"`
-	SortOrder             int32                `json:"SortOrder"`
-	QuestSceneType        model.QuestSceneType `json:"QuestSceneType"`
-	AssetBackgroundId     int32                `json:"AssetBackgroundId"`
-	EventMapNumberUpper   int32                `json:"EventMapNumberUpper"`
-	EventMapNumberLower   int32                `json:"EventMapNumberLower"`
-	IsMainFlowQuestTarget bool                 `json:"IsMainFlowQuestTarget"`
-	IsBattleOnlyTarget    bool                 `json:"IsBattleOnlyTarget"`
+	QuestSceneId          int32                 `json:"QuestSceneId"`
+	QuestId               int32                 `json:"QuestId"`
+	SortOrder             int32                 `json:"SortOrder"`
+	QuestSceneType        model.QuestSceneType  `json:"QuestSceneType"`
+	AssetBackgroundId     int32                 `json:"AssetBackgroundId"`
+	EventMapNumberUpper   int32                 `json:"EventMapNumberUpper"`
+	EventMapNumberLower   int32                 `json:"EventMapNumberLower"`
+	IsMainFlowQuestTarget bool                  `json:"IsMainFlowQuestTarget"`
+	IsBattleOnlyTarget    bool                  `json:"IsBattleOnlyTarget"`
 	QuestResultType       model.QuestResultType `json:"QuestResultType"`
-	IsStorySkipTarget     bool                 `json:"IsStorySkipTarget"`
+	IsStorySkipTarget     bool                  `json:"IsStorySkipTarget"`
 }
 
 type missionGroup struct {
@@ -60,8 +60,8 @@ type quest struct {
 type mission struct {
 	QuestMissionId                    int32                           `json:"QuestMissionId"`
 	QuestMissionConditionType         model.QuestMissionConditionType `json:"QuestMissionConditionType"`
-	QuestMissionRewardId              int32                     `json:"QuestMissionRewardId"`
-	QuestMissionConditionValueGroupId int32                     `json:"QuestMissionConditionValueGroupId"`
+	QuestMissionRewardId              int32                           `json:"QuestMissionRewardId"`
+	QuestMissionConditionValueGroupId int32                           `json:"QuestMissionConditionValueGroupId"`
 }
 
 type missionReward struct {
@@ -108,8 +108,8 @@ type weaponStoryReleaseCondition struct {
 	WeaponStoryReleaseConditionGroupId          int32                                 `json:"WeaponStoryReleaseConditionGroupId"`
 	StoryIndex                                  int32                                 `json:"StoryIndex"`
 	WeaponStoryReleaseConditionType             model.WeaponStoryReleaseConditionType `json:"WeaponStoryReleaseConditionType"`
-	ConditionValue                              int32                           `json:"ConditionValue"`
-	WeaponStoryReleaseConditionOperationGroupId int32                           `json:"WeaponStoryReleaseConditionOperationGroupId"`
+	ConditionValue                              int32                                 `json:"ConditionValue"`
+	WeaponStoryReleaseConditionOperationGroupId int32                                 `json:"WeaponStoryReleaseConditionOperationGroupId"`
 }
 
 type sceneGrant struct {
