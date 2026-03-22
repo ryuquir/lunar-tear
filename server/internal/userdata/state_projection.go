@@ -3,9 +3,9 @@ package userdata
 import (
 	"log"
 	"sort"
-	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/store"
 )
 
@@ -92,6 +92,20 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"mainQuestRouteId":  user.MainQuest.CurrentMainQuestRouteId,
 		"latestVersion":     user.MainQuest.LatestVersion,
 	})
+	userGuerrillaFreeOpenJSON, _ := encodeJSONMaps(map[string]any{
+		"userId":           user.UserId,
+		"startDatetime":    user.GuerrillaFreeOpen.StartDatetime,
+		"openMinutes":      user.GuerrillaFreeOpen.OpenMinutes,
+		"dailyOpenedCount": user.GuerrillaFreeOpen.DailyOpenedCount,
+		"latestVersion":    user.GuerrillaFreeOpen.LatestVersion,
+	})
+	userPortalCageStatusJSON, _ := encodeJSONMaps(map[string]any{
+		"userId":                user.UserId,
+		"isCurrentProgress":     user.PortalCageStatus.IsCurrentProgress,
+		"dropItemStartDatetime": user.PortalCageStatus.DropItemStartDatetime,
+		"currentDropItemCount":  user.PortalCageStatus.CurrentDropItemCount,
+		"latestVersion":         user.PortalCageStatus.LatestVersion,
+	})
 
 	userCharacterJSON, _ := encodeJSONMaps(sortedCharacterRecords(user)...)
 	userCostumeJSON, _ := encodeJSONMaps(sortedCostumeRecords(user)...)
@@ -117,6 +131,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 	userDeckSubWeaponGroupJSON, _ := encodeJSONMaps(sortedDeckSubWeaponGroupRecords(user)...)
 	userWeaponNoteJSON, _ := encodeJSONMaps(sortedWeaponNoteRecords(user)...)
 	userNaviCutInJSON, _ := encodeJSONMaps(sortedNaviCutInRecords(user)...)
+	userDokanJSON, _ := encodeJSONMaps(sortedDokanRecords(user)...)
 
 	return map[string]string{
 		"IUser":                        userJSON,
@@ -181,7 +196,10 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserPartsPresetTag": "[]",
 		"IUserPartsStatusSub": "[]",
 
-		"IUserNaviCutIn": userNaviCutInJSON,
+		"IUserNaviCutIn":                   userNaviCutInJSON,
+		"IUserDokan":                       userDokanJSON,
+		"IUserPortalCageStatus":            userPortalCageStatusJSON,
+		"IUserEventQuestGuerrillaFreeOpen": userGuerrillaFreeOpenJSON,
 	}
 }
 
@@ -195,17 +213,6 @@ func FirstEntranceClientTableMap(user store.UserState) map[string]string {
 		"IUserDeckCharacter",
 		"IUserDeck",
 		"IUserTutorialProgress",
-		"IUserQuest",
-		"IUserQuestMission",
-		"IUserMission",
-		"IUserMainQuestFlowStatus",
-		"IUserMainQuestMainFlowStatus",
-		"IUserMainQuestProgressStatus",
-		"IUserMainQuestSeasonRoute",
-		"IUserGimmick",
-		"IUserGimmickOrnamentProgress",
-		"IUserGimmickSequence",
-		"IUserGimmickUnlock",
 		"IUserParts",
 		"IUserWeaponNote",
 		"IUserWeaponStory",
@@ -411,11 +418,33 @@ func sortedNaviCutInRecords(user store.UserState) []map[string]any {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	now := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
-			"userId":      user.UserId,
-			"naviCutInId": id,
+			"userId":        user.UserId,
+			"naviCutInId":   id,
+			"playDatetime":  now,
+			"latestVersion": 0,
+		})
+	}
+	return records
+}
+
+func sortedDokanRecords(user store.UserState) []map[string]any {
+	ids := make([]int32, 0, len(user.DokanConfirmed))
+	for id := range user.DokanConfirmed {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	now := gametime.NowMillis()
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":          user.UserId,
+			"dokanId":         id,
+			"displayDatetime": now,
+			"latestVersion":   0,
 		})
 	}
 	return records
@@ -690,7 +719,7 @@ func sortedMaterialRecords(user store.UserState) []map[string]any {
 	}
 	sort.Ints(ids)
 
-	nowMillis := time.Now().UnixMilli()
+	nowMillis := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
@@ -711,7 +740,7 @@ func sortedConsumableItemRecords(user store.UserState) []map[string]any {
 	}
 	sort.Ints(ids)
 
-	nowMillis := time.Now().UnixMilli()
+	nowMillis := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
@@ -749,7 +778,7 @@ func sortedImportantItemRecords(user store.UserState) []map[string]any {
 	}
 	sort.Ints(ids)
 
-	nowMillis := time.Now().UnixMilli()
+	nowMillis := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{

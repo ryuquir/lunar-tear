@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"log"
-	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
@@ -31,7 +31,7 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 		}
 		if req.TutorialType == int32(model.TutorialTypeMenuFirst) ||
 			req.TutorialType == int32(model.TutorialTypeMenuSecond) {
-			store.EnsureDefaultDeck(user, time.Now().UnixMilli())
+			store.EnsureDefaultDeck(user, gametime.NowMillis())
 		}
 	})
 	tables := []string{"IUserTutorialProgress"}
@@ -61,7 +61,7 @@ func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Co
 			ProgressPhase: req.ProgressPhase,
 		}
 		if req.Deck != nil {
-			store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), time.Now().UnixMilli())
+			store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), gametime.NowMillis())
 		}
 	})
 	return &pb.SetTutorialProgressAndReplaceDeckResponse{

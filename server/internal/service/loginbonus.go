@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/loginbonusloader"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
@@ -29,7 +30,7 @@ func (s *LoginBonusServiceServer) ReceiveStamp(ctx context.Context, req *emptypb
 	userId := currentUserId(ctx, s.store)
 
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		now := time.Now().UnixMilli()
+		now := gametime.NowMillis()
 		nextStamp := user.LoginBonus.CurrentStampNumber + 1
 
 		reward, ok := s.catalog.LookupStampReward(

@@ -120,6 +120,23 @@ type UserState struct {
 	WeaponNotes         map[int32]WeaponNoteState
 	DeckSubWeapons      map[string][]string // userDeckCharacterUuid -> ordered sub-weapon UUIDs
 	NaviCutInPlayed     map[int32]bool
+	DokanConfirmed      map[int32]bool
+	PortalCageStatus    PortalCageStatusState
+	GuerrillaFreeOpen   GuerrillaFreeOpenState
+}
+
+type GuerrillaFreeOpenState struct {
+	StartDatetime    int64
+	OpenMinutes      int32
+	DailyOpenedCount int32
+	LatestVersion    int64
+}
+
+type PortalCageStatusState struct {
+	IsCurrentProgress     bool
+	DropItemStartDatetime int64
+	CurrentDropItemCount  int32
+	LatestVersion         int64
 }
 
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
@@ -838,6 +855,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 		DeckTypeNotes:       make(map[int32]DeckTypeNoteState),
 		WeaponNotes:         make(map[int32]WeaponNoteState),
 		NaviCutInPlayed:     make(map[int32]bool),
+		DokanConfirmed:      make(map[int32]bool),
 	}
 	if bootstrapper != nil {
 		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
@@ -876,6 +894,7 @@ func (u UserState) clone() UserState {
 	out.DeckTypeNotes = maps.Clone(u.DeckTypeNotes)
 	out.WeaponNotes = maps.Clone(u.WeaponNotes)
 	out.NaviCutInPlayed = maps.Clone(u.NaviCutInPlayed)
+	out.DokanConfirmed = maps.Clone(u.DokanConfirmed)
 	out.Gacha = GachaState{
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,

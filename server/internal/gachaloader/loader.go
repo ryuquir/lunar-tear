@@ -3,9 +3,9 @@ package gachaloader
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"lunar-tear/server/internal/gacha"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/utils"
 )
@@ -51,7 +51,7 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, error) {
 		gachaToBanner[b.DestinationDomainId] = b
 	}
 
-	now := time.Now()
+	now := gametime.Now()
 	startDt := now.AddDate(0, 0, -3).UnixMilli()
 	endDt := now.AddDate(0, 0, 3).UnixMilli()
 

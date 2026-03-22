@@ -8,6 +8,7 @@ import (
 	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
 
@@ -30,7 +31,7 @@ func (s *GiftServiceServer) ReceiveGift(ctx context.Context, req *pb.ReceiveGift
 	userId := currentUserId(ctx, s.store)
 	received := make([]string, 0, len(req.UserGiftUuid))
 	_, ok := s.store.UpdateUser(userId, func(user *store.UserState) {
-		nowMillis := time.Now().UnixMilli()
+		nowMillis := gametime.NowMillis()
 		remaining := make([]store.NotReceivedGiftState, 0, len(user.Gifts.NotReceived))
 		for _, gift := range user.Gifts.NotReceived {
 			if slices.Contains(req.UserGiftUuid, gift.UserGiftUuid) {

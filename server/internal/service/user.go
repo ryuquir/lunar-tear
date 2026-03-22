@@ -8,6 +8,7 @@ import (
 	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
@@ -34,9 +35,7 @@ func setCommonResponseTrailers(ctx context.Context, diff map[string]*pb.DiffData
 	}
 	sort.Strings(keys)
 
-	pairs := []string{
-		"x-apb-response-datetime", fmt.Sprintf("%d", time.Now().UnixMilli()),
-	}
+	var pairs []string
 	if includeUpdateNames && len(keys) > 0 {
 		pairs = append(pairs, "x-apb-update-user-data-names", keys[0])
 		for _, key := range keys[1:] {
@@ -55,7 +54,7 @@ func (s *UserServiceServer) RegisterUser(ctx context.Context, req *pb.RegisterUs
 
 	return &pb.RegisterUserResponse{
 		UserId:       user.UserId,
-		Signature:    fmt.Sprintf("sig_%d_%d", user.UserId, time.Now().Unix()),
+		Signature:    fmt.Sprintf("sig_%d_%d", user.UserId, gametime.Now().Unix()),
 		DiffUserData: userdata.BuildDiffFromTables(userdata.FirstEntranceClientTableMap(user)),
 	}, nil
 }
@@ -85,7 +84,7 @@ func (s *UserServiceServer) GameStart(ctx context.Context, _ *emptypb.Empty) (*p
 
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		nowMillis := time.Now().UnixMilli()
+		nowMillis := gametime.NowMillis()
 		user.GameStartDatetime = nowMillis
 		if user.Profile.Name == "Un-regist User Name" {
 			user.Profile.Name = "Lunar Tear"
@@ -117,7 +116,7 @@ func (s *UserServiceServer) SetUserName(ctx context.Context, req *pb.SetUserName
 	log.Printf("[UserService] SetUserName: %s", req.Name)
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		nowMillis := time.Now().UnixMilli()
+		nowMillis := gametime.NowMillis()
 		user.Profile.Name = req.Name
 		user.Profile.NameUpdateDatetime = nowMillis
 	})
@@ -130,7 +129,7 @@ func (s *UserServiceServer) SetUserMessage(ctx context.Context, req *pb.SetUserM
 	log.Printf("[UserService] SetUserMessage: %s", req.Message)
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		nowMillis := time.Now().UnixMilli()
+		nowMillis := gametime.NowMillis()
 		user.Profile.Message = req.Message
 		user.Profile.MessageUpdateDatetime = nowMillis
 	})
@@ -143,7 +142,7 @@ func (s *UserServiceServer) SetUserFavoriteCostumeId(ctx context.Context, req *p
 	log.Printf("[UserService] SetUserFavoriteCostumeId: %d", req.FavoriteCostumeId)
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		nowMillis := time.Now().UnixMilli()
+		nowMillis := gametime.NowMillis()
 		user.Profile.FavoriteCostumeId = req.FavoriteCostumeId
 		user.Profile.FavoriteCostumeIdUpdateDatetime = nowMillis
 	})

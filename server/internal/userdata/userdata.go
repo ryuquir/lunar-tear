@@ -4,7 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"time"
+
+	"lunar-tear/server/internal/gametime"
 
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -278,7 +279,7 @@ func encodeJSONMaps(records ...map[string]any) (string, error) {
 // We provide BOTH msgpack-encoded (base64) and plain JSON variants.
 // The server tries msgpack first; if the client doesn't accept it, switch to JSON.
 func DefaultUserData(userId int64) map[string]string {
-	now := time.Now().Unix()
+	now := gametime.Now().Unix()
 
 	userRecord, _ := EncodeRecords(&EntityIUser{
 		UserId:           userId,

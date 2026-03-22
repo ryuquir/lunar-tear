@@ -11,6 +11,7 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/cageornamentloader"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/gachaloader"
 	"lunar-tear/server/internal/loginbonusloader"
 	"lunar-tear/server/internal/questflow"
@@ -21,6 +22,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
@@ -100,7 +102,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(loggingInterceptor),
+		grpc.ChainUnaryInterceptor(loggingInterceptor, timeSyncInterceptor),
 		grpc.UnknownServiceHandler(loggingUnknownService),
 	)
 	questEngine := questflow.MakeEngine()
@@ -135,6 +137,8 @@ func main() {
 	pb.RegisterDeckServiceServer(grpcServer, service.NewDeckServiceServer(userStore))
 	pb.RegisterLoginBonusServiceServer(grpcServer, service.NewLoginBonusServiceServer(userStore, loginBonusCatalog))
 	pb.RegisterNaviCutInServiceServer(grpcServer, service.NewNaviCutInServiceServer(userStore))
+	pb.RegisterDokanServiceServer(grpcServer, service.NewDokanServiceServer(userStore))
+	pb.RegisterPortalCageServiceServer(grpcServer, service.NewPortalCageServiceServer(userStore))
 
 	reflection.Register(grpcServer)
 
@@ -157,6 +161,20 @@ func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo
 		log.Printf("<<< %s ERROR: %v", info.FullMethod, err)
 	} else {
 		log.Printf("<<< %s OK", info.FullMethod)
+	}
+	return resp, err
+}
+
+func timeSyncInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	resp, err := handler(ctx, req)
+	switch info.FullMethod {
+	case "/apb.api.user.UserService/Auth",
+		"/apb.api.user.UserService/RegisterUser",
+		"/apb.api.user.UserService/TransferUser":
+	default:
+		grpc.SetTrailer(ctx, metadata.Pairs(
+			"x-apb-response-datetime", fmt.Sprintf("%d", gametime.NowMillis()),
+		))
 	}
 	return resp, err
 }

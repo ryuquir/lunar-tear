@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"log"
-	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/questflow"
 	"lunar-tear/server/internal/store"
@@ -42,7 +42,7 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		s.engine.HandleMainFlowSceneProgress(user, req.QuestSceneId, time.Now().UnixMilli())
+		s.engine.HandleMainFlowSceneProgress(user, req.QuestSceneId, gametime.NowMillis())
 	})
 	logQuestState("UpdateMainFlowSceneProgress state", user)
 
@@ -98,7 +98,7 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 	log.Printf("[QuestService] StartMainQuest: %+v", req)
 
 	userId := currentUserId(ctx, s.store)
-	nowMillis := time.Now().UnixMilli()
+	nowMillis := gametime.NowMillis()
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
 		s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, nowMillis)
 	})
@@ -147,7 +147,7 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 	log.Printf("[QuestService] FinishMainQuest: questId=%d isMainFlow=%v isRetired=%v storySkipType=%d",
 		req.QuestId, req.IsMainFlow, req.IsRetired, req.StorySkipType)
 
-	nowMillis := time.Now().UnixMilli()
+	nowMillis := gametime.NowMillis()
 	userId := currentUserId(ctx, s.store)
 	var outcome questflow.FinishOutcome
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
@@ -193,7 +193,7 @@ func (s *QuestServiceServer) RestartMainQuest(ctx context.Context, req *pb.Resta
 
 	userId := currentUserId(ctx, s.store)
 	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
-		s.engine.HandleQuestRestart(user, req.QuestId, time.Now().UnixMilli())
+		s.engine.HandleQuestRestart(user, req.QuestId, gametime.NowMillis())
 	})
 	logQuestState("RestartMainQuest state", user)
 
@@ -215,5 +215,24 @@ func (s *QuestServiceServer) SetQuestSceneChoice(ctx context.Context, req *pb.Se
 		req.QuestSceneId, req.ChoiceNumber)
 	return &pb.SetQuestSceneChoiceResponse{
 		DiffUserData: mock.EmptyDiff(),
+	}, nil
+}
+
+const defaultGuerrillaFreeOpenMinutes = int32(60)
+
+func (s *QuestServiceServer) StartGuerrillaFreeOpen(ctx context.Context, req *emptypb.Empty) (*pb.StartGuerrillaFreeOpenResponse, error) {
+	log.Printf("[QuestService] StartGuerrillaFreeOpen")
+
+	userId := currentUserId(ctx, s.store)
+	nowMillis := gametime.NowMillis()
+	user, _ := s.store.UpdateUser(userId, func(user *store.UserState) {
+		user.GuerrillaFreeOpen.StartDatetime = nowMillis
+		user.GuerrillaFreeOpen.OpenMinutes = defaultGuerrillaFreeOpenMinutes
+		user.GuerrillaFreeOpen.DailyOpenedCount++
+		user.GuerrillaFreeOpen.LatestVersion = nowMillis
+	})
+
+	return &pb.StartGuerrillaFreeOpenResponse{
+		DiffUserData: buildSelectedQuestDiff(user, []string{"IUserEventQuestGuerrillaFreeOpen"}),
 	}, nil
 }

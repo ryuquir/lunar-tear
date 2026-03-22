@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"log"
-	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/mock"
 	"lunar-tear/server/internal/store"
 )
@@ -25,7 +25,7 @@ func (s *BattleServiceServer) StartWave(ctx context.Context, req *pb.StartWaveRe
 	s.store.UpdateUser(userId, func(user *store.UserState) {
 		user.Battle.IsActive = true
 		user.Battle.StartCount++
-		user.Battle.LastStartedAt = time.Now().UnixMilli()
+		user.Battle.LastStartedAt = gametime.NowMillis()
 		user.Battle.LastUserPartyCount = int32(len(req.UserPartyInitialInfoList))
 		user.Battle.LastNpcPartyCount = int32(len(req.NpcPartyInitialInfoList))
 	})
@@ -41,7 +41,7 @@ func (s *BattleServiceServer) FinishWave(ctx context.Context, req *pb.FinishWave
 	s.store.UpdateUser(userId, func(user *store.UserState) {
 		user.Battle.IsActive = false
 		user.Battle.FinishCount++
-		user.Battle.LastFinishedAt = time.Now().UnixMilli()
+		user.Battle.LastFinishedAt = gametime.NowMillis()
 		user.Battle.LastUserPartyCount = int32(len(req.UserPartyResultInfoList))
 		user.Battle.LastNpcPartyCount = int32(len(req.NpcPartyResultInfoList))
 		user.Battle.LastBattleBinarySize = int32(len(req.BattleBinary))

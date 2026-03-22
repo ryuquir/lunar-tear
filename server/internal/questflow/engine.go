@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"time"
 
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/utils"
@@ -495,6 +495,12 @@ type Engine struct {
 	userExpThresholds                  []int32
 	characterExpThresholds             []int32
 	costumeExpByRarity                 map[int32][]int32
+	maxStaminaByLevel                  map[int32]int32
+}
+
+type userLevelEntry struct {
+	UserLevel  int32 `json:"UserLevel"`
+	MaxStamina int32 `json:"MaxStamina"`
 }
 
 func MakeEngine() *Engine {
@@ -654,6 +660,15 @@ func MakeEngine() *Engine {
 	if err != nil {
 		panic(err)
 	}
+
+	userLevels, err := utils.ReadJSON[userLevelEntry]("EntityMUserLevelTable.json")
+	if err != nil {
+		panic(err)
+	}
+	maxStaminaByLevel := make(map[int32]int32, len(userLevels))
+	for _, ul := range userLevels {
+		maxStaminaByLevel[ul.UserLevel] = ul.MaxStamina
+	}
 	buildExpThresholds := func(mapId int32) []int32 {
 		maxKey := int32(0)
 		for _, r := range paramMapRows {
@@ -692,6 +707,7 @@ func MakeEngine() *Engine {
 		userExpThresholds:                  buildExpThresholds(1),
 		characterExpThresholds:             buildExpThresholds(31),
 		costumeExpByRarity:                 buildCostumeExpByRarity(costumeRarities, buildExpThresholds),
+		maxStaminaByLevel:                  maxStaminaByLevel,
 	}
 
 	for _, scene := range scenes {
@@ -1115,7 +1131,7 @@ func (e *Engine) HandleMainQuestSceneProgress(user *store.UserState, questSceneI
 
 	if isMainQuestPlayable(quest) {
 		if scene.QuestResultType == QuestResultTypeHalfResult {
-			nowMillis := time.Now().UnixMilli()
+			nowMillis := gametime.NowMillis()
 			e.clearQuestMissions(user, quest.QuestId, nowMillis)
 		}
 
@@ -1156,9 +1172,18 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 		return
 	}
 
+	oldLevel := user.Status.Level
 	user.Status.Exp += questMeta.UserExp
 	user.Status.Level = levelFromExp(user.Status.Exp, e.userExpThresholds)
 	log.Printf("[applyExpRewards] questId=%d user: +%d exp -> total=%d level=%d", questId, questMeta.UserExp, user.Status.Exp, user.Status.Level)
+
+	if user.Status.Level > oldLevel {
+		if maxStamina, ok := e.maxStaminaByLevel[user.Status.Level]; ok {
+			user.Status.StaminaMilliValue = maxStamina * 1000
+			user.Status.StaminaUpdateDatetime = nowMillis
+			log.Printf("[applyExpRewards] level-up %d->%d, stamina replenished to %d", oldLevel, user.Status.Level, maxStamina)
+		}
+	}
 
 	if questMeta.CharacterExp != 0 {
 		for id, row := range user.Characters {
