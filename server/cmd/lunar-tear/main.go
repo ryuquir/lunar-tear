@@ -106,7 +106,7 @@ func main() {
 		grpc.UnknownServiceHandler(loggingUnknownService),
 	)
 	questEngine := questflow.MakeEngine()
-	userStore := store.New(nil, store.WithBootstrap(int32(*scene), questEngine))
+	userStore := store.New(gametime.Now, store.WithBootstrap(int32(*scene), questEngine))
 	if *scene != 0 {
 		log.Printf("bootstrap scene: %d", *scene)
 	}

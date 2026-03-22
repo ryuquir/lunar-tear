@@ -30,7 +30,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"level":                 user.Status.Level,
 		"exp":                   user.Status.Exp,
 		"staminaMilliValue":     user.Status.StaminaMilliValue,
-		"staminaUpdateDatetime": 0,
+		"staminaUpdateDatetime": user.Status.StaminaUpdateDatetime,
 		"latestVersion":         user.Status.LatestVersion,
 	})
 	userGemJSON, _ := encodeJSONRecords(&EntityIUserGem{
