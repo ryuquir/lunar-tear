@@ -279,6 +279,57 @@ type weaponMaster struct {
 	WeaponStoryReleaseConditionGroupId int32 `json:"WeaponStoryReleaseConditionGroupId"`
 }
 
+type battleDropReward struct {
+	BattleDropRewardId int32                `json:"BattleDropRewardId"`
+	PossessionType     model.PossessionType `json:"PossessionType"`
+	PossessionId       int32                `json:"PossessionId"`
+	Count              int32                `json:"Count"`
+}
+
+type questPickupRewardGroup struct {
+	QuestPickupRewardGroupId int32 `json:"QuestPickupRewardGroupId"`
+	SortOrder                int32 `json:"SortOrder"`
+	BattleDropRewardId       int32 `json:"BattleDropRewardId"`
+}
+
+type questSceneBattle struct {
+	QuestSceneId  int32 `json:"QuestSceneId"`
+	BattleGroupId int32 `json:"BattleGroupId"`
+}
+
+type battleGroup struct {
+	BattleGroupId int32 `json:"BattleGroupId"`
+	WaveNumber    int32 `json:"WaveNumber"`
+	BattleId      int32 `json:"BattleId"`
+}
+
+type battle struct {
+	BattleId            int32 `json:"BattleId"`
+	BattleNpcId         int32 `json:"BattleNpcId"`
+	DeckType            int32 `json:"DeckType"`
+	BattleNpcDeckNumber int32 `json:"BattleNpcDeckNumber"`
+}
+
+type battleNpcDeck struct {
+	BattleNpcId                  int32  `json:"BattleNpcId"`
+	DeckType                     int32  `json:"DeckType"`
+	BattleNpcDeckNumber          int32  `json:"BattleNpcDeckNumber"`
+	BattleNpcDeckCharacterUuid01 string `json:"BattleNpcDeckCharacterUuid01"`
+	BattleNpcDeckCharacterUuid02 string `json:"BattleNpcDeckCharacterUuid02"`
+	BattleNpcDeckCharacterUuid03 string `json:"BattleNpcDeckCharacterUuid03"`
+}
+
+type battleNpcDropCategory struct {
+	BattleNpcId                int32  `json:"BattleNpcId"`
+	BattleNpcDeckCharacterUuid string `json:"BattleNpcDeckCharacterUuid"`
+	BattleDropCategoryId       int32  `json:"BattleDropCategoryId"`
+}
+
+type BattleDropInfo struct {
+	QuestSceneId         int32
+	BattleDropCategoryId int32
+}
+
 type numericalParameterMapRow struct {
 	NumericalParameterMapId int32 `json:"NumericalParameterMapId"`
 	ParameterKey            int32 `json:"ParameterKey"`
@@ -292,6 +343,7 @@ type RewardGrant struct {
 }
 
 type FinishOutcome struct {
+	DropRewards                  []RewardGrant
 	FirstClearRewards            []RewardGrant
 	MissionClearRewards          []RewardGrant
 	MissionClearCompleteRewards  []RewardGrant
@@ -393,6 +445,18 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 		outcome.IsBigWin = len(outcome.BigWinClearedQuestMissionIds) > 0
 	}
 
+	if questMeta.QuestPickupRewardGroupId != 0 {
+		for _, dropId := range e.pickupRewardIdsByGroupId[questMeta.QuestPickupRewardGroupId] {
+			if bdr, ok := e.battleDropRewardById[dropId]; ok {
+				outcome.DropRewards = append(outcome.DropRewards, RewardGrant{
+					PossessionType: bdr.PossessionType,
+					PossessionId:   bdr.PossessionId,
+					Count:          bdr.Count,
+				})
+			}
+		}
+	}
+
 	return outcome
 }
 
@@ -424,6 +488,9 @@ type Engine struct {
 	releaseConditionsByGroupId         map[int32][]weaponStoryReleaseCondition
 	costumeById                        map[int32]costumeMaster
 	sceneGrantsBySceneId               map[int32][]sceneGrant
+	battleDropRewardById               map[int32]battleDropReward
+	pickupRewardIdsByGroupId           map[int32][]int32
+	battleDropsByQuestId               map[int32][]BattleDropInfo
 	tutorialUnlockConditions           []tutorialUnlockCondition
 	userExpThresholds                  []int32
 	characterExpThresholds             []int32
@@ -537,6 +604,47 @@ func MakeEngine() *Engine {
 		panic(err)
 	}
 
+	battleDropRewards, err := utils.ReadJSON[battleDropReward]("EntityMBattleDropRewardTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	pickupRewardGroups, err := utils.ReadJSON[questPickupRewardGroup]("EntityMQuestPickupRewardGroupTable.json")
+	if err != nil {
+		panic(err)
+	}
+	sort.Slice(pickupRewardGroups, func(i, j int) bool {
+		if pickupRewardGroups[i].QuestPickupRewardGroupId != pickupRewardGroups[j].QuestPickupRewardGroupId {
+			return pickupRewardGroups[i].QuestPickupRewardGroupId < pickupRewardGroups[j].QuestPickupRewardGroupId
+		}
+		return pickupRewardGroups[i].SortOrder < pickupRewardGroups[j].SortOrder
+	})
+
+	sceneBattles, err := utils.ReadJSON[questSceneBattle]("EntityMQuestSceneBattleTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	battleGroups, err := utils.ReadJSON[battleGroup]("EntityMBattleGroupTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	battles, err := utils.ReadJSON[battle]("EntityMBattleTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	npcDecks, err := utils.ReadJSON[battleNpcDeck]("EntityMBattleNpcDeckTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	npcDropCategories, err := utils.ReadJSON[battleNpcDropCategory]("EntityMBattleNpcDeckCharacterDropCategoryTable.json")
+	if err != nil {
+		panic(err)
+	}
+
 	tutorialUnlockConds, err := utils.ReadJSON[tutorialUnlockCondition]("EntityMTutorialUnlockConditionTable.json")
 	if err != nil {
 		panic(err)
@@ -577,6 +685,9 @@ func MakeEngine() *Engine {
 		releaseConditionsByGroupId:         make(map[int32][]weaponStoryReleaseCondition),
 		costumeById:                        make(map[int32]costumeMaster, len(costumeMasters)),
 		sceneGrantsBySceneId:               make(map[int32][]sceneGrant),
+		battleDropRewardById:               make(map[int32]battleDropReward, len(battleDropRewards)),
+		pickupRewardIdsByGroupId:           make(map[int32][]int32),
+		battleDropsByQuestId:               make(map[int32][]BattleDropInfo),
 		tutorialUnlockConditions:           tutorialUnlockConds,
 		userExpThresholds:                  buildExpThresholds(1),
 		characterExpThresholds:             buildExpThresholds(31),
@@ -688,6 +799,91 @@ func MakeEngine() *Engine {
 		)
 	}
 
+	for _, bdr := range battleDropRewards {
+		engine.battleDropRewardById[bdr.BattleDropRewardId] = bdr
+	}
+
+	for _, pg := range pickupRewardGroups {
+		engine.pickupRewardIdsByGroupId[pg.QuestPickupRewardGroupId] = append(
+			engine.pickupRewardIdsByGroupId[pg.QuestPickupRewardGroupId],
+			pg.BattleDropRewardId,
+		)
+	}
+
+	battleGroupBySceneId := make(map[int32]int32, len(sceneBattles))
+	for _, sb := range sceneBattles {
+		battleGroupBySceneId[sb.QuestSceneId] = sb.BattleGroupId
+	}
+
+	battleIdsByGroupId := make(map[int32][]int32)
+	for _, bg := range battleGroups {
+		battleIdsByGroupId[bg.BattleGroupId] = append(battleIdsByGroupId[bg.BattleGroupId], bg.BattleId)
+	}
+
+	type npcDeckKey struct {
+		BattleNpcId         int32
+		DeckType            int32
+		BattleNpcDeckNumber int32
+	}
+	npcDeckByKey := make(map[npcDeckKey]battleNpcDeck, len(npcDecks))
+	for _, d := range npcDecks {
+		npcDeckByKey[npcDeckKey{d.BattleNpcId, d.DeckType, d.BattleNpcDeckNumber}] = d
+	}
+
+	battleById := make(map[int32]battle, len(battles))
+	for _, b := range battles {
+		battleById[b.BattleId] = b
+	}
+
+	type dropCatKey struct {
+		BattleNpcId int32
+		Uuid        string
+	}
+	dropCategoryByKey := make(map[dropCatKey]int32, len(npcDropCategories))
+	for _, dc := range npcDropCategories {
+		dropCategoryByKey[dropCatKey{dc.BattleNpcId, dc.BattleNpcDeckCharacterUuid}] = dc.BattleDropCategoryId
+	}
+
+	for questId := range engine.questById {
+		sceneIds := engine.sceneIdsByQuestId[questId]
+		seen := make(map[BattleDropInfo]bool)
+		var drops []BattleDropInfo
+		for _, sceneId := range sceneIds {
+			groupId, ok := battleGroupBySceneId[sceneId]
+			if !ok {
+				continue
+			}
+			for _, battleId := range battleIdsByGroupId[groupId] {
+				b, ok := battleById[battleId]
+				if !ok {
+					continue
+				}
+				dk := npcDeckKey{b.BattleNpcId, b.DeckType, b.BattleNpcDeckNumber}
+				deck, ok := npcDeckByKey[dk]
+				if !ok {
+					continue
+				}
+				for _, uuid := range []string{deck.BattleNpcDeckCharacterUuid01, deck.BattleNpcDeckCharacterUuid02, deck.BattleNpcDeckCharacterUuid03} {
+					if uuid == "" {
+						continue
+					}
+					catId, ok := dropCategoryByKey[dropCatKey{b.BattleNpcId, uuid}]
+					if !ok {
+						continue
+					}
+					info := BattleDropInfo{QuestSceneId: sceneId, BattleDropCategoryId: catId}
+					if !seen[info] {
+						seen[info] = true
+						drops = append(drops, info)
+					}
+				}
+			}
+		}
+		if len(drops) > 0 {
+			engine.battleDropsByQuestId[questId] = drops
+		}
+	}
+
 	return engine
 }
 
@@ -763,6 +959,17 @@ func (e *Engine) applySceneGrants(user *store.UserState, questSceneId int32, now
 	}
 }
 
+func (e *Engine) isSceneAhead(newSceneId, currentHeadId int32) bool {
+	if currentHeadId == 0 {
+		return true
+	}
+	return e.sceneById[newSceneId].SortOrder > e.sceneById[currentHeadId].SortOrder
+}
+
+func (e *Engine) BattleDropRewards(questId int32) []BattleDropInfo {
+	return e.battleDropsByQuestId[questId]
+}
+
 func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
 	scene, ok := e.sceneById[questSceneId]
 	if !ok {
@@ -775,7 +982,9 @@ func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId
 	}
 
 	user.MainQuest.CurrentQuestSceneId = questSceneId
-	user.MainQuest.HeadQuestSceneId = max(user.MainQuest.HeadQuestSceneId, questSceneId)
+	if e.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
+		user.MainQuest.HeadQuestSceneId = questSceneId
+	}
 	user.MainQuest.CurrentQuestFlowType = int32(QuestFlowTypeMainFlow)
 
 	routeId, ok := e.routeIdByQuestId[quest.QuestId]
@@ -883,15 +1092,7 @@ func (e *Engine) getLastMainFlowSceneId(questId int32) int32 {
 		panic(fmt.Sprintf("no scenes found for questId=%d", questId))
 	}
 
-	for i := len(sceneIds) - 1; i >= 0; i-- {
-		sceneId := sceneIds[i]
-		scene := e.sceneById[sceneId]
-		if scene.IsMainFlowQuestTarget {
-			return sceneId
-		}
-	}
-
-	panic(fmt.Sprintf("no main flow target scene found for questId=%d", questId))
+	return sceneIds[len(sceneIds)-1]
 }
 
 func (e *Engine) HandleMainQuestSceneProgress(user *store.UserState, questSceneId int32) {
@@ -906,25 +1107,22 @@ func (e *Engine) HandleMainQuestSceneProgress(user *store.UserState, questSceneI
 	}
 
 	user.MainQuest.CurrentQuestSceneId = questSceneId
-	user.MainQuest.HeadQuestSceneId = max(user.MainQuest.HeadQuestSceneId, questSceneId)
+	if e.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
+		user.MainQuest.HeadQuestSceneId = questSceneId
+	}
 	lastSceneId := e.getLastMainFlowSceneId(quest.QuestId)
 	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 
 	if isMainQuestPlayable(quest) {
-		questState := user.Quests[quest.QuestId]
 		if scene.QuestResultType == QuestResultTypeHalfResult {
 			nowMillis := time.Now().UnixMilli()
 			e.clearQuestMissions(user, quest.QuestId, nowMillis)
 		}
-		if scene.QuestResultType == QuestResultTypeFullResult {
-			questState.QuestStateType = store.UserQuestStateTypeCleared
-			questState.ClearCount = 1
-			questState.DailyClearCount = 1
-		}
-		user.Quests[quest.QuestId] = questState
 
 		user.MainQuest.ProgressQuestSceneId = questSceneId
-		user.MainQuest.ProgressHeadQuestSceneId = max(user.MainQuest.ProgressHeadQuestSceneId, questSceneId)
+		if e.isSceneAhead(questSceneId, user.MainQuest.ProgressHeadQuestSceneId) {
+			user.MainQuest.ProgressHeadQuestSceneId = questSceneId
+		}
 		user.MainQuest.CurrentQuestFlowType = int32(QuestFlowTypeSubFlow)
 		user.MainQuest.ProgressQuestFlowType = int32(QuestFlowTypeSubFlow)
 	}
@@ -1204,6 +1402,11 @@ func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, isRetir
 		e.grantWeaponStoryUnlocksForQuestScene(user, questId, QuestResultTypeHalfResult, nowMillis)
 		e.grantWeaponStoryUnlocksForQuestScene(user, questId, QuestResultTypeFullResult, nowMillis)
 		questState.IsRewardGranted = true
+	}
+	if !isRetired {
+		for _, drop := range outcome.DropRewards {
+			e.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
+		}
 	}
 	questState.QuestStateType = store.UserQuestStateTypeCleared
 	questState.ClearCount = 1

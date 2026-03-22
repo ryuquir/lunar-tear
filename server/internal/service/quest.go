@@ -104,8 +104,18 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 	})
 	logQuestState("StartMainQuest state", user)
 
+	drops := s.engine.BattleDropRewards(req.QuestId)
+	pbDrops := make([]*pb.BattleDropReward, len(drops))
+	for i, d := range drops {
+		pbDrops[i] = &pb.BattleDropReward{
+			QuestSceneId:         d.QuestSceneId,
+			BattleDropCategoryId: d.BattleDropCategoryId,
+			BattleDropEffectId:   1,
+		}
+	}
+
 	return &pb.StartMainQuestResponse{
-		BattleDropReward: []*pb.BattleDropReward{},
+		BattleDropReward: pbDrops,
 		DiffUserData: buildSelectedQuestDiff(user, []string{
 			"IUserStatus",
 			"IUserQuest",
@@ -146,7 +156,7 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 	logQuestState("FinishMainQuest state", user)
 
 	return &pb.FinishMainQuestResponse{
-		DropReward:                      []*pb.QuestReward{},
+		DropReward:                      toProtoRewards(outcome.DropRewards),
 		FirstClearReward:                toProtoRewards(outcome.FirstClearRewards),
 		MissionClearReward:              toProtoRewards(outcome.MissionClearRewards),
 		MissionClearCompleteReward:      toProtoRewards(outcome.MissionClearCompleteRewards),

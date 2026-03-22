@@ -1,6 +1,6 @@
 # Lunar Tear
 
-Private server research project for **NieR Re[in]carnation**.
+Private server research project for **NieR Reincarnation**.
 
 ## Description
 
@@ -16,7 +16,6 @@ Main components:
 
 - `server/` - Go gRPC + HTTP services.
 - `scripts/` - APK patching and data tooling.
-- `frida/` - instrumentation scripts for reverse engineering and runtime tracing.
 - `docs/` - active progress and investigation notes.
 
 ## How To Patch An APK
@@ -150,19 +149,3 @@ Important flags:
 cd server
 make proto
 ```
-
-## Development Notes
-
-- Current trusted project status: `docs/PROGRESS.active.md`
-- Deprecated history: `docs/PROGRESS.md`
-
-## Current Working Workflow
-
-Current proven in-game flow:
-
-1. Game starts
-2. User enters name
-3. 2D story scene
-4. 3D story scene
-5. Trailer
-6. `"Showdown in the Wastes"` quest with battle
