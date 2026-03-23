@@ -133,7 +133,7 @@ func defaultTableNames() []string {
 		"IUserPortalCageStatus",
 		"IUserPossessionAutoConvert",
 		"IUserPremiumItem",
-		// "IUserProfile",
+		"IUserProfile",
 		"IUserPvpDefenseDeck",
 		"IUserPvpStatus",
 		"IUserPvpWeeklyResult",

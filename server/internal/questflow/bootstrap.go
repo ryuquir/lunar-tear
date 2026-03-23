@@ -47,6 +47,9 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 			break
 		}
 	}
+	user.MainQuest.IsReachedLastQuestScene = false
+
+	user.Profile.Name = "Lunar Tear"
 
 	e.advanceTutorialForBootstrap(user, sceneId)
 }
