@@ -333,6 +333,10 @@ func (e *Engine) grantWeaponStoryUnlock(user *store.UserState, weaponId, storyIn
 	}
 }
 
+func (e *Engine) BattleDropRewards(questId int32) []BattleDropInfo {
+	return e.battleDropsByQuestId[questId]
+}
+
 func (e *Engine) grantWeaponStoryUnlocksForQuestScene(user *store.UserState, questId int32, resultType model.QuestResultType, nowMillis int64) {
 	if resultType == model.QuestResultTypeHalfResult {
 		questMeta, ok := e.questById[questId]

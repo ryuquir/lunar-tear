@@ -126,6 +126,3 @@ func (e *Engine) HandleQuestRestart(user *store.UserState, questId int32, nowMil
 	}
 }
 
-func (e *Engine) BattleDropRewards(questId int32) []BattleDropInfo {
-	return e.battleDropsByQuestId[questId]
-}
