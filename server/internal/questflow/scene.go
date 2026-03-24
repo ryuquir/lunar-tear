@@ -42,11 +42,17 @@ func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId
 	}
 	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 
+	lastSceneId := e.getLastMainFlowSceneId(scene.QuestId)
+	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
+
 	routeId, ok := e.routeIdByQuestId[quest.QuestId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleMainFlowSceneProgress setting currentMainQuestRouteId", quest.QuestId))
 	}
 	user.MainQuest.CurrentMainQuestRouteId = routeId
+
+	user.PortalCageStatus.IsCurrentProgress = false
+	user.PortalCageStatus.LatestVersion = nowMillis
 
 	e.applySceneGrants(user, questSceneId, nowMillis)
 }

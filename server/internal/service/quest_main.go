@@ -50,8 +50,9 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 		DiffUserData: buildSelectedQuestDiff(user, []string{
 			"IUserMainQuestFlowStatus",
 			"IUserMainQuestMainFlowStatus",
-			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
+			"IUserPortalCageStatus",
+			"IUserQuest",
 			"IUserCharacter",
 			"IUserCostume",
 			"IUserCostumeActiveSkill",
@@ -122,7 +123,6 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 			"IUserQuestMission",
 			"IUserMainQuestFlowStatus",
 			"IUserMainQuestMainFlowStatus",
-			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
 		}),
 	}, nil
@@ -170,7 +170,6 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 			"IUserQuestMission",
 			"IUserMainQuestFlowStatus",
 			"IUserMainQuestMainFlowStatus",
-			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
 			"IUserStatus",
 			"IUserGem",
