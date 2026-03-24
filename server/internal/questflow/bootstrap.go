@@ -40,10 +40,24 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 		}
 	}
 
-	e.initQuestState(user, targetQuestId)
+	effectiveSceneId := sceneId
+	targetQuest, _ := e.questById[targetQuestId]
+	if isMainQuestPlayable(targetQuest) && scene.IsMainFlowQuestTarget {
+		for _, sid := range e.sceneIdsByQuestId[targetQuestId] {
+			s := e.sceneById[sid]
+			if !s.IsMainFlowQuestTarget {
+				effectiveSceneId = sid
+			}
+			if sid == sceneId {
+				break
+			}
+		}
+	}
+
+	e.HandleQuestStart(user, targetQuestId, false, nowMillis)
 	for _, sid := range e.sceneIdsByQuestId[targetQuestId] {
 		e.HandleMainFlowSceneProgress(user, sid, nowMillis)
-		if sid == sceneId {
+		if sid == effectiveSceneId {
 			break
 		}
 	}
