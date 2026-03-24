@@ -98,7 +98,7 @@ func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, isRetir
 	user.MainQuest.ProgressQuestSceneId = 0
 	user.MainQuest.ProgressHeadQuestSceneId = 0
 	user.MainQuest.ProgressQuestFlowType = 0
-	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeUnknown)
+	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 	user.Quests[questId] = questState
 
 	e.clearQuestMissions(user, questId, nowMillis)

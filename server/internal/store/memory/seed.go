@@ -56,8 +56,8 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bo
 			FreeGem: 10000,
 		},
 		Profile: store.UserProfileState{
-			Name:                            "Un-regist User Name",
-			NameUpdateDatetime:              nowMillis,
+			Name:                            "",
+			NameUpdateDatetime:              0,
 			Message:                         "",
 			MessageUpdateDatetime:           nowMillis,
 			FavoriteCostumeId:               0,

@@ -90,12 +90,7 @@ func (s *UserServiceServer) GameStart(ctx context.Context, _ *emptypb.Empty) (*p
 
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		nowMillis := gametime.NowMillis()
-		user.GameStartDatetime = nowMillis
-		if user.Profile.Name == "Un-regist User Name" {
-			user.Profile.Name = "Lunar Tear"
-			user.Profile.NameUpdateDatetime = nowMillis
-		}
+		user.GameStartDatetime = gametime.NowMillis()
 	})
 	fullTables := userdata.FullClientTableMap(user)
 	diff := userdata.BuildDiffFromTables(userdata.SelectTables(fullTables, startedGameStartTables))

@@ -47,7 +47,6 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 			break
 		}
 	}
-	user.MainQuest.IsReachedLastQuestScene = false
 
 	user.Profile.Name = "Lunar Tear"
 
@@ -55,25 +54,9 @@ func (e *Engine) ApplyBootstrap(user *store.UserState, sceneId int32, nowMillis 
 }
 
 func (e *Engine) advanceTutorialForBootstrap(user *store.UserState, bootstrapSceneId int32) {
-	added := 0
-	for _, cond := range e.tutorialUnlockConditions {
-		satisfied := false
-		switch cond.TutorialUnlockConditionType {
-		case tutorialUnlockReachSpecifiedQuestScene:
-			satisfied = bootstrapSceneId >= cond.ConditionValue
-		case tutorialUnlockUntilReachSpecifiedScene:
-			satisfied = bootstrapSceneId >= cond.ConditionValue
-		}
-		if satisfied {
-			if _, exists := user.Tutorials[cond.TutorialType]; !exists {
-				user.Tutorials[cond.TutorialType] = store.TutorialProgressState{
-					TutorialType:  cond.TutorialType,
-					ProgressPhase: 99999,
-				}
-				added++
-			}
-		}
-	}
+	before := len(user.Tutorials)
+	e.advanceTutorialsForScene(user, bootstrapSceneId)
+	added := len(user.Tutorials) - before
 	if added > 0 {
 		log.Printf("[ApplyBootstrap] marked %d tutorials as completed for scene=%d", added, bootstrapSceneId)
 	}

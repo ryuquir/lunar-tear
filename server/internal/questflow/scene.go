@@ -57,6 +57,26 @@ func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId
 	e.applySceneGrants(user, questSceneId, nowMillis)
 }
 
+func (e *Engine) advanceTutorialsForScene(user *store.UserState, sceneId int32) {
+	for _, cond := range e.tutorialUnlockConditions {
+		satisfied := false
+		switch cond.TutorialUnlockConditionType {
+		case tutorialUnlockReachSpecifiedQuestScene:
+			satisfied = sceneId >= cond.ConditionValue
+		case tutorialUnlockUntilReachSpecifiedScene:
+			satisfied = sceneId >= cond.ConditionValue
+		}
+		if satisfied {
+			if _, exists := user.Tutorials[cond.TutorialType]; !exists {
+				user.Tutorials[cond.TutorialType] = store.TutorialProgressState{
+					TutorialType:  cond.TutorialType,
+					ProgressPhase: 99999,
+				}
+			}
+		}
+	}
+}
+
 func (e *Engine) getLastMainFlowSceneId(questId int32) int32 {
 	sceneIds := e.sceneIdsByQuestId[questId]
 	if len(sceneIds) == 0 {
