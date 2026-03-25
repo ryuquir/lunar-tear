@@ -34,7 +34,7 @@ func (l loggingListener) Accept() (net.Conn, error) {
 	return conn, nil
 }
 
-func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog) {
+func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog, characterViewerCatalog *masterdata.CharacterViewerCatalog) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
 		log.Fatalf("failed to listen on :443: %v", err)
@@ -46,7 +46,7 @@ func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, quest
 		grpc.UnknownServiceHandler(loggingUnknownService),
 	)
 
-	registerServices(grpcServer, host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog)
+	registerServices(grpcServer, host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog)
 
 	reflection.Register(grpcServer)
 
@@ -58,7 +58,7 @@ func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, quest
 	}
 }
 
-func registerServices(srv *grpc.Server, host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog) {
+func registerServices(srv *grpc.Server, host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog, characterViewerCatalog *masterdata.CharacterViewerCatalog) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
 	pb.RegisterBattleServiceServer(srv, service.NewBattleServiceServer(userStore, userStore))
@@ -77,6 +77,7 @@ func registerServices(srv *grpc.Server, host string, octoURL string, userStore *
 	pb.RegisterNaviCutInServiceServer(srv, service.NewNaviCutInServiceServer(userStore, userStore))
 	pb.RegisterDokanServiceServer(srv, service.NewDokanServiceServer(userStore, userStore))
 	pb.RegisterPortalCageServiceServer(srv, service.NewPortalCageServiceServer(userStore, userStore))
+	pb.RegisterCharacterViewerServiceServer(srv, service.NewCharacterViewerServiceServer(userStore, userStore, characterViewerCatalog))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {

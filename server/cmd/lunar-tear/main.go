@@ -56,6 +56,7 @@ func main() {
 
 	cageOrnamentCatalog := masterdata.LoadCageOrnamentCatalog()
 	loginBonusCatalog := masterdata.LoadLoginBonusCatalog()
+	characterViewerCatalog := masterdata.LoadCharacterViewerCatalog()
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog)
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog)
 }
