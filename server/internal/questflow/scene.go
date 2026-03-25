@@ -2,6 +2,7 @@ package questflow
 
 import (
 	"fmt"
+	"log"
 
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/model"
@@ -58,15 +59,18 @@ func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId
 }
 
 func (e *Engine) advanceTutorialsForScene(user *store.UserState, sceneId int32) {
+	currentScene, ok := e.sceneById[sceneId]
+	if !ok {
+		log.Printf("[advanceTutorialsForScene] unknown sceneId=%d", sceneId)
+		return
+	}
 	for _, cond := range e.tutorialUnlockConditions {
-		satisfied := false
-		switch cond.TutorialUnlockConditionType {
-		case tutorialUnlockReachSpecifiedQuestScene:
-			satisfied = sceneId >= cond.ConditionValue
-		case tutorialUnlockUntilReachSpecifiedScene:
-			satisfied = sceneId >= cond.ConditionValue
+		condScene, ok := e.sceneById[cond.ConditionValue]
+		if !ok {
+			log.Printf("[advanceTutorialsForScene] unknown conditionValue=%d", cond.ConditionValue)
+			continue
 		}
-		if satisfied {
+		if currentScene.SortOrder >= condScene.SortOrder {
 			if _, exists := user.Tutorials[cond.TutorialType]; !exists {
 				user.Tutorials[cond.TutorialType] = store.TutorialProgressState{
 					TutorialType:  cond.TutorialType,

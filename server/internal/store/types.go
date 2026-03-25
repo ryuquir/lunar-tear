@@ -1,6 +1,9 @@
 package store
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"lunar-tear/server/internal/model"
@@ -190,6 +193,28 @@ type DeckKey struct {
 	UserDeckNumber int32
 }
 
+func (k DeckKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d", k.DeckType, k.UserDeckNumber), nil
+}
+
+func (k *DeckKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid DeckKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.DeckType = int32(a)
+	k.UserDeckNumber = int32(b)
+	return nil
+}
+
 type DeckState struct {
 	DeckType                int32
 	UserDeckNumber          int32
@@ -280,6 +305,28 @@ type QuestMissionKey struct {
 	QuestMissionId int32
 }
 
+func (k QuestMissionKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d", k.QuestId, k.QuestMissionId), nil
+}
+
+func (k *QuestMissionKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid QuestMissionKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.QuestId = int32(a)
+	k.QuestMissionId = int32(b)
+	return nil
+}
+
 type UserQuestMissionState struct {
 	QuestId             int32
 	QuestMissionId      int32
@@ -317,10 +364,59 @@ type GimmickSequenceKey struct {
 	GimmickSequenceId         int32
 }
 
+func (k GimmickSequenceKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d", k.GimmickSequenceScheduleId, k.GimmickSequenceId), nil
+}
+
+func (k *GimmickSequenceKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid GimmickSequenceKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.GimmickSequenceScheduleId = int32(a)
+	k.GimmickSequenceId = int32(b)
+	return nil
+}
+
 type GimmickKey struct {
 	GimmickSequenceScheduleId int32
 	GimmickSequenceId         int32
 	GimmickId                 int32
+}
+
+func (k GimmickKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d:%d", k.GimmickSequenceScheduleId, k.GimmickSequenceId, k.GimmickId), nil
+}
+
+func (k *GimmickKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 3 {
+		return fmt.Errorf("invalid GimmickKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	c, err := strconv.ParseInt(parts[2], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.GimmickSequenceScheduleId = int32(a)
+	k.GimmickSequenceId = int32(b)
+	k.GimmickId = int32(c)
+	return nil
 }
 
 type GimmickOrnamentKey struct {
@@ -328,6 +424,38 @@ type GimmickOrnamentKey struct {
 	GimmickSequenceId         int32
 	GimmickId                 int32
 	GimmickOrnamentIndex      int32
+}
+
+func (k GimmickOrnamentKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d:%d:%d", k.GimmickSequenceScheduleId, k.GimmickSequenceId, k.GimmickId, k.GimmickOrnamentIndex), nil
+}
+
+func (k *GimmickOrnamentKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 4 {
+		return fmt.Errorf("invalid GimmickOrnamentKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	c, err := strconv.ParseInt(parts[2], 10, 32)
+	if err != nil {
+		return err
+	}
+	d, err := strconv.ParseInt(parts[3], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.GimmickSequenceScheduleId = int32(a)
+	k.GimmickSequenceId = int32(b)
+	k.GimmickId = int32(c)
+	k.GimmickOrnamentIndex = int32(d)
+	return nil
 }
 
 type GimmickState struct {

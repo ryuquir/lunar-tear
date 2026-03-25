@@ -18,12 +18,26 @@ func WithBootstrap(sceneId int32, bootstrapper store.Bootstrapper) Option {
 	}
 }
 
+func WithSnapshotDir(dir string) Option {
+	return func(s *MemoryStore) {
+		s.snapshotDir = dir
+	}
+}
+
+func WithSceneId(sceneId int32) Option {
+	return func(s *MemoryStore) {
+		s.bootstrapSceneId = sceneId
+	}
+}
+
 type MemoryStore struct {
 	mu               sync.RWMutex
 	clock            store.Clock
 	bootstrapSceneId int32
 	bootstrapper     store.Bootstrapper
-	nextUserId       int64
+	snapshotDir         string
+	lastSnapshotSceneId int32
+	nextUserId          int64
 	users            map[int64]*store.UserState
 	userIdsByUuid    map[string]int64
 	sessionToUserId  map[string]int64
@@ -112,6 +126,11 @@ func (s *MemoryStore) UpdateUser(userId int64, mutate func(*store.UserState)) (s
 		return store.UserState{}, store.ErrNotFound
 	}
 	mutate(user)
+	sceneId := user.MainQuest.CurrentQuestSceneId
+	if s.snapshotDir != "" && sceneId != 0 && sceneId != s.lastSnapshotSceneId {
+		saveSnapshot(user, s.snapshotDir)
+		s.lastSnapshotSceneId = sceneId
+	}
 	return cloneUserState(*user), nil
 }
 
@@ -165,7 +184,7 @@ func (s *MemoryStore) getOrCreateLocked(uuid string) *store.UserState {
 	userId := s.nextUserId
 	s.nextUserId++
 
-	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.bootstrapper)
+	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.snapshotDir, s.bootstrapper)
 	s.users[userId] = user
 	s.userIdsByUuid[uuid] = userId
 	return user

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 	"strconv"
 
 	"lunar-tear/server/internal/gametime"
@@ -32,10 +33,18 @@ func main() {
 
 	go startHTTP(*httpPort, *resourcesBaseURL)
 
+	snapshotDir := "snapshots"
+	if err := os.MkdirAll(snapshotDir, 0755); err != nil {
+		log.Fatalf("create snapshot dir: %v", err)
+	}
+
 	questEngine := questflow.MakeEngine()
-	userStore := memory.New(gametime.Now, memory.WithBootstrap(int32(*scene), questEngine))
+	userStore := memory.New(gametime.Now,
+		memory.WithSnapshotDir(snapshotDir),
+		memory.WithSceneId(int32(*scene)),
+	)
 	if *scene != 0 {
-		log.Printf("bootstrap scene: %d", *scene)
+		log.Printf("bootstrap scene: %d (from snapshot)", *scene)
 	}
 
 	gachaEntries, err := masterdata.LoadGachaCatalog()

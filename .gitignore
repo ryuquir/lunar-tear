@@ -19,6 +19,9 @@ server/certs/
 
 # Server assets (binary data, too large for git)
 server/assets/
+
+# Snapshots (recorded user state)
+snapshots/
 extracted_tables/
 master_data/
 

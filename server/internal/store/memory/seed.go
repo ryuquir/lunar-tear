@@ -2,6 +2,7 @@ package memory
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"lunar-tear/server/internal/store"
@@ -25,7 +26,16 @@ const (
 	defaultChargeMoneyThisMonth = int64(0)
 )
 
-func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, bootstrapper store.Bootstrapper) *store.UserState {
+func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, snapshotDir string, bootstrapper store.Bootstrapper) *store.UserState {
+	if sceneId != 0 && snapshotDir != "" {
+		user, err := loadSnapshot(snapshotDir, sceneId)
+		if err != nil {
+			log.Fatalf("[bootstrap] no snapshot for scene=%d: %v", sceneId, err)
+		}
+		log.Printf("[bootstrap] loaded snapshot for scene=%d", sceneId)
+		return user
+	}
+
 	user := &store.UserState{
 		UserId:               userId,
 		Uuid:                 uuid,
