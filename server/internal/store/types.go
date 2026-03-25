@@ -64,7 +64,7 @@ type UserState struct {
 	Parts               map[string]PartsState
 	ImportantItems      map[int32]int32
 	CostumeActiveSkills map[string]CostumeActiveSkillState
-	DeckTypeNotes       map[int32]DeckTypeNoteState
+	DeckTypeNotes       map[model.DeckType]DeckTypeNoteState
 	WeaponNotes         map[int32]WeaponNoteState
 	DeckSubWeapons      map[string][]string
 	NaviCutInPlayed     map[int32]bool
@@ -189,7 +189,7 @@ type DeckCharacterState struct {
 }
 
 type DeckKey struct {
-	DeckType       int32
+	DeckType       model.DeckType
 	UserDeckNumber int32
 }
 
@@ -210,13 +210,13 @@ func (k *DeckKey) UnmarshalText(text []byte) error {
 	if err != nil {
 		return err
 	}
-	k.DeckType = int32(a)
+	k.DeckType = model.DeckType(a)
 	k.UserDeckNumber = int32(b)
 	return nil
 }
 
 type DeckState struct {
-	DeckType                int32
+	DeckType                model.DeckType
 	UserDeckNumber          int32
 	UserDeckCharacterUuid01 string
 	UserDeckCharacterUuid02 string
@@ -242,7 +242,7 @@ type CostumeActiveSkillState struct {
 }
 
 type DeckTypeNoteState struct {
-	DeckType      int32
+	DeckType      model.DeckType
 	MaxDeckPower  int32
 	LatestVersion int64
 }
@@ -291,6 +291,7 @@ type UserQuestState struct {
 	QuestId             int32
 	QuestStateType      model.UserQuestStateType
 	IsBattleOnly        bool
+	UserDeckNumber      int32
 	LatestStartDatetime int64
 	ClearCount          int32
 	DailyClearCount     int32

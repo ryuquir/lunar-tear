@@ -8,7 +8,7 @@ import (
 	"lunar-tear/server/internal/store"
 )
 
-func (e *Engine) HandleEventQuestStart(user *store.UserState, eventQuestChapterId, questId int32, isBattleOnly bool, nowMillis int64) {
+func (e *Engine) HandleEventQuestStart(user *store.UserState, eventQuestChapterId, questId int32, isBattleOnly bool, userDeckNumber int32, nowMillis int64) {
 	quest, ok := e.questById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleEventQuestStart", questId))
@@ -24,6 +24,7 @@ func (e *Engine) HandleEventQuestStart(user *store.UserState, eventQuestChapterI
 
 	questState := user.Quests[questId]
 	questState.IsBattleOnly = isBattleOnly
+	questState.UserDeckNumber = userDeckNumber
 	questState.QuestStateType = model.UserQuestStateTypeActive
 	questState.LatestStartDatetime = nowMillis
 	user.Quests[questId] = questState

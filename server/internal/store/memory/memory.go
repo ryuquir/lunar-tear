@@ -11,13 +11,6 @@ import (
 
 type Option func(*MemoryStore)
 
-func WithBootstrap(sceneId int32, bootstrapper store.Bootstrapper) Option {
-	return func(s *MemoryStore) {
-		s.bootstrapSceneId = sceneId
-		s.bootstrapper = bootstrapper
-	}
-}
-
 func WithSnapshotDir(dir string) Option {
 	return func(s *MemoryStore) {
 		s.snapshotDir = dir
@@ -34,7 +27,6 @@ type MemoryStore struct {
 	mu                  sync.RWMutex
 	clock               store.Clock
 	bootstrapSceneId    int32
-	bootstrapper        store.Bootstrapper
 	snapshotDir         string
 	lastSnapshotSceneId int32
 	nextUserId          int64
@@ -184,7 +176,7 @@ func (s *MemoryStore) getOrCreateLocked(uuid string) *store.UserState {
 	userId := s.nextUserId
 	s.nextUserId++
 
-	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.snapshotDir, s.bootstrapper)
+	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.snapshotDir)
 	s.users[userId] = user
 	s.userIdsByUuid[uuid] = userId
 	return user

@@ -37,7 +37,7 @@ func (e *Engine) clearQuestMissions(user *store.UserState, questId int32, nowMil
 	}
 }
 
-func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattleOnly bool, nowMillis int64) {
+func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattleOnly bool, userDeckNumber int32, nowMillis int64) {
 	quest, ok := e.questById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleQuestStart", questId))
@@ -57,6 +57,7 @@ func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattle
 	}
 
 	questState.IsBattleOnly = isBattleOnly
+	questState.UserDeckNumber = userDeckNumber
 	if isMainQuestPlayable(quest) {
 		user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 		questState.QuestStateType = model.UserQuestStateTypeActive

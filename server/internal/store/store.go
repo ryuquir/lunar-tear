@@ -9,10 +9,6 @@ var ErrNotFound = errors.New("store: not found")
 
 type Clock func() time.Time
 
-type Bootstrapper interface {
-	ApplyBootstrap(user *UserState, sceneId int32, nowMillis int64)
-}
-
 type UserRepository interface {
 	EnsureUser(uuid string) (UserState, error)
 	SnapshotUser(userId int64) (UserState, error)

@@ -3,6 +3,7 @@ package userdata
 import (
 	"sort"
 
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 )
 
@@ -110,7 +111,7 @@ func sortedDeckTypeNoteRecords(user store.UserState) []map[string]any {
 
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
-		row := user.DeckTypeNotes[int32(id)]
+		row := user.DeckTypeNotes[model.DeckType(id)]
 		records = append(records, map[string]any{
 			"userId":        user.UserId,
 			"deckType":      row.DeckType,

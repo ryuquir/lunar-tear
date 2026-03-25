@@ -18,7 +18,7 @@ func (s *QuestServiceServer) StartEventQuest(ctx context.Context, req *pb.StartE
 	userId := currentUserId(ctx, s.users, s.sessions)
 	nowMillis := gametime.NowMillis()
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		s.engine.HandleEventQuestStart(user, req.EventQuestChapterId, req.QuestId, req.IsBattleOnly, nowMillis)
+		s.engine.HandleEventQuestStart(user, req.EventQuestChapterId, req.QuestId, req.IsBattleOnly, req.UserDeckNumber, nowMillis)
 	})
 
 	drops := s.engine.BattleDropRewards(req.QuestId)

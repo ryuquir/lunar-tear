@@ -43,8 +43,8 @@ func EnsureDefaultDeck(user *UserState, nowMillis int64) {
 		Power:                 100,
 		LatestVersion:         nowMillis,
 	}
-	user.Decks[DeckKey{DeckType: 1, UserDeckNumber: 1}] = DeckState{
-		DeckType:                1,
+	user.Decks[DeckKey{DeckType: model.DeckTypeQuest, UserDeckNumber: 1}] = DeckState{
+		DeckType:                model.DeckTypeQuest,
 		UserDeckNumber:          1,
 		UserDeckCharacterUuid01: dcUuid,
 		Name:                    "Deck 1",
@@ -52,9 +52,9 @@ func EnsureDefaultDeck(user *UserState, nowMillis int64) {
 		LatestVersion:           nowMillis,
 	}
 
-	if _, exists := user.DeckTypeNotes[int32(1)]; !exists {
-		user.DeckTypeNotes[int32(1)] = DeckTypeNoteState{
-			DeckType:      1,
+	if _, exists := user.DeckTypeNotes[model.DeckTypeQuest]; !exists {
+		user.DeckTypeNotes[model.DeckTypeQuest] = DeckTypeNoteState{
+			DeckType:      model.DeckTypeQuest,
 			MaxDeckPower:  100,
 			LatestVersion: nowMillis,
 		}
@@ -73,7 +73,7 @@ func FirstSortedKey[V any](m map[string]V) string {
 	return keys[0]
 }
 
-func ApplyDeckReplacement(user *UserState, deckType, userDeckNumber int32, slots []DeckCharacterInput, nowMillis int64) {
+func ApplyDeckReplacement(user *UserState, deckType model.DeckType, userDeckNumber int32, slots []DeckCharacterInput, nowMillis int64) {
 	deckKey := DeckKey{DeckType: deckType, UserDeckNumber: userDeckNumber}
 	deck := user.Decks[deckKey]
 	deck.DeckType = deckType

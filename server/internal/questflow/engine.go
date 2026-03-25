@@ -4,7 +4,6 @@ import (
 	"sort"
 
 	"lunar-tear/server/internal/model"
-	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/utils"
 )
 
@@ -160,19 +159,19 @@ type battleGroup struct {
 }
 
 type battle struct {
-	BattleId            int32 `json:"BattleId"`
-	BattleNpcId         int32 `json:"BattleNpcId"`
-	DeckType            int32 `json:"DeckType"`
-	BattleNpcDeckNumber int32 `json:"BattleNpcDeckNumber"`
+	BattleId            int32          `json:"BattleId"`
+	BattleNpcId         int32          `json:"BattleNpcId"`
+	DeckType            model.DeckType `json:"DeckType"`
+	BattleNpcDeckNumber int32          `json:"BattleNpcDeckNumber"`
 }
 
 type battleNpcDeck struct {
-	BattleNpcId                  int32  `json:"BattleNpcId"`
-	DeckType                     int32  `json:"DeckType"`
-	BattleNpcDeckNumber          int32  `json:"BattleNpcDeckNumber"`
-	BattleNpcDeckCharacterUuid01 string `json:"BattleNpcDeckCharacterUuid01"`
-	BattleNpcDeckCharacterUuid02 string `json:"BattleNpcDeckCharacterUuid02"`
-	BattleNpcDeckCharacterUuid03 string `json:"BattleNpcDeckCharacterUuid03"`
+	BattleNpcId                  int32          `json:"BattleNpcId"`
+	DeckType                     model.DeckType `json:"DeckType"`
+	BattleNpcDeckNumber          int32          `json:"BattleNpcDeckNumber"`
+	BattleNpcDeckCharacterUuid01 string         `json:"BattleNpcDeckCharacterUuid01"`
+	BattleNpcDeckCharacterUuid02 string         `json:"BattleNpcDeckCharacterUuid02"`
+	BattleNpcDeckCharacterUuid03 string         `json:"BattleNpcDeckCharacterUuid03"`
 }
 
 type battleNpcDropCategory struct {
@@ -219,6 +218,10 @@ const (
 	tutorialUnlockUntilReachSpecifiedScene = 3
 )
 
+type rentalDeck struct {
+	BattleGroupId int32 `json:"BattleGroupId"`
+}
+
 type Engine struct {
 	sceneById                          map[int32]questScene
 	missionById                        map[int32]mission
@@ -238,6 +241,7 @@ type Engine struct {
 	battleDropRewardById               map[int32]battleDropReward
 	pickupRewardIdsByGroupId           map[int32][]int32
 	battleDropsByQuestId               map[int32][]BattleDropInfo
+	rentalQuestIds                     map[int32]bool
 	tutorialUnlockConditions           []tutorialUnlockCondition
 	userExpThresholds                  []int32
 	characterExpThresholds             []int32
@@ -394,6 +398,11 @@ func MakeEngine() *Engine {
 	}
 
 	npcDropCategories, err := utils.ReadJSON[battleNpcDropCategory]("EntityMBattleNpcDeckCharacterDropCategoryTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	rentalDecks, err := utils.ReadJSON[rentalDeck]("EntityMBattleRentalDeckTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -563,7 +572,7 @@ func MakeEngine() *Engine {
 
 	type npcDeckKey struct {
 		BattleNpcId         int32
-		DeckType            int32
+		DeckType            model.DeckType
 		BattleNpcDeckNumber int32
 	}
 	npcDeckByKey := make(map[npcDeckKey]battleNpcDeck, len(npcDecks))
@@ -625,6 +634,20 @@ func MakeEngine() *Engine {
 		}
 	}
 
+	rentalBattleGroups := make(map[int32]bool, len(rentalDecks))
+	for _, rd := range rentalDecks {
+		rentalBattleGroups[rd.BattleGroupId] = true
+	}
+	engine.rentalQuestIds = make(map[int32]bool)
+	for questId := range engine.questById {
+		for _, sceneId := range engine.sceneIdsByQuestId[questId] {
+			if groupId, ok := battleGroupBySceneId[sceneId]; ok && rentalBattleGroups[groupId] {
+				engine.rentalQuestIds[questId] = true
+				break
+			}
+		}
+	}
+
 	return engine
 }
 
@@ -637,6 +660,3 @@ func buildCostumeExpByRarity(rarities []costumeRarityRow, buildThresholds func(i
 	}
 	return m
 }
-
-// Ensure Engine satisfies the store.Bootstrapper interface.
-var _ store.Bootstrapper = (*Engine)(nil)

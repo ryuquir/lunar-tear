@@ -6,6 +6,7 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 )
@@ -25,7 +26,7 @@ func (s *DeckServiceServer) UpdateName(ctx context.Context, req *pb.UpdateNameRe
 	userId := currentUserId(ctx, s.users, s.sessions)
 
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		deckKey := store.DeckKey{DeckType: req.DeckType, UserDeckNumber: req.UserDeckNumber}
+		deckKey := store.DeckKey{DeckType: model.DeckType(req.DeckType), UserDeckNumber: req.UserDeckNumber}
 		deck := user.Decks[deckKey]
 		deck.Name = req.Name
 		user.Decks[deckKey] = deck
@@ -47,7 +48,8 @@ func (s *DeckServiceServer) RefreshDeckPower(ctx context.Context, req *pb.Refres
 			return
 		}
 
-		deckKey := store.DeckKey{DeckType: req.DeckType, UserDeckNumber: req.UserDeckNumber}
+		dt := model.DeckType(req.DeckType)
+		deckKey := store.DeckKey{DeckType: dt, UserDeckNumber: req.UserDeckNumber}
 		deck, ok := user.Decks[deckKey]
 		if !ok {
 			log.Fatalf("[DeckService] RefreshDeckPower: deck not found")
@@ -71,11 +73,11 @@ func (s *DeckServiceServer) RefreshDeckPower(ctx context.Context, req *pb.Refres
 			}
 		}
 
-		note := user.DeckTypeNotes[req.DeckType]
+		note := user.DeckTypeNotes[dt]
 		if req.DeckPower.Power > note.MaxDeckPower {
-			note.DeckType = req.DeckType
+			note.DeckType = dt
 			note.MaxDeckPower = req.DeckPower.Power
-			user.DeckTypeNotes[req.DeckType] = note
+			user.DeckTypeNotes[dt] = note
 		}
 	})
 
@@ -124,7 +126,7 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 		if req.Deck == nil {
 			return
 		}
-		store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), gametime.NowMillis())
+		store.ApplyDeckReplacement(user, model.DeckType(req.DeckType), req.UserDeckNumber, deckSlotsFromProto(req.Deck), gametime.NowMillis())
 	})
 
 	newSubWeapons := userdata.DeckSubWeaponRecords(user)

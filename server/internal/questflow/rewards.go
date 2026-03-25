@@ -147,8 +147,20 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 		}
 	}
 
+	if e.rentalQuestIds[questId] {
+		log.Printf("[applyExpRewards] questId=%d skipping character/costume exp (rental deck)", questId)
+		return
+	}
+
+	deckCostumeUuids, deckCharacterIds := e.resolveDeckUnits(user, questId)
+	if deckCostumeUuids == nil {
+		log.Printf("[applyExpRewards] questId=%d skipping character/costume exp (deck not resolved)", questId)
+		return
+	}
+
 	if questMeta.CharacterExp != 0 {
-		for id, row := range user.Characters {
+		for id := range deckCharacterIds {
+			row := user.Characters[id]
 			row.Exp += questMeta.CharacterExp
 			row.Level = levelFromExp(row.Exp, e.characterExpThresholds)
 			user.Characters[id] = row
@@ -157,7 +169,8 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 	}
 
 	if questMeta.CostumeExp != 0 {
-		for key, row := range user.Costumes {
+		for key := range deckCostumeUuids {
+			row := user.Costumes[key]
 			row.Exp += questMeta.CostumeExp
 			cm, ok := e.costumeById[row.CostumeId]
 			if ok {
@@ -169,6 +182,40 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 			log.Printf("[applyExpRewards] questId=%d costume=%d (key=%s): +%d exp -> total=%d level=%d", questId, row.CostumeId, key, questMeta.CostumeExp, row.Exp, row.Level)
 		}
 	}
+}
+
+func (e *Engine) resolveDeckUnits(user *store.UserState, questId int32) (costumeUuids map[string]bool, characterIds map[int32]bool) {
+	dn := user.Quests[questId].UserDeckNumber
+	if dn == 0 {
+		return nil, nil
+	}
+	deck, ok := user.Decks[store.DeckKey{DeckType: model.DeckTypeQuest, UserDeckNumber: dn}]
+	if !ok {
+		return nil, nil
+	}
+
+	costumeUuids = make(map[string]bool)
+	characterIds = make(map[int32]bool)
+	for _, dcUuid := range []string{deck.UserDeckCharacterUuid01, deck.UserDeckCharacterUuid02, deck.UserDeckCharacterUuid03} {
+		if dcUuid == "" {
+			continue
+		}
+		dc, ok := user.DeckCharacters[dcUuid]
+		if !ok || dc.UserCostumeUuid == "" {
+			continue
+		}
+		costumeUuids[dc.UserCostumeUuid] = true
+		if costume, ok := user.Costumes[dc.UserCostumeUuid]; ok {
+			if cm, ok := e.costumeById[costume.CostumeId]; ok {
+				characterIds[cm.CharacterId] = true
+			}
+		}
+	}
+
+	if len(costumeUuids) == 0 {
+		return nil, nil
+	}
+	return costumeUuids, characterIds
 }
 
 const goldConsumableItemId int32 = 1

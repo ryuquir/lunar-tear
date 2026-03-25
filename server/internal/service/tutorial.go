@@ -78,7 +78,7 @@ func (s *TutorialServiceServer) SetTutorialProgressAndReplaceDeck(ctx context.Co
 			ProgressPhase: req.ProgressPhase,
 		}
 		if req.Deck != nil {
-			store.ApplyDeckReplacement(user, req.DeckType, req.UserDeckNumber, deckSlotsFromProto(req.Deck), gametime.NowMillis())
+			store.ApplyDeckReplacement(user, model.DeckType(req.DeckType), req.UserDeckNumber, deckSlotsFromProto(req.Deck), gametime.NowMillis())
 		}
 	})
 	return &pb.SetTutorialProgressAndReplaceDeckResponse{

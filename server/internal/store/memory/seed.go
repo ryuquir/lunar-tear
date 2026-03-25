@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 )
 
@@ -26,7 +27,7 @@ const (
 	defaultChargeMoneyThisMonth = int64(0)
 )
 
-func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, snapshotDir string, bootstrapper store.Bootstrapper) *store.UserState {
+func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, snapshotDir string) *store.UserState {
 	if sceneId != 0 && snapshotDir != "" {
 		user, err := loadSnapshot(snapshotDir, sceneId)
 		if err != nil {
@@ -150,13 +151,10 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		Parts:               make(map[string]store.PartsState),
 		ImportantItems:      make(map[int32]int32),
 		CostumeActiveSkills: make(map[string]store.CostumeActiveSkillState),
-		DeckTypeNotes:       make(map[int32]store.DeckTypeNoteState),
+		DeckTypeNotes:       make(map[model.DeckType]store.DeckTypeNoteState),
 		WeaponNotes:         make(map[int32]store.WeaponNoteState),
 		NaviCutInPlayed:     make(map[int32]bool),
 		DokanConfirmed:      make(map[int32]bool),
-	}
-	if bootstrapper != nil {
-		bootstrapper.ApplyBootstrap(user, sceneId, nowMillis)
 	}
 	store.EnsureDefaultDeck(user, nowMillis)
 	return user

@@ -102,7 +102,7 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 	userId := currentUserId(ctx, s.users, s.sessions)
 	nowMillis := gametime.NowMillis()
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, nowMillis)
+		s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, req.UserDeckNumber, nowMillis)
 	})
 	logQuestState("StartMainQuest state", user)
 

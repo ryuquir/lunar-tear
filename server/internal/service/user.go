@@ -9,6 +9,7 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 
@@ -167,7 +168,7 @@ func (s *UserServiceServer) GetUserProfile(ctx context.Context, req *pb.GetUserP
 	}
 
 	deckCharacters := []*pb.ProfileDeckCharacter{}
-	if deck, ok := user.Decks[store.DeckKey{DeckType: 1, UserDeckNumber: 1}]; ok && deck.UserDeckCharacterUuid01 != "" {
+	if deck, ok := user.Decks[store.DeckKey{DeckType: model.DeckTypeQuest, UserDeckNumber: 1}]; ok && deck.UserDeckCharacterUuid01 != "" {
 		if deckCharacter, ok := user.DeckCharacters[deck.UserDeckCharacterUuid01]; ok {
 			costumeId := int32(0)
 			if costume, ok := user.Costumes[deckCharacter.UserCostumeUuid]; ok {
