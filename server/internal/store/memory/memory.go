@@ -31,18 +31,18 @@ func WithSceneId(sceneId int32) Option {
 }
 
 type MemoryStore struct {
-	mu               sync.RWMutex
-	clock            store.Clock
-	bootstrapSceneId int32
-	bootstrapper     store.Bootstrapper
+	mu                  sync.RWMutex
+	clock               store.Clock
+	bootstrapSceneId    int32
+	bootstrapper        store.Bootstrapper
 	snapshotDir         string
 	lastSnapshotSceneId int32
 	nextUserId          int64
-	users            map[int64]*store.UserState
-	userIdsByUuid    map[string]int64
-	sessionToUserId  map[string]int64
-	sessions         map[string]store.SessionState
-	gachaCatalog     map[int32]store.GachaCatalogEntry
+	users               map[int64]*store.UserState
+	userIdsByUuid       map[string]int64
+	sessionToUserId     map[string]int64
+	sessions            map[string]store.SessionState
+	gachaCatalog        map[int32]store.GachaCatalogEntry
 }
 
 var (

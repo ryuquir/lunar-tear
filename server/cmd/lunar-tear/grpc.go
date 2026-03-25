@@ -64,7 +64,7 @@ func registerServices(srv *grpc.Server, host string, octoURL string, userStore *
 	pb.RegisterBattleServiceServer(srv, service.NewBattleServiceServer(userStore, userStore))
 	pb.RegisterConfigServiceServer(srv, service.NewConfigServiceServer(host, int32(443), octoURL))
 	pb.RegisterDataServiceServer(srv, service.NewDataServiceServer(userStore, userStore))
-	pb.RegisterTutorialServiceServer(srv, service.NewTutorialServiceServer(userStore, userStore))
+	pb.RegisterTutorialServiceServer(srv, service.NewTutorialServiceServer(userStore, userStore, questEngine))
 	pb.RegisterGachaServiceServer(srv, service.NewGachaServiceServer(userStore, userStore, userStore))
 	pb.RegisterGiftServiceServer(srv, service.NewGiftServiceServer(userStore, userStore))
 	pb.RegisterGamePlayServiceServer(srv, service.NewGameplayServiceServer())

@@ -7,6 +7,7 @@ import (
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/model"
+	"lunar-tear/server/internal/questflow"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 )
@@ -15,15 +16,18 @@ type TutorialServiceServer struct {
 	pb.UnimplementedTutorialServiceServer
 	users    store.UserRepository
 	sessions store.SessionRepository
+	engine   *questflow.Engine
 }
 
-func NewTutorialServiceServer(users store.UserRepository, sessions store.SessionRepository) *TutorialServiceServer {
-	return &TutorialServiceServer{users: users, sessions: sessions}
+func NewTutorialServiceServer(users store.UserRepository, sessions store.SessionRepository, engine *questflow.Engine) *TutorialServiceServer {
+	return &TutorialServiceServer{users: users, sessions: sessions, engine: engine}
 }
 
 func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb.SetTutorialProgressRequest) (*pb.SetTutorialProgressResponse, error) {
 	log.Printf("[TutorialService] SetTutorialProgress: type=%d phase=%d choice=%d", req.TutorialType, req.ProgressPhase, req.ChoiceId)
 	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+	var grants []questflow.RewardGrant
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.Tutorials[req.TutorialType] = store.TutorialProgressState{
 			TutorialType:  req.TutorialType,
@@ -32,8 +36,9 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 		}
 		if req.TutorialType == int32(model.TutorialTypeMenuFirst) ||
 			req.TutorialType == int32(model.TutorialTypeMenuSecond) {
-			store.EnsureDefaultDeck(user, gametime.NowMillis())
+			store.EnsureDefaultDeck(user, nowMillis)
 		}
+		grants = s.engine.ApplyTutorialReward(user, model.TutorialType(req.TutorialType), req.ChoiceId, nowMillis)
 	})
 	tables := []string{"IUserTutorialProgress"}
 	if req.TutorialType == int32(model.TutorialTypeMenuFirst) ||
@@ -43,12 +48,23 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 			"IUserCompanion", "IUserDeckCharacter", "IUserDeck",
 		)
 	}
+	if len(grants) > 0 {
+		tables = append(tables, "IUserCompanion")
+	}
 	result := userdata.SelectTables(userdata.FullClientTableMap(user), tables)
 	for _, t := range tables {
 		log.Printf("[TutorialService] DiffTable %s -> %s", t, result[t])
 	}
+	rewards := make([]*pb.TutorialChoiceReward, len(grants))
+	for i, g := range grants {
+		rewards[i] = &pb.TutorialChoiceReward{
+			PossessionType: int32(g.PossessionType),
+			PossessionId:   g.PossessionId,
+			Count:          g.Count,
+		}
+	}
 	return &pb.SetTutorialProgressResponse{
-		TutorialChoiceReward: []*pb.TutorialChoiceReward{},
+		TutorialChoiceReward: rewards,
 		DiffUserData:         userdata.BuildDiffFromTables(result),
 	}, nil
 }

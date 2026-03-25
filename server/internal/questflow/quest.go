@@ -125,4 +125,3 @@ func (e *Engine) HandleQuestRestart(user *store.UserState, questId int32, nowMil
 		user.QuestMissions[key] = m
 	}
 }
-

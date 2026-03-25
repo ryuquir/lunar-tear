@@ -333,6 +333,36 @@ func (e *Engine) grantWeaponStoryUnlock(user *store.UserState, weaponId, storyIn
 	}
 }
 
+var tutorialCompanionChoices = map[int32]int32{
+	1: 2,  // bear + fire (Cat=1, Attr=2)
+	2: 1,  // bear + wind (Cat=1, Attr=6)
+	3: 7,  // doll + fire (Cat=3, Attr=2)
+	4: 10, // doll + wind (Cat=3, Attr=6)
+}
+
+func (e *Engine) ApplyTutorialReward(user *store.UserState, tutorialType model.TutorialType, choiceId int32, nowMillis int64) []RewardGrant {
+	switch tutorialType {
+	case model.TutorialTypeCompanion:
+		return e.applyCompanionTutorialReward(user, choiceId, nowMillis)
+	default:
+		return nil
+	}
+}
+
+func (e *Engine) applyCompanionTutorialReward(user *store.UserState, choiceId int32, nowMillis int64) []RewardGrant {
+	companionId, ok := tutorialCompanionChoices[choiceId]
+	if !ok {
+		log.Printf("[Engine] unknown companion tutorial choiceId=%d", choiceId)
+		return nil
+	}
+	e.grantCompanion(user, companionId, nowMillis)
+	return []RewardGrant{{
+		PossessionType: model.PossessionTypeCompanion,
+		PossessionId:   companionId,
+		Count:          1,
+	}}
+}
+
 func (e *Engine) BattleDropRewards(questId int32) []BattleDropInfo {
 	return e.battleDropsByQuestId[questId]
 }
