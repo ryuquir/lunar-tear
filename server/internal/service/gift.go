@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"slices"
 	"sort"
@@ -72,7 +73,7 @@ func (s *GiftServiceServer) GetGiftList(ctx context.Context, req *pb.GetGiftList
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, err := s.users.SnapshotUser(userId)
 	if err != nil {
-		user, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 
 	gifts := append([]store.NotReceivedGiftState(nil), user.Gifts.NotReceived...)
@@ -109,7 +110,7 @@ func (s *GiftServiceServer) GetGiftReceiveHistoryList(ctx context.Context, req *
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, err := s.users.SnapshotUser(userId)
 	if err != nil {
-		user, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 
 	items := make([]*pb.ReceivedGift, 0, len(user.Gifts.Received))

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -41,7 +42,7 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, err := s.users.SnapshotUser(userId)
 	if err != nil {
-		user, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 
 	gachaList := make([]*pb.Gacha, 0, len(catalog))
@@ -104,7 +105,7 @@ func (s *GachaServiceServer) GetRewardGacha(ctx context.Context, req *emptypb.Em
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, err := s.users.SnapshotUser(userId)
 	if err != nil {
-		user, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 
 	return &pb.GetRewardGachaResponse{

@@ -15,10 +15,10 @@ type characterViewerField struct {
 }
 
 type evaluateCondition struct {
-	EvaluateConditionId             int32 `json:"EvaluateConditionId"`
-	EvaluateConditionFunctionType   int32 `json:"EvaluateConditionFunctionType"`
-	EvaluateConditionEvaluateType   int32 `json:"EvaluateConditionEvaluateType"`
-	EvaluateConditionValueGroupId   int32 `json:"EvaluateConditionValueGroupId"`
+	EvaluateConditionId           int32 `json:"EvaluateConditionId"`
+	EvaluateConditionFunctionType int32 `json:"EvaluateConditionFunctionType"`
+	EvaluateConditionEvaluateType int32 `json:"EvaluateConditionEvaluateType"`
+	EvaluateConditionValueGroupId int32 `json:"EvaluateConditionValueGroupId"`
 }
 
 type evaluateConditionValueGroup struct {

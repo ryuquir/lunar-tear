@@ -78,6 +78,7 @@ func registerServices(srv *grpc.Server, host string, octoURL string, userStore *
 	pb.RegisterDokanServiceServer(srv, service.NewDokanServiceServer(userStore, userStore))
 	pb.RegisterPortalCageServiceServer(srv, service.NewPortalCageServiceServer(userStore, userStore))
 	pb.RegisterCharacterViewerServiceServer(srv, service.NewCharacterViewerServiceServer(userStore, userStore, characterViewerCatalog))
+	pb.RegisterMissionServiceServer(srv, service.NewMissionServiceServer(userStore, userStore))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {

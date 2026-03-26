@@ -41,10 +41,10 @@ func (s *CharacterViewerServiceServer) CharacterViewerTop(ctx context.Context, _
 	records := make([]map[string]any, 0, len(released))
 	for _, fieldId := range released {
 		records = append(records, map[string]any{
-			"userId":                   userId,
-			"characterViewerFieldId":   fieldId,
-			"releaseDatetime":          now,
-			"latestVersion":            0,
+			"userId":                 userId,
+			"characterViewerFieldId": fieldId,
+			"releaseDatetime":        now,
+			"latestVersion":          0,
 		})
 	}
 

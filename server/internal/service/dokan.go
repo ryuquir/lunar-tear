@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
@@ -29,7 +30,7 @@ func (s *DokanServiceServer) RegisterDokanConfirmed(ctx context.Context, req *pb
 		}
 	})
 	if err != nil {
-		snapshot, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("update user: %w", err)
 	}
 
 	tables := userdata.FullClientTableMap(snapshot)

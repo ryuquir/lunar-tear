@@ -53,9 +53,5 @@ func currentUserId(ctx context.Context, users store.UserRepository, sessions sto
 	}
 
 	defaultId, _ := users.DefaultUserId()
-	if _, err := users.SnapshotUser(defaultId); err == nil {
-		return defaultId
-	}
-	user, _ := users.EnsureUser("")
-	return user.UserId
+	return defaultId
 }

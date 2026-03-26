@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
@@ -43,7 +44,7 @@ func (s *DataServiceServer) GetUserData(ctx context.Context, req *pb.UserDataGet
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, err := s.users.SnapshotUser(userId)
 	if err != nil {
-		user, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 
 	defaults := userdata.FirstEntranceClientTableMap(user)

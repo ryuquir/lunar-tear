@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
@@ -84,7 +85,7 @@ func (s *GimmickServiceServer) InitSequenceSchedule(ctx context.Context, _ *empt
 	userId := currentUserId(ctx, s.users, s.sessions)
 	user, err := s.users.SnapshotUser(userId)
 	if err != nil {
-		user, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 	return &pb.InitSequenceScheduleResponse{
 		DiffUserData: userdata.BuildDiffFromTables(userdata.SelectTables(userdata.FullClientTableMap(user), gimmickDiffTables)),

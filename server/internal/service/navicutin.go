@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
@@ -27,7 +28,7 @@ func (s *NaviCutInServiceServer) RegisterPlayed(ctx context.Context, req *pb.Reg
 		user.NaviCutInPlayed[req.NaviCutId] = true
 	})
 	if err != nil {
-		snapshot, _ = s.users.EnsureUser("")
+		return nil, fmt.Errorf("update user: %w", err)
 	}
 
 	tables := userdata.FullClientTableMap(snapshot)
