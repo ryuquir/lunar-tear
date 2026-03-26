@@ -37,6 +37,8 @@ func cloneUserState(u store.UserState) store.UserState {
 	out.WeaponNotes = maps.Clone(u.WeaponNotes)
 	out.NaviCutInPlayed = maps.Clone(u.NaviCutInPlayed)
 	out.DokanConfirmed = maps.Clone(u.DokanConfirmed)
+	out.ShopItems = maps.Clone(u.ShopItems)
+	out.ShopReplaceableLineup = maps.Clone(u.ShopReplaceableLineup)
 	out.Gacha = store.GachaState{
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,

@@ -46,31 +46,34 @@ type UserState struct {
 	Gacha         GachaState
 	Notifications NotificationState
 
-	Characters          map[int32]CharacterState
-	Costumes            map[string]CostumeState
-	Weapons             map[string]WeaponState
-	Companions          map[string]CompanionState
-	Thoughts            map[string]ThoughtState
-	DeckCharacters      map[string]DeckCharacterState
-	Decks               map[DeckKey]DeckState
-	Quests              map[int32]UserQuestState
-	QuestMissions       map[QuestMissionKey]UserQuestMissionState
-	Missions            map[int32]UserMissionState
-	WeaponStories       map[int32]WeaponStoryState
-	Gimmick             GimmickState
-	CageOrnamentRewards map[int32]CageOrnamentRewardState
-	ConsumableItems     map[int32]int32
-	Materials           map[int32]int32
-	Parts               map[string]PartsState
-	ImportantItems      map[int32]int32
-	CostumeActiveSkills map[string]CostumeActiveSkillState
-	DeckTypeNotes       map[model.DeckType]DeckTypeNoteState
-	WeaponNotes         map[int32]WeaponNoteState
-	DeckSubWeapons      map[string][]string
-	NaviCutInPlayed     map[int32]bool
-	DokanConfirmed      map[int32]bool
-	PortalCageStatus    PortalCageStatusState
-	GuerrillaFreeOpen   GuerrillaFreeOpenState
+	Characters            map[int32]CharacterState
+	Costumes              map[string]CostumeState
+	Weapons               map[string]WeaponState
+	Companions            map[string]CompanionState
+	Thoughts              map[string]ThoughtState
+	DeckCharacters        map[string]DeckCharacterState
+	Decks                 map[DeckKey]DeckState
+	Quests                map[int32]UserQuestState
+	QuestMissions         map[QuestMissionKey]UserQuestMissionState
+	Missions              map[int32]UserMissionState
+	WeaponStories         map[int32]WeaponStoryState
+	Gimmick               GimmickState
+	CageOrnamentRewards   map[int32]CageOrnamentRewardState
+	ConsumableItems       map[int32]int32
+	Materials             map[int32]int32
+	Parts                 map[string]PartsState
+	ImportantItems        map[int32]int32
+	CostumeActiveSkills   map[string]CostumeActiveSkillState
+	DeckTypeNotes         map[model.DeckType]DeckTypeNoteState
+	WeaponNotes           map[int32]WeaponNoteState
+	DeckSubWeapons        map[string][]string
+	NaviCutInPlayed       map[int32]bool
+	DokanConfirmed        map[int32]bool
+	PortalCageStatus      PortalCageStatusState
+	GuerrillaFreeOpen     GuerrillaFreeOpenState
+	ShopItems             map[int32]UserShopItemState
+	ShopReplaceable       UserShopReplaceableState
+	ShopReplaceableLineup map[int32]UserShopReplaceableLineupState
 }
 
 type GuerrillaFreeOpenState struct {
@@ -552,6 +555,25 @@ type ConvertedGachaMedalState struct {
 type ConsumableItemState struct {
 	ConsumableItemId int32
 	Count            int32
+}
+
+type UserShopItemState struct {
+	ShopItemId                       int32
+	BoughtCount                      int32
+	LatestBoughtCountChangedDatetime int64
+	LatestVersion                    int64
+}
+
+type UserShopReplaceableState struct {
+	LineupUpdateCount          int32
+	LatestLineupUpdateDatetime int64
+	LatestVersion              int64
+}
+
+type UserShopReplaceableLineupState struct {
+	SlotNumber    int32
+	ShopItemId    int32
+	LatestVersion int64
 }
 
 type GachaCatalogEntry struct {

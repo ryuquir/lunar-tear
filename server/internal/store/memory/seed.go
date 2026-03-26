@@ -13,13 +13,11 @@ const (
 	defaultUUID   = "default-user"
 	defaultUserId = int64(1001)
 
-	starterMissionId          = int32(1)
-	starterMainQuestRouteId   = int32(1)
-	starterMainQuestSeasonId  = int32(1)
-	missionInProgress         = int32(1)
-	giftPossessionTypeFreeGem = int32(12)
-	giftDefaultCount          = int32(300)
-	giftUUIDPrefix            = "default-gift"
+	starterMissionId         = int32(1)
+	starterMainQuestRouteId  = int32(1)
+	starterMainQuestSeasonId = int32(1)
+	missionInProgress        = int32(1)
+	giftUUIDPrefix           = "default-gift"
 
 	defaultBirthYear            = int32(2000)
 	defaultBirthMonth           = int32(1)
@@ -27,13 +25,32 @@ const (
 	defaultChargeMoneyThisMonth = int64(0)
 )
 
-func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, snapshotDir string) *store.UserState {
+type starterItemDef struct {
+	Type model.PossessionType
+	Id   int32
+	Qty  int32
+}
+
+var defaultStarterItems = []starterItemDef{
+	{Type: model.PossessionTypeFreeGem, Qty: 300},
+	{Type: model.PossessionTypeConsumableItem, Id: 9001, Qty: 1000},
+	{Type: model.PossessionTypeConsumableItem, Id: 2, Qty: 1000},
+	{Type: model.PossessionTypeConsumableItem, Id: 5001, Qty: 1000},
+	{Type: model.PossessionTypeConsumableItem, Id: 5002, Qty: 1000},
+	{Type: model.PossessionTypeConsumableItem, Id: 5003, Qty: 1000},
+	{Type: model.PossessionTypeConsumableItem, Id: 1009, Qty: 1000},
+}
+
+func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, snapshotDir string, grantStarterItems bool) *store.UserState {
 	if sceneId != 0 && snapshotDir != "" {
 		user, err := loadSnapshot(snapshotDir, sceneId)
 		if err != nil {
 			log.Fatalf("[bootstrap] no snapshot for scene=%d: %v", sceneId, err)
 		}
 		log.Printf("[bootstrap] loaded snapshot for scene=%d", sceneId)
+		if grantStarterItems {
+			applyStarterItems(user)
+		}
 		return user
 	}
 
@@ -98,9 +115,9 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 			NotReceived: []store.NotReceivedGiftState{
 				{
 					GiftCommon: store.GiftCommonState{
-						PossessionType: giftPossessionTypeFreeGem,
+						PossessionType: int32(model.PossessionTypeFreeGem),
 						PossessionId:   0,
-						Count:          giftDefaultCount,
+						Count:          300,
 						GrantDatetime:  nowMillis,
 					},
 					ExpirationDatetime: nowMillis + int64((7*24*time.Hour)/time.Millisecond),
@@ -144,18 +161,36 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 			Sequences:        make(map[store.GimmickSequenceKey]store.GimmickSequenceState),
 			Unlocks:          make(map[store.GimmickKey]store.GimmickUnlockState),
 		},
-		CageOrnamentRewards: make(map[int32]store.CageOrnamentRewardState),
-		ConsumableItems:     make(map[int32]int32),
-		Materials:           make(map[int32]int32),
-		Thoughts:            make(map[string]store.ThoughtState),
-		Parts:               make(map[string]store.PartsState),
-		ImportantItems:      make(map[int32]int32),
-		CostumeActiveSkills: make(map[string]store.CostumeActiveSkillState),
-		DeckTypeNotes:       make(map[model.DeckType]store.DeckTypeNoteState),
-		WeaponNotes:         make(map[int32]store.WeaponNoteState),
-		NaviCutInPlayed:     make(map[int32]bool),
-		DokanConfirmed:      make(map[int32]bool),
+		CageOrnamentRewards:   make(map[int32]store.CageOrnamentRewardState),
+		ConsumableItems:       make(map[int32]int32),
+		Materials:             make(map[int32]int32),
+		Thoughts:              make(map[string]store.ThoughtState),
+		Parts:                 make(map[string]store.PartsState),
+		ImportantItems:        make(map[int32]int32),
+		CostumeActiveSkills:   make(map[string]store.CostumeActiveSkillState),
+		DeckTypeNotes:         make(map[model.DeckType]store.DeckTypeNoteState),
+		WeaponNotes:           make(map[int32]store.WeaponNoteState),
+		NaviCutInPlayed:       make(map[int32]bool),
+		DokanConfirmed:        make(map[int32]bool),
+		ShopItems:             make(map[int32]store.UserShopItemState),
+		ShopReplaceableLineup: make(map[int32]store.UserShopReplaceableLineupState),
 	}
 	store.EnsureDefaultDeck(user, nowMillis)
+	if grantStarterItems {
+		applyStarterItems(user)
+	}
 	return user
+}
+
+func applyStarterItems(user *store.UserState) {
+	for _, item := range defaultStarterItems {
+		switch item.Type {
+		case model.PossessionTypeFreeGem:
+			user.Gem.FreeGem += item.Qty
+		case model.PossessionTypeConsumableItem:
+			user.ConsumableItems[item.Id] += item.Qty
+		case model.PossessionTypeMaterial:
+			user.Materials[item.Id] += item.Qty
+		}
+	}
 }

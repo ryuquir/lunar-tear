@@ -8,6 +8,39 @@ import (
 	"lunar-tear/server/internal/model"
 )
 
+func DeductPrice(user *UserState, priceType, priceId, amount int32) error {
+	switch priceType {
+	case model.PriceTypeConsumableItem:
+		cur := user.ConsumableItems[priceId]
+		if cur < amount {
+			return fmt.Errorf("insufficient consumable %d: have %d, need %d", priceId, cur, amount)
+		}
+		user.ConsumableItems[priceId] = cur - amount
+	case model.PriceTypeGem:
+		total := user.Gem.FreeGem + user.Gem.PaidGem
+		if total < amount {
+			return fmt.Errorf("insufficient gems: have %d, need %d", total, amount)
+		}
+		if user.Gem.FreeGem >= amount {
+			user.Gem.FreeGem -= amount
+		} else {
+			amount -= user.Gem.FreeGem
+			user.Gem.FreeGem = 0
+			user.Gem.PaidGem -= amount
+		}
+	case model.PriceTypePaidGem:
+		if user.Gem.PaidGem < amount {
+			return fmt.Errorf("insufficient paid gems: have %d, need %d", user.Gem.PaidGem, amount)
+		}
+		user.Gem.PaidGem -= amount
+	case model.PriceTypePlatformPayment:
+		// real-money purchase -- treat as free on private server
+	default:
+		log.Printf("[DeductPrice] unhandled priceType=%d priceId=%d amount=%d", priceType, priceId, amount)
+	}
+	return nil
+}
+
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
 	switch possessionType {
 	case model.PossessionTypeMaterial:

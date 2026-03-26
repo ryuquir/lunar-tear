@@ -121,6 +121,24 @@ func init() {
 		return s
 	})
 
+	register("IUserShopItem", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedShopItemRecords(user)...)
+		return s
+	})
+	register("IUserShopReplaceable", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":                     user.UserId,
+			"lineupUpdateCount":          user.ShopReplaceable.LineupUpdateCount,
+			"latestLineupUpdateDatetime": user.ShopReplaceable.LatestLineupUpdateDatetime,
+			"latestVersion":              user.ShopReplaceable.LatestVersion,
+		})
+		return s
+	})
+	register("IUserShopReplaceableLineup", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedShopReplaceableLineupRecords(user)...)
+		return s
+	})
+
 	registerStatic()
 }
 
@@ -201,6 +219,45 @@ func sortedDokanRecords(user store.UserState) []map[string]any {
 			"dokanId":         id,
 			"displayDatetime": now,
 			"latestVersion":   0,
+		})
+	}
+	return records
+}
+
+func sortedShopItemRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.ShopItems))
+	for id := range user.ShopItems {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.ShopItems[int32(id)]
+		records = append(records, map[string]any{
+			"userId":                           user.UserId,
+			"shopItemId":                       row.ShopItemId,
+			"boughtCount":                      row.BoughtCount,
+			"latestBoughtCountChangedDatetime": row.LatestBoughtCountChangedDatetime,
+			"latestVersion":                    row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedShopReplaceableLineupRecords(user store.UserState) []map[string]any {
+	slots := make([]int, 0, len(user.ShopReplaceableLineup))
+	for slot := range user.ShopReplaceableLineup {
+		slots = append(slots, int(slot))
+	}
+	sort.Ints(slots)
+	records := make([]map[string]any, 0, len(slots))
+	for _, slot := range slots {
+		row := user.ShopReplaceableLineup[int32(slot)]
+		records = append(records, map[string]any{
+			"userId":        user.UserId,
+			"slotNumber":    row.SlotNumber,
+			"shopItemId":    row.ShopItemId,
+			"latestVersion": row.LatestVersion,
 		})
 	}
 	return records

@@ -23,11 +23,18 @@ func WithSceneId(sceneId int32) Option {
 	}
 }
 
+func WithStarterItems(v bool) Option {
+	return func(s *MemoryStore) {
+		s.starterItems = v
+	}
+}
+
 type MemoryStore struct {
 	mu                  sync.RWMutex
 	clock               store.Clock
 	bootstrapSceneId    int32
 	snapshotDir         string
+	starterItems        bool
 	lastSnapshotSceneId int32
 	nextUserId          int64
 	users               map[int64]*store.UserState
@@ -176,7 +183,7 @@ func (s *MemoryStore) getOrCreateLocked(uuid string) *store.UserState {
 	userId := s.nextUserId
 	s.nextUserId++
 
-	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.snapshotDir)
+	user := seedUserState(userId, uuid, s.clock().UnixMilli(), s.bootstrapSceneId, s.snapshotDir, s.starterItems)
 	s.users[userId] = user
 	s.userIdsByUuid[uuid] = userId
 	return user

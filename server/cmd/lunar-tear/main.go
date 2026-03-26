@@ -17,6 +17,7 @@ func main() {
 	host := flag.String("host", "127.0.0.1", "hostname the client will connect to")
 	resourcesBaseURL := flag.String("resources-base-url", "", "Resources base URL for list.bin rewrite (must be exactly 43 chars); empty = derive from host (so client uses our server for assets)")
 	scene := flag.Int("scene", 0, "Bootstrap to scene N (0 = fresh start)")
+	starterItems := flag.Bool("starter-items", false, "Grant starter items to new users")
 	flag.Parse()
 
 	octoURL := "http://" + *host + ":" + strconv.Itoa(*httpPort)
@@ -42,6 +43,7 @@ func main() {
 	userStore := memory.New(gametime.Now,
 		memory.WithSnapshotDir(snapshotDir),
 		memory.WithSceneId(int32(*scene)),
+		memory.WithStarterItems(*starterItems),
 	)
 	if *scene != 0 {
 		log.Printf("bootstrap scene: %d (from snapshot)", *scene)
@@ -58,5 +60,11 @@ func main() {
 	loginBonusCatalog := masterdata.LoadLoginBonusCatalog()
 	characterViewerCatalog := masterdata.LoadCharacterViewerCatalog()
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog)
+	shopCatalog, err := masterdata.LoadShopCatalog()
+	if err != nil {
+		log.Fatalf("load shop catalog: %v", err)
+	}
+	log.Printf("shop catalog loaded: %d items, %d content groups", len(shopCatalog.Items), len(shopCatalog.Contents))
+
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog)
 }
