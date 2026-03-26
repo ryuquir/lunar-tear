@@ -66,5 +66,11 @@ func main() {
 	}
 	log.Printf("shop catalog loaded: %d items, %d content groups", len(shopCatalog.Items), len(shopCatalog.Contents))
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog)
+	costumeCatalog, err := masterdata.LoadCostumeCatalog()
+	if err != nil {
+		log.Fatalf("load costume catalog: %v", err)
+	}
+	log.Printf("costume catalog loaded: %d costumes, %d materials, %d rarity curves", len(costumeCatalog.Costumes), len(costumeCatalog.Materials), len(costumeCatalog.ExpByRarity))
+
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog)
 }
