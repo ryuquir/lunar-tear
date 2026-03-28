@@ -36,6 +36,8 @@ func cloneUserState(u store.UserState) store.UserState {
 	out.DeckTypeNotes = maps.Clone(u.DeckTypeNotes)
 	out.WeaponNotes = maps.Clone(u.WeaponNotes)
 	out.NaviCutInPlayed = maps.Clone(u.NaviCutInPlayed)
+	out.ViewedMovies = maps.Clone(u.ViewedMovies)
+	out.DrawnOmikuji = maps.Clone(u.DrawnOmikuji)
 	out.DokanConfirmed = maps.Clone(u.DokanConfirmed)
 	out.ShopItems = maps.Clone(u.ShopItems)
 	out.ShopReplaceableLineup = maps.Clone(u.ShopReplaceableLineup)

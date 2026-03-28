@@ -171,6 +171,8 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		DeckTypeNotes:         make(map[model.DeckType]store.DeckTypeNoteState),
 		WeaponNotes:           make(map[int32]store.WeaponNoteState),
 		NaviCutInPlayed:       make(map[int32]bool),
+		ViewedMovies:          make(map[int32]int64),
+		DrawnOmikuji:          make(map[int32]int64),
 		DokanConfirmed:        make(map[int32]bool),
 		ShopItems:             make(map[int32]store.UserShopItemState),
 		ShopReplaceableLineup: make(map[int32]store.UserShopReplaceableLineupState),

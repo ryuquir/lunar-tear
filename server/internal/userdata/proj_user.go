@@ -96,6 +96,14 @@ func init() {
 		s, _ := encodeJSONMaps(sortedNaviCutInRecords(user)...)
 		return s
 	})
+	register("IUserMovie", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedMovieRecords(user)...)
+		return s
+	})
+	register("IUserOmikuji", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedOmikujiRecords(user)...)
+		return s
+	})
 	register("IUserDokan", func(user store.UserState) string {
 		s, _ := encodeJSONMaps(sortedDokanRecords(user)...)
 		return s
@@ -200,6 +208,42 @@ func sortedNaviCutInRecords(user store.UserState) []map[string]any {
 			"naviCutInId":   id,
 			"playDatetime":  now,
 			"latestVersion": 0,
+		})
+	}
+	return records
+}
+
+func sortedMovieRecords(user store.UserState) []map[string]any {
+	ids := make([]int32, 0, len(user.ViewedMovies))
+	for id := range user.ViewedMovies {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":               user.UserId,
+			"movieId":              id,
+			"latestViewedDatetime": user.ViewedMovies[id],
+			"latestVersion":        0,
+		})
+	}
+	return records
+}
+
+func sortedOmikujiRecords(user store.UserState) []map[string]any {
+	ids := make([]int32, 0, len(user.DrawnOmikuji))
+	for id := range user.DrawnOmikuji {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		records = append(records, map[string]any{
+			"userId":             user.UserId,
+			"omikujiId":          id,
+			"latestDrawDatetime": user.DrawnOmikuji[id],
+			"latestVersion":      0,
 		})
 	}
 	return records

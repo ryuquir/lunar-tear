@@ -60,6 +60,8 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserPartsPresetTag":                     projectTable("IUserPartsPresetTag", user),
 		"IUserPartsStatusSub":                     projectTable("IUserPartsStatusSub", user),
 		"IUserNaviCutIn":                          projectTable("IUserNaviCutIn", user),
+		"IUserMovie":                              projectTable("IUserMovie", user),
+		"IUserOmikuji":                            projectTable("IUserOmikuji", user),
 		"IUserDokan":                              projectTable("IUserDokan", user),
 		"IUserPortalCageStatus":                   projectTable("IUserPortalCageStatus", user),
 		"IUserEventQuestGuerrillaFreeOpen":        projectTable("IUserEventQuestGuerrillaFreeOpen", user),

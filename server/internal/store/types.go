@@ -68,6 +68,8 @@ type UserState struct {
 	WeaponNotes           map[int32]WeaponNoteState
 	DeckSubWeapons        map[string][]string
 	NaviCutInPlayed       map[int32]bool
+	ViewedMovies          map[int32]int64
+	DrawnOmikuji          map[int32]int64
 	DokanConfirmed        map[int32]bool
 	PortalCageStatus      PortalCageStatusState
 	GuerrillaFreeOpen     GuerrillaFreeOpenState

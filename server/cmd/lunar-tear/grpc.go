@@ -34,7 +34,18 @@ func (l loggingListener) Accept() (net.Conn, error) {
 	return conn, nil
 }
 
-func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog, characterViewerCatalog *masterdata.CharacterViewerCatalog, shopCatalog *masterdata.ShopCatalog, costumeCatalog *masterdata.CostumeCatalog) {
+func startGRPC(
+	host string,
+	octoURL string,
+	userStore *memory.MemoryStore,
+	questEngine *questflow.Engine,
+	cageOrnamentCatalog *masterdata.CageOrnamentCatalog,
+	loginBonusCatalog *masterdata.LoginBonusCatalog,
+	characterViewerCatalog *masterdata.CharacterViewerCatalog,
+	shopCatalog *masterdata.ShopCatalog,
+	costumeCatalog *masterdata.CostumeCatalog,
+	omikujiCatalog *masterdata.OmikujiCatalog,
+) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
 		log.Fatalf("failed to listen on :443: %v", err)
@@ -46,7 +57,18 @@ func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, quest
 		grpc.UnknownServiceHandler(loggingUnknownService),
 	)
 
-	registerServices(grpcServer, host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog)
+	registerServices(grpcServer,
+		host,
+		octoURL,
+		userStore,
+		questEngine,
+		cageOrnamentCatalog,
+		loginBonusCatalog,
+		characterViewerCatalog,
+		shopCatalog,
+		costumeCatalog,
+		omikujiCatalog,
+	)
 
 	reflection.Register(grpcServer)
 
@@ -58,7 +80,19 @@ func startGRPC(host string, octoURL string, userStore *memory.MemoryStore, quest
 	}
 }
 
-func registerServices(srv *grpc.Server, host string, octoURL string, userStore *memory.MemoryStore, questEngine *questflow.Engine, cageOrnamentCatalog *masterdata.CageOrnamentCatalog, loginBonusCatalog *masterdata.LoginBonusCatalog, characterViewerCatalog *masterdata.CharacterViewerCatalog, shopCatalog *masterdata.ShopCatalog, costumeCatalog *masterdata.CostumeCatalog) {
+func registerServices(
+	srv *grpc.Server,
+	host string,
+	octoURL string,
+	userStore *memory.MemoryStore,
+	questEngine *questflow.Engine,
+	cageOrnamentCatalog *masterdata.CageOrnamentCatalog,
+	loginBonusCatalog *masterdata.LoginBonusCatalog,
+	characterViewerCatalog *masterdata.CharacterViewerCatalog,
+	shopCatalog *masterdata.ShopCatalog,
+	costumeCatalog *masterdata.CostumeCatalog,
+	omikujiCatalog *masterdata.OmikujiCatalog,
+) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
 	pb.RegisterBattleServiceServer(srv, service.NewBattleServiceServer(userStore, userStore))
@@ -81,6 +115,8 @@ func registerServices(srv *grpc.Server, host string, octoURL string, userStore *
 	pb.RegisterMissionServiceServer(srv, service.NewMissionServiceServer(userStore, userStore))
 	pb.RegisterShopServiceServer(srv, service.NewShopServiceServer(userStore, userStore, shopCatalog))
 	pb.RegisterCostumeServiceServer(srv, service.NewCostumeServiceServer(userStore, userStore, costumeCatalog))
+	pb.RegisterMovieServiceServer(srv, service.NewMovieServiceServer(userStore, userStore))
+	pb.RegisterOmikujiServiceServer(srv, service.NewOmikujiServiceServer(userStore, userStore, omikujiCatalog))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {

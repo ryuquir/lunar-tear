@@ -59,6 +59,7 @@ func main() {
 	cageOrnamentCatalog := masterdata.LoadCageOrnamentCatalog()
 	loginBonusCatalog := masterdata.LoadLoginBonusCatalog()
 	characterViewerCatalog := masterdata.LoadCharacterViewerCatalog()
+	omikujiCatalog := masterdata.LoadOmikujiCatalog()
 
 	shopCatalog, err := masterdata.LoadShopCatalog()
 	if err != nil {
@@ -72,5 +73,5 @@ func main() {
 	}
 	log.Printf("costume catalog loaded: %d costumes, %d materials, %d rarity curves", len(costumeCatalog.Costumes), len(costumeCatalog.Materials), len(costumeCatalog.ExpByRarity))
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog)
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog)
 }
