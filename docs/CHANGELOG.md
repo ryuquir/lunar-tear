@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-03-28
+
+### Working
+
+- Everything from 2026-03-21, plus:
+- Costume enhancement (gold cost, material consumption, same-weapon-type EXP bonus)
+- Shop (buying items, price deduction, starter item grants on new accounts)
+- Mission progress tracking
+- 3D viewer
+- Event quests (start/finish/restart/update lifecycle, state tracking)
+- Tutorial rewards with companion choices
+- Battle drop rewards on quest finish
+- Snapshot system for saving/loading user state per quest scene
+
+### Roadblock
+
+- Retire quest/battle mechanism — the abandon/withdraw flow for quests and battles hasn't been traced or implemented yet
+
+### Need to Figure Out
+
+- Rarity/awakening, and full client expectations (enhancement is done, rest TBD)
+- Banner/gacha logic (scheduling, rates, pity, relationship between MomBanner and gacha catalogs)
+
 ## 2026-03-21
 
 ### Working
