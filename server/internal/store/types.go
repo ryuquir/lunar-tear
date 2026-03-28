@@ -70,6 +70,7 @@ type UserState struct {
 	NaviCutInPlayed       map[int32]bool
 	ViewedMovies          map[int32]int64
 	DrawnOmikuji          map[int32]int64
+	PremiumItems          map[int32]int64
 	DokanConfirmed        map[int32]bool
 	PortalCageStatus      PortalCageStatusState
 	GuerrillaFreeOpen     GuerrillaFreeOpenState

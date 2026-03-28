@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/model"
 )
 
@@ -53,6 +54,8 @@ func GrantPossession(user *UserState, possessionType model.PossessionType, posse
 		user.Gem.FreeGem += count
 	case model.PossessionTypeImportantItem:
 		user.ImportantItems[possessionId] += count
+	case model.PossessionTypePremiumItem:
+		user.PremiumItems[possessionId] = gametime.NowMillis()
 	default:
 		log.Printf("[GrantPossession] unhandled type=%d id=%d count=%d", possessionType, possessionId, count)
 	}

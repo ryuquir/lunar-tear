@@ -49,6 +49,10 @@ func init() {
 		s, _ := encodeJSONMaps(sortedImportantItemRecords(user)...)
 		return s
 	})
+	register("IUserPremiumItem", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedPremiumItemRecords(user)...)
+		return s
+	})
 	register("IUserParts", func(user store.UserState) string {
 		s, _ := encodeJSONMaps(sortedPartsRecords(user)...)
 		return s
@@ -282,6 +286,30 @@ func sortedImportantItemRecords(user store.UserState) []map[string]any {
 			"count":                    user.ImportantItems[int32(id)],
 			"firstAcquisitionDatetime": nowMillis,
 			"latestVersion":            nowMillis,
+		})
+	}
+	return records
+}
+
+func sortedPremiumItemRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.PremiumItems))
+	for id := range user.PremiumItems {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	nowMillis := gametime.NowMillis()
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		acqTime := user.PremiumItems[int32(id)]
+		if acqTime == 0 {
+			acqTime = nowMillis
+		}
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"premiumItemId":       int32(id),
+			"acquisitionDatetime": acqTime,
+			"latestVersion":       nowMillis,
 		})
 	}
 	return records

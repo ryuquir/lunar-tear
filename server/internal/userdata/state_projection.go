@@ -39,6 +39,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserConsumableItem":                     projectTable("IUserConsumableItem", user),
 		"IUserParts":                              projectTable("IUserParts", user),
 		"IUserImportantItem":                      projectTable("IUserImportantItem", user),
+		"IUserPremiumItem":                        projectTable("IUserPremiumItem", user),
 		"IUserDeckPartsGroup":                     projectTable("IUserDeckPartsGroup", user),
 		"IUserDeckSubWeaponGroup":                 projectTable("IUserDeckSubWeaponGroup", user),
 		"IUserDeckCharacterDressupCostume":        projectTable("IUserDeckCharacterDressupCostume", user),

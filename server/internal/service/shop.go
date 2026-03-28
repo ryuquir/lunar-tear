@@ -11,6 +11,8 @@ import (
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var shopDiffTables = []string{
@@ -21,6 +23,7 @@ var shopDiffTables = []string{
 	"IUserConsumableItem",
 	"IUserMaterial",
 	"IUserImportantItem",
+	"IUserPremiumItem",
 }
 
 type ShopServiceServer struct {
@@ -108,5 +111,79 @@ func (s *ShopServiceServer) RefreshUserData(ctx context.Context, req *pb.Refresh
 
 	return &pb.RefreshResponse{
 		DiffUserData: diff,
+	}, nil
+}
+
+func (s *ShopServiceServer) GetCesaLimit(_ context.Context, _ *emptypb.Empty) (*pb.GetCesaLimitResponse, error) {
+	log.Printf("[ShopService] GetCesaLimit")
+	return &pb.GetCesaLimitResponse{
+		CesaLimit:    []*pb.CesaLimit{},
+		DiffUserData: userdata.EmptyDiff(),
+	}, nil
+}
+
+func (s *ShopServiceServer) CreatePurchaseTransaction(ctx context.Context, req *pb.CreatePurchaseTransactionRequest) (*pb.CreatePurchaseTransactionResponse, error) {
+	log.Printf("[ShopService] CreatePurchaseTransaction: shopId=%d shopItemId=%d productId=%s",
+		req.ShopId, req.ShopItemId, req.ProductId)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		item, ok := s.catalog.Items[req.ShopItemId]
+		if !ok {
+			log.Printf("[ShopService] CreatePurchaseTransaction: unknown shopItemId=%d", req.ShopItemId)
+			return
+		}
+
+		if err := store.DeductPrice(user, item.PriceType, item.PriceId, item.Price); err != nil {
+			log.Printf("[ShopService] CreatePurchaseTransaction: deduct failed: %v", err)
+		}
+
+		for _, content := range s.catalog.Contents[req.ShopItemId] {
+			store.GrantPossession(user,
+				model.PossessionType(content.PossessionType),
+				content.PossessionId,
+				content.Count,
+			)
+		}
+
+		si := user.ShopItems[req.ShopItemId]
+		si.ShopItemId = req.ShopItemId
+		si.BoughtCount++
+		si.LatestBoughtCountChangedDatetime = nowMillis
+		si.LatestVersion = nowMillis
+		user.ShopItems[req.ShopItemId] = si
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create purchase transaction: %w", err)
+	}
+
+	txId := fmt.Sprintf("tx_%d_%d_%d", userId, req.ShopItemId, nowMillis)
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, shopDiffTables))
+
+	return &pb.CreatePurchaseTransactionResponse{
+		PurchaseTransactionId: txId,
+		DiffUserData:          diff,
+	}, nil
+}
+
+func (s *ShopServiceServer) PurchaseGooglePlayStoreProduct(ctx context.Context, req *pb.PurchaseGooglePlayStoreProductRequest) (*pb.PurchaseGooglePlayStoreProductResponse, error) {
+	log.Printf("[ShopService] PurchaseGooglePlayStoreProduct: txId=%s", req.PurchaseTransactionId)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	snapshot, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		return nil, fmt.Errorf("purchase google play: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, shopDiffTables))
+
+	return &pb.PurchaseGooglePlayStoreProductResponse{
+		OverflowPossession: []*pb.Possession{},
+		DiffUserData:       diff,
 	}, nil
 }

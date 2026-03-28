@@ -173,6 +173,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		NaviCutInPlayed:       make(map[int32]bool),
 		ViewedMovies:          make(map[int32]int64),
 		DrawnOmikuji:          make(map[int32]int64),
+		PremiumItems:          make(map[int32]int64),
 		DokanConfirmed:        make(map[int32]bool),
 		ShopItems:             make(map[int32]store.UserShopItemState),
 		ShopReplaceableLineup: make(map[int32]store.UserShopReplaceableLineupState),

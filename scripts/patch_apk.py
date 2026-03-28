@@ -7,7 +7,8 @@ private server without any runtime (Frida) hooks.
 
 Patches applied:
   1. global-metadata.dat  — rewrite IL2CPP string literals (URLs + hostname)
-  2. libil2cpp.so          — ARM64 binary patches (SSL bypass, encryption passthrough, Octo plain list)
+  2. libil2cpp.so          — ARM64 binary patches (SSL bypass, encryption passthrough,
+                             Octo plain list, Google Play billing bypass)
   3. AndroidManifest.xml  — add networkSecurityConfig for cleartext HTTP
   4. res/xml/network_security_config.xml — allow cleartext traffic
 """
@@ -145,7 +146,9 @@ def create_network_security_config(res_xml_dir: str) -> bool:
 
 # ARM64 instruction encodings (little-endian)
 MOV_X0_0 = struct.pack("<I", 0xD2800000)   # mov x0, #0
+MOV_W0_1 = struct.pack("<I", 0x52800020)   # mov w0, #1
 MOV_X0_X1 = struct.pack("<I", 0xAA0103E0)  # mov x0, x1
+NOP = struct.pack("<I", 0xD503201F)        # nop
 RET = struct.pack("<I", 0xD65F03C0)        # ret
 
 # RVAs from dump.cs (Il2CppDumper output matching client/3.7.1.apk)
@@ -173,6 +176,24 @@ IL2CPP_PATCHES = [
         "desc": "Octo list: force plain list (return false = no AES); server serves raw list.bin",
         "rva": 0x4C27038,
         "bytes": MOV_X0_0 + RET,
+    },
+    {
+        "name": "PurchaseRealProductAsync.MoveNext (inlined IsInitialized check)",
+        "desc": "IAP bypass — NOP the cbz that branches to PurchasingUnavailable when _initialized is false",
+        "rva": 0x2831CA8,
+        "bytes": NOP,
+    },
+    {
+        "name": "Purchaser.IsExistProduct",
+        "desc": "IAP bypass — always report product as existing in store",
+        "rva": 0x282CE78,
+        "bytes": MOV_W0_1 + RET,
+    },
+    {
+        "name": "Purchaser.<BuyProduct>d__24.MoveNext (null _storeController)",
+        "desc": "IAP bypass — redirect null _storeController from NRE to cancelled-return path",
+        "rva": 0x2834028,
+        "bytes": struct.pack("<I", 0xB4001675),
     },
 ]
 
@@ -254,7 +275,7 @@ def main():
     n = patch_metadata_strings(meta, replacements)
     print(f"    {n}/{len(replacements)} strings patched")
 
-    print(f"\n[2] Patching libil2cpp.so (SSL bypass + encryption passthrough) ...")
+    print(f"\n[2] Patching libil2cpp.so (SSL bypass + encryption passthrough + IAP bypass) ...")
     n2 = patch_libil2cpp(so)
     print(f"    {n2}/{len(IL2CPP_PATCHES)} methods patched")
 
