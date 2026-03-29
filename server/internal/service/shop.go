@@ -24,6 +24,7 @@ var shopDiffTables = []string{
 	"IUserMaterial",
 	"IUserImportantItem",
 	"IUserPremiumItem",
+	"IUserStatus",
 }
 
 type ShopServiceServer struct {
@@ -64,6 +65,8 @@ func (s *ShopServiceServer) Buy(ctx context.Context, req *pb.BuyRequest) (*pb.Bu
 					content.Count*qty,
 				)
 			}
+
+			s.applyContentEffects(user, shopItemId, qty, nowMillis)
 
 			si := user.ShopItems[shopItemId]
 			si.ShopItemId = shopItemId
@@ -148,6 +151,8 @@ func (s *ShopServiceServer) CreatePurchaseTransaction(ctx context.Context, req *
 			)
 		}
 
+		s.applyContentEffects(user, req.ShopItemId, 1, nowMillis)
+
 		si := user.ShopItems[req.ShopItemId]
 		si.ShopItemId = req.ShopItemId
 		si.BoughtCount++
@@ -186,4 +191,29 @@ func (s *ShopServiceServer) PurchaseGooglePlayStoreProduct(ctx context.Context, 
 		OverflowPossession: []*pb.Possession{},
 		DiffUserData:       diff,
 	}, nil
+}
+
+func (s *ShopServiceServer) applyContentEffects(user *store.UserState, shopItemId, qty int32, nowMillis int64) {
+	for _, effect := range s.catalog.Effects[shopItemId] {
+		switch effect.EffectTargetType {
+		case model.EffectTargetStaminaRecovery:
+			maxMillis := s.catalog.MaxStaminaMillis[user.Status.Level]
+			millis := s.resolveEffectMillis(effect.EffectValueType, effect.EffectValue, user.Status.Level)
+			store.RecoverStamina(user, millis*qty, maxMillis, nowMillis)
+		default:
+			log.Printf("[ShopService] unhandled effect: shopItemId=%d targetType=%d", shopItemId, effect.EffectTargetType)
+		}
+	}
+}
+
+func (s *ShopServiceServer) resolveEffectMillis(effectValueType, effectValue, userLevel int32) int32 {
+	switch effectValueType {
+	case model.EffectValueFixed:
+		return effectValue
+	case model.EffectValuePermil:
+		maxMillis := s.catalog.MaxStaminaMillis[userLevel]
+		return effectValue * maxMillis / 1000
+	default:
+		return 0
+	}
 }

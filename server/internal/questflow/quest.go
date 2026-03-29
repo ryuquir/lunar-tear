@@ -2,7 +2,6 @@ package questflow
 
 import (
 	"fmt"
-	"log"
 
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
@@ -46,9 +45,8 @@ func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattle
 	e.initQuestState(user, questId)
 
 	if quest.Stamina > 0 {
-		user.Status.StaminaMilliValue = max(user.Status.StaminaMilliValue-quest.Stamina*1000, 0)
-		user.Status.StaminaUpdateDatetime = nowMillis
-		log.Printf("[HandleQuestStart] questId=%d stamina cost=%d -> remaining=%d", questId, quest.Stamina, user.Status.StaminaMilliValue)
+		maxMillis := e.maxStaminaByLevel[user.Status.Level] * 1000
+		store.ConsumeStamina(user, quest.Stamina, maxMillis, nowMillis)
 	}
 
 	questState := user.Quests[questId]

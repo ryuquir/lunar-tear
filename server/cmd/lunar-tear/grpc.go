@@ -107,6 +107,7 @@ func registerServices(
 	pb.RegisterNotificationServiceServer(srv, service.NewNotificationServiceServer(userStore, userStore))
 	pb.RegisterCageOrnamentServiceServer(srv, service.NewCageOrnamentServiceServer(userStore, userStore, cageOrnamentCatalog))
 	pb.RegisterDeckServiceServer(srv, service.NewDeckServiceServer(userStore, userStore))
+	pb.RegisterFriendServiceServer(srv, service.NewFriendServiceServer(userStore, userStore))
 	pb.RegisterLoginBonusServiceServer(srv, service.NewLoginBonusServiceServer(userStore, userStore, loginBonusCatalog))
 	pb.RegisterNaviCutInServiceServer(srv, service.NewNaviCutInServiceServer(userStore, userStore))
 	pb.RegisterDokanServiceServer(srv, service.NewDokanServiceServer(userStore, userStore))

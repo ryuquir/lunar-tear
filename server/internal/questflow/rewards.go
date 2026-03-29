@@ -141,9 +141,7 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 
 	if user.Status.Level > oldLevel {
 		if maxStamina, ok := e.maxStaminaByLevel[user.Status.Level]; ok {
-			user.Status.StaminaMilliValue = maxStamina * 1000
-			user.Status.StaminaUpdateDatetime = nowMillis
-			log.Printf("[applyExpRewards] level-up %d->%d, stamina replenished to %d", oldLevel, user.Status.Level, maxStamina)
+			store.ReplenishStamina(user, maxStamina*1000, nowMillis)
 		}
 	}
 
