@@ -195,6 +195,18 @@ IL2CPP_PATCHES = [
         "rva": 0x2834028,
         "bytes": struct.pack("<I", 0xB4001675),
     },
+    {
+        "name": "PurchaseRealProductAsync.MoveNext (skip CheckPurchasingAlert)",
+        "desc": "Fast purchase — skip CheckPurchasingAlert call, awaiter, and CESA dialog (B to post-alert code)",
+        "rva": 0x2831CAC,
+        "bytes": struct.pack("<I", 0x14000019),
+    },
+    {
+        "name": "Initialize.MoveNext (skip _initialized check)",
+        "desc": "Fast purchase — NOP the cbz so Initialize always returns None via builder (skip ~8s GP timeout)",
+        "rva": 0x2830834,
+        "bytes": NOP,
+    },
 ]
 
 
@@ -275,7 +287,7 @@ def main():
     n = patch_metadata_strings(meta, replacements)
     print(f"    {n}/{len(replacements)} strings patched")
 
-    print(f"\n[2] Patching libil2cpp.so (SSL bypass + encryption passthrough + IAP bypass) ...")
+    print(f"\n[2] Patching libil2cpp.so (SSL bypass + encryption passthrough + IAP bypass + fast purchase) ...")
     n2 = patch_libil2cpp(so)
     print(f"    {n2}/{len(IL2CPP_PATCHES)} methods patched")
 
