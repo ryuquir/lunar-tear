@@ -69,6 +69,14 @@ func init() {
 		s, _ := encodeJSONMaps(sortedWeaponAbilityRecords(user)...)
 		return s
 	})
+	register("IUserExplore", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(exploreRecord(user))
+		return s
+	})
+	register("IUserExploreScore", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedExploreScoreRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeAwakenStatusUp",
 		"IUserCostumeLevelBonusReleaseStatus",
@@ -384,6 +392,37 @@ func sortedWeaponAbilityRecords(user store.UserState) []map[string]any {
 				"latestVersion":  int64(0),
 			})
 		}
+	}
+	return records
+}
+
+func exploreRecord(user store.UserState) map[string]any {
+	return map[string]any{
+		"userId":             user.UserId,
+		"isUseExploreTicket": user.Explore.IsUseExploreTicket,
+		"playingExploreId":   user.Explore.PlayingExploreId,
+		"latestPlayDatetime": user.Explore.LatestPlayDatetime,
+		"latestVersion":      user.Explore.LatestVersion,
+	}
+}
+
+func sortedExploreScoreRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.ExploreScores))
+	for id := range user.ExploreScores {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.ExploreScores[int32(id)]
+		records = append(records, map[string]any{
+			"userId":                 user.UserId,
+			"exploreId":              row.ExploreId,
+			"maxScore":               row.MaxScore,
+			"maxScoreUpdateDatetime": row.MaxScoreUpdateDatetime,
+			"latestVersion":          row.LatestVersion,
+		})
 	}
 	return records
 }

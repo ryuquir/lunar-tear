@@ -179,6 +179,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		DokanConfirmed:        make(map[int32]bool),
 		ShopItems:             make(map[int32]store.UserShopItemState),
 		ShopReplaceableLineup: make(map[int32]store.UserShopReplaceableLineupState),
+		ExploreScores:         make(map[int32]store.ExploreScoreState),
 	}
 	store.EnsureDefaultDeck(user, nowMillis)
 	if grantStarterItems {

@@ -8,13 +8,13 @@ import (
 )
 
 type WeaponMasterRow struct {
-	WeaponId               int32 `json:"WeaponId"`
-	WeaponType             int32 `json:"WeaponType"`
+	WeaponId                int32 `json:"WeaponId"`
+	WeaponType              int32 `json:"WeaponType"`
 	WeaponSpecificEnhanceId int32 `json:"WeaponSpecificEnhanceId"`
 }
 
 type weaponSpecificEnhanceRow struct {
-	WeaponSpecificEnhanceId                     int32 `json:"WeaponSpecificEnhanceId"`
+	WeaponSpecificEnhanceId                      int32 `json:"WeaponSpecificEnhanceId"`
 	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
 	EnhancementCostByMaterialNumericalFunctionId int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
 	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`

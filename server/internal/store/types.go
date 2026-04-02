@@ -64,8 +64,8 @@ type UserState struct {
 	Parts                 map[string]PartsState
 	ImportantItems        map[int32]int32
 	CostumeActiveSkills   map[string]CostumeActiveSkillState
-	WeaponSkills          map[string][]WeaponSkillState    // key: userWeaponUuid
-	WeaponAbilities       map[string][]WeaponAbilityState  // key: userWeaponUuid
+	WeaponSkills          map[string][]WeaponSkillState   // key: userWeaponUuid
+	WeaponAbilities       map[string][]WeaponAbilityState // key: userWeaponUuid
 	DeckTypeNotes         map[model.DeckType]DeckTypeNoteState
 	WeaponNotes           map[int32]WeaponNoteState
 	DeckSubWeapons        map[string][]string
@@ -79,6 +79,23 @@ type UserState struct {
 	ShopItems             map[int32]UserShopItemState
 	ShopReplaceable       UserShopReplaceableState
 	ShopReplaceableLineup map[int32]UserShopReplaceableLineupState
+
+	Explore       ExploreState
+	ExploreScores map[int32]ExploreScoreState
+}
+
+type ExploreState struct {
+	IsUseExploreTicket bool
+	PlayingExploreId   int32
+	LatestPlayDatetime int64
+	LatestVersion      int64
+}
+
+type ExploreScoreState struct {
+	ExploreId              int32
+	MaxScore               int32
+	MaxScoreUpdateDatetime int64
+	LatestVersion          int64
 }
 
 type GuerrillaFreeOpenState struct {
