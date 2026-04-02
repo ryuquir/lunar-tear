@@ -356,7 +356,7 @@ func sortedCostumeActiveSkillRecords(user store.UserState) []map[string]any {
 
 func sortedWeaponSkillRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.WeaponSkills)
-	var records []map[string]any
+	records := make([]map[string]any, 0)
 	for _, key := range keys {
 		for _, row := range user.WeaponSkills[key] {
 			records = append(records, map[string]any{
@@ -373,7 +373,7 @@ func sortedWeaponSkillRecords(user store.UserState) []map[string]any {
 
 func sortedWeaponAbilityRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.WeaponAbilities)
-	var records []map[string]any
+	records := make([]map[string]any, 0)
 	for _, key := range keys {
 		for _, row := range user.WeaponAbilities[key] {
 			records = append(records, map[string]any{

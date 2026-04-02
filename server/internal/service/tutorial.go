@@ -45,6 +45,7 @@ func (s *TutorialServiceServer) SetTutorialProgress(ctx context.Context, req *pb
 		req.TutorialType == int32(model.TutorialTypeMenuSecond) {
 		tables = append(tables,
 			"IUserCharacter", "IUserCostume", "IUserWeapon",
+			"IUserWeaponSkill", "IUserWeaponAbility",
 			"IUserCompanion", "IUserDeckCharacter", "IUserDeck",
 		)
 	}

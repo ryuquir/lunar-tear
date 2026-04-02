@@ -6,6 +6,7 @@ import (
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gameutil"
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/store"
@@ -86,7 +87,7 @@ func (s *CostumeServiceServer) Enhance(ctx context.Context, req *pb.EnhanceReque
 		costume.Exp += totalExp
 
 		if thresholds, ok := s.catalog.ExpByRarity[cm.RarityType]; ok {
-			costume.Level = costumeLevel(costume.Exp, thresholds)
+			costume.Level, costume.Exp = gameutil.LevelAndCap(costume.Exp, thresholds)
 		}
 
 		costume.LatestVersion = nowMillis
@@ -107,14 +108,3 @@ func (s *CostumeServiceServer) Enhance(ctx context.Context, req *pb.EnhanceReque
 	}, nil
 }
 
-func costumeLevel(exp int32, thresholds []int32) int32 {
-	level := int32(1)
-	for lvl := 1; lvl < len(thresholds); lvl++ {
-		if exp >= thresholds[lvl] {
-			level = int32(lvl)
-		} else {
-			break
-		}
-	}
-	return level
-}

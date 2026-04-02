@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"lunar-tear/server/internal/gameutil"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 )
@@ -116,18 +117,6 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 	return outcome
 }
 
-func levelFromExp(exp int32, thresholds []int32) int32 {
-	level := int32(1)
-	for lvl := 1; lvl < len(thresholds); lvl++ {
-		if exp >= thresholds[lvl] {
-			level = int32(lvl)
-		} else {
-			break
-		}
-	}
-	return level
-}
-
 func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis int64) {
 	questMeta, ok := e.questById[questId]
 	if !ok {
@@ -136,7 +125,7 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 
 	oldLevel := user.Status.Level
 	user.Status.Exp += questMeta.UserExp
-	user.Status.Level = levelFromExp(user.Status.Exp, e.userExpThresholds)
+	user.Status.Level, user.Status.Exp = gameutil.LevelAndCap(user.Status.Exp, e.userExpThresholds)
 	log.Printf("[applyExpRewards] questId=%d user: +%d exp -> total=%d level=%d", questId, questMeta.UserExp, user.Status.Exp, user.Status.Level)
 
 	if user.Status.Level > oldLevel {
@@ -160,7 +149,7 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 		for id := range deckCharacterIds {
 			row := user.Characters[id]
 			row.Exp += questMeta.CharacterExp
-			row.Level = levelFromExp(row.Exp, e.characterExpThresholds)
+			row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, e.characterExpThresholds)
 			user.Characters[id] = row
 			log.Printf("[applyExpRewards] questId=%d character=%d: +%d exp -> total=%d level=%d", questId, id, questMeta.CharacterExp, row.Exp, row.Level)
 		}
@@ -173,7 +162,7 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 			cm, ok := e.costumeById[row.CostumeId]
 			if ok {
 				if thresholds, ok := e.costumeExpByRarity[cm.RarityType]; ok {
-					row.Level = levelFromExp(row.Exp, thresholds)
+					row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, thresholds)
 				}
 			}
 			user.Costumes[key] = row

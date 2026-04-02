@@ -6,6 +6,7 @@ import (
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gameutil"
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/store"
@@ -14,6 +15,8 @@ import (
 
 var weaponDiffTables = []string{
 	"IUserWeapon",
+	"IUserWeaponSkill",
+	"IUserWeaponAbility",
 	"IUserMaterial",
 	"IUserConsumableItem",
 }
@@ -80,7 +83,7 @@ func (s *WeaponServiceServer) EnhanceByMaterial(ctx context.Context, req *pb.Enh
 
 		weapon.Exp += totalExp
 		if thresholds, ok := s.catalog.ExpByEnhanceId[wm.WeaponSpecificEnhanceId]; ok {
-			weapon.Level = weaponLevel(weapon.Exp, thresholds)
+			weapon.Level, weapon.Exp = gameutil.LevelAndCap(weapon.Exp, thresholds)
 		}
 
 		weapon.LatestVersion = nowMillis
@@ -101,14 +104,3 @@ func (s *WeaponServiceServer) EnhanceByMaterial(ctx context.Context, req *pb.Enh
 	}, nil
 }
 
-func weaponLevel(exp int32, thresholds []int32) int32 {
-	level := int32(1)
-	for lvl := 1; lvl < len(thresholds); lvl++ {
-		if exp >= thresholds[lvl] {
-			level = int32(lvl)
-		} else {
-			break
-		}
-	}
-	return level
-}

@@ -13,6 +13,8 @@ var startedGameStartTables = []string{
 	"IUserCharacter",
 	"IUserCostume",
 	"IUserWeapon",
+	"IUserWeaponSkill",
+	"IUserWeaponAbility",
 	"IUserCompanion",
 	"IUserDeckCharacter",
 	"IUserDeck",
