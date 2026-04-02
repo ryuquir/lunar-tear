@@ -67,11 +67,23 @@ func main() {
 	}
 	log.Printf("shop catalog loaded: %d items, %d content groups", len(shopCatalog.Items), len(shopCatalog.Contents))
 
-	costumeCatalog, err := masterdata.LoadCostumeCatalog()
+	materialCatalog, err := masterdata.LoadMaterialCatalog()
+	if err != nil {
+		log.Fatalf("load material catalog: %v", err)
+	}
+	log.Printf("material catalog loaded: %d materials", len(materialCatalog.All))
+
+	costumeCatalog, err := masterdata.LoadCostumeCatalog(materialCatalog)
 	if err != nil {
 		log.Fatalf("load costume catalog: %v", err)
 	}
 	log.Printf("costume catalog loaded: %d costumes, %d materials, %d rarity curves", len(costumeCatalog.Costumes), len(costumeCatalog.Materials), len(costumeCatalog.ExpByRarity))
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog)
+	weaponCatalog, err := masterdata.LoadWeaponCatalog(materialCatalog)
+	if err != nil {
+		log.Fatalf("load weapon catalog: %v", err)
+	}
+	log.Printf("weapon catalog loaded: %d weapons, %d materials, %d enhance configs", len(weaponCatalog.Weapons), len(weaponCatalog.Materials), len(weaponCatalog.ExpByEnhanceId))
+
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog)
 }

@@ -33,6 +33,8 @@ func cloneUserState(u store.UserState) store.UserState {
 	out.Parts = maps.Clone(u.Parts)
 	out.ImportantItems = maps.Clone(u.ImportantItems)
 	out.CostumeActiveSkills = maps.Clone(u.CostumeActiveSkills)
+	out.WeaponSkills = cloneSliceMap(u.WeaponSkills)
+	out.WeaponAbilities = cloneSliceMap(u.WeaponAbilities)
 	out.DeckTypeNotes = maps.Clone(u.DeckTypeNotes)
 	out.WeaponNotes = maps.Clone(u.WeaponNotes)
 	out.NaviCutInPlayed = maps.Clone(u.NaviCutInPlayed)
@@ -88,6 +90,17 @@ func cloneNotReceivedGifts(gifts []store.NotReceivedGiftState) []store.NotReceiv
 			ExpirationDatetime: gift.ExpirationDatetime,
 			UserGiftUuid:       gift.UserGiftUuid,
 		}
+	}
+	return out
+}
+
+func cloneSliceMap[T any](m map[string][]T) map[string][]T {
+	if m == nil {
+		return nil
+	}
+	out := make(map[string][]T, len(m))
+	for k, v := range m {
+		out[k] = append([]T(nil), v...)
 	}
 	return out
 }

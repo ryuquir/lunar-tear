@@ -131,7 +131,19 @@ type costumeRarityRow struct {
 
 type weaponMaster struct {
 	WeaponId                           int32 `json:"WeaponId"`
+	WeaponSkillGroupId                 int32 `json:"WeaponSkillGroupId"`
+	WeaponAbilityGroupId               int32 `json:"WeaponAbilityGroupId"`
 	WeaponStoryReleaseConditionGroupId int32 `json:"WeaponStoryReleaseConditionGroupId"`
+}
+
+type weaponSkillGroupRow struct {
+	WeaponSkillGroupId int32 `json:"WeaponSkillGroupId"`
+	SlotNumber         int32 `json:"SlotNumber"`
+}
+
+type weaponAbilityGroupRow struct {
+	WeaponAbilityGroupId int32 `json:"WeaponAbilityGroupId"`
+	SlotNumber           int32 `json:"SlotNumber"`
 }
 
 type battleDropReward struct {
@@ -247,6 +259,8 @@ type Engine struct {
 	characterExpThresholds             []int32
 	costumeExpByRarity                 map[int32][]int32
 	maxStaminaByLevel                  map[int32]int32
+	skillGroupSlots                    map[int32][]int32 // groupId -> slot numbers
+	abilityGroupSlots                  map[int32][]int32 // groupId -> slot numbers
 }
 
 type userLevelEntry struct {
@@ -337,6 +351,16 @@ func MakeEngine() *Engine {
 	}
 
 	weapons, err := utils.ReadJSON[weaponMaster]("EntityMWeaponTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	weaponSkillGroups, err := utils.ReadJSON[weaponSkillGroupRow]("EntityMWeaponSkillGroupTable.json")
+	if err != nil {
+		panic(err)
+	}
+
+	weaponAbilityGroups, err := utils.ReadJSON[weaponAbilityGroupRow]("EntityMWeaponAbilityGroupTable.json")
 	if err != nil {
 		panic(err)
 	}
@@ -441,6 +465,15 @@ func MakeEngine() *Engine {
 		return thresholds
 	}
 
+	skillSlots := make(map[int32][]int32)
+	for _, row := range weaponSkillGroups {
+		skillSlots[row.WeaponSkillGroupId] = append(skillSlots[row.WeaponSkillGroupId], row.SlotNumber)
+	}
+	abilitySlots := make(map[int32][]int32)
+	for _, row := range weaponAbilityGroups {
+		abilitySlots[row.WeaponAbilityGroupId] = append(abilitySlots[row.WeaponAbilityGroupId], row.SlotNumber)
+	}
+
 	engine := &Engine{
 		sceneById:                          make(map[int32]questScene, len(scenes)),
 		missionById:                        make(map[int32]mission, len(missions)),
@@ -464,6 +497,8 @@ func MakeEngine() *Engine {
 		characterExpThresholds:             buildExpThresholds(31),
 		costumeExpByRarity:                 buildCostumeExpByRarity(costumeRarities, buildExpThresholds),
 		maxStaminaByLevel:                  maxStaminaByLevel,
+		skillGroupSlots:                    skillSlots,
+		abilityGroupSlots:                  abilitySlots,
 	}
 
 	for _, scene := range scenes {

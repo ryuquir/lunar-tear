@@ -64,6 +64,8 @@ type UserState struct {
 	Parts                 map[string]PartsState
 	ImportantItems        map[int32]int32
 	CostumeActiveSkills   map[string]CostumeActiveSkillState
+	WeaponSkills          map[string][]WeaponSkillState    // key: userWeaponUuid
+	WeaponAbilities       map[string][]WeaponAbilityState  // key: userWeaponUuid
 	DeckTypeNotes         map[model.DeckType]DeckTypeNoteState
 	WeaponNotes           map[int32]WeaponNoteState
 	DeckSubWeapons        map[string][]string
@@ -245,6 +247,18 @@ type CostumeActiveSkillState struct {
 	Level               int32
 	AcquisitionDatetime int64
 	LatestVersion       int64
+}
+
+type WeaponSkillState struct {
+	UserWeaponUuid string
+	SlotNumber     int32
+	Level          int32
+}
+
+type WeaponAbilityState struct {
+	UserWeaponUuid string
+	SlotNumber     int32
+	Level          int32
 }
 
 type DeckTypeNoteState struct {

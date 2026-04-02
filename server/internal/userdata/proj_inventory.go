@@ -61,6 +61,14 @@ func init() {
 		s, _ := encodeJSONMaps(sortedCostumeActiveSkillRecords(user)...)
 		return s
 	})
+	register("IUserWeaponSkill", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedWeaponSkillRecords(user)...)
+		return s
+	})
+	register("IUserWeaponAbility", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedWeaponAbilityRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeAwakenStatusUp",
 		"IUserCostumeLevelBonusReleaseStatus",
@@ -68,8 +76,6 @@ func init() {
 		"IUserCostumeLotteryEffectAbility",
 		"IUserCostumeLotteryEffectStatusUp",
 		"IUserCostumeLotteryEffectPending",
-		"IUserWeaponAbility",
-		"IUserWeaponSkill",
 		"IUserWeaponAwaken",
 		"IUserPartsGroupNote",
 		"IUserPartsPreset",
@@ -344,6 +350,40 @@ func sortedCostumeActiveSkillRecords(user store.UserState) []map[string]any {
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"latestVersion":       row.LatestVersion,
 		})
+	}
+	return records
+}
+
+func sortedWeaponSkillRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.WeaponSkills)
+	var records []map[string]any
+	for _, key := range keys {
+		for _, row := range user.WeaponSkills[key] {
+			records = append(records, map[string]any{
+				"userId":         user.UserId,
+				"userWeaponUuid": row.UserWeaponUuid,
+				"slotNumber":     row.SlotNumber,
+				"level":          row.Level,
+				"latestVersion":  int64(0),
+			})
+		}
+	}
+	return records
+}
+
+func sortedWeaponAbilityRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.WeaponAbilities)
+	var records []map[string]any
+	for _, key := range keys {
+		for _, row := range user.WeaponAbilities[key] {
+			records = append(records, map[string]any{
+				"userId":         user.UserId,
+				"userWeaponUuid": row.UserWeaponUuid,
+				"slotNumber":     row.SlotNumber,
+				"level":          row.Level,
+				"latestVersion":  int64(0),
+			})
+		}
 	}
 	return records
 }

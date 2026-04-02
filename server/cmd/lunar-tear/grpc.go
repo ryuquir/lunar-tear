@@ -45,6 +45,7 @@ func startGRPC(
 	shopCatalog *masterdata.ShopCatalog,
 	costumeCatalog *masterdata.CostumeCatalog,
 	omikujiCatalog *masterdata.OmikujiCatalog,
+	weaponCatalog *masterdata.WeaponCatalog,
 ) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
@@ -68,6 +69,7 @@ func startGRPC(
 		shopCatalog,
 		costumeCatalog,
 		omikujiCatalog,
+		weaponCatalog,
 	)
 
 	reflection.Register(grpcServer)
@@ -92,6 +94,7 @@ func registerServices(
 	shopCatalog *masterdata.ShopCatalog,
 	costumeCatalog *masterdata.CostumeCatalog,
 	omikujiCatalog *masterdata.OmikujiCatalog,
+	weaponCatalog *masterdata.WeaponCatalog,
 ) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
@@ -118,6 +121,7 @@ func registerServices(
 	pb.RegisterCostumeServiceServer(srv, service.NewCostumeServiceServer(userStore, userStore, costumeCatalog))
 	pb.RegisterMovieServiceServer(srv, service.NewMovieServiceServer(userStore, userStore))
 	pb.RegisterOmikujiServiceServer(srv, service.NewOmikujiServiceServer(userStore, userStore, omikujiCatalog))
+	pb.RegisterWeaponServiceServer(srv, service.NewWeaponServiceServer(userStore, userStore, weaponCatalog))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {

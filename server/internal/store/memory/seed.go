@@ -168,6 +168,8 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		Parts:                 make(map[string]store.PartsState),
 		ImportantItems:        make(map[int32]int32),
 		CostumeActiveSkills:   make(map[string]store.CostumeActiveSkillState),
+		WeaponSkills:          make(map[string][]store.WeaponSkillState),
+		WeaponAbilities:       make(map[string][]store.WeaponAbilityState),
 		DeckTypeNotes:         make(map[model.DeckType]store.DeckTypeNoteState),
 		WeaponNotes:           make(map[int32]store.WeaponNoteState),
 		NaviCutInPlayed:       make(map[int32]bool),

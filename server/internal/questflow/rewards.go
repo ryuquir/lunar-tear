@@ -312,12 +312,41 @@ func (e *Engine) grantWeapon(user *store.UserState, weaponId int32, nowMillis in
 		}
 	}
 	weapon, ok := e.weaponById[weaponId]
-	if ok && weapon.WeaponStoryReleaseConditionGroupId != 0 {
+	if !ok {
+		return
+	}
+	e.populateWeaponSkillsAbilities(user, key, weapon)
+	if weapon.WeaponStoryReleaseConditionGroupId != 0 {
 		for _, cond := range e.releaseConditionsByGroupId[weapon.WeaponStoryReleaseConditionGroupId] {
 			if cond.WeaponStoryReleaseConditionType == model.WeaponStoryReleaseConditionTypeAcquisition {
 				e.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
 			}
 		}
+	}
+}
+
+func (e *Engine) populateWeaponSkillsAbilities(user *store.UserState, weaponUuid string, weapon weaponMaster) {
+	if slots, ok := e.skillGroupSlots[weapon.WeaponSkillGroupId]; ok {
+		skills := make([]store.WeaponSkillState, len(slots))
+		for i, slot := range slots {
+			skills[i] = store.WeaponSkillState{
+				UserWeaponUuid: weaponUuid,
+				SlotNumber:     slot,
+				Level:          1,
+			}
+		}
+		user.WeaponSkills[weaponUuid] = skills
+	}
+	if slots, ok := e.abilityGroupSlots[weapon.WeaponAbilityGroupId]; ok {
+		abilities := make([]store.WeaponAbilityState, len(slots))
+		for i, slot := range slots {
+			abilities[i] = store.WeaponAbilityState{
+				UserWeaponUuid: weaponUuid,
+				SlotNumber:     slot,
+				Level:          1,
+			}
+		}
+		user.WeaponAbilities[weaponUuid] = abilities
 	}
 }
 

@@ -17,7 +17,7 @@ service WeaponService {
 	rpc LimitBreakByWeapon (LimitBreakByWeaponRequest) returns (LimitBreakByWeaponResponse);
 	rpc LimitBreakByMaterial (LimitBreakByMaterialRequest) returns (LimitBreakByMaterialResponse);
 	rpc Evolve (EvolveRequest) returns (EvolveResponse);
-	rpc Awaken (AwakenRequest) returns (AwakenResponse);
+	rpc Awaken (WeaponAwakenRequest) returns (WeaponAwakenResponse);
 }
 
 message SellRequest {
@@ -112,10 +112,10 @@ message EvolveResponse {
 	map<string, apb.api.data.DiffData> diffUserData = 99;
 }
 
-message AwakenRequest {
+message WeaponAwakenRequest {
 	string userWeaponUuid = 1;
 }
 
-message AwakenResponse {
+message WeaponAwakenResponse {
 	map<string, apb.api.data.DiffData> diffUserData = 99;
 }
