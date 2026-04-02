@@ -24,6 +24,7 @@ server/assets/
 snapshots/
 extracted_tables/
 master_data/
+master_data_before_eos/
 
 # Client APK and dumps
 client/
