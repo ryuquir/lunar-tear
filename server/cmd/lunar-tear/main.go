@@ -56,9 +56,14 @@ func main() {
 	userStore.ReplaceCatalog(gachaEntries)
 	log.Printf("gacha catalog loaded: %d entries", len(gachaEntries))
 
+	conditionResolver, err := masterdata.LoadConditionResolver()
+	if err != nil {
+		log.Fatalf("load condition resolver: %v", err)
+	}
+
 	cageOrnamentCatalog := masterdata.LoadCageOrnamentCatalog()
 	loginBonusCatalog := masterdata.LoadLoginBonusCatalog()
-	characterViewerCatalog := masterdata.LoadCharacterViewerCatalog()
+	characterViewerCatalog := masterdata.LoadCharacterViewerCatalog(conditionResolver)
 	omikujiCatalog := masterdata.LoadOmikujiCatalog()
 
 	shopCatalog, err := masterdata.LoadShopCatalog()
@@ -91,5 +96,10 @@ func main() {
 	}
 	log.Printf("explore catalog loaded: %d explores, %d grade assets", len(exploreCatalog.Explores), len(exploreCatalog.GradeAssets))
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog)
+	gimmickCatalog, err := masterdata.LoadGimmickCatalog(conditionResolver)
+	if err != nil {
+		log.Fatalf("load gimmick catalog: %v", err)
+	}
+
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog, gimmickCatalog)
 }

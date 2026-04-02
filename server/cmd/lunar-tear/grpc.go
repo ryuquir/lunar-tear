@@ -47,6 +47,7 @@ func startGRPC(
 	omikujiCatalog *masterdata.OmikujiCatalog,
 	weaponCatalog *masterdata.WeaponCatalog,
 	exploreCatalog *masterdata.ExploreCatalog,
+	gimmickCatalog *masterdata.GimmickCatalog,
 ) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
@@ -72,6 +73,7 @@ func startGRPC(
 		omikujiCatalog,
 		weaponCatalog,
 		exploreCatalog,
+		gimmickCatalog,
 	)
 
 	reflection.Register(grpcServer)
@@ -98,6 +100,7 @@ func registerServices(
 	omikujiCatalog *masterdata.OmikujiCatalog,
 	weaponCatalog *masterdata.WeaponCatalog,
 	exploreCatalog *masterdata.ExploreCatalog,
+	gimmickCatalog *masterdata.GimmickCatalog,
 ) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
@@ -108,7 +111,7 @@ func registerServices(
 	pb.RegisterGachaServiceServer(srv, service.NewGachaServiceServer(userStore, userStore, userStore))
 	pb.RegisterGiftServiceServer(srv, service.NewGiftServiceServer(userStore, userStore))
 	pb.RegisterGamePlayServiceServer(srv, service.NewGameplayServiceServer())
-	pb.RegisterGimmickServiceServer(srv, service.NewGimmickServiceServer(userStore, userStore))
+	pb.RegisterGimmickServiceServer(srv, service.NewGimmickServiceServer(userStore, userStore, gimmickCatalog))
 	pb.RegisterQuestServiceServer(srv, service.NewQuestServiceServer(userStore, userStore, questEngine))
 	pb.RegisterNotificationServiceServer(srv, service.NewNotificationServiceServer(userStore, userStore))
 	pb.RegisterCageOrnamentServiceServer(srv, service.NewCageOrnamentServiceServer(userStore, userStore, cageOrnamentCatalog))

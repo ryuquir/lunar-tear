@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 
@@ -15,12 +15,13 @@ import (
 
 type GimmickServiceServer struct {
 	pb.UnimplementedGimmickServiceServer
-	users    store.UserRepository
-	sessions store.SessionRepository
+	users          store.UserRepository
+	sessions       store.SessionRepository
+	gimmickCatalog *masterdata.GimmickCatalog
 }
 
-func NewGimmickServiceServer(users store.UserRepository, sessions store.SessionRepository) *GimmickServiceServer {
-	return &GimmickServiceServer{users: users, sessions: sessions}
+func NewGimmickServiceServer(users store.UserRepository, sessions store.SessionRepository, gimmickCatalog *masterdata.GimmickCatalog) *GimmickServiceServer {
+	return &GimmickServiceServer{users: users, sessions: sessions, gimmickCatalog: gimmickCatalog}
 }
 
 func (s *GimmickServiceServer) UpdateSequence(ctx context.Context, req *pb.UpdateSequenceRequest) (*pb.UpdateSequenceResponse, error) {
@@ -83,10 +84,19 @@ func (s *GimmickServiceServer) UpdateGimmickProgress(ctx context.Context, req *p
 func (s *GimmickServiceServer) InitSequenceSchedule(ctx context.Context, _ *emptypb.Empty) (*pb.InitSequenceScheduleResponse, error) {
 	log.Printf("[GimmickService] InitSequenceSchedule")
 	userId := currentUserId(ctx, s.users, s.sessions)
-	user, err := s.users.SnapshotUser(userId)
-	if err != nil {
-		return nil, fmt.Errorf("snapshot user: %w", err)
-	}
+	now := gametime.NowMillis()
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		added := 0
+		for _, key := range s.gimmickCatalog.ActiveScheduleKeys(*user, now) {
+			if _, exists := user.Gimmick.Sequences[key]; !exists {
+				user.Gimmick.Sequences[key] = store.GimmickSequenceState{Key: key}
+				added++
+			}
+		}
+		if added > 0 {
+			log.Printf("[GimmickService] InitSequenceSchedule: added %d sequences (total %d)", added, len(user.Gimmick.Sequences))
+		}
+	})
 	return &pb.InitSequenceScheduleResponse{
 		DiffUserData: userdata.BuildDiffFromTables(userdata.SelectTables(userdata.FullClientTableMap(user), gimmickDiffTables)),
 	}, nil
