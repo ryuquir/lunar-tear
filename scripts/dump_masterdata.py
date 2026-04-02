@@ -14,9 +14,11 @@ Output mirrors the master_data/ directory layout:
 Requires: pip install pycryptodome msgpack lz4
 
 Usage:
+  python dump_masterdata.py
+  python dump_masterdata.py --output /tmp/dump
   python dump_masterdata.py --key KEY_HEX --iv IV_HEX
-  python dump_masterdata.py --key-file key.bin --iv-file iv.bin --output /tmp/dump
-  python dump_masterdata.py --key KEY --iv IV --schema-dir /path/to/nier-rein-apps/src/NierReincarnation.Core/Dark
+  python dump_masterdata.py --key-file key.bin --iv-file iv.bin
+  python dump_masterdata.py --schema-dir /path/to/nier-rein-apps/src/NierReincarnation.Core/Dark
 """
 
 import argparse
@@ -34,6 +36,8 @@ from Crypto.Util.Padding import unpad
 
 DEFAULT_INPUT = os.path.join("server", "assets", "release", "20240404193219.bin.e")
 DEFAULT_OUTPUT = "master_data"
+DEFAULT_KEY = "36436230313332314545356536624265"
+DEFAULT_IV  = "45666341656634434165356536446141"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -125,12 +129,14 @@ def main():
         description="Dump master data binary to JSON files per table."
     )
 
-    key_group = parser.add_mutually_exclusive_group(required=True)
-    key_group.add_argument("--key", help="AES key as hex string (16 or 32 bytes)")
+    key_group = parser.add_mutually_exclusive_group()
+    key_group.add_argument("--key", default=DEFAULT_KEY,
+                           help="AES key as hex string (default: built-in)")
     key_group.add_argument("--key-file", help="Path to raw key file (16 or 32 bytes)")
 
-    iv_group = parser.add_mutually_exclusive_group(required=True)
-    iv_group.add_argument("--iv", help="AES IV as hex string")
+    iv_group = parser.add_mutually_exclusive_group()
+    iv_group.add_argument("--iv", default=DEFAULT_IV,
+                          help="AES IV as hex string (default: built-in)")
     iv_group.add_argument("--iv-file", help="Path to raw IV file (16 bytes)")
 
     parser.add_argument("--input", default=DEFAULT_INPUT,
@@ -143,21 +149,21 @@ def main():
     args = parser.parse_args()
 
     # Load key
-    if args.key:
-        key = bytes.fromhex(args.key)
-    else:
+    if args.key_file:
         with open(args.key_file, "rb") as f:
             key = f.read()
+    else:
+        key = bytes.fromhex(args.key)
     if len(key) not in (16, 32):
         print(f"ERROR: AES key must be 16 or 32 bytes, got {len(key)}", file=sys.stderr)
         sys.exit(1)
 
     # Load IV
-    if args.iv:
-        iv = bytes.fromhex(args.iv)
-    else:
+    if args.iv_file:
         with open(args.iv_file, "rb") as f:
             iv = f.read()
+    else:
+        iv = bytes.fromhex(args.iv)
     if len(iv) != 16:
         print(f"ERROR: AES IV must be 16 bytes, got {len(iv)}", file=sys.stderr)
         sys.exit(1)

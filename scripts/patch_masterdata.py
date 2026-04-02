@@ -15,18 +15,21 @@ Requires: pip install pycryptodome msgpack lz4
 
 Usage examples:
 
-  # With hex key/IV on command line
-  python patch_masterdata.py --key 0123...ff --iv abcd...ef
-
-  # With key/IV files (dumped via Frida)
-  python patch_masterdata.py --key-file masterdata_key.bin --iv-file masterdata_iv.bin
+  # Default key/IV (built-in), default input path
+  python patch_masterdata.py
 
   # Custom input/output paths
-  python patch_masterdata.py --key-file key.bin --iv-file iv.bin \\
+  python patch_masterdata.py \\
       --input original.bin.e --output patched.bin.e
 
+  # Override key/IV via hex strings
+  python patch_masterdata.py --key 0123...ff --iv abcd...ef
+
+  # Override key/IV via files (dumped via Frida)
+  python patch_masterdata.py --key-file masterdata_key.bin --iv-file masterdata_iv.bin
+
   # Dry run (decrypt + patch + report, no re-encrypt or write)
-  python patch_masterdata.py --key-file key.bin --iv-file iv.bin --dry-run
+  python patch_masterdata.py --dry-run
 """
 
 import argparse
@@ -42,6 +45,8 @@ from Crypto.Util.Padding import pad, unpad
 
 
 DEFAULT_INPUT = os.path.join("server", "assets", "release", "20240404193219.bin.e")
+DEFAULT_KEY = "36436230313332314545356536624265"
+DEFAULT_IV  = "45666341656634434165356536446141"
 
 # --- Timestamp patching constants ---
 
@@ -52,6 +57,18 @@ MIN_PATCH_MS = int(datetime(2020, 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
 MAX_PATCH_MS = int(datetime(2030, 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
 
 SKIP_TABLES = frozenset({"m_maintenance", "m_omikuji"})
+
+# Client has MaxGimmickSequenceSchedule = 1024.  Only patch schedules whose
+# StartDatetime (column 1) is before this cutoff so the non-expired count
+# stays under the limit.  Through 2023-02 there are 1022 entries (safe).
+SCHEDULE_PATCH_CUTOFF = datetime(2023, 2, 1, tzinfo=timezone.utc)
+SCHEDULE_PATCH_CUTOFF_MS = int(SCHEDULE_PATCH_CUTOFF.timestamp() * 1000)
+
+# Maps table name -> (column_index, max_value_ms).  Rows whose int64 at
+# column_index >= max_value_ms are skipped (EndDatetime left original/expired).
+TABLE_PATCH_FILTERS = {
+    'm_gimmick_sequence_schedule': (1, SCHEDULE_PATCH_CUTOFF_MS),
+}
 
 # Derived from entity class definitions in nier-rein-apps (Key attribute indices).
 # Maps snake_case table name -> list of (column_index, field_name) for end-datetime columns.
@@ -203,27 +220,48 @@ def read_array_len(data, pos):
     raise ValueError(f"Expected array at pos {pos}, got tag 0x{tag:02x}")
 
 
-def patch_table_blob(blob, col_indices):
+def patch_table_blob(blob, col_indices, row_filter=None):
     """Patch int64 datetime values in-place within a decompressed table blob.
 
     blob:        bytearray of decompressed msgpack (array of row-arrays)
     col_indices: set of column indices whose values should be patched
+    row_filter:  optional (filter_col_index, max_value_ms) — when set, rows
+                 whose int64 at filter_col_index >= max_value_ms are skipped
 
-    Returns number of values patched.
+    Returns (patched_count, skipped_count).
     """
     row_count, pos = read_array_len(blob, 0)
     patched = 0
+    skipped = 0
     for _ in range(row_count):
         col_count, p = read_array_len(blob, pos)
-        for col_i in range(col_count):
-            if col_i in col_indices and blob[p] == 0xd3:
-                val = struct.unpack('>q', blob[p + 1:p + 9])[0]
-                if MIN_PATCH_MS <= val <= MAX_PATCH_MS:
-                    struct.pack_into('>q', blob, p + 1, TARGET_END_MS)
-                    patched += 1
-            p = skip_msgpack_value(blob, p)
+
+        skip_row = False
+        if row_filter is not None:
+            filter_col, filter_max = row_filter
+            fp = p
+            for ci in range(min(filter_col + 1, col_count)):
+                if ci == filter_col and blob[fp] == 0xd3:
+                    val = struct.unpack('>q', blob[fp + 1:fp + 9])[0]
+                    if val >= filter_max:
+                        skip_row = True
+                    break
+                fp = skip_msgpack_value(blob, fp)
+
+        if skip_row:
+            skipped += 1
+            for col_i in range(col_count):
+                p = skip_msgpack_value(blob, p)
+        else:
+            for col_i in range(col_count):
+                if col_i in col_indices and blob[p] == 0xd3:
+                    val = struct.unpack('>q', blob[p + 1:p + 9])[0]
+                    if MIN_PATCH_MS <= val <= MAX_PATCH_MS:
+                        struct.pack_into('>q', blob, p + 1, TARGET_END_MS)
+                        patched += 1
+                p = skip_msgpack_value(blob, p)
         pos = p
-    return patched
+    return patched, skipped
 
 
 # --- Main ---
@@ -233,12 +271,14 @@ def main():
         description="Patch master data timestamps to extend content to 2030."
     )
 
-    key_group = parser.add_mutually_exclusive_group(required=True)
-    key_group.add_argument("--key", help="AES key as hex string (16 or 32 bytes)")
+    key_group = parser.add_mutually_exclusive_group()
+    key_group.add_argument("--key", default=DEFAULT_KEY,
+                           help=f"AES key as hex string (default: built-in)")
     key_group.add_argument("--key-file", help="Path to raw key file (16 or 32 bytes)")
 
-    iv_group = parser.add_mutually_exclusive_group(required=True)
-    iv_group.add_argument("--iv", help="AES IV as hex string")
+    iv_group = parser.add_mutually_exclusive_group()
+    iv_group.add_argument("--iv", default=DEFAULT_IV,
+                          help=f"AES IV as hex string (default: built-in)")
     iv_group.add_argument("--iv-file", help="Path to raw IV file (16 bytes)")
 
     parser.add_argument("--input", default=DEFAULT_INPUT,
@@ -251,21 +291,21 @@ def main():
     args = parser.parse_args()
 
     # Load key
-    if args.key:
-        key = bytes.fromhex(args.key)
-    else:
+    if args.key_file:
         with open(args.key_file, "rb") as f:
             key = f.read()
+    else:
+        key = bytes.fromhex(args.key)
     if len(key) not in (16, 32):
         print(f"ERROR: AES key must be 16 or 32 bytes, got {len(key)}", file=sys.stderr)
         sys.exit(1)
 
     # Load IV
-    if args.iv:
-        iv = bytes.fromhex(args.iv)
-    else:
+    if args.iv_file:
         with open(args.iv_file, "rb") as f:
             iv = f.read()
+    else:
+        iv = bytes.fromhex(args.iv)
     if len(iv) != 16:
         print(f"ERROR: AES IV must be 16 bytes, got {len(iv)}", file=sys.stderr)
         sys.exit(1)
@@ -324,17 +364,20 @@ def main():
         decompressed = bytearray(lz4.block.decompress(lz4_data, uncompressed_size=uncompressed_len))
 
         col_indices = {idx for idx, _ in columns}
-        count = patch_table_blob(decompressed, col_indices)
+        row_filter = TABLE_PATCH_FILTERS.get(tname)
+        count, skip_count = patch_table_blob(decompressed, col_indices, row_filter)
 
         if count > 0:
             new_blobs[tname] = build_lz4_ext_blob(bytes(decompressed))
-            stats[tname] = count
+            stats[tname] = (count, skip_count)
             total_patched += count
 
     print(f"\n  Patched {total_patched} values across {len(stats)} tables:")
     for tname in sorted(stats):
+        count, skip_count = stats[tname]
         cols = ", ".join(name for _, name in PATCH_COLUMNS[tname])
-        print(f"    {tname}: {stats[tname]} values ({cols})")
+        suffix = f" (skipped {skip_count} rows by filter)" if skip_count else ""
+        print(f"    {tname}: {count} values ({cols}){suffix}")
 
     if SKIP_TABLES:
         print(f"\n  Skipped tables: {', '.join(sorted(SKIP_TABLES))}")
