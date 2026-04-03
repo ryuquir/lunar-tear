@@ -106,6 +106,11 @@ func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, isRetir
 }
 
 func (e *Engine) HandleQuestRestart(user *store.UserState, questId int32, nowMillis int64) {
+	questMeta, ok := e.questById[questId]
+	if ok && isMainQuestPlayable(questMeta) {
+		user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
+	}
+
 	quest := user.Quests[questId]
 	quest.QuestId = questId
 	quest.QuestStateType = model.UserQuestStateTypeActive

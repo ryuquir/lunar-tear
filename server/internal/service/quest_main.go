@@ -203,9 +203,28 @@ func (s *QuestServiceServer) RestartMainQuest(ctx context.Context, req *pb.Resta
 	})
 	logQuestState("RestartMainQuest state", user)
 
+	drops := s.engine.BattleDropRewards(req.QuestId)
+	pbDrops := make([]*pb.BattleDropReward, len(drops))
+	for i, d := range drops {
+		pbDrops[i] = &pb.BattleDropReward{
+			QuestSceneId:         d.QuestSceneId,
+			BattleDropCategoryId: d.BattleDropCategoryId,
+			BattleDropEffectId:   1,
+		}
+	}
+
 	return &pb.RestartMainQuestResponse{
-		BattleDropReward: []*pb.BattleDropReward{},
-		DiffUserData:     buildSelectedQuestDiff(user, []string{"IUserQuest", "IUserQuestMission"}),
+		BattleDropReward: pbDrops,
+		DeckNumber:       user.Quests[req.QuestId].UserDeckNumber,
+		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserStatus",
+			"IUserQuest",
+			"IUserQuestMission",
+			"IUserMainQuestFlowStatus",
+			"IUserMainQuestMainFlowStatus",
+			"IUserMainQuestProgressStatus",
+			"IUserMainQuestSeasonRoute",
+		}),
 	}, nil
 }
 

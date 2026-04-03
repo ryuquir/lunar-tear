@@ -158,11 +158,26 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 	if questMeta.CostumeExp != 0 {
 		for key := range deckCostumeUuids {
 			row := user.Costumes[key]
-			row.Exp += questMeta.CostumeExp
 			cm, ok := e.costumeById[row.CostumeId]
-			if ok {
-				if thresholds, ok := e.costumeExpByRarity[cm.RarityType]; ok {
-					row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, thresholds)
+			if !ok {
+				continue
+			}
+			if maxLevelFunc, hasMax := e.costumeMaxLevelByRarity[cm.RarityType]; hasMax {
+				maxLevel := maxLevelFunc.Evaluate(row.LimitBreakCount)
+				if row.Level >= maxLevel {
+					log.Printf("[applyExpRewards] questId=%d costume=%d (key=%s): at max level %d, skipping", questId, row.CostumeId, key, row.Level)
+					continue
+				}
+			}
+			row.Exp += questMeta.CostumeExp
+			if thresholds, ok := e.costumeExpByRarity[cm.RarityType]; ok {
+				row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, thresholds)
+				if maxLevelFunc, hasMax := e.costumeMaxLevelByRarity[cm.RarityType]; hasMax {
+					maxLevel := maxLevelFunc.Evaluate(row.LimitBreakCount)
+					if row.Level > maxLevel && int(maxLevel) < len(thresholds) {
+						row.Level = maxLevel
+						row.Exp = thresholds[maxLevel]
+					}
 				}
 			}
 			user.Costumes[key] = row

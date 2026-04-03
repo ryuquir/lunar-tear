@@ -3,6 +3,7 @@ package questflow
 import (
 	"sort"
 
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/utils"
 )
@@ -127,6 +128,7 @@ type costumeMaster struct {
 type costumeRarityRow struct {
 	RarityType                                   int32 `json:"RarityType"`
 	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
+	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
 }
 
 type weaponMaster struct {
@@ -258,6 +260,7 @@ type Engine struct {
 	userExpThresholds                  []int32
 	characterExpThresholds             []int32
 	costumeExpByRarity                 map[int32][]int32
+	costumeMaxLevelByRarity            map[int32]masterdata.NumericalFunc
 	maxStaminaByLevel                  map[int32]int32
 	skillGroupSlots                    map[int32][]int32 // groupId -> slot numbers
 	abilityGroupSlots                  map[int32][]int32 // groupId -> slot numbers
@@ -465,6 +468,19 @@ func MakeEngine() *Engine {
 		return thresholds
 	}
 
+	funcResolver, err := masterdata.LoadFunctionResolver()
+	if err != nil {
+		panic(err)
+	}
+	costumeMaxLevelByRarity := make(map[int32]masterdata.NumericalFunc, len(costumeRarities))
+	for _, r := range costumeRarities {
+		if _, ok := costumeMaxLevelByRarity[r.RarityType]; !ok {
+			if f, found := funcResolver.Resolve(r.MaxLevelNumericalFunctionId); found {
+				costumeMaxLevelByRarity[r.RarityType] = f
+			}
+		}
+	}
+
 	skillSlots := make(map[int32][]int32)
 	for _, row := range weaponSkillGroups {
 		skillSlots[row.WeaponSkillGroupId] = append(skillSlots[row.WeaponSkillGroupId], row.SlotNumber)
@@ -496,6 +512,7 @@ func MakeEngine() *Engine {
 		userExpThresholds:                  buildExpThresholds(1),
 		characterExpThresholds:             buildExpThresholds(31),
 		costumeExpByRarity:                 buildCostumeExpByRarity(costumeRarities, buildExpThresholds),
+		costumeMaxLevelByRarity:            costumeMaxLevelByRarity,
 		maxStaminaByLevel:                  maxStaminaByLevel,
 		skillGroupSlots:                    skillSlots,
 		abilityGroupSlots:                  abilitySlots,
