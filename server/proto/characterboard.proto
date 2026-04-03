@@ -6,7 +6,7 @@ import "proto/data.proto";
 
 package apb.api.characterboard;
 
-service CharacterboardService {
+service CharacterBoardService {
 	rpc ReleasePanel (ReleasePanelRequest) returns (ReleasePanelResponse);
 }
 

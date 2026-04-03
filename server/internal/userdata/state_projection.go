@@ -76,6 +76,10 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserShopReplaceableLineup":              projectTable("IUserShopReplaceableLineup", user),
 		"IUserExplore":                            projectTable("IUserExplore", user),
 		"IUserExploreScore":                       projectTable("IUserExploreScore", user),
+		"IUserCharacterBoard":                     projectTable("IUserCharacterBoard", user),
+		"IUserCharacterBoardAbility":              projectTable("IUserCharacterBoardAbility", user),
+		"IUserCharacterBoardStatusUp":             projectTable("IUserCharacterBoardStatusUp", user),
+		"IUserCharacterBoardCompleteReward":       projectTable("IUserCharacterBoardCompleteReward", user),
 	}
 }
 

@@ -82,6 +82,10 @@ type UserState struct {
 
 	Explore       ExploreState
 	ExploreScores map[int32]ExploreScoreState
+
+	CharacterBoards         map[int32]CharacterBoardState
+	CharacterBoardAbilities map[CharacterBoardAbilityKey]CharacterBoardAbilityState
+	CharacterBoardStatusUps map[CharacterBoardStatusUpKey]CharacterBoardStatusUpState
 }
 
 type ExploreState struct {
@@ -631,4 +635,86 @@ type GachaCatalogEntry struct {
 	GachaMode                  []byte
 	BannerAssetName            string
 	StepupGroupId              int32
+}
+
+type CharacterBoardState struct {
+	CharacterBoardId int32
+	PanelReleaseBit1 int32
+	PanelReleaseBit2 int32
+	PanelReleaseBit3 int32
+	PanelReleaseBit4 int32
+	LatestVersion    int64
+}
+
+type CharacterBoardAbilityKey struct {
+	CharacterId int32
+	AbilityId   int32
+}
+
+func (k CharacterBoardAbilityKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d", k.CharacterId, k.AbilityId), nil
+}
+
+func (k *CharacterBoardAbilityKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid CharacterBoardAbilityKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.CharacterId = int32(a)
+	k.AbilityId = int32(b)
+	return nil
+}
+
+type CharacterBoardAbilityState struct {
+	CharacterId   int32
+	AbilityId     int32
+	Level         int32
+	LatestVersion int64
+}
+
+type CharacterBoardStatusUpKey struct {
+	CharacterId           int32
+	StatusCalculationType int32
+}
+
+func (k CharacterBoardStatusUpKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%d:%d", k.CharacterId, k.StatusCalculationType), nil
+}
+
+func (k *CharacterBoardStatusUpKey) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ":")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid CharacterBoardStatusUpKey: %s", text)
+	}
+	a, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseInt(parts[1], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.CharacterId = int32(a)
+	k.StatusCalculationType = int32(b)
+	return nil
+}
+
+type CharacterBoardStatusUpState struct {
+	CharacterId           int32
+	StatusCalculationType int32
+	Hp                    int32
+	Attack                int32
+	Vitality              int32
+	Agility               int32
+	CriticalRatio         int32
+	CriticalAttack        int32
+	LatestVersion         int64
 }

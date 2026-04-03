@@ -105,5 +105,11 @@ func main() {
 		log.Fatalf("load gimmick catalog: %v", err)
 	}
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog, gimmickCatalog)
+	characterBoardCatalog, err := masterdata.LoadCharacterBoardCatalog()
+	if err != nil {
+		log.Fatalf("load character board catalog: %v", err)
+	}
+	log.Printf("character board catalog loaded: %d panels, %d boards", len(characterBoardCatalog.PanelById), len(characterBoardCatalog.BoardById))
+
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog, gimmickCatalog, characterBoardCatalog)
 }

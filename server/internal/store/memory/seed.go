@@ -180,6 +180,10 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		ShopItems:             make(map[int32]store.UserShopItemState),
 		ShopReplaceableLineup: make(map[int32]store.UserShopReplaceableLineupState),
 		ExploreScores:         make(map[int32]store.ExploreScoreState),
+
+		CharacterBoards:         make(map[int32]store.CharacterBoardState),
+		CharacterBoardAbilities: make(map[store.CharacterBoardAbilityKey]store.CharacterBoardAbilityState),
+		CharacterBoardStatusUps: make(map[store.CharacterBoardStatusUpKey]store.CharacterBoardStatusUpState),
 	}
 	store.EnsureDefaultDeck(user, nowMillis)
 	if grantStarterItems {

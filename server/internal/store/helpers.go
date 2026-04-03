@@ -42,6 +42,27 @@ func DeductPrice(user *UserState, priceType, priceId, amount int32) error {
 	return nil
 }
 
+func DeductPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
+	switch possessionType {
+	case model.PossessionTypeMaterial:
+		user.Materials[possessionId] -= count
+		if user.Materials[possessionId] <= 0 {
+			delete(user.Materials, possessionId)
+		}
+	case model.PossessionTypeConsumableItem:
+		user.ConsumableItems[possessionId] -= count
+		if user.ConsumableItems[possessionId] <= 0 {
+			delete(user.ConsumableItems, possessionId)
+		}
+	case model.PossessionTypePaidGem:
+		user.Gem.PaidGem -= count
+	case model.PossessionTypeFreeGem:
+		user.Gem.FreeGem -= count
+	default:
+		log.Printf("[DeductPossession] unhandled type=%d id=%d count=%d", possessionType, possessionId, count)
+	}
+}
+
 func GrantPossession(user *UserState, possessionType model.PossessionType, possessionId, count int32) {
 	switch possessionType {
 	case model.PossessionTypeMaterial:
