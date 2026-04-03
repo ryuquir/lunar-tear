@@ -100,6 +100,14 @@ const (
 	TutorialTypeDeleteCostumeFio           TutorialType = 2101
 )
 
+type TutorialUnlockConditionType int32
+
+const (
+	TutorialUnlockConditionTypeFunctionReleased         TutorialUnlockConditionType = 1
+	TutorialUnlockConditionTypeReachSpecifiedQuestScene TutorialUnlockConditionType = 2
+	TutorialUnlockConditionTypeUntilReachSpecifiedScene TutorialUnlockConditionType = 3
+)
+
 // TutorialPhase values are runtime-initialized in the client (static readonly),
 // so only observed values are listed here.
 type TutorialPhase int32

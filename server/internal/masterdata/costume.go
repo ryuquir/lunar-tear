@@ -18,6 +18,7 @@ type costumeRarityRow struct {
 	RarityType                                   int32 `json:"RarityType"`
 	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
 	EnhancementCostByMaterialNumericalFunctionId int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
+	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
 }
 
 type CostumeCatalog struct {
@@ -25,6 +26,7 @@ type CostumeCatalog struct {
 	Materials           map[int32]MaterialRow
 	ExpByRarity         map[int32][]int32
 	EnhanceCostByRarity map[int32]NumericalFunc
+	MaxLevelByRarity    map[int32]NumericalFunc
 }
 
 func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
@@ -53,6 +55,7 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		Materials:           matCatalog.ByType[model.MaterialTypeCostumeEnhancement],
 		ExpByRarity:         make(map[int32][]int32, len(rarities)),
 		EnhanceCostByRarity: make(map[int32]NumericalFunc, len(rarities)),
+		MaxLevelByRarity:    make(map[int32]NumericalFunc, len(rarities)),
 	}
 
 	for _, row := range costumes {
@@ -66,6 +69,11 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		if _, ok := catalog.EnhanceCostByRarity[r.RarityType]; !ok {
 			if f, found := funcResolver.Resolve(r.EnhancementCostByMaterialNumericalFunctionId); found {
 				catalog.EnhanceCostByRarity[r.RarityType] = f
+			}
+		}
+		if _, ok := catalog.MaxLevelByRarity[r.RarityType]; !ok {
+			if f, found := funcResolver.Resolve(r.MaxLevelNumericalFunctionId); found {
+				catalog.MaxLevelByRarity[r.RarityType] = f
 			}
 		}
 	}

@@ -5,11 +5,12 @@ import (
 	"log"
 
 	"lunar-tear/server/internal/gameutil"
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 )
 
-func (e *Engine) isQuestCleared(user *store.UserState, questId int32) bool {
+func (h *QuestHandler) isQuestCleared(user *store.UserState, questId int32) bool {
 	quest, ok := user.Quests[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for isQuestCleared", questId))
@@ -17,7 +18,7 @@ func (e *Engine) isQuestCleared(user *store.UserState, questId int32) bool {
 	return quest.QuestStateType == model.UserQuestStateTypeCleared
 }
 
-func appendMissionRewards(dst []RewardGrant, src []missionReward) []RewardGrant {
+func appendMissionRewards(dst []RewardGrant, src []masterdata.QuestMissionRewardRow) []RewardGrant {
 	for _, r := range src {
 		dst = append(dst, RewardGrant{
 			PossessionType: r.PossessionType,
@@ -28,10 +29,10 @@ func appendMissionRewards(dst []RewardGrant, src []missionReward) []RewardGrant 
 	return dst
 }
 
-func (e *Engine) firstClearRewardGroupId(user *store.UserState, questMeta quest) int32 {
+func (h *QuestHandler) firstClearRewardGroupId(user *store.UserState, questMeta masterdata.QuestRow) int32 {
 	rewardGroupId := questMeta.QuestFirstClearRewardGroupId
-	for _, switchRow := range e.firstClearRewardSwitchesByQuestId[questMeta.QuestId] {
-		if e.isQuestCleared(user, switchRow.SwitchConditionClearQuestId) {
+	for _, switchRow := range h.FirstClearRewardSwitchesByQuestId[questMeta.QuestId] {
+		if h.isQuestCleared(user, switchRow.SwitchConditionClearQuestId) {
 			rewardGroupId = switchRow.QuestFirstClearRewardGroupId
 			break
 		}
@@ -39,20 +40,20 @@ func (e *Engine) firstClearRewardGroupId(user *store.UserState, questMeta quest)
 	return rewardGroupId
 }
 
-func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) FinishOutcome {
+func (h *QuestHandler) evaluateFinishOutcome(user *store.UserState, questId int32) FinishOutcome {
 	outcome := FinishOutcome{}
 	quest, ok := user.Quests[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for evaluateFinishOutcome", questId))
 	}
-	questMeta, ok := e.questById[questId]
+	questMeta, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for evaluateFinishOutcome", questId))
 	}
 
 	if !quest.IsRewardGranted {
-		rewardGroupId := e.firstClearRewardGroupId(user, questMeta)
-		for _, reward := range e.firstClearRewardsByGroupId[rewardGroupId] {
+		rewardGroupId := h.firstClearRewardGroupId(user, questMeta)
+		for _, reward := range h.FirstClearRewardsByGroupId[rewardGroupId] {
 			outcome.FirstClearRewards = append(outcome.FirstClearRewards, RewardGrant{
 				PossessionType: reward.PossessionType,
 				PossessionId:   reward.PossessionId,
@@ -63,8 +64,8 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 
 	newlyClearedCount := 0
 	totalNon9999 := 0
-	for _, questMissionId := range e.missionIdsByQuestId[questId] {
-		missionMaster, ok := e.missionById[questMissionId]
+	for _, questMissionId := range h.MissionIdsByQuestId[questId] {
+		missionMaster, ok := h.MissionById[questMissionId]
 		if !ok || missionMaster.QuestMissionConditionType == model.QuestMissionConditionTypeComplete {
 			continue
 		}
@@ -77,7 +78,7 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 			newlyClearedCount++
 			outcome.MissionClearRewards = appendMissionRewards(
 				outcome.MissionClearRewards,
-				e.missionRewardsByMissionId[missionMaster.QuestMissionRewardId],
+				h.MissionRewardsByMissionId[missionMaster.QuestMissionRewardId],
 			)
 		}
 	}
@@ -85,8 +86,8 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 	alreadyClearedCount := totalNon9999 - newlyClearedCount
 	allWillBeClear := totalNon9999 > 0 && (alreadyClearedCount+newlyClearedCount) == totalNon9999
 	if allWillBeClear {
-		for _, questMissionId := range e.missionIdsByQuestId[questId] {
-			missionMaster, ok := e.missionById[questMissionId]
+		for _, questMissionId := range h.MissionIdsByQuestId[questId] {
+			missionMaster, ok := h.MissionById[questMissionId]
 			if !ok || missionMaster.QuestMissionConditionType != model.QuestMissionConditionTypeComplete {
 				continue
 			}
@@ -94,7 +95,7 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 			if !user.QuestMissions[key].IsClear {
 				outcome.MissionClearCompleteRewards = appendMissionRewards(
 					outcome.MissionClearCompleteRewards,
-					e.missionRewardsByMissionId[missionMaster.QuestMissionRewardId],
+					h.MissionRewardsByMissionId[missionMaster.QuestMissionRewardId],
 				)
 				outcome.BigWinClearedQuestMissionIds = append(outcome.BigWinClearedQuestMissionIds, questMissionId)
 			}
@@ -103,8 +104,8 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 	}
 
 	if questMeta.QuestPickupRewardGroupId != 0 {
-		for _, dropId := range e.pickupRewardIdsByGroupId[questMeta.QuestPickupRewardGroupId] {
-			if bdr, ok := e.battleDropRewardById[dropId]; ok {
+		for _, dropId := range h.PickupRewardIdsByGroupId[questMeta.QuestPickupRewardGroupId] {
+			if bdr, ok := h.BattleDropRewardById[dropId]; ok {
 				outcome.DropRewards = append(outcome.DropRewards, RewardGrant{
 					PossessionType: bdr.PossessionType,
 					PossessionId:   bdr.PossessionId,
@@ -117,29 +118,29 @@ func (e *Engine) evaluateFinishOutcome(user *store.UserState, questId int32) Fin
 	return outcome
 }
 
-func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis int64) {
-	questMeta, ok := e.questById[questId]
+func (h *QuestHandler) applyExpRewards(user *store.UserState, questId int32, nowMillis int64) {
+	questMeta, ok := h.QuestById[questId]
 	if !ok {
 		return
 	}
 
 	oldLevel := user.Status.Level
 	user.Status.Exp += questMeta.UserExp
-	user.Status.Level, user.Status.Exp = gameutil.LevelAndCap(user.Status.Exp, e.userExpThresholds)
+	user.Status.Level, user.Status.Exp = gameutil.LevelAndCap(user.Status.Exp, h.UserExpThresholds)
 	log.Printf("[applyExpRewards] questId=%d user: +%d exp -> total=%d level=%d", questId, questMeta.UserExp, user.Status.Exp, user.Status.Level)
 
 	if user.Status.Level > oldLevel {
-		if maxStamina, ok := e.maxStaminaByLevel[user.Status.Level]; ok {
+		if maxStamina, ok := h.MaxStaminaByLevel[user.Status.Level]; ok {
 			store.ReplenishStamina(user, maxStamina*1000, nowMillis)
 		}
 	}
 
-	if e.rentalQuestIds[questId] {
+	if h.RentalQuestIds[questId] {
 		log.Printf("[applyExpRewards] questId=%d skipping character/costume exp (rental deck)", questId)
 		return
 	}
 
-	deckCostumeUuids, deckCharacterIds := e.resolveDeckUnits(user, questId)
+	deckCostumeUuids, deckCharacterIds := h.resolveDeckUnits(user, questId)
 	if deckCostumeUuids == nil {
 		log.Printf("[applyExpRewards] questId=%d skipping character/costume exp (deck not resolved)", questId)
 		return
@@ -149,7 +150,7 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 		for id := range deckCharacterIds {
 			row := user.Characters[id]
 			row.Exp += questMeta.CharacterExp
-			row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, e.characterExpThresholds)
+			row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, h.CharacterExpThresholds)
 			user.Characters[id] = row
 			log.Printf("[applyExpRewards] questId=%d character=%d: +%d exp -> total=%d level=%d", questId, id, questMeta.CharacterExp, row.Exp, row.Level)
 		}
@@ -158,11 +159,11 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 	if questMeta.CostumeExp != 0 {
 		for key := range deckCostumeUuids {
 			row := user.Costumes[key]
-			cm, ok := e.costumeById[row.CostumeId]
+			cm, ok := h.CostumeById[row.CostumeId]
 			if !ok {
 				continue
 			}
-			if maxLevelFunc, hasMax := e.costumeMaxLevelByRarity[cm.RarityType]; hasMax {
+			if maxLevelFunc, hasMax := h.CostumeMaxLevelByRarity[cm.RarityType]; hasMax {
 				maxLevel := maxLevelFunc.Evaluate(row.LimitBreakCount)
 				if row.Level >= maxLevel {
 					log.Printf("[applyExpRewards] questId=%d costume=%d (key=%s): at max level %d, skipping", questId, row.CostumeId, key, row.Level)
@@ -170,9 +171,9 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 				}
 			}
 			row.Exp += questMeta.CostumeExp
-			if thresholds, ok := e.costumeExpByRarity[cm.RarityType]; ok {
+			if thresholds, ok := h.CostumeExpByRarity[cm.RarityType]; ok {
 				row.Level, row.Exp = gameutil.LevelAndCap(row.Exp, thresholds)
-				if maxLevelFunc, hasMax := e.costumeMaxLevelByRarity[cm.RarityType]; hasMax {
+				if maxLevelFunc, hasMax := h.CostumeMaxLevelByRarity[cm.RarityType]; hasMax {
 					maxLevel := maxLevelFunc.Evaluate(row.LimitBreakCount)
 					if row.Level > maxLevel && int(maxLevel) < len(thresholds) {
 						row.Level = maxLevel
@@ -186,7 +187,7 @@ func (e *Engine) applyExpRewards(user *store.UserState, questId int32, nowMillis
 	}
 }
 
-func (e *Engine) resolveDeckUnits(user *store.UserState, questId int32) (costumeUuids map[string]bool, characterIds map[int32]bool) {
+func (h *QuestHandler) resolveDeckUnits(user *store.UserState, questId int32) (costumeUuids map[string]bool, characterIds map[int32]bool) {
 	dn := user.Quests[questId].UserDeckNumber
 	if dn == 0 {
 		return nil, nil
@@ -208,7 +209,7 @@ func (e *Engine) resolveDeckUnits(user *store.UserState, questId int32) (costume
 		}
 		costumeUuids[dc.UserCostumeUuid] = true
 		if costume, ok := user.Costumes[dc.UserCostumeUuid]; ok {
-			if cm, ok := e.costumeById[costume.CostumeId]; ok {
+			if cm, ok := h.CostumeById[costume.CostumeId]; ok {
 				characterIds[cm.CharacterId] = true
 			}
 		}
@@ -222,55 +223,55 @@ func (e *Engine) resolveDeckUnits(user *store.UserState, questId int32) (costume
 
 const goldConsumableItemId int32 = 1
 
-func (e *Engine) applyQuestRewards(user *store.UserState, questId int32, nowMillis int64) {
-	questMeta, ok := e.questById[questId]
+func (h *QuestHandler) applyQuestRewards(user *store.UserState, questId int32, nowMillis int64) {
+	questMeta, ok := h.QuestById[questId]
 	if !ok {
 		return
 	}
 
-	e.applyExpRewards(user, questId, nowMillis)
+	h.applyExpRewards(user, questId, nowMillis)
 
 	if questMeta.Gold != 0 {
 		user.ConsumableItems[goldConsumableItemId] += questMeta.Gold
 		log.Printf("[applyQuestRewards] questId=%d gold: +%d -> total=%d", questId, questMeta.Gold, user.ConsumableItems[goldConsumableItemId])
 	}
 
-	rewardGroupId := e.firstClearRewardGroupId(user, questMeta)
-	for _, reward := range e.firstClearRewardsByGroupId[rewardGroupId] {
-		e.applyRewardPossession(user, reward.PossessionType, reward.PossessionId, reward.Count, nowMillis)
+	rewardGroupId := h.firstClearRewardGroupId(user, questMeta)
+	for _, reward := range h.FirstClearRewardsByGroupId[rewardGroupId] {
+		h.applyRewardPossession(user, reward.PossessionType, reward.PossessionId, reward.Count, nowMillis)
 	}
 }
 
-func (e *Engine) applyRewardPossession(user *store.UserState, possType model.PossessionType, possId, count int32, nowMillis int64) {
+func (h *QuestHandler) applyRewardPossession(user *store.UserState, possType model.PossessionType, possId, count int32, nowMillis int64) {
 	switch possType {
 	case model.PossessionTypeFreeGem:
 		user.Gem.FreeGem += count
 	case model.PossessionTypePaidGem:
 		user.Gem.PaidGem += count
 	case model.PossessionTypeCostume:
-		e.grantCostume(user, possId, nowMillis)
+		h.grantCostume(user, possId, nowMillis)
 	case model.PossessionTypeWeapon:
-		e.grantWeapon(user, possId, nowMillis)
+		h.grantWeapon(user, possId, nowMillis)
 	case model.PossessionTypeCompanion:
-		e.grantCompanion(user, possId, nowMillis)
+		h.grantCompanion(user, possId, nowMillis)
 	case model.PossessionTypeParts:
-		e.grantParts(user, possId, nowMillis)
+		h.grantParts(user, possId, nowMillis)
 	case model.PossessionTypeCostumeEnhanced:
-		e.grantCostume(user, possId, nowMillis)
+		h.grantCostume(user, possId, nowMillis)
 	case model.PossessionTypeMaterial, model.PossessionTypeConsumableItem, model.PossessionTypeImportantItem:
 		store.GrantPossession(user, possType, possId, count)
 	default:
-		log.Printf("[Engine] unsupported reward possession: type=%d id=%d count=%d", possType, possId, count)
+		log.Printf("[QuestHandler] unsupported reward possession: type=%d id=%d count=%d", possType, possId, count)
 	}
 }
 
-func (e *Engine) grantCostume(user *store.UserState, costumeId int32, nowMillis int64) {
+func (h *QuestHandler) grantCostume(user *store.UserState, costumeId int32, nowMillis int64) {
 	for _, row := range user.Costumes {
 		if row.CostumeId == costumeId {
 			return
 		}
 	}
-	if cm, ok := e.costumeById[costumeId]; ok {
+	if cm, ok := h.CostumeById[costumeId]; ok {
 		if _, exists := user.Characters[cm.CharacterId]; !exists {
 			user.Characters[cm.CharacterId] = store.CharacterState{
 				CharacterId: cm.CharacterId,
@@ -293,7 +294,7 @@ func (e *Engine) grantCostume(user *store.UserState, costumeId int32, nowMillis 
 	}
 }
 
-func (e *Engine) grantWeapon(user *store.UserState, weaponId int32, nowMillis int64) {
+func (h *QuestHandler) grantWeapon(user *store.UserState, weaponId int32, nowMillis int64) {
 	for _, row := range user.Weapons {
 		if row.WeaponId == weaponId {
 			return
@@ -315,22 +316,22 @@ func (e *Engine) grantWeapon(user *store.UserState, weaponId int32, nowMillis in
 			LatestVersion:            nowMillis,
 		}
 	}
-	weapon, ok := e.weaponById[weaponId]
+	weapon, ok := h.WeaponById[weaponId]
 	if !ok {
 		return
 	}
-	e.populateWeaponSkillsAbilities(user, key, weapon)
+	h.populateWeaponSkillsAbilities(user, key, weapon)
 	if weapon.WeaponStoryReleaseConditionGroupId != 0 {
-		for _, cond := range e.releaseConditionsByGroupId[weapon.WeaponStoryReleaseConditionGroupId] {
+		for _, cond := range h.ReleaseConditionsByGroupId[weapon.WeaponStoryReleaseConditionGroupId] {
 			if cond.WeaponStoryReleaseConditionType == model.WeaponStoryReleaseConditionTypeAcquisition {
-				e.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+				h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
 			}
 		}
 	}
 }
 
-func (e *Engine) populateWeaponSkillsAbilities(user *store.UserState, weaponUuid string, weapon weaponMaster) {
-	if slots, ok := e.skillGroupSlots[weapon.WeaponSkillGroupId]; ok {
+func (h *QuestHandler) populateWeaponSkillsAbilities(user *store.UserState, weaponUuid string, weapon masterdata.WeaponMasterRow) {
+	if slots, ok := h.WeaponSkillSlots[weapon.WeaponSkillGroupId]; ok {
 		skills := make([]store.WeaponSkillState, len(slots))
 		for i, slot := range slots {
 			skills[i] = store.WeaponSkillState{
@@ -341,7 +342,7 @@ func (e *Engine) populateWeaponSkillsAbilities(user *store.UserState, weaponUuid
 		}
 		user.WeaponSkills[weaponUuid] = skills
 	}
-	if slots, ok := e.abilityGroupSlots[weapon.WeaponAbilityGroupId]; ok {
+	if slots, ok := h.WeaponAbilitySlots[weapon.WeaponAbilityGroupId]; ok {
 		abilities := make([]store.WeaponAbilityState, len(slots))
 		for i, slot := range slots {
 			abilities[i] = store.WeaponAbilityState{
@@ -354,7 +355,7 @@ func (e *Engine) populateWeaponSkillsAbilities(user *store.UserState, weaponUuid
 	}
 }
 
-func (e *Engine) grantCompanion(user *store.UserState, companionId int32, nowMillis int64) {
+func (h *QuestHandler) grantCompanion(user *store.UserState, companionId int32, nowMillis int64) {
 	for _, row := range user.Companions {
 		if row.CompanionId == companionId {
 			return
@@ -370,7 +371,7 @@ func (e *Engine) grantCompanion(user *store.UserState, companionId int32, nowMil
 	}
 }
 
-func (e *Engine) grantParts(user *store.UserState, partsId int32, nowMillis int64) {
+func (h *QuestHandler) grantParts(user *store.UserState, partsId int32, nowMillis int64) {
 	for _, row := range user.Parts {
 		if row.PartsId == partsId {
 			return
@@ -385,7 +386,7 @@ func (e *Engine) grantParts(user *store.UserState, partsId int32, nowMillis int6
 	}
 }
 
-func (e *Engine) grantWeaponStoryUnlock(user *store.UserState, weaponId, storyIndex int32, nowMillis int64) {
+func (h *QuestHandler) grantWeaponStoryUnlock(user *store.UserState, weaponId, storyIndex int32, nowMillis int64) {
 	hasWeapon := false
 	for _, row := range user.Weapons {
 		if row.WeaponId == weaponId {
@@ -394,7 +395,7 @@ func (e *Engine) grantWeaponStoryUnlock(user *store.UserState, weaponId, storyIn
 		}
 	}
 	if !hasWeapon {
-		log.Printf("[Engine] grantWeaponStoryUnlock: skipping weaponId=%d (weapon not in user.Weapons)", weaponId)
+		log.Printf("[QuestHandler] grantWeaponStoryUnlock: skipping weaponId=%d (weapon not in user.Weapons)", weaponId)
 		return
 	}
 	if user.WeaponStories == nil {
@@ -418,22 +419,22 @@ var tutorialCompanionChoices = map[int32]int32{
 	4: 10, // doll + wind (Cat=3, Attr=6)
 }
 
-func (e *Engine) ApplyTutorialReward(user *store.UserState, tutorialType model.TutorialType, choiceId int32, nowMillis int64) []RewardGrant {
+func (h *QuestHandler) ApplyTutorialReward(user *store.UserState, tutorialType model.TutorialType, choiceId int32, nowMillis int64) []RewardGrant {
 	switch tutorialType {
 	case model.TutorialTypeCompanion:
-		return e.applyCompanionTutorialReward(user, choiceId, nowMillis)
+		return h.applyCompanionTutorialReward(user, choiceId, nowMillis)
 	default:
 		return nil
 	}
 }
 
-func (e *Engine) applyCompanionTutorialReward(user *store.UserState, choiceId int32, nowMillis int64) []RewardGrant {
+func (h *QuestHandler) applyCompanionTutorialReward(user *store.UserState, choiceId int32, nowMillis int64) []RewardGrant {
 	companionId, ok := tutorialCompanionChoices[choiceId]
 	if !ok {
-		log.Printf("[Engine] unknown companion tutorial choiceId=%d", choiceId)
+		log.Printf("[QuestHandler] unknown companion tutorial choiceId=%d", choiceId)
 		return nil
 	}
-	e.grantCompanion(user, companionId, nowMillis)
+	h.grantCompanion(user, companionId, nowMillis)
 	return []RewardGrant{{
 		PossessionType: model.PossessionTypeCompanion,
 		PossessionId:   companionId,
@@ -441,41 +442,41 @@ func (e *Engine) applyCompanionTutorialReward(user *store.UserState, choiceId in
 	}}
 }
 
-func (e *Engine) BattleDropRewards(questId int32) []BattleDropInfo {
-	return e.battleDropsByQuestId[questId]
+func (h *QuestHandler) BattleDropRewards(questId int32) []masterdata.BattleDropInfo {
+	return h.BattleDropsByQuestId[questId]
 }
 
-func (e *Engine) grantWeaponStoryUnlocksForQuestScene(user *store.UserState, questId int32, resultType model.QuestResultType, nowMillis int64) {
+func (h *QuestHandler) grantWeaponStoryUnlocksForQuestScene(user *store.UserState, questId int32, resultType model.QuestResultType, nowMillis int64) {
 	if resultType == model.QuestResultTypeHalfResult {
-		questMeta, ok := e.questById[questId]
+		questMeta, ok := h.QuestById[questId]
 		if !ok {
 			return
 		}
-		rewardGroupId := e.firstClearRewardGroupId(user, questMeta)
-		for _, reward := range e.firstClearRewardsByGroupId[rewardGroupId] {
+		rewardGroupId := h.firstClearRewardGroupId(user, questMeta)
+		for _, reward := range h.FirstClearRewardsByGroupId[rewardGroupId] {
 			if reward.PossessionType != model.PossessionTypeWeapon {
 				continue
 			}
 			weaponId := reward.PossessionId
-			weapon, ok := e.weaponById[weaponId]
+			weapon, ok := h.WeaponById[weaponId]
 			if !ok || weapon.WeaponStoryReleaseConditionGroupId == 0 {
 				continue
 			}
 			groupId := weapon.WeaponStoryReleaseConditionGroupId
-			for _, cond := range e.releaseConditionsByGroupId[groupId] {
+			for _, cond := range h.ReleaseConditionsByGroupId[groupId] {
 				if cond.WeaponStoryReleaseConditionType == model.WeaponStoryReleaseConditionTypeAcquisition && cond.ConditionValue == 0 {
-					e.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+					h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
 				}
 			}
 		}
 		return
 	}
 	if resultType == model.QuestResultTypeFullResult {
-		for groupId, conditions := range e.releaseConditionsByGroupId {
+		for groupId, conditions := range h.ReleaseConditionsByGroupId {
 			for _, cond := range conditions {
 				if cond.WeaponStoryReleaseConditionType == model.WeaponStoryReleaseConditionTypeQuestClear && cond.ConditionValue == questId {
-					for _, weaponId := range e.weaponIdsByReleaseConditionGroupId[groupId] {
-						e.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+					for _, weaponId := range h.WeaponIdsByReleaseConditionGroupId[groupId] {
+						h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
 					}
 					break
 				}

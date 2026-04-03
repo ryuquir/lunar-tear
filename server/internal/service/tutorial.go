@@ -16,10 +16,10 @@ type TutorialServiceServer struct {
 	pb.UnimplementedTutorialServiceServer
 	users    store.UserRepository
 	sessions store.SessionRepository
-	engine   *questflow.Engine
+	engine   *questflow.QuestHandler
 }
 
-func NewTutorialServiceServer(users store.UserRepository, sessions store.SessionRepository, engine *questflow.Engine) *TutorialServiceServer {
+func NewTutorialServiceServer(users store.UserRepository, sessions store.SessionRepository, engine *questflow.QuestHandler) *TutorialServiceServer {
 	return &TutorialServiceServer{users: users, sessions: sessions, engine: engine}
 }
 

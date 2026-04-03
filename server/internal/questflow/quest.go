@@ -3,16 +3,17 @@ package questflow
 import (
 	"fmt"
 
+	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 )
 
-func (e *Engine) initQuestState(user *store.UserState, questId int32) {
+func (h *QuestHandler) initQuestState(user *store.UserState, questId int32) {
 	quest := user.Quests[questId]
 	quest.QuestId = questId
 	user.Quests[questId] = quest
 
-	for _, missionId := range e.missionIdsByQuestId[questId] {
+	for _, missionId := range h.MissionIdsByQuestId[questId] {
 		key := store.QuestMissionKey{QuestId: questId, QuestMissionId: missionId}
 		mission := user.QuestMissions[key]
 		mission.QuestId = questId
@@ -21,12 +22,12 @@ func (e *Engine) initQuestState(user *store.UserState, questId int32) {
 	}
 }
 
-func isMainQuestPlayable(quest quest) bool {
+func isMainQuestPlayable(quest masterdata.QuestRow) bool {
 	return !quest.IsRunInTheBackground && quest.IsCountedAsQuest
 }
 
-func (e *Engine) clearQuestMissions(user *store.UserState, questId int32, nowMillis int64) {
-	for _, missionId := range e.missionIdsByQuestId[questId] {
+func (h *QuestHandler) clearQuestMissions(user *store.UserState, questId int32, nowMillis int64) {
+	for _, missionId := range h.MissionIdsByQuestId[questId] {
 		key := store.QuestMissionKey{QuestId: questId, QuestMissionId: missionId}
 		mission := user.QuestMissions[key]
 		mission.IsClear = true
@@ -36,16 +37,16 @@ func (e *Engine) clearQuestMissions(user *store.UserState, questId int32, nowMil
 	}
 }
 
-func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattleOnly bool, userDeckNumber int32, nowMillis int64) {
-	quest, ok := e.questById[questId]
+func (h *QuestHandler) HandleQuestStart(user *store.UserState, questId int32, isBattleOnly bool, userDeckNumber int32, nowMillis int64) {
+	quest, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleQuestStart", questId))
 	}
 
-	e.initQuestState(user, questId)
+	h.initQuestState(user, questId)
 
 	if quest.Stamina > 0 {
-		maxMillis := e.maxStaminaByLevel[user.Status.Level] * 1000
+		maxMillis := h.MaxStaminaByLevel[user.Status.Level] * 1000
 		store.ConsumeStamina(user, quest.Stamina, maxMillis, nowMillis)
 	}
 
@@ -69,24 +70,24 @@ func (e *Engine) HandleQuestStart(user *store.UserState, questId int32, isBattle
 	user.Quests[questId] = questState
 }
 
-func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
-	_, ok := e.questById[questId]
+func (h *QuestHandler) HandleQuestFinish(user *store.UserState, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
+	_, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleQuestFinish", questId))
 	}
 
-	outcome := e.evaluateFinishOutcome(user, questId)
+	outcome := h.evaluateFinishOutcome(user, questId)
 
 	questState := user.Quests[questId]
 	if !questState.IsRewardGranted && !isRetired {
-		e.applyQuestRewards(user, questId, nowMillis)
-		e.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
-		e.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
+		h.applyQuestRewards(user, questId, nowMillis)
+		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
+		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
 		questState.IsRewardGranted = true
 	}
 	if !isRetired {
 		for _, drop := range outcome.DropRewards {
-			e.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
+			h.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
 		}
 	}
 	questState.QuestStateType = model.UserQuestStateTypeCleared
@@ -100,13 +101,13 @@ func (e *Engine) HandleQuestFinish(user *store.UserState, questId int32, isRetir
 	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeUnknown)
 	user.Quests[questId] = questState
 
-	e.clearQuestMissions(user, questId, nowMillis)
+	h.clearQuestMissions(user, questId, nowMillis)
 
 	return outcome
 }
 
-func (e *Engine) HandleQuestRestart(user *store.UserState, questId int32, nowMillis int64) {
-	questMeta, ok := e.questById[questId]
+func (h *QuestHandler) HandleQuestRestart(user *store.UserState, questId int32, nowMillis int64) {
+	questMeta, ok := h.QuestById[questId]
 	if ok && isMainQuestPlayable(questMeta) {
 		user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 	}
@@ -118,7 +119,7 @@ func (e *Engine) HandleQuestRestart(user *store.UserState, questId int32, nowMil
 	quest.LatestStartDatetime = nowMillis
 	user.Quests[questId] = quest
 
-	for _, missionId := range e.missionIdsByQuestId[questId] {
+	for _, missionId := range h.MissionIdsByQuestId[questId] {
 		key := store.QuestMissionKey{QuestId: questId, QuestMissionId: missionId}
 		m := user.QuestMissions[key]
 		m.QuestId = questId

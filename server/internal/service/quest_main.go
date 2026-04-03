@@ -17,12 +17,12 @@ type QuestServiceServer struct {
 	pb.UnimplementedQuestServiceServer
 	users    store.UserRepository
 	sessions store.SessionRepository
-	engine   *questflow.Engine
+	engine   *questflow.QuestHandler
 }
 
-func NewQuestServiceServer(users store.UserRepository, sessions store.SessionRepository, engine *questflow.Engine) *QuestServiceServer {
+func NewQuestServiceServer(users store.UserRepository, sessions store.SessionRepository, engine *questflow.QuestHandler) *QuestServiceServer {
 	if engine == nil {
-		panic("quest flow engine is required")
+		panic("quest handler is required")
 	}
 	return &QuestServiceServer{users: users, sessions: sessions, engine: engine}
 }

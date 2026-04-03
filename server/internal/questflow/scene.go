@@ -9,44 +9,44 @@ import (
 	"lunar-tear/server/internal/store"
 )
 
-func (e *Engine) applySceneGrants(user *store.UserState, questSceneId int32, nowMillis int64) {
-	grants, ok := e.sceneGrantsBySceneId[questSceneId]
+func (h *QuestHandler) applySceneGrants(user *store.UserState, questSceneId int32, nowMillis int64) {
+	grants, ok := h.SceneGrantsBySceneId[questSceneId]
 	if !ok {
 		return
 	}
 	for _, g := range grants {
-		e.applyRewardPossession(user, g.PossessionType, g.PossessionId, g.Count, nowMillis)
+		h.applyRewardPossession(user, g.PossessionType, g.PossessionId, g.Count, nowMillis)
 	}
 }
 
-func (e *Engine) isSceneAhead(newSceneId, currentHeadId int32) bool {
+func (h *QuestHandler) isSceneAhead(newSceneId, currentHeadId int32) bool {
 	if currentHeadId == 0 {
 		return true
 	}
-	return e.sceneById[newSceneId].SortOrder > e.sceneById[currentHeadId].SortOrder
+	return h.SceneById[newSceneId].SortOrder > h.SceneById[currentHeadId].SortOrder
 }
 
-func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
-	scene, ok := e.sceneById[questSceneId]
+func (h *QuestHandler) HandleMainFlowSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
+	scene, ok := h.SceneById[questSceneId]
 	if !ok {
 		panic(fmt.Sprintf("unknown sceneId=%d for HandleMainFlowSceneProgress", questSceneId))
 	}
 
-	quest, ok := e.questById[scene.QuestId]
+	quest, ok := h.QuestById[scene.QuestId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleMainFlowSceneProgress", questSceneId))
 	}
 
 	user.MainQuest.CurrentQuestSceneId = questSceneId
-	if e.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
+	if h.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
 		user.MainQuest.HeadQuestSceneId = questSceneId
 	}
 	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 
-	lastSceneId := e.getLastMainFlowSceneId(scene.QuestId)
+	lastSceneId := h.getLastMainFlowSceneId(scene.QuestId)
 	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 
-	routeId, ok := e.routeIdByQuestId[quest.QuestId]
+	routeId, ok := h.RouteIdByQuestId[quest.QuestId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleMainFlowSceneProgress setting currentMainQuestRouteId", quest.QuestId))
 	}
@@ -55,17 +55,17 @@ func (e *Engine) HandleMainFlowSceneProgress(user *store.UserState, questSceneId
 	user.PortalCageStatus.IsCurrentProgress = false
 	user.PortalCageStatus.LatestVersion = nowMillis
 
-	e.applySceneGrants(user, questSceneId, nowMillis)
+	h.applySceneGrants(user, questSceneId, nowMillis)
 }
 
-func (e *Engine) advanceTutorialsForScene(user *store.UserState, sceneId int32) {
-	currentScene, ok := e.sceneById[sceneId]
+func (h *QuestHandler) advanceTutorialsForScene(user *store.UserState, sceneId int32) {
+	currentScene, ok := h.SceneById[sceneId]
 	if !ok {
 		log.Printf("[advanceTutorialsForScene] unknown sceneId=%d", sceneId)
 		return
 	}
-	for _, cond := range e.tutorialUnlockConditions {
-		condScene, ok := e.sceneById[cond.ConditionValue]
+	for _, cond := range h.TutorialUnlockConditions {
+		condScene, ok := h.SceneById[cond.ConditionValue]
 		if !ok {
 			log.Printf("[advanceTutorialsForScene] unknown conditionValue=%d", cond.ConditionValue)
 			continue
@@ -81,40 +81,40 @@ func (e *Engine) advanceTutorialsForScene(user *store.UserState, sceneId int32) 
 	}
 }
 
-func (e *Engine) getLastMainFlowSceneId(questId int32) int32 {
-	sceneIds := e.sceneIdsByQuestId[questId]
+func (h *QuestHandler) getLastMainFlowSceneId(questId int32) int32 {
+	sceneIds := h.SceneIdsByQuestId[questId]
 	if len(sceneIds) == 0 {
 		panic(fmt.Sprintf("no scenes found for questId=%d", questId))
 	}
 	return sceneIds[len(sceneIds)-1]
 }
 
-func (e *Engine) HandleMainQuestSceneProgress(user *store.UserState, questSceneId int32) {
-	scene, ok := e.sceneById[questSceneId]
+func (h *QuestHandler) HandleMainQuestSceneProgress(user *store.UserState, questSceneId int32) {
+	scene, ok := h.SceneById[questSceneId]
 	if !ok {
 		panic(fmt.Sprintf("unknown sceneId=%d for HandleMainQuestSceneProgress", questSceneId))
 	}
 
-	quest, ok := e.questById[scene.QuestId]
+	quest, ok := h.QuestById[scene.QuestId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleMainQuestSceneProgress", questSceneId))
 	}
 
 	user.MainQuest.CurrentQuestSceneId = questSceneId
-	if e.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
+	if h.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
 		user.MainQuest.HeadQuestSceneId = questSceneId
 	}
-	lastSceneId := e.getLastMainFlowSceneId(quest.QuestId)
+	lastSceneId := h.getLastMainFlowSceneId(quest.QuestId)
 	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 
 	if isMainQuestPlayable(quest) {
 		if scene.QuestResultType == model.QuestResultTypeHalfResult {
 			nowMillis := gametime.NowMillis()
-			e.clearQuestMissions(user, quest.QuestId, nowMillis)
+			h.clearQuestMissions(user, quest.QuestId, nowMillis)
 		}
 
 		user.MainQuest.ProgressQuestSceneId = questSceneId
-		if e.isSceneAhead(questSceneId, user.MainQuest.ProgressHeadQuestSceneId) {
+		if h.isSceneAhead(questSceneId, user.MainQuest.ProgressHeadQuestSceneId) {
 			user.MainQuest.ProgressHeadQuestSceneId = questSceneId
 		}
 		user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeSubFlow)

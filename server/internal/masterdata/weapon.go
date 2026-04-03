@@ -8,9 +8,30 @@ import (
 )
 
 type WeaponMasterRow struct {
-	WeaponId                int32 `json:"WeaponId"`
-	WeaponType              int32 `json:"WeaponType"`
-	WeaponSpecificEnhanceId int32 `json:"WeaponSpecificEnhanceId"`
+	WeaponId                           int32 `json:"WeaponId"`
+	WeaponType                         int32 `json:"WeaponType"`
+	WeaponSpecificEnhanceId            int32 `json:"WeaponSpecificEnhanceId"`
+	WeaponSkillGroupId                 int32 `json:"WeaponSkillGroupId"`
+	WeaponAbilityGroupId               int32 `json:"WeaponAbilityGroupId"`
+	WeaponStoryReleaseConditionGroupId int32 `json:"WeaponStoryReleaseConditionGroupId"`
+}
+
+type WeaponStoryReleaseConditionRow struct {
+	WeaponStoryReleaseConditionGroupId          int32                                 `json:"WeaponStoryReleaseConditionGroupId"`
+	StoryIndex                                  int32                                 `json:"StoryIndex"`
+	WeaponStoryReleaseConditionType             model.WeaponStoryReleaseConditionType `json:"WeaponStoryReleaseConditionType"`
+	ConditionValue                              int32                                 `json:"ConditionValue"`
+	WeaponStoryReleaseConditionOperationGroupId int32                                 `json:"WeaponStoryReleaseConditionOperationGroupId"`
+}
+
+type WeaponSkillGroupRow struct {
+	WeaponSkillGroupId int32 `json:"WeaponSkillGroupId"`
+	SlotNumber         int32 `json:"SlotNumber"`
+}
+
+type WeaponAbilityGroupRow struct {
+	WeaponAbilityGroupId int32 `json:"WeaponAbilityGroupId"`
+	SlotNumber           int32 `json:"SlotNumber"`
 }
 
 type weaponSpecificEnhanceRow struct {

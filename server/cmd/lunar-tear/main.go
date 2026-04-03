@@ -39,7 +39,11 @@ func main() {
 		log.Fatalf("create snapshot dir: %v", err)
 	}
 
-	questEngine := questflow.MakeEngine()
+	questCatalog, err := masterdata.LoadQuestCatalog()
+	if err != nil {
+		log.Fatalf("load quest catalog: %v", err)
+	}
+	questEngine := questflow.NewQuestHandler(questCatalog)
 	userStore := memory.New(gametime.Now,
 		memory.WithSnapshotDir(snapshotDir),
 		memory.WithSceneId(int32(*scene)),

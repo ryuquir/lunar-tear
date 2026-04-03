@@ -8,16 +8,16 @@ import (
 	"lunar-tear/server/internal/store"
 )
 
-func (e *Engine) HandleEventQuestStart(user *store.UserState, eventQuestChapterId, questId int32, isBattleOnly bool, userDeckNumber int32, nowMillis int64) {
-	quest, ok := e.questById[questId]
+func (h *QuestHandler) HandleEventQuestStart(user *store.UserState, eventQuestChapterId, questId int32, isBattleOnly bool, userDeckNumber int32, nowMillis int64) {
+	quest, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleEventQuestStart", questId))
 	}
 
-	e.initQuestState(user, questId)
+	h.initQuestState(user, questId)
 
 	if quest.Stamina > 0 {
-		maxMillis := e.maxStaminaByLevel[user.Status.Level] * 1000
+		maxMillis := h.MaxStaminaByLevel[user.Status.Level] * 1000
 		store.ConsumeStamina(user, quest.Stamina, maxMillis, nowMillis)
 	}
 
@@ -30,30 +30,30 @@ func (e *Engine) HandleEventQuestStart(user *store.UserState, eventQuestChapterI
 
 	user.EventQuest.CurrentEventQuestChapterId = eventQuestChapterId
 	user.EventQuest.CurrentQuestId = questId
-	if sceneIds := e.sceneIdsByQuestId[questId]; len(sceneIds) > 0 {
+	if sceneIds := h.SceneIdsByQuestId[questId]; len(sceneIds) > 0 {
 		user.EventQuest.CurrentQuestSceneId = sceneIds[0]
 		user.EventQuest.HeadQuestSceneId = sceneIds[0]
 	}
 }
 
-func (e *Engine) HandleEventQuestFinish(user *store.UserState, eventQuestChapterId, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
-	_, ok := e.questById[questId]
+func (h *QuestHandler) HandleEventQuestFinish(user *store.UserState, eventQuestChapterId, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
+	_, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleEventQuestFinish", questId))
 	}
 
-	outcome := e.evaluateFinishOutcome(user, questId)
+	outcome := h.evaluateFinishOutcome(user, questId)
 
 	questState := user.Quests[questId]
 	if !questState.IsRewardGranted && !isRetired {
-		e.applyQuestRewards(user, questId, nowMillis)
-		e.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
-		e.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
+		h.applyQuestRewards(user, questId, nowMillis)
+		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
+		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
 		questState.IsRewardGranted = true
 	}
 	if !isRetired {
 		for _, drop := range outcome.DropRewards {
-			e.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
+			h.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
 		}
 	}
 	questState.QuestStateType = model.UserQuestStateTypeCleared
@@ -66,33 +66,33 @@ func (e *Engine) HandleEventQuestFinish(user *store.UserState, eventQuestChapter
 	user.EventQuest.CurrentQuestSceneId = 0
 	user.EventQuest.HeadQuestSceneId = 0
 
-	e.clearQuestMissions(user, questId, nowMillis)
+	h.clearQuestMissions(user, questId, nowMillis)
 
 	return outcome
 }
 
-func (e *Engine) HandleEventQuestRestart(user *store.UserState, eventQuestChapterId, questId int32, nowMillis int64) {
-	e.HandleQuestRestart(user, questId, nowMillis)
+func (h *QuestHandler) HandleEventQuestRestart(user *store.UserState, eventQuestChapterId, questId int32, nowMillis int64) {
+	h.HandleQuestRestart(user, questId, nowMillis)
 
 	user.EventQuest.CurrentEventQuestChapterId = eventQuestChapterId
 	user.EventQuest.CurrentQuestId = questId
 }
 
-func (e *Engine) HandleEventQuestSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
-	scene, ok := e.sceneById[questSceneId]
+func (h *QuestHandler) HandleEventQuestSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
+	scene, ok := h.SceneById[questSceneId]
 	if !ok {
 		log.Printf("[HandleEventQuestSceneProgress] unknown sceneId=%d, skipping", questSceneId)
 		return
 	}
 
 	user.EventQuest.CurrentQuestSceneId = questSceneId
-	if e.isSceneAhead(questSceneId, user.EventQuest.HeadQuestSceneId) {
+	if h.isSceneAhead(questSceneId, user.EventQuest.HeadQuestSceneId) {
 		user.EventQuest.HeadQuestSceneId = questSceneId
 	}
 
-	e.applySceneGrants(user, questSceneId, nowMillis)
+	h.applySceneGrants(user, questSceneId, nowMillis)
 
 	if scene.QuestResultType == model.QuestResultTypeHalfResult {
-		e.clearQuestMissions(user, scene.QuestId, nowMillis)
+		h.clearQuestMissions(user, scene.QuestId, nowMillis)
 	}
 }
