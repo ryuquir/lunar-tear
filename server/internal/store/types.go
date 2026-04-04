@@ -89,6 +89,8 @@ type UserState struct {
 	CharacterBoards         map[int32]CharacterBoardState
 	CharacterBoardAbilities map[CharacterBoardAbilityKey]CharacterBoardAbilityState
 	CharacterBoardStatusUps map[CharacterBoardStatusUpKey]CharacterBoardStatusUpState
+
+	CostumeAwakenStatusUps map[CostumeAwakenStatusKey]CostumeAwakenStatusUpState
 }
 
 func (u *UserState) EnsureMaps() {
@@ -202,6 +204,9 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.CharacterBoardStatusUps == nil {
 		u.CharacterBoardStatusUps = make(map[CharacterBoardStatusUpKey]CharacterBoardStatusUpState)
+	}
+	if u.CostumeAwakenStatusUps == nil {
+		u.CostumeAwakenStatusUps = make(map[CostumeAwakenStatusKey]CostumeAwakenStatusUpState)
 	}
 	if u.Gimmick.Progress == nil {
 		u.Gimmick.Progress = make(map[GimmickKey]GimmickProgressState)
@@ -858,6 +863,42 @@ func (k *CharacterBoardStatusUpKey) UnmarshalText(text []byte) error {
 type CharacterBoardStatusUpState struct {
 	CharacterId           int32
 	StatusCalculationType int32
+	Hp                    int32
+	Attack                int32
+	Vitality              int32
+	Agility               int32
+	CriticalRatio         int32
+	CriticalAttack        int32
+	LatestVersion         int64
+}
+
+type CostumeAwakenStatusKey struct {
+	UserCostumeUuid       string
+	StatusCalculationType model.StatusCalculationType
+}
+
+func (k CostumeAwakenStatusKey) MarshalText() ([]byte, error) {
+	return fmt.Appendf(nil, "%s:%d", k.UserCostumeUuid, k.StatusCalculationType), nil
+}
+
+func (k *CostumeAwakenStatusKey) UnmarshalText(text []byte) error {
+	s := string(text)
+	idx := strings.LastIndex(s, ":")
+	if idx < 0 {
+		return fmt.Errorf("invalid CostumeAwakenStatusKey: %s", text)
+	}
+	k.UserCostumeUuid = s[:idx]
+	v, err := strconv.ParseInt(s[idx+1:], 10, 32)
+	if err != nil {
+		return err
+	}
+	k.StatusCalculationType = model.StatusCalculationType(v)
+	return nil
+}
+
+type CostumeAwakenStatusUpState struct {
+	UserCostumeUuid       string
+	StatusCalculationType model.StatusCalculationType
 	Hp                    int32
 	Attack                int32
 	Vitality              int32

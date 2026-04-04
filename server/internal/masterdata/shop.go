@@ -28,11 +28,17 @@ type ShopContentEffectRow struct {
 	EffectValue      int32 `json:"EffectValue"`
 }
 
+type shopItemLimitedStockRow struct {
+	ShopItemLimitedStockId int32 `json:"ShopItemLimitedStockId"`
+	MaxCount               int32 `json:"MaxCount"`
+}
+
 type ShopCatalog struct {
 	Items            map[int32]ShopItemRow
 	Contents         map[int32][]ShopContentRow
 	Effects          map[int32][]ShopContentEffectRow
 	MaxStaminaMillis map[int32]int32 // level -> max stamina in millis
+	LimitedStock     map[int32]int32 // stock id -> max count
 }
 
 type userLevelEntry struct {
@@ -57,12 +63,17 @@ func LoadShopCatalog() (*ShopCatalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load user level table: %w", err)
 	}
+	stockRows, err := utils.ReadJSON[shopItemLimitedStockRow]("EntityMShopItemLimitedStockTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load shop item limited stock table: %w", err)
+	}
 
 	catalog := &ShopCatalog{
 		Items:            make(map[int32]ShopItemRow, len(items)),
 		Contents:         make(map[int32][]ShopContentRow, len(contents)),
 		Effects:          make(map[int32][]ShopContentEffectRow, len(effects)),
 		MaxStaminaMillis: make(map[int32]int32, len(userLevels)),
+		LimitedStock:     make(map[int32]int32, len(stockRows)),
 	}
 	for _, row := range items {
 		catalog.Items[row.ShopItemId] = row
@@ -75,6 +86,9 @@ func LoadShopCatalog() (*ShopCatalog, error) {
 	}
 	for _, ul := range userLevels {
 		catalog.MaxStaminaMillis[ul.UserLevel] = ul.MaxStamina * 1000
+	}
+	for _, row := range stockRows {
+		catalog.LimitedStock[row.ShopItemLimitedStockId] = row.MaxCount
 	}
 	return catalog, nil
 }

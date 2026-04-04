@@ -21,12 +21,53 @@ type costumeRarityRow struct {
 	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
 }
 
+type CostumeAwakenRow struct {
+	CostumeId                        int32 `json:"CostumeId"`
+	CostumeAwakenEffectGroupId       int32 `json:"CostumeAwakenEffectGroupId"`
+	CostumeAwakenStepMaterialGroupId int32 `json:"CostumeAwakenStepMaterialGroupId"`
+	CostumeAwakenPriceGroupId        int32 `json:"CostumeAwakenPriceGroupId"`
+}
+
+type costumeAwakenPriceRow struct {
+	CostumeAwakenPriceGroupId int32 `json:"CostumeAwakenPriceGroupId"`
+	AwakenStepLowerLimit      int32 `json:"AwakenStepLowerLimit"`
+	Gold                      int32 `json:"Gold"`
+}
+
+type CostumeAwakenEffectRow struct {
+	CostumeAwakenEffectGroupId int32 `json:"CostumeAwakenEffectGroupId"`
+	AwakenStep                 int32 `json:"AwakenStep"`
+	CostumeAwakenEffectType    int32 `json:"CostumeAwakenEffectType"`
+	CostumeAwakenEffectId      int32 `json:"CostumeAwakenEffectId"`
+}
+
+type CostumeAwakenStatusUpRow struct {
+	CostumeAwakenStatusUpGroupId int32 `json:"CostumeAwakenStatusUpGroupId"`
+	SortOrder                    int32 `json:"SortOrder"`
+	StatusKindType               int32 `json:"StatusKindType"`
+	StatusCalculationType        int32 `json:"StatusCalculationType"`
+	EffectValue                  int32 `json:"EffectValue"`
+}
+
+type CostumeAwakenItemAcquireRow struct {
+	CostumeAwakenItemAcquireId int32 `json:"CostumeAwakenItemAcquireId"`
+	PossessionType             int32 `json:"PossessionType"`
+	PossessionId               int32 `json:"PossessionId"`
+	Count                      int32 `json:"Count"`
+}
+
 type CostumeCatalog struct {
 	Costumes            map[int32]CostumeMasterRow
 	Materials           map[int32]MaterialRow
 	ExpByRarity         map[int32][]int32
 	EnhanceCostByRarity map[int32]NumericalFunc
 	MaxLevelByRarity    map[int32]NumericalFunc
+
+	AwakenByCostumeId           map[int32]CostumeAwakenRow
+	AwakenPriceByGroup          map[int32]int32
+	AwakenEffectsByGroupAndStep map[int32]map[int32]CostumeAwakenEffectRow
+	AwakenStatusUpByGroup       map[int32][]CostumeAwakenStatusUpRow
+	AwakenItemAcquireById       map[int32]CostumeAwakenItemAcquireRow
 }
 
 func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
@@ -50,12 +91,39 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		return nil, fmt.Errorf("load function resolver: %w", err)
 	}
 
+	awakenRows, err := utils.ReadJSON[CostumeAwakenRow]("EntityMCostumeAwakenTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume awaken table: %w", err)
+	}
+	awakenPriceRows, err := utils.ReadJSON[costumeAwakenPriceRow]("EntityMCostumeAwakenPriceGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume awaken price table: %w", err)
+	}
+	awakenEffectRows, err := utils.ReadJSON[CostumeAwakenEffectRow]("EntityMCostumeAwakenEffectGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume awaken effect table: %w", err)
+	}
+	awakenStatusUpRows, err := utils.ReadJSON[CostumeAwakenStatusUpRow]("EntityMCostumeAwakenStatusUpGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume awaken status up table: %w", err)
+	}
+	awakenItemAcquireRows, err := utils.ReadJSON[CostumeAwakenItemAcquireRow]("EntityMCostumeAwakenItemAcquireTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume awaken item acquire table: %w", err)
+	}
+
 	catalog := &CostumeCatalog{
 		Costumes:            make(map[int32]CostumeMasterRow, len(costumes)),
 		Materials:           matCatalog.ByType[model.MaterialTypeCostumeEnhancement],
 		ExpByRarity:         make(map[int32][]int32, len(rarities)),
 		EnhanceCostByRarity: make(map[int32]NumericalFunc, len(rarities)),
 		MaxLevelByRarity:    make(map[int32]NumericalFunc, len(rarities)),
+
+		AwakenByCostumeId:           make(map[int32]CostumeAwakenRow, len(awakenRows)),
+		AwakenPriceByGroup:          make(map[int32]int32, len(awakenPriceRows)),
+		AwakenEffectsByGroupAndStep: make(map[int32]map[int32]CostumeAwakenEffectRow),
+		AwakenStatusUpByGroup:       make(map[int32][]CostumeAwakenStatusUpRow),
+		AwakenItemAcquireById:       make(map[int32]CostumeAwakenItemAcquireRow, len(awakenItemAcquireRows)),
 	}
 
 	for _, row := range costumes {
@@ -76,6 +144,28 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 				catalog.MaxLevelByRarity[r.RarityType] = f
 			}
 		}
+	}
+
+	for _, row := range awakenRows {
+		catalog.AwakenByCostumeId[row.CostumeId] = row
+	}
+	for _, row := range awakenPriceRows {
+		catalog.AwakenPriceByGroup[row.CostumeAwakenPriceGroupId] = row.Gold
+	}
+	for _, row := range awakenEffectRows {
+		m, ok := catalog.AwakenEffectsByGroupAndStep[row.CostumeAwakenEffectGroupId]
+		if !ok {
+			m = make(map[int32]CostumeAwakenEffectRow)
+			catalog.AwakenEffectsByGroupAndStep[row.CostumeAwakenEffectGroupId] = m
+		}
+		m[row.AwakenStep] = row
+	}
+	for _, row := range awakenStatusUpRows {
+		catalog.AwakenStatusUpByGroup[row.CostumeAwakenStatusUpGroupId] = append(
+			catalog.AwakenStatusUpByGroup[row.CostumeAwakenStatusUpGroupId], row)
+	}
+	for _, row := range awakenItemAcquireRows {
+		catalog.AwakenItemAcquireById[row.CostumeAwakenItemAcquireId] = row
 	}
 
 	return catalog, nil

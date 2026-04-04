@@ -63,6 +63,7 @@ func cloneUserState(u store.UserState) store.UserState {
 		Received:    cloneReceivedGifts(u.Gifts.Received),
 	}
 	out.Battle = u.Battle
+	out.CostumeAwakenStatusUps = maps.Clone(u.CostumeAwakenStatusUps)
 	return out
 }
 

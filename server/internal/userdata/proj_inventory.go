@@ -85,8 +85,11 @@ func init() {
 		s, _ := encodeJSONMaps(sortedPartsPresetRecords(user)...)
 		return s
 	})
+	register("IUserCostumeAwakenStatusUp", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedCostumeAwakenStatusUpRecords(user)...)
+		return s
+	})
 	registerStatic(
-		"IUserCostumeAwakenStatusUp",
 		"IUserCostumeLevelBonusReleaseStatus",
 		"IUserCostumeLotteryEffect",
 		"IUserCostumeLotteryEffectAbility",
@@ -135,6 +138,36 @@ func sortedCostumeRecords(user store.UserState) []map[string]any {
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"awakenCount":         row.AwakenCount,
 			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedCostumeAwakenStatusUpRecords(user store.UserState) []map[string]any {
+	keys := make([]store.CostumeAwakenStatusKey, 0, len(user.CostumeAwakenStatusUps))
+	for k := range user.CostumeAwakenStatusUps {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].UserCostumeUuid != keys[j].UserCostumeUuid {
+			return keys[i].UserCostumeUuid < keys[j].UserCostumeUuid
+		}
+		return keys[i].StatusCalculationType < keys[j].StatusCalculationType
+	})
+	records := make([]map[string]any, 0, len(keys))
+	for _, k := range keys {
+		row := user.CostumeAwakenStatusUps[k]
+		records = append(records, map[string]any{
+			"userId":                user.UserId,
+			"userCostumeUuid":       row.UserCostumeUuid,
+			"statusCalculationType": int32(row.StatusCalculationType),
+			"hp":                    row.Hp,
+			"attack":                row.Attack,
+			"vitality":              row.Vitality,
+			"agility":               row.Agility,
+			"criticalRatio":         row.CriticalRatio,
+			"criticalAttack":        row.CriticalAttack,
+			"latestVersion":         row.LatestVersion,
 		})
 	}
 	return records

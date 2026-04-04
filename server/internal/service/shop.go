@@ -156,6 +156,11 @@ func (s *ShopServiceServer) CreatePurchaseTransaction(ctx context.Context, req *
 		si := user.ShopItems[req.ShopItemId]
 		si.ShopItemId = req.ShopItemId
 		si.BoughtCount++
+		if item.ShopItemLimitedStockId > 0 {
+			if maxCount, ok := s.catalog.LimitedStock[item.ShopItemLimitedStockId]; ok && si.BoughtCount >= maxCount {
+				si.BoughtCount = 0
+			}
+		}
 		si.LatestBoughtCountChangedDatetime = nowMillis
 		si.LatestVersion = nowMillis
 		user.ShopItems[req.ShopItemId] = si
