@@ -93,6 +93,10 @@ func init() {
 		s, _ := encodeJSONMaps(sortedAutoSaleSettingRecords(user)...)
 		return s
 	})
+	register("IUserCharacterRebirth", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedCharacterRebirthRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeLevelBonusReleaseStatus",
 		"IUserCostumeLotteryEffect",
@@ -511,6 +515,26 @@ func exploreRecord(user store.UserState) map[string]any {
 		"latestPlayDatetime": user.Explore.LatestPlayDatetime,
 		"latestVersion":      user.Explore.LatestVersion,
 	}
+}
+
+func sortedCharacterRebirthRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.CharacterRebirths))
+	for id := range user.CharacterRebirths {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.CharacterRebirths[int32(id)]
+		records = append(records, map[string]any{
+			"userId":        user.UserId,
+			"characterId":   row.CharacterId,
+			"rebirthCount":  row.RebirthCount,
+			"latestVersion": row.LatestVersion,
+		})
+	}
+	return records
 }
 
 func sortedExploreScoreRecords(user store.UserState) []map[string]any {

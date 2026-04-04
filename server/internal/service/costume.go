@@ -20,20 +20,16 @@ var costumeDiffTables = []string{
 	"IUserConsumableItem",
 }
 
-const (
-	sameWeaponExpCoefficientPermil = 1500
-	goldConsumableItemId           = int32(1)
-)
-
 type CostumeServiceServer struct {
 	pb.UnimplementedCostumeServiceServer
 	users    store.UserRepository
 	sessions store.SessionRepository
 	catalog  *masterdata.CostumeCatalog
+	config   *masterdata.GameConfig
 }
 
-func NewCostumeServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.CostumeCatalog) *CostumeServiceServer {
-	return &CostumeServiceServer{users: users, sessions: sessions, catalog: catalog}
+func NewCostumeServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.CostumeCatalog, config *masterdata.GameConfig) *CostumeServiceServer {
+	return &CostumeServiceServer{users: users, sessions: sessions, catalog: catalog, config: config}
 }
 
 func (s *CostumeServiceServer) Enhance(ctx context.Context, req *pb.EnhanceRequest) (*pb.EnhanceResponse, error) {
@@ -74,14 +70,14 @@ func (s *CostumeServiceServer) Enhance(ctx context.Context, req *pb.EnhanceReque
 
 			expPerUnit := mat.EffectValue
 			if mat.WeaponType != 0 && mat.WeaponType == cm.SkillfulWeaponType {
-				expPerUnit = expPerUnit * sameWeaponExpCoefficientPermil / 1000
+				expPerUnit = expPerUnit * s.config.MaterialSameWeaponExpCoefficientPermil / 1000
 			}
 			totalExp += expPerUnit * count
 		}
 
 		if costFunc, ok := s.catalog.EnhanceCostByRarity[cm.RarityType]; ok && totalMaterialCount > 0 {
 			goldCost := costFunc.Evaluate(totalMaterialCount)
-			user.ConsumableItems[goldConsumableItemId] -= goldCost
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
 			log.Printf("[CostumeService] Enhance: gold cost=%d (materials=%d)", goldCost, totalMaterialCount)
 		}
 
@@ -139,7 +135,7 @@ func (s *CostumeServiceServer) Awaken(ctx context.Context, req *pb.AwakenRequest
 		nextStep := costume.AwakenCount + 1
 
 		if gold, ok := s.catalog.AwakenPriceByGroup[awakenRow.CostumeAwakenPriceGroupId]; ok {
-			user.ConsumableItems[goldConsumableItemId] -= gold
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= gold
 			log.Printf("[CostumeService] Awaken: gold cost=%d", gold)
 		}
 

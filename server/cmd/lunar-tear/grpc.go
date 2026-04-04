@@ -50,6 +50,8 @@ func startGRPC(
 	gimmickCatalog *masterdata.GimmickCatalog,
 	characterBoardCatalog *masterdata.CharacterBoardCatalog,
 	partsCatalog *masterdata.PartsCatalog,
+	characterRebirthCatalog *masterdata.CharacterRebirthCatalog,
+	gameConfig *masterdata.GameConfig,
 ) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
@@ -78,6 +80,8 @@ func startGRPC(
 		gimmickCatalog,
 		characterBoardCatalog,
 		partsCatalog,
+		characterRebirthCatalog,
+		gameConfig,
 	)
 
 	reflection.Register(grpcServer)
@@ -107,6 +111,8 @@ func registerServices(
 	gimmickCatalog *masterdata.GimmickCatalog,
 	characterBoardCatalog *masterdata.CharacterBoardCatalog,
 	partsCatalog *masterdata.PartsCatalog,
+	characterRebirthCatalog *masterdata.CharacterRebirthCatalog,
+	gameConfig *masterdata.GameConfig,
 ) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
@@ -130,13 +136,14 @@ func registerServices(
 	pb.RegisterCharacterViewerServiceServer(srv, service.NewCharacterViewerServiceServer(userStore, userStore, characterViewerCatalog))
 	pb.RegisterMissionServiceServer(srv, service.NewMissionServiceServer(userStore, userStore))
 	pb.RegisterShopServiceServer(srv, service.NewShopServiceServer(userStore, userStore, shopCatalog))
-	pb.RegisterCostumeServiceServer(srv, service.NewCostumeServiceServer(userStore, userStore, costumeCatalog))
+	pb.RegisterCostumeServiceServer(srv, service.NewCostumeServiceServer(userStore, userStore, costumeCatalog, gameConfig))
 	pb.RegisterMovieServiceServer(srv, service.NewMovieServiceServer(userStore, userStore))
 	pb.RegisterOmikujiServiceServer(srv, service.NewOmikujiServiceServer(userStore, userStore, omikujiCatalog))
-	pb.RegisterWeaponServiceServer(srv, service.NewWeaponServiceServer(userStore, userStore, weaponCatalog))
+	pb.RegisterWeaponServiceServer(srv, service.NewWeaponServiceServer(userStore, userStore, weaponCatalog, gameConfig))
 	pb.RegisterExploreServiceServer(srv, service.NewExploreServiceServer(userStore, userStore, exploreCatalog))
 	pb.RegisterCharacterBoardServiceServer(srv, service.NewCharacterBoardServiceServer(userStore, userStore, characterBoardCatalog))
-	pb.RegisterPartsServiceServer(srv, service.NewPartsServiceServer(userStore, userStore, partsCatalog))
+	pb.RegisterPartsServiceServer(srv, service.NewPartsServiceServer(userStore, userStore, partsCatalog, gameConfig))
+	pb.RegisterCharacterServiceServer(srv, service.NewCharacterServiceServer(userStore, userStore, characterRebirthCatalog, gameConfig))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {

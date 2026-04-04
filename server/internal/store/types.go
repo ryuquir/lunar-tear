@@ -92,6 +92,7 @@ type UserState struct {
 
 	CostumeAwakenStatusUps map[CostumeAwakenStatusKey]CostumeAwakenStatusUpState
 	AutoSaleSettings       map[int32]AutoSaleSettingState
+	CharacterRebirths      map[int32]CharacterRebirthState
 }
 
 func (u *UserState) EnsureMaps() {
@@ -211,6 +212,9 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.AutoSaleSettings == nil {
 		u.AutoSaleSettings = make(map[int32]AutoSaleSettingState)
+	}
+	if u.CharacterRebirths == nil {
+		u.CharacterRebirths = make(map[int32]CharacterRebirthState)
 	}
 	if u.Gimmick.Progress == nil {
 		u.Gimmick.Progress = make(map[GimmickKey]GimmickProgressState)
@@ -915,4 +919,10 @@ type CostumeAwakenStatusUpState struct {
 type AutoSaleSettingState struct {
 	PossessionAutoSaleItemType  int32
 	PossessionAutoSaleItemValue string
+}
+
+type CharacterRebirthState struct {
+	CharacterId   int32
+	RebirthCount  int32
+	LatestVersion int64
 }

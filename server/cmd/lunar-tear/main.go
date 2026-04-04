@@ -39,6 +39,13 @@ func main() {
 		log.Fatalf("create snapshot dir: %v", err)
 	}
 
+	gameConfig, err := masterdata.LoadGameConfig()
+	if err != nil {
+		log.Fatalf("load game config: %v", err)
+	}
+	log.Printf("game config loaded (goldId=%d, skipTicketId=%d, rebirthGold=%d)",
+		gameConfig.ConsumableItemIdForGold, gameConfig.ConsumableItemIdForQuestSkipTicket, gameConfig.CharacterRebirthConsumeGold)
+
 	partsCatalog, err := masterdata.LoadPartsCatalog()
 	if err != nil {
 		log.Fatalf("load parts catalog: %v", err)
@@ -49,7 +56,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("load quest catalog: %v", err)
 	}
-	questEngine := questflow.NewQuestHandler(questCatalog)
+	questHandler := questflow.NewQuestHandler(questCatalog, gameConfig)
 	userStore := memory.New(gametime.Now,
 		memory.WithSnapshotDir(snapshotDir),
 		memory.WithSceneId(int32(*scene)),
@@ -117,5 +124,29 @@ func main() {
 	}
 	log.Printf("character board catalog loaded: %d panels, %d boards", len(characterBoardCatalog.PanelById), len(characterBoardCatalog.BoardById))
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog, gimmickCatalog, characterBoardCatalog, partsCatalog)
+	characterRebirthCatalog, err := masterdata.LoadCharacterRebirthCatalog()
+	if err != nil {
+		log.Fatalf("load character rebirth catalog: %v", err)
+	}
+	log.Printf("character rebirth catalog loaded: %d characters", len(characterRebirthCatalog.StepGroupByCharacterId))
+
+	startGRPC(
+		*host,
+		octoURL,
+		userStore,
+		questHandler,
+		cageOrnamentCatalog,
+		loginBonusCatalog,
+		characterViewerCatalog,
+		shopCatalog,
+		costumeCatalog,
+		omikujiCatalog,
+		weaponCatalog,
+		exploreCatalog,
+		gimmickCatalog,
+		characterBoardCatalog,
+		partsCatalog,
+		characterRebirthCatalog,
+		gameConfig,
+	)
 }

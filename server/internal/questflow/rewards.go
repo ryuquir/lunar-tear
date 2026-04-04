@@ -227,9 +227,6 @@ func (h *QuestHandler) resolveDeckUnits(user *store.UserState, questId int32) (c
 	return costumeUuids, characterIds
 }
 
-const goldConsumableItemId int32 = 1
-const skipTicketConsumableItemId int32 = 2003
-
 func (h *QuestHandler) applyQuestRewards(user *store.UserState, questId int32, nowMillis int64) {
 	questMeta, ok := h.QuestById[questId]
 	if !ok {
@@ -239,8 +236,8 @@ func (h *QuestHandler) applyQuestRewards(user *store.UserState, questId int32, n
 	h.applyExpRewards(user, questId, nowMillis)
 
 	if questMeta.Gold != 0 {
-		user.ConsumableItems[goldConsumableItemId] += questMeta.Gold
-		log.Printf("[applyQuestRewards] questId=%d gold: +%d -> total=%d", questId, questMeta.Gold, user.ConsumableItems[goldConsumableItemId])
+		user.ConsumableItems[h.Config.ConsumableItemIdForGold] += questMeta.Gold
+		log.Printf("[applyQuestRewards] questId=%d gold: +%d -> total=%d", questId, questMeta.Gold, user.ConsumableItems[h.Config.ConsumableItemIdForGold])
 	}
 
 	rewardGroupId := h.firstClearRewardGroupId(user, questMeta)

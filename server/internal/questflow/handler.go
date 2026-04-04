@@ -22,8 +22,9 @@ type FinishOutcome struct {
 
 type QuestHandler struct {
 	*masterdata.QuestCatalog
+	Config *masterdata.GameConfig
 }
 
-func NewQuestHandler(catalog *masterdata.QuestCatalog) *QuestHandler {
-	return &QuestHandler{QuestCatalog: catalog}
+func NewQuestHandler(catalog *masterdata.QuestCatalog, config *masterdata.GameConfig) *QuestHandler {
+	return &QuestHandler{QuestCatalog: catalog, Config: config}
 }

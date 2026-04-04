@@ -25,10 +25,11 @@ type PartsServiceServer struct {
 	users    store.UserRepository
 	sessions store.SessionRepository
 	catalog  *masterdata.PartsCatalog
+	config   *masterdata.GameConfig
 }
 
-func NewPartsServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.PartsCatalog) *PartsServiceServer {
-	return &PartsServiceServer{users: users, sessions: sessions, catalog: catalog}
+func NewPartsServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.PartsCatalog, config *masterdata.GameConfig) *PartsServiceServer {
+	return &PartsServiceServer{users: users, sessions: sessions, catalog: catalog, config: config}
 }
 
 func (s *PartsServiceServer) Enhance(ctx context.Context, req *pb.PartsEnhanceRequest) (*pb.PartsEnhanceResponse, error) {
@@ -68,13 +69,13 @@ func (s *PartsServiceServer) Enhance(ctx context.Context, req *pb.PartsEnhanceRe
 			goldCost = prices[part.Level]
 		}
 
-		currentGold := user.ConsumableItems[goldConsumableItemId]
+		currentGold := user.ConsumableItems[s.config.ConsumableItemIdForGold]
 		if currentGold < goldCost {
 			log.Printf("[PartsService] Enhance: insufficient gold have=%d need=%d", currentGold, goldCost)
 			return
 		}
 
-		user.ConsumableItems[goldConsumableItemId] -= goldCost
+		user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
 
 		successRate := int32(1000)
 		if rates, ok := s.catalog.RateByGroupAndLevel[rarity.PartsLevelUpRateGroupId]; ok {

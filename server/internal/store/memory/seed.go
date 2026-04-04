@@ -190,6 +190,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 
 		CostumeAwakenStatusUps: make(map[store.CostumeAwakenStatusKey]store.CostumeAwakenStatusUpState),
 		AutoSaleSettings:       make(map[int32]store.AutoSaleSettingState),
+		CharacterRebirths:      make(map[int32]store.CharacterRebirthState),
 	}
 	store.EnsureDefaultDeck(user, nowMillis)
 	if grantStarterItems {

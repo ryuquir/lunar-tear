@@ -129,9 +129,10 @@ func (h *QuestHandler) HandleQuestSkip(user *store.UserState, questId, skipCount
 	maxMillis := h.MaxStaminaByLevel[user.Status.Level] * 1000
 	store.ConsumeStamina(user, skipCount, maxMillis, nowMillis)
 
-	user.ConsumableItems[skipTicketConsumableItemId] -= skipCount
-	if user.ConsumableItems[skipTicketConsumableItemId] < 0 {
-		user.ConsumableItems[skipTicketConsumableItemId] = 0
+	skipTicketId := h.Config.ConsumableItemIdForQuestSkipTicket
+	user.ConsumableItems[skipTicketId] -= skipCount
+	if user.ConsumableItems[skipTicketId] < 0 {
+		user.ConsumableItems[skipTicketId] = 0
 	}
 
 	var allDrops []RewardGrant
@@ -143,7 +144,7 @@ func (h *QuestHandler) HandleQuestSkip(user *store.UserState, questId, skipCount
 		allDrops = append(allDrops, drops...)
 
 		if questMeta.Gold != 0 {
-			user.ConsumableItems[goldConsumableItemId] += questMeta.Gold
+			user.ConsumableItems[h.Config.ConsumableItemIdForGold] += questMeta.Gold
 		}
 		h.applyExpRewards(user, questId, nowMillis)
 	}

@@ -65,6 +65,7 @@ func cloneUserState(u store.UserState) store.UserState {
 	out.Battle = u.Battle
 	out.CostumeAwakenStatusUps = maps.Clone(u.CostumeAwakenStatusUps)
 	out.AutoSaleSettings = maps.Clone(u.AutoSaleSettings)
+	out.CharacterRebirths = maps.Clone(u.CharacterRebirths)
 	return out
 }
 

@@ -26,10 +26,11 @@ type WeaponServiceServer struct {
 	users    store.UserRepository
 	sessions store.SessionRepository
 	catalog  *masterdata.WeaponCatalog
+	config   *masterdata.GameConfig
 }
 
-func NewWeaponServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.WeaponCatalog) *WeaponServiceServer {
-	return &WeaponServiceServer{users: users, sessions: sessions, catalog: catalog}
+func NewWeaponServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.WeaponCatalog, config *masterdata.GameConfig) *WeaponServiceServer {
+	return &WeaponServiceServer{users: users, sessions: sessions, catalog: catalog, config: config}
 }
 
 func (s *WeaponServiceServer) Protect(ctx context.Context, req *pb.ProtectRequest) (*pb.ProtectResponse, error) {
@@ -118,14 +119,14 @@ func (s *WeaponServiceServer) EnhanceByMaterial(ctx context.Context, req *pb.Enh
 
 			expPerUnit := mat.EffectValue
 			if mat.WeaponType != 0 && mat.WeaponType == wm.WeaponType {
-				expPerUnit = expPerUnit * sameWeaponExpCoefficientPermil / 1000
+				expPerUnit = expPerUnit * s.config.MaterialSameWeaponExpCoefficientPermil / 1000
 			}
 			totalExp += expPerUnit * count
 		}
 
 		if costFunc, ok := s.catalog.GoldCostByEnhanceId[wm.WeaponSpecificEnhanceId]; ok && totalMaterialCount > 0 {
 			goldCost := costFunc.Evaluate(totalMaterialCount)
-			user.ConsumableItems[goldConsumableItemId] -= goldCost
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
 			log.Printf("[WeaponService] EnhanceByMaterial: gold cost=%d (materials=%d)", goldCost, totalMaterialCount)
 		}
 
