@@ -2,6 +2,7 @@ package questflow
 
 import (
 	"fmt"
+	"log"
 
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
@@ -66,6 +67,19 @@ func (h *QuestHandler) HandleQuestStart(user *store.UserState, questId int32, is
 		questState.ClearCount = 1
 		questState.DailyClearCount = 1
 		questState.LastClearDatetime = nowMillis
+
+		if sceneIds := h.SceneIdsByQuestId[questId]; len(sceneIds) > 0 {
+			firstSceneId := sceneIds[0]
+			prevSceneId := user.MainQuest.CurrentQuestSceneId
+			user.MainQuest.CurrentQuestSceneId = firstSceneId
+			if h.isSceneAhead(firstSceneId, user.MainQuest.HeadQuestSceneId) {
+				user.MainQuest.HeadQuestSceneId = firstSceneId
+			}
+			user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
+			lastSceneId := h.getLastMainFlowSceneId(questId)
+			user.MainQuest.IsReachedLastQuestScene = firstSceneId == lastSceneId
+			log.Printf("[HandleQuestStart] background quest %d auto-cleared, scene %d -> %d", questId, prevSceneId, firstSceneId)
+		}
 	}
 	user.Quests[questId] = questState
 }
