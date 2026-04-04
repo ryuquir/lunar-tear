@@ -89,6 +89,10 @@ func init() {
 		s, _ := encodeJSONMaps(sortedCostumeAwakenStatusUpRecords(user)...)
 		return s
 	})
+	register("IUserAutoSaleSettingDetail", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedAutoSaleSettingRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeLevelBonusReleaseStatus",
 		"IUserCostumeLotteryEffect",
@@ -138,6 +142,26 @@ func sortedCostumeRecords(user store.UserState) []map[string]any {
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"awakenCount":         row.AwakenCount,
 			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedAutoSaleSettingRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.AutoSaleSettings))
+	for id := range user.AutoSaleSettings {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.AutoSaleSettings[int32(id)]
+		records = append(records, map[string]any{
+			"userId":                      user.UserId,
+			"possessionAutoSaleItemType":  row.PossessionAutoSaleItemType,
+			"possessionAutoSaleItemValue": row.PossessionAutoSaleItemValue,
+			"latestVersion":               gametime.NowMillis(),
 		})
 	}
 	return records

@@ -279,3 +279,24 @@ func (s *QuestServiceServer) SetQuestSceneChoice(ctx context.Context, req *pb.Se
 		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
+
+func (s *QuestServiceServer) SetAutoSaleSetting(ctx context.Context, req *pb.SetAutoSaleSettingRequest) (*pb.SetAutoSaleSettingResponse, error) {
+	log.Printf("[QuestService] SetAutoSaleSetting: items=%d", len(req.AutoSaleSettingItem))
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		user.AutoSaleSettings = make(map[int32]store.AutoSaleSettingState, len(req.AutoSaleSettingItem))
+		for itemType, itemValue := range req.AutoSaleSettingItem {
+			user.AutoSaleSettings[itemType] = store.AutoSaleSettingState{
+				PossessionAutoSaleItemType:  itemType,
+				PossessionAutoSaleItemValue: itemValue,
+			}
+		}
+	})
+
+	return &pb.SetAutoSaleSettingResponse{
+		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserAutoSaleSettingDetail",
+		}),
+	}, nil
+}

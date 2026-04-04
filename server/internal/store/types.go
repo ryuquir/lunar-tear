@@ -91,6 +91,7 @@ type UserState struct {
 	CharacterBoardStatusUps map[CharacterBoardStatusUpKey]CharacterBoardStatusUpState
 
 	CostumeAwakenStatusUps map[CostumeAwakenStatusKey]CostumeAwakenStatusUpState
+	AutoSaleSettings       map[int32]AutoSaleSettingState
 }
 
 func (u *UserState) EnsureMaps() {
@@ -207,6 +208,9 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.CostumeAwakenStatusUps == nil {
 		u.CostumeAwakenStatusUps = make(map[CostumeAwakenStatusKey]CostumeAwakenStatusUpState)
+	}
+	if u.AutoSaleSettings == nil {
+		u.AutoSaleSettings = make(map[int32]AutoSaleSettingState)
 	}
 	if u.Gimmick.Progress == nil {
 		u.Gimmick.Progress = make(map[GimmickKey]GimmickProgressState)
@@ -906,4 +910,9 @@ type CostumeAwakenStatusUpState struct {
 	CriticalRatio         int32
 	CriticalAttack        int32
 	LatestVersion         int64
+}
+
+type AutoSaleSettingState struct {
+	PossessionAutoSaleItemType  int32
+	PossessionAutoSaleItemValue string
 }
