@@ -32,6 +32,54 @@ func NewWeaponServiceServer(users store.UserRepository, sessions store.SessionRe
 	return &WeaponServiceServer{users: users, sessions: sessions, catalog: catalog}
 }
 
+func (s *WeaponServiceServer) Protect(ctx context.Context, req *pb.ProtectRequest) (*pb.ProtectResponse, error) {
+	log.Printf("[WeaponService] Protect: uuids=%v", req.UserWeaponUuid)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		for _, uuid := range req.UserWeaponUuid {
+			weapon, ok := user.Weapons[uuid]
+			if !ok {
+				log.Printf("[WeaponService] Protect: weapon uuid=%s not found", uuid)
+				continue
+			}
+			weapon.IsProtected = true
+			weapon.LatestVersion = nowMillis
+			user.Weapons[uuid] = weapon
+		}
+	})
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, []string{"IUserWeapon"}))
+	return &pb.ProtectResponse{DiffUserData: diff}, nil
+}
+
+func (s *WeaponServiceServer) Unprotect(ctx context.Context, req *pb.UnprotectRequest) (*pb.UnprotectResponse, error) {
+	log.Printf("[WeaponService] Unprotect: uuids=%v", req.UserWeaponUuid)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		for _, uuid := range req.UserWeaponUuid {
+			weapon, ok := user.Weapons[uuid]
+			if !ok {
+				log.Printf("[WeaponService] Unprotect: weapon uuid=%s not found", uuid)
+				continue
+			}
+			weapon.IsProtected = false
+			weapon.LatestVersion = nowMillis
+			user.Weapons[uuid] = weapon
+		}
+	})
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, []string{"IUserWeapon"}))
+	return &pb.UnprotectResponse{DiffUserData: diff}, nil
+}
+
 func (s *WeaponServiceServer) EnhanceByMaterial(ctx context.Context, req *pb.EnhanceByMaterialRequest) (*pb.EnhanceByMaterialResponse, error) {
 	log.Printf("[WeaponService] EnhanceByMaterial: uuid=%s materials=%v", req.UserWeaponUuid, req.Materials)
 
