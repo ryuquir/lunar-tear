@@ -121,7 +121,7 @@ func (h *QuestHandler) HandleQuestFinish(user *store.UserState, questId int32, i
 }
 
 func (h *QuestHandler) HandleQuestSkip(user *store.UserState, questId, skipCount int32, nowMillis int64) FinishOutcome {
-	questMeta, ok := h.QuestById[questId]
+	questDef, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleQuestSkip", questId))
 	}
@@ -137,14 +137,14 @@ func (h *QuestHandler) HandleQuestSkip(user *store.UserState, questId, skipCount
 
 	var allDrops []RewardGrant
 	for range skipCount {
-		drops := h.computeDropRewards(questMeta)
+		drops := h.computeDropRewards(questDef)
 		for _, drop := range drops {
 			h.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
 		}
 		allDrops = append(allDrops, drops...)
 
-		if questMeta.Gold != 0 {
-			user.ConsumableItems[h.Config.ConsumableItemIdForGold] += questMeta.Gold
+		if questDef.Gold != 0 {
+			user.ConsumableItems[h.Config.ConsumableItemIdForGold] += questDef.Gold
 		}
 		h.applyExpRewards(user, questId, nowMillis)
 	}
@@ -155,13 +155,13 @@ func (h *QuestHandler) HandleQuestSkip(user *store.UserState, questId, skipCount
 	questState.LastClearDatetime = nowMillis
 	user.Quests[questId] = questState
 
-	log.Printf("[HandleQuestSkip] questId=%d skipCount=%d drops=%d gold=%d", questId, skipCount, len(allDrops), questMeta.Gold*skipCount)
+	log.Printf("[HandleQuestSkip] questId=%d skipCount=%d drops=%d gold=%d", questId, skipCount, len(allDrops), questDef.Gold*skipCount)
 	return FinishOutcome{DropRewards: allDrops}
 }
 
 func (h *QuestHandler) HandleQuestRestart(user *store.UserState, questId int32, nowMillis int64) {
-	questMeta, ok := h.QuestById[questId]
-	if ok && isMainQuestPlayable(questMeta) {
+	questDef, ok := h.QuestById[questId]
+	if ok && isMainQuestPlayable(questDef) {
 		user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 	}
 
