@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-04-04
+
+### Working
+
+- Weapon management (enhancement with material consumption, skill/ability tracking, protect/unprotect)
+- Mythic slab / character board (panel releases, status effects, ability tracking)
+- Explore system
+- In-app purchase flow
+- Friend service stub
+- Master data tooling
+- Costume max-level capping by rarity in quest reward flow
+
+### Fixed
+
+- Map freeze caused by gimmick schedule overflow — capped patched entries under the client's MaxGimmickSequenceSchedule=1024 limit
+
+### Roadblock
+
+- Retire quest/battle mechanism — still untraced for quest/battle
+- Chapter transition loop — re-login after chapter 7 replays scene 261 instead of advancing
+
+### Need to Figure Out
+
+- Banner/gacha logic (scheduling, rates, pity, relationship between MomBanner and gacha catalogs)
+
 ## 2026-03-28
 
 ### Working
