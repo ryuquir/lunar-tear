@@ -39,7 +39,13 @@ func main() {
 		log.Fatalf("create snapshot dir: %v", err)
 	}
 
-	questCatalog, err := masterdata.LoadQuestCatalog()
+	partsCatalog, err := masterdata.LoadPartsCatalog()
+	if err != nil {
+		log.Fatalf("load parts catalog: %v", err)
+	}
+	log.Printf("parts catalog loaded: %d parts, %d rarities", len(partsCatalog.PartsById), len(partsCatalog.RarityByRarityType))
+
+	questCatalog, err := masterdata.LoadQuestCatalog(partsCatalog)
 	if err != nil {
 		log.Fatalf("load quest catalog: %v", err)
 	}
@@ -111,5 +117,5 @@ func main() {
 	}
 	log.Printf("character board catalog loaded: %d panels, %d boards", len(characterBoardCatalog.PanelById), len(characterBoardCatalog.BoardById))
 
-	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog, gimmickCatalog, characterBoardCatalog)
+	startGRPC(*host, octoURL, userStore, questEngine, cageOrnamentCatalog, loginBonusCatalog, characterViewerCatalog, shopCatalog, costumeCatalog, omikujiCatalog, weaponCatalog, exploreCatalog, gimmickCatalog, characterBoardCatalog, partsCatalog)
 }

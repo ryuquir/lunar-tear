@@ -1,0 +1,110 @@
+package service
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"math/rand"
+
+	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/masterdata"
+	"lunar-tear/server/internal/store"
+	"lunar-tear/server/internal/userdata"
+)
+
+const partsMaxLevel = int32(15)
+
+var partsDiffTables = []string{
+	"IUserParts",
+	"IUserConsumableItem",
+}
+
+type PartsServiceServer struct {
+	pb.UnimplementedPartsServiceServer
+	users    store.UserRepository
+	sessions store.SessionRepository
+	catalog  *masterdata.PartsCatalog
+}
+
+func NewPartsServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.PartsCatalog) *PartsServiceServer {
+	return &PartsServiceServer{users: users, sessions: sessions, catalog: catalog}
+}
+
+func (s *PartsServiceServer) Enhance(ctx context.Context, req *pb.PartsEnhanceRequest) (*pb.PartsEnhanceResponse, error) {
+	log.Printf("[PartsService] Enhance: uuid=%s", req.UserPartsUuid)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	isSuccess := false
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		part, ok := user.Parts[req.UserPartsUuid]
+		if !ok {
+			log.Printf("[PartsService] Enhance: part uuid=%s not found", req.UserPartsUuid)
+			return
+		}
+
+		if part.Level >= partsMaxLevel {
+			log.Printf("[PartsService] Enhance: part uuid=%s already at max level %d", req.UserPartsUuid, part.Level)
+			return
+		}
+
+		partDef, ok := s.catalog.PartsById[part.PartsId]
+		if !ok {
+			log.Printf("[PartsService] Enhance: part master id=%d not found", part.PartsId)
+			return
+		}
+
+		rarity, ok := s.catalog.RarityByRarityType[partDef.RarityType]
+		if !ok {
+			log.Printf("[PartsService] Enhance: rarity type=%d not found", partDef.RarityType)
+			return
+		}
+
+		goldCost := int32(0)
+		if prices, ok := s.catalog.PriceByGroupAndLevel[rarity.PartsLevelUpPriceGroupId]; ok {
+			goldCost = prices[part.Level]
+		}
+
+		currentGold := user.ConsumableItems[goldConsumableItemId]
+		if currentGold < goldCost {
+			log.Printf("[PartsService] Enhance: insufficient gold have=%d need=%d", currentGold, goldCost)
+			return
+		}
+
+		user.ConsumableItems[goldConsumableItemId] -= goldCost
+
+		successRate := int32(1000)
+		if rates, ok := s.catalog.RateByGroupAndLevel[rarity.PartsLevelUpRateGroupId]; ok {
+			if r, ok := rates[part.Level]; ok {
+				successRate = r
+			}
+		}
+
+		if rand.Intn(1000) < int(successRate) {
+			part.Level++
+			isSuccess = true
+			log.Printf("[PartsService] Enhance: SUCCESS partsId=%d level %d -> %d (rate=%d‰, cost=%d gold)",
+				part.PartsId, part.Level-1, part.Level, successRate, goldCost)
+		} else {
+			log.Printf("[PartsService] Enhance: FAIL partsId=%d stays level %d (rate=%d‰, cost=%d gold)",
+				part.PartsId, part.Level, successRate, goldCost)
+		}
+
+		part.LatestVersion = nowMillis
+		user.Parts[req.UserPartsUuid] = part
+	})
+	if err != nil {
+		return nil, fmt.Errorf("parts enhance: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, partsDiffTables))
+
+	return &pb.PartsEnhanceResponse{
+		IsSuccess:    isSuccess,
+		DiffUserData: diff,
+	}, nil
+}

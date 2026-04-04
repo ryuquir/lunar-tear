@@ -172,12 +172,6 @@ type RentalDeckRow struct {
 	BattleGroupId int32 `json:"BattleGroupId"`
 }
 
-type PartsRow struct {
-	PartsId                       int32 `json:"PartsId"`
-	PartsGroupId                  int32 `json:"PartsGroupId"`
-	PartsStatusMainLotteryGroupId int32 `json:"PartsStatusMainLotteryGroupId"`
-}
-
 type UserLevelRow struct {
 	UserLevel  int32 `json:"UserLevel"`
 	MaxStamina int32 `json:"MaxStamina"`
@@ -215,11 +209,10 @@ type QuestCatalog struct {
 	WeaponSkillSlots   map[int32][]int32
 	WeaponAbilitySlots map[int32][]int32
 
-	PartsById                            map[int32]PartsRow
-	DefaultPartsStatusMainByLotteryGroup map[int32]int32
+	*PartsCatalog
 }
 
-func LoadQuestCatalog() (*QuestCatalog, error) {
+func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 	scenes, err := utils.ReadJSON[QuestSceneRow]("EntityMQuestSceneTable.json")
 	if err != nil {
 		return nil, fmt.Errorf("load quest scene table: %w", err)
@@ -387,11 +380,6 @@ func LoadQuestCatalog() (*QuestCatalog, error) {
 		return nil, fmt.Errorf("load tutorial unlock condition table: %w", err)
 	}
 
-	partsRows, err := utils.ReadJSON[PartsRow]("EntityMPartsTable.json")
-	if err != nil {
-		return nil, fmt.Errorf("load parts table: %w", err)
-	}
-
 	paramMapRows, err := LoadParameterMap()
 	if err != nil {
 		return nil, err
@@ -441,22 +429,6 @@ func LoadQuestCatalog() (*QuestCatalog, error) {
 	abilitySlots := make(map[int32][]int32)
 	for _, row := range weaponAbilityGroups {
 		abilitySlots[row.WeaponAbilityGroupId] = append(abilitySlots[row.WeaponAbilityGroupId], row.SlotNumber)
-	}
-
-	partsById := make(map[int32]PartsRow, len(partsRows))
-	for _, p := range partsRows {
-		partsById[p.PartsId] = p
-	}
-
-	// Lottery group ID encodes tier (first digit 1-4) and stat category
-	// (second digit 1-6). Formula: mainStatId = (category - 1) * 4 + tier.
-	defaultPartsStatusMainByLotteryGroup := make(map[int32]int32, 24)
-	for tier := int32(1); tier <= 4; tier++ {
-		for cat := int32(1); cat <= 6; cat++ {
-			groupId := tier*10 + cat
-			mainStatId := (cat-1)*4 + tier
-			defaultPartsStatusMainByLotteryGroup[groupId] = mainStatId
-		}
 	}
 
 	sceneById := make(map[int32]QuestSceneRow, len(scenes))
@@ -686,7 +658,6 @@ func LoadQuestCatalog() (*QuestCatalog, error) {
 		WeaponSkillSlots:   skillSlots,
 		WeaponAbilitySlots: abilitySlots,
 
-		PartsById:                            partsById,
-		DefaultPartsStatusMainByLotteryGroup: defaultPartsStatusMainByLotteryGroup,
+		PartsCatalog: partsCatalog,
 	}, nil
 }

@@ -49,6 +49,7 @@ func startGRPC(
 	exploreCatalog *masterdata.ExploreCatalog,
 	gimmickCatalog *masterdata.GimmickCatalog,
 	characterBoardCatalog *masterdata.CharacterBoardCatalog,
+	partsCatalog *masterdata.PartsCatalog,
 ) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
@@ -76,6 +77,7 @@ func startGRPC(
 		exploreCatalog,
 		gimmickCatalog,
 		characterBoardCatalog,
+		partsCatalog,
 	)
 
 	reflection.Register(grpcServer)
@@ -104,6 +106,7 @@ func registerServices(
 	exploreCatalog *masterdata.ExploreCatalog,
 	gimmickCatalog *masterdata.GimmickCatalog,
 	characterBoardCatalog *masterdata.CharacterBoardCatalog,
+	partsCatalog *masterdata.PartsCatalog,
 ) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
@@ -133,6 +136,7 @@ func registerServices(
 	pb.RegisterWeaponServiceServer(srv, service.NewWeaponServiceServer(userStore, userStore, weaponCatalog))
 	pb.RegisterExploreServiceServer(srv, service.NewExploreServiceServer(userStore, userStore, exploreCatalog))
 	pb.RegisterCharacterBoardServiceServer(srv, service.NewCharacterBoardServiceServer(userStore, userStore, characterBoardCatalog))
+	pb.RegisterPartsServiceServer(srv, service.NewPartsServiceServer(userStore, userStore, partsCatalog))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
