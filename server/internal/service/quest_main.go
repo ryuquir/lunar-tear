@@ -239,6 +239,39 @@ func (s *QuestServiceServer) FinishAutoOrbit(ctx context.Context, req *emptypb.E
 	}, nil
 }
 
+func (s *QuestServiceServer) SkipQuest(ctx context.Context, req *pb.SkipQuestRequest) (*pb.SkipQuestResponse, error) {
+	log.Printf("[QuestService] SkipQuest: questId=%d skipCount=%d useEffectItems=%d", req.QuestId, req.SkipCount, len(req.UseEffectItem))
+
+	nowMillis := gametime.NowMillis()
+	userId := currentUserId(ctx, s.users, s.sessions)
+	var outcome questflow.FinishOutcome
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		for _, item := range req.UseEffectItem {
+			log.Printf("[QuestService] SkipQuest UseEffectItem: consumableItemId=%d count=%d", item.ConsumableItemId, item.Count)
+			user.ConsumableItems[item.ConsumableItemId] -= item.Count
+			if user.ConsumableItems[item.ConsumableItemId] < 0 {
+				user.ConsumableItems[item.ConsumableItemId] = 0
+			}
+		}
+		outcome = s.engine.HandleQuestSkip(user, req.QuestId, req.SkipCount, nowMillis)
+	})
+
+	return &pb.SkipQuestResponse{
+		DropReward:               toProtoRewards(outcome.DropRewards),
+		UserStatusCampaignReward: []*pb.QuestReward{},
+		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserQuest",
+			"IUserStatus",
+			"IUserConsumableItem",
+			"IUserMaterial",
+			"IUserParts",
+			"IUserPartsGroupNote",
+			"IUserCharacter",
+			"IUserCostume",
+		}),
+	}, nil
+}
+
 func (s *QuestServiceServer) SetQuestSceneChoice(ctx context.Context, req *pb.SetQuestSceneChoiceRequest) (*pb.SetQuestSceneChoiceResponse, error) {
 	log.Printf("[QuestService] SetQuestSceneChoice: questSceneId=%d choiceNumber=%d",
 		req.QuestSceneId, req.ChoiceNumber)

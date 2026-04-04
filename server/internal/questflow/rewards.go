@@ -103,19 +103,25 @@ func (h *QuestHandler) evaluateFinishOutcome(user *store.UserState, questId int3
 		outcome.IsBigWin = len(outcome.BigWinClearedQuestMissionIds) > 0
 	}
 
-	if questMeta.QuestPickupRewardGroupId != 0 {
-		for _, dropId := range h.PickupRewardIdsByGroupId[questMeta.QuestPickupRewardGroupId] {
-			if bdr, ok := h.BattleDropRewardById[dropId]; ok {
-				outcome.DropRewards = append(outcome.DropRewards, RewardGrant{
-					PossessionType: bdr.PossessionType,
-					PossessionId:   bdr.PossessionId,
-					Count:          bdr.Count,
-				})
-			}
+	outcome.DropRewards = h.computeDropRewards(questMeta)
+	return outcome
+}
+
+func (h *QuestHandler) computeDropRewards(questMeta masterdata.QuestRow) []RewardGrant {
+	if questMeta.QuestPickupRewardGroupId == 0 {
+		return nil
+	}
+	var drops []RewardGrant
+	for _, dropId := range h.PickupRewardIdsByGroupId[questMeta.QuestPickupRewardGroupId] {
+		if bdr, ok := h.BattleDropRewardById[dropId]; ok {
+			drops = append(drops, RewardGrant{
+				PossessionType: bdr.PossessionType,
+				PossessionId:   bdr.PossessionId,
+				Count:          bdr.Count,
+			})
 		}
 	}
-
-	return outcome
+	return drops
 }
 
 func (h *QuestHandler) applyExpRewards(user *store.UserState, questId int32, nowMillis int64) {
@@ -222,6 +228,7 @@ func (h *QuestHandler) resolveDeckUnits(user *store.UserState, questId int32) (c
 }
 
 const goldConsumableItemId int32 = 1
+const skipTicketConsumableItemId int32 = 2003
 
 func (h *QuestHandler) applyQuestRewards(user *store.UserState, questId int32, nowMillis int64) {
 	questMeta, ok := h.QuestById[questId]
