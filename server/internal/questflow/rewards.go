@@ -377,11 +377,26 @@ func (h *QuestHandler) grantParts(user *store.UserState, partsId int32, nowMilli
 			return
 		}
 	}
+
+	var mainStatId int32
+	if partsDef, ok := h.PartsById[partsId]; ok {
+		mainStatId = h.DefaultPartsStatusMainByLotteryGroup[partsDef.PartsStatusMainLotteryGroupId]
+
+		if _, exists := user.PartsGroupNotes[partsDef.PartsGroupId]; !exists {
+			user.PartsGroupNotes[partsDef.PartsGroupId] = store.PartsGroupNoteState{
+				PartsGroupId:             partsDef.PartsGroupId,
+				FirstAcquisitionDatetime: nowMillis,
+				LatestVersion:            nowMillis,
+			}
+		}
+	}
+
 	key := fmt.Sprintf("reward-parts-%d", partsId)
 	user.Parts[key] = store.PartsState{
 		UserPartsUuid:       key,
 		PartsId:             partsId,
 		Level:               1,
+		PartsStatusMainId:   mainStatId,
 		AcquisitionDatetime: nowMillis,
 	}
 }

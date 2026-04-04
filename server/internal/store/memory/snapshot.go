@@ -42,5 +42,6 @@ func loadSnapshot(dir string, sceneId int32) (*store.UserState, error) {
 	if err := json.Unmarshal(data, &user); err != nil {
 		return nil, fmt.Errorf("unmarshal snapshot scene=%d: %w", sceneId, err)
 	}
+	user.EnsureMaps()
 	return &user, nil
 }

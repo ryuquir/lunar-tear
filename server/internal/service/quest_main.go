@@ -66,6 +66,8 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 			"IUserConsumableItem",
 			"IUserMaterial",
 			"IUserImportantItem",
+			"IUserParts",
+			"IUserPartsGroupNote",
 		}),
 	}, nil
 }
@@ -190,6 +192,8 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 			"IUserConsumableItem",
 			"IUserMaterial",
 			"IUserImportantItem",
+			"IUserParts",
+			"IUserPartsGroupNote",
 		}),
 	}, nil
 }

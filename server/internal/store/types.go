@@ -62,6 +62,7 @@ type UserState struct {
 	ConsumableItems       map[int32]int32
 	Materials             map[int32]int32
 	Parts                 map[string]PartsState
+	PartsGroupNotes       map[int32]PartsGroupNoteState
 	ImportantItems        map[int32]int32
 	CostumeActiveSkills   map[string]CostumeActiveSkillState
 	WeaponSkills          map[string][]WeaponSkillState   // key: userWeaponUuid
@@ -86,6 +87,126 @@ type UserState struct {
 	CharacterBoards         map[int32]CharacterBoardState
 	CharacterBoardAbilities map[CharacterBoardAbilityKey]CharacterBoardAbilityState
 	CharacterBoardStatusUps map[CharacterBoardStatusUpKey]CharacterBoardStatusUpState
+}
+
+func (u *UserState) EnsureMaps() {
+	if u.Tutorials == nil {
+		u.Tutorials = make(map[int32]TutorialProgressState)
+	}
+	if u.Characters == nil {
+		u.Characters = make(map[int32]CharacterState)
+	}
+	if u.Costumes == nil {
+		u.Costumes = make(map[string]CostumeState)
+	}
+	if u.Weapons == nil {
+		u.Weapons = make(map[string]WeaponState)
+	}
+	if u.Companions == nil {
+		u.Companions = make(map[string]CompanionState)
+	}
+	if u.Thoughts == nil {
+		u.Thoughts = make(map[string]ThoughtState)
+	}
+	if u.DeckCharacters == nil {
+		u.DeckCharacters = make(map[string]DeckCharacterState)
+	}
+	if u.Decks == nil {
+		u.Decks = make(map[DeckKey]DeckState)
+	}
+	if u.DeckSubWeapons == nil {
+		u.DeckSubWeapons = make(map[string][]string)
+	}
+	if u.Quests == nil {
+		u.Quests = make(map[int32]UserQuestState)
+	}
+	if u.QuestMissions == nil {
+		u.QuestMissions = make(map[QuestMissionKey]UserQuestMissionState)
+	}
+	if u.Missions == nil {
+		u.Missions = make(map[int32]UserMissionState)
+	}
+	if u.WeaponStories == nil {
+		u.WeaponStories = make(map[int32]WeaponStoryState)
+	}
+	if u.CageOrnamentRewards == nil {
+		u.CageOrnamentRewards = make(map[int32]CageOrnamentRewardState)
+	}
+	if u.ConsumableItems == nil {
+		u.ConsumableItems = make(map[int32]int32)
+	}
+	if u.Materials == nil {
+		u.Materials = make(map[int32]int32)
+	}
+	if u.Parts == nil {
+		u.Parts = make(map[string]PartsState)
+	}
+	if u.PartsGroupNotes == nil {
+		u.PartsGroupNotes = make(map[int32]PartsGroupNoteState)
+	}
+	if u.ImportantItems == nil {
+		u.ImportantItems = make(map[int32]int32)
+	}
+	if u.CostumeActiveSkills == nil {
+		u.CostumeActiveSkills = make(map[string]CostumeActiveSkillState)
+	}
+	if u.WeaponSkills == nil {
+		u.WeaponSkills = make(map[string][]WeaponSkillState)
+	}
+	if u.WeaponAbilities == nil {
+		u.WeaponAbilities = make(map[string][]WeaponAbilityState)
+	}
+	if u.DeckTypeNotes == nil {
+		u.DeckTypeNotes = make(map[model.DeckType]DeckTypeNoteState)
+	}
+	if u.WeaponNotes == nil {
+		u.WeaponNotes = make(map[int32]WeaponNoteState)
+	}
+	if u.NaviCutInPlayed == nil {
+		u.NaviCutInPlayed = make(map[int32]bool)
+	}
+	if u.ViewedMovies == nil {
+		u.ViewedMovies = make(map[int32]int64)
+	}
+	if u.DrawnOmikuji == nil {
+		u.DrawnOmikuji = make(map[int32]int64)
+	}
+	if u.PremiumItems == nil {
+		u.PremiumItems = make(map[int32]int64)
+	}
+	if u.DokanConfirmed == nil {
+		u.DokanConfirmed = make(map[int32]bool)
+	}
+	if u.ShopItems == nil {
+		u.ShopItems = make(map[int32]UserShopItemState)
+	}
+	if u.ShopReplaceableLineup == nil {
+		u.ShopReplaceableLineup = make(map[int32]UserShopReplaceableLineupState)
+	}
+	if u.ExploreScores == nil {
+		u.ExploreScores = make(map[int32]ExploreScoreState)
+	}
+	if u.CharacterBoards == nil {
+		u.CharacterBoards = make(map[int32]CharacterBoardState)
+	}
+	if u.CharacterBoardAbilities == nil {
+		u.CharacterBoardAbilities = make(map[CharacterBoardAbilityKey]CharacterBoardAbilityState)
+	}
+	if u.CharacterBoardStatusUps == nil {
+		u.CharacterBoardStatusUps = make(map[CharacterBoardStatusUpKey]CharacterBoardStatusUpState)
+	}
+	if u.Gimmick.Progress == nil {
+		u.Gimmick.Progress = make(map[GimmickKey]GimmickProgressState)
+	}
+	if u.Gimmick.OrnamentProgress == nil {
+		u.Gimmick.OrnamentProgress = make(map[GimmickOrnamentKey]GimmickOrnamentProgressState)
+	}
+	if u.Gimmick.Sequences == nil {
+		u.Gimmick.Sequences = make(map[GimmickSequenceKey]GimmickSequenceState)
+	}
+	if u.Gimmick.Unlocks == nil {
+		u.Gimmick.Unlocks = make(map[GimmickKey]GimmickUnlockState)
+	}
 }
 
 type ExploreState struct {
@@ -543,8 +664,16 @@ type PartsState struct {
 	UserPartsUuid       string
 	PartsId             int32
 	Level               int32
+	PartsStatusMainId   int32
+	IsProtected         bool
 	AcquisitionDatetime int64
 	LatestVersion       int64
+}
+
+type PartsGroupNoteState struct {
+	PartsGroupId             int32
+	FirstAcquisitionDatetime int64
+	LatestVersion            int64
 }
 
 type NotificationState struct {

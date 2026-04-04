@@ -31,6 +31,7 @@ func cloneUserState(u store.UserState) store.UserState {
 	out.ConsumableItems = maps.Clone(u.ConsumableItems)
 	out.Materials = maps.Clone(u.Materials)
 	out.Parts = maps.Clone(u.Parts)
+	out.PartsGroupNotes = maps.Clone(u.PartsGroupNotes)
 	out.ImportantItems = maps.Clone(u.ImportantItems)
 	out.CostumeActiveSkills = maps.Clone(u.CostumeActiveSkills)
 	out.WeaponSkills = cloneSliceMap(u.WeaponSkills)

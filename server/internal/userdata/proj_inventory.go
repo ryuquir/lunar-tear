@@ -77,6 +77,10 @@ func init() {
 		s, _ := encodeJSONMaps(sortedExploreScoreRecords(user)...)
 		return s
 	})
+	register("IUserPartsGroupNote", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedPartsGroupNoteRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeAwakenStatusUp",
 		"IUserCostumeLevelBonusReleaseStatus",
@@ -85,7 +89,6 @@ func init() {
 		"IUserCostumeLotteryEffectStatusUp",
 		"IUserCostumeLotteryEffectPending",
 		"IUserWeaponAwaken",
-		"IUserPartsGroupNote",
 		"IUserPartsPreset",
 		"IUserPartsPresetTag",
 		"IUserPartsStatusSub",
@@ -339,8 +342,29 @@ func sortedPartsRecords(user store.UserState) []map[string]any {
 			"userPartsUuid":       row.UserPartsUuid,
 			"partsId":             row.PartsId,
 			"level":               row.Level,
+			"partsStatusMainId":   row.PartsStatusMainId,
+			"isProtected":         row.IsProtected,
 			"acquisitionDatetime": row.AcquisitionDatetime,
 			"latestVersion":       row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedPartsGroupNoteRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.PartsGroupNotes))
+	for id := range user.PartsGroupNotes {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.PartsGroupNotes[int32(id)]
+		records = append(records, map[string]any{
+			"userId":                   user.UserId,
+			"partsGroupId":             row.PartsGroupId,
+			"firstAcquisitionDatetime": row.FirstAcquisitionDatetime,
+			"latestVersion":            row.LatestVersion,
 		})
 	}
 	return records

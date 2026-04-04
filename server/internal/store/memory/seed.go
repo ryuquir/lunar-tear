@@ -166,6 +166,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		Materials:             make(map[int32]int32),
 		Thoughts:              make(map[string]store.ThoughtState),
 		Parts:                 make(map[string]store.PartsState),
+		PartsGroupNotes:       make(map[int32]store.PartsGroupNoteState),
 		ImportantItems:        make(map[int32]int32),
 		CostumeActiveSkills:   make(map[string]store.CostumeActiveSkillState),
 		WeaponSkills:          make(map[string][]store.WeaponSkillState),

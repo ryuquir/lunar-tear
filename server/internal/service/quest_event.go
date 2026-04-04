@@ -79,6 +79,8 @@ func (s *QuestServiceServer) FinishEventQuest(ctx context.Context, req *pb.Finis
 			"IUserConsumableItem",
 			"IUserMaterial",
 			"IUserImportantItem",
+			"IUserParts",
+			"IUserPartsGroupNote",
 		}),
 	}, nil
 }
@@ -121,6 +123,8 @@ func (s *QuestServiceServer) UpdateEventQuestSceneProgress(ctx context.Context, 
 			"IUserConsumableItem",
 			"IUserMaterial",
 			"IUserImportantItem",
+			"IUserParts",
+			"IUserPartsGroupNote",
 		}),
 	}, nil
 }
