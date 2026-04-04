@@ -63,6 +63,7 @@ type UserState struct {
 	Materials             map[int32]int32
 	Parts                 map[string]PartsState
 	PartsGroupNotes       map[int32]PartsGroupNoteState
+	PartsPresets          map[int32]PartsPresetState
 	ImportantItems        map[int32]int32
 	CostumeActiveSkills   map[string]CostumeActiveSkillState
 	WeaponSkills          map[string][]WeaponSkillState   // key: userWeaponUuid
@@ -70,6 +71,7 @@ type UserState struct {
 	DeckTypeNotes         map[model.DeckType]DeckTypeNoteState
 	WeaponNotes           map[int32]WeaponNoteState
 	DeckSubWeapons        map[string][]string
+	DeckParts             map[string][]string
 	NaviCutInPlayed       map[int32]bool
 	ViewedMovies          map[int32]int64
 	DrawnOmikuji          map[int32]int64
@@ -117,6 +119,9 @@ func (u *UserState) EnsureMaps() {
 	if u.DeckSubWeapons == nil {
 		u.DeckSubWeapons = make(map[string][]string)
 	}
+	if u.DeckParts == nil {
+		u.DeckParts = make(map[string][]string)
+	}
 	if u.Quests == nil {
 		u.Quests = make(map[int32]UserQuestState)
 	}
@@ -143,6 +148,9 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.PartsGroupNotes == nil {
 		u.PartsGroupNotes = make(map[int32]PartsGroupNoteState)
+	}
+	if u.PartsPresets == nil {
+		u.PartsPresets = make(map[int32]PartsPresetState)
 	}
 	if u.ImportantItems == nil {
 		u.ImportantItems = make(map[int32]int32)
@@ -380,6 +388,7 @@ type DeckCharacterInput struct {
 	UserCostumeUuid    string
 	MainUserWeaponUuid string
 	SubWeaponUuids     []string
+	PartsUuids         []string
 	UserCompanionUuid  string
 	UserThoughtUuid    string
 }
@@ -673,6 +682,16 @@ type PartsState struct {
 type PartsGroupNoteState struct {
 	PartsGroupId             int32
 	FirstAcquisitionDatetime int64
+	LatestVersion            int64
+}
+
+type PartsPresetState struct {
+	UserPartsPresetNumber    int32
+	UserPartsUuid01          string
+	UserPartsUuid02          string
+	UserPartsUuid03          string
+	Name                     string
+	UserPartsPresetTagNumber int32
 	LatestVersion            int64
 }
 

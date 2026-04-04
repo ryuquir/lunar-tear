@@ -99,6 +99,7 @@ func deckSlotsFromProto(deck *pb.Deck) []store.DeckCharacterInput {
 			UserCostumeUuid:    ch.UserCostumeUuid,
 			MainUserWeaponUuid: ch.MainUserWeaponUuid,
 			SubWeaponUuids:     ch.SubUserWeaponUuid,
+			PartsUuids:         ch.UserPartsUuid,
 			UserCompanionUuid:  ch.UserCompanionUuid,
 			UserThoughtUuid:    ch.UserThoughtUuid,
 		}
@@ -121,6 +122,7 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 
 	oldUser, _ := s.users.SnapshotUser(userId)
 	oldSubWeapons := userdata.DeckSubWeaponRecords(oldUser)
+	oldPartsGroup := userdata.DeckPartsGroupRecords(oldUser)
 
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		if req.Deck == nil {
@@ -133,14 +135,19 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 	subWeaponDeleteKeys := userdata.ComputeDeleteKeys(oldSubWeapons, newSubWeapons,
 		[]string{"userId", "userDeckCharacterUuid", "sortOrder"})
 
+	newPartsGroup := userdata.DeckPartsGroupRecords(user)
+	partsDeleteKeys := userdata.ComputeDeleteKeys(oldPartsGroup, newPartsGroup,
+		[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"})
+
 	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
-		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup",
+		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup", "IUserDeckPartsGroup",
 	})
 	log.Printf("[DeckService] ReplaceDeck response IUserDeckSubWeaponGroup: %s deleteKeys: %s",
 		result["IUserDeckSubWeaponGroup"], subWeaponDeleteKeys)
 	return &pb.ReplaceDeckResponse{
 		DiffUserData: userdata.NewDiffSet(result).
 			WithDeletes("IUserDeckSubWeaponGroup", subWeaponDeleteKeys).
+			WithDeletes("IUserDeckPartsGroup", partsDeleteKeys).
 			Build(),
 	}, nil
 }

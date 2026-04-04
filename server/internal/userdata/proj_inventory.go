@@ -81,6 +81,10 @@ func init() {
 		s, _ := encodeJSONMaps(sortedPartsGroupNoteRecords(user)...)
 		return s
 	})
+	register("IUserPartsPreset", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedPartsPresetRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeAwakenStatusUp",
 		"IUserCostumeLevelBonusReleaseStatus",
@@ -89,7 +93,6 @@ func init() {
 		"IUserCostumeLotteryEffectStatusUp",
 		"IUserCostumeLotteryEffectPending",
 		"IUserWeaponAwaken",
-		"IUserPartsPreset",
 		"IUserPartsPresetTag",
 		"IUserPartsStatusSub",
 	)
@@ -364,6 +367,29 @@ func sortedPartsGroupNoteRecords(user store.UserState) []map[string]any {
 			"userId":                   user.UserId,
 			"partsGroupId":             row.PartsGroupId,
 			"firstAcquisitionDatetime": row.FirstAcquisitionDatetime,
+			"latestVersion":            row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedPartsPresetRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.PartsPresets))
+	for id := range user.PartsPresets {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.PartsPresets[int32(id)]
+		records = append(records, map[string]any{
+			"userId":                   user.UserId,
+			"userPartsPresetNumber":    row.UserPartsPresetNumber,
+			"userPartsUuid01":          row.UserPartsUuid01,
+			"userPartsUuid02":          row.UserPartsUuid02,
+			"userPartsUuid03":          row.UserPartsUuid03,
+			"name":                     row.Name,
+			"userPartsPresetTagNumber": row.UserPartsPresetTagNumber,
 			"latestVersion":            row.LatestVersion,
 		})
 	}

@@ -159,6 +159,7 @@ func ApplyDeckReplacement(user *UserState, deckType model.DeckType, userDeckNumb
 		dc.LatestVersion = nowMillis
 		user.DeckCharacters[dcUuid] = dc
 		user.DeckSubWeapons[dcUuid] = slot.SubWeaponUuids
+		user.DeckParts[dcUuid] = slot.PartsUuids
 		*uuid = dcUuid
 	}
 

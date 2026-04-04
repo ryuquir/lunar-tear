@@ -108,3 +108,31 @@ func (s *PartsServiceServer) Enhance(ctx context.Context, req *pb.PartsEnhanceRe
 		DiffUserData: diff,
 	}, nil
 }
+
+func (s *PartsServiceServer) ReplacePreset(ctx context.Context, req *pb.PartsReplacePresetRequest) (*pb.PartsReplacePresetResponse, error) {
+	log.Printf("[PartsService] ReplacePreset: preset=%d uuids=[%s, %s, %s]",
+		req.UserPartsPresetNumber, req.UserPartsUuid01, req.UserPartsUuid02, req.UserPartsUuid03)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		preset := user.PartsPresets[req.UserPartsPresetNumber]
+		preset.UserPartsPresetNumber = req.UserPartsPresetNumber
+		preset.UserPartsUuid01 = req.UserPartsUuid01
+		preset.UserPartsUuid02 = req.UserPartsUuid02
+		preset.UserPartsUuid03 = req.UserPartsUuid03
+		preset.LatestVersion = nowMillis
+		user.PartsPresets[req.UserPartsPresetNumber] = preset
+	})
+	if err != nil {
+		return nil, fmt.Errorf("parts replace preset: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, []string{"IUserPartsPreset"}))
+
+	return &pb.PartsReplacePresetResponse{
+		DiffUserData: diff,
+	}, nil
+}
