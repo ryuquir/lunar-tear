@@ -93,18 +93,31 @@ func (s *ShopServiceServer) RefreshUserData(ctx context.Context, req *pb.Refresh
 	log.Printf("[ShopService] RefreshUserData: isGemUsed=%v", req.IsGemUsed)
 
 	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
 
-	var snapshot store.UserState
-	var err error
-
-	if req.IsGemUsed {
-		snapshot, err = s.users.UpdateUser(userId, func(user *store.UserState) {
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		if len(user.ShopReplaceableLineup) == 0 && len(s.catalog.ItemShopPool) > 0 {
+			for i, itemId := range s.catalog.ItemShopPool {
+				slot := int32(i + 1)
+				user.ShopReplaceableLineup[slot] = store.UserShopReplaceableLineupState{
+					SlotNumber:    slot,
+					ShopItemId:    itemId,
+					LatestVersion: nowMillis,
+				}
+			}
+		}
+		if req.IsGemUsed {
 			user.ShopReplaceable.LineupUpdateCount++
-			user.ShopReplaceable.LatestLineupUpdateDatetime = gametime.NowMillis()
-		})
-	} else {
-		snapshot, err = s.users.SnapshotUser(userId)
-	}
+			user.ShopReplaceable.LatestLineupUpdateDatetime = nowMillis
+			for _, itemId := range s.catalog.ItemShopPool {
+				if si, ok := user.ShopItems[itemId]; ok {
+					si.BoughtCount = 0
+					si.LatestVersion = nowMillis
+					user.ShopItems[itemId] = si
+				}
+			}
+		}
+	})
 	if err != nil {
 		return nil, fmt.Errorf("shop refresh: %w", err)
 	}
