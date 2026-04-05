@@ -43,13 +43,13 @@ func (s *QuestServiceServer) StartEventQuest(ctx context.Context, req *pb.StartE
 }
 
 func (s *QuestServiceServer) FinishEventQuest(ctx context.Context, req *pb.FinishEventQuestRequest) (*pb.FinishEventQuestResponse, error) {
-	log.Printf("[QuestService] FinishEventQuest: chapterId=%d questId=%d isRetired=%v", req.EventQuestChapterId, req.QuestId, req.IsRetired)
+	log.Printf("[QuestService] FinishEventQuest: chapterId=%d questId=%d isRetired=%v isAnnihilated=%v", req.EventQuestChapterId, req.QuestId, req.IsRetired, req.IsAnnihilated)
 
 	nowMillis := gametime.NowMillis()
 	userId := currentUserId(ctx, s.users, s.sessions)
 	var outcome questflow.FinishOutcome
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		outcome = s.engine.HandleEventQuestFinish(user, req.EventQuestChapterId, req.QuestId, req.IsRetired, nowMillis)
+		outcome = s.engine.HandleEventQuestFinish(user, req.EventQuestChapterId, req.QuestId, req.IsRetired, req.IsAnnihilated, nowMillis)
 	})
 
 	return &pb.FinishEventQuestResponse{

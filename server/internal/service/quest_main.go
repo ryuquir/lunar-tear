@@ -32,11 +32,6 @@ func buildSelectedQuestDiff(user store.UserState, tableNames []string) map[strin
 	return userdata.BuildDiffFromTablesOrdered(tables, tableNames)
 }
 
-func logQuestState(prefix string, user store.UserState) {
-	log.Printf("[QuestService] %s MainQuest=%#v Status=%#v Quests=%#v", prefix, user.MainQuest, user.Status, user.Quests)
-	log.Printf("[QuestService] %s Weapons=%#v WeaponStories=%#v", prefix, user.Weapons, user.WeaponStories)
-}
-
 func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, req *pb.UpdateMainFlowSceneProgressRequest) (*pb.UpdateMainFlowSceneProgressResponse, error) {
 	log.Printf("[QuestService] UpdateMainFlowSceneProgress: questSceneId=%d", req.QuestSceneId)
 
@@ -44,7 +39,6 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		s.engine.HandleMainFlowSceneProgress(user, req.QuestSceneId, gametime.NowMillis())
 	})
-	logQuestState("UpdateMainFlowSceneProgress state", user)
 
 	return &pb.UpdateMainFlowSceneProgressResponse{
 		DiffUserData: buildSelectedQuestDiff(user, []string{
@@ -86,7 +80,7 @@ func (s *QuestServiceServer) UpdateMainQuestSceneProgress(ctx context.Context, r
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		s.engine.HandleMainQuestSceneProgress(user, req.QuestSceneId)
 	})
-	logQuestState("UpdateMainQuestSceneProgress state", user)
+
 	return &pb.UpdateMainQuestSceneProgressResponse{
 		DiffUserData: buildSelectedQuestDiff(user, []string{
 			"IUserStatus",
@@ -108,7 +102,6 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, req.UserDeckNumber, nowMillis)
 	})
-	logQuestState("StartMainQuest state", user)
 
 	drops := s.engine.BattleDropRewards(req.QuestId)
 	pbDrops := make([]*pb.BattleDropReward, len(drops))
@@ -150,16 +143,15 @@ func toProtoRewards(grants []questflow.RewardGrant) []*pb.QuestReward {
 }
 
 func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.FinishMainQuestRequest) (*pb.FinishMainQuestResponse, error) {
-	log.Printf("[QuestService] FinishMainQuest: questId=%d isMainFlow=%v isRetired=%v storySkipType=%d",
-		req.QuestId, req.IsMainFlow, req.IsRetired, req.StorySkipType)
+	log.Printf("[QuestService] FinishMainQuest: questId=%d isMainFlow=%v isRetired=%v isAnnihilated=%v storySkipType=%d",
+		req.QuestId, req.IsMainFlow, req.IsRetired, req.IsAnnihilated, req.StorySkipType)
 
 	nowMillis := gametime.NowMillis()
 	userId := currentUserId(ctx, s.users, s.sessions)
 	var outcome questflow.FinishOutcome
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		outcome = s.engine.HandleQuestFinish(user, req.QuestId, req.IsRetired, nowMillis)
+		outcome = s.engine.HandleQuestFinish(user, req.QuestId, req.IsRetired, req.IsAnnihilated, nowMillis)
 	})
-	logQuestState("FinishMainQuest state", user)
 
 	return &pb.FinishMainQuestResponse{
 		DropReward:                      toProtoRewards(outcome.DropRewards),
@@ -205,7 +197,6 @@ func (s *QuestServiceServer) RestartMainQuest(ctx context.Context, req *pb.Resta
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		s.engine.HandleQuestRestart(user, req.QuestId, gametime.NowMillis())
 	})
-	logQuestState("RestartMainQuest state", user)
 
 	drops := s.engine.BattleDropRewards(req.QuestId)
 	pbDrops := make([]*pb.BattleDropReward, len(drops))

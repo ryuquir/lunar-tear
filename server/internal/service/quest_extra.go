@@ -41,13 +41,13 @@ func (s *QuestServiceServer) StartExtraQuest(ctx context.Context, req *pb.StartE
 }
 
 func (s *QuestServiceServer) FinishExtraQuest(ctx context.Context, req *pb.FinishExtraQuestRequest) (*pb.FinishExtraQuestResponse, error) {
-	log.Printf("[QuestService] FinishExtraQuest: questId=%d isRetired=%v", req.QuestId, req.IsRetired)
+	log.Printf("[QuestService] FinishExtraQuest: questId=%d isRetired=%v isAnnihilated=%v", req.QuestId, req.IsRetired, req.IsAnnihilated)
 
 	nowMillis := gametime.NowMillis()
 	userId := currentUserId(ctx, s.users, s.sessions)
 	var outcome questflow.FinishOutcome
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		outcome = s.engine.HandleExtraQuestFinish(user, req.QuestId, req.IsRetired, nowMillis)
+		outcome = s.engine.HandleExtraQuestFinish(user, req.QuestId, req.IsRetired, req.IsAnnihilated, nowMillis)
 	})
 
 	return &pb.FinishExtraQuestResponse{

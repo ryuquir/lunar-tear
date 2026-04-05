@@ -36,8 +36,8 @@ func (h *QuestHandler) HandleEventQuestStart(user *store.UserState, eventQuestCh
 	}
 }
 
-func (h *QuestHandler) HandleEventQuestFinish(user *store.UserState, eventQuestChapterId, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
-	_, ok := h.QuestById[questId]
+func (h *QuestHandler) HandleEventQuestFinish(user *store.UserState, eventQuestChapterId, questId int32, isRetired, isAnnihilated bool, nowMillis int64) FinishOutcome {
+	quest, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleEventQuestFinish", questId))
 	}
@@ -45,6 +45,12 @@ func (h *QuestHandler) HandleEventQuestFinish(user *store.UserState, eventQuestC
 	outcome := h.evaluateFinishOutcome(user, questId)
 	if !isRetired {
 		h.applyQuestVictory(user, questId, outcome, nowMillis)
+	}
+
+	if isRetired && !isAnnihilated && quest.Stamina > 1 {
+		refund := quest.Stamina - 1
+		maxMillis := h.MaxStaminaByLevel[user.Status.Level] * 1000
+		store.RecoverStamina(user, refund*1000, maxMillis, nowMillis)
 	}
 
 	user.EventQuest.CurrentQuestId = 0

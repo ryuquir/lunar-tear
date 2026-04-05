@@ -34,8 +34,8 @@ func (h *QuestHandler) HandleExtraQuestStart(user *store.UserState, questId, use
 	}
 }
 
-func (h *QuestHandler) HandleExtraQuestFinish(user *store.UserState, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
-	_, ok := h.QuestById[questId]
+func (h *QuestHandler) HandleExtraQuestFinish(user *store.UserState, questId int32, isRetired, isAnnihilated bool, nowMillis int64) FinishOutcome {
+	quest, ok := h.QuestById[questId]
 	if !ok {
 		panic(fmt.Sprintf("unknown questId=%d for HandleExtraQuestFinish", questId))
 	}
@@ -43,6 +43,12 @@ func (h *QuestHandler) HandleExtraQuestFinish(user *store.UserState, questId int
 	outcome := h.evaluateFinishOutcome(user, questId)
 	if !isRetired {
 		h.applyQuestVictory(user, questId, outcome, nowMillis)
+	}
+
+	if isRetired && !isAnnihilated && quest.Stamina > 1 {
+		refund := quest.Stamina - 1
+		maxMillis := h.MaxStaminaByLevel[user.Status.Level] * 1000
+		store.RecoverStamina(user, refund*1000, maxMillis, nowMillis)
 	}
 
 	user.ExtraQuest.CurrentQuestId = 0
