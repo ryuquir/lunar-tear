@@ -12,6 +12,7 @@ type MaterialRow struct {
 	MaterialType model.MaterialType `json:"MaterialType"`
 	WeaponType   int32              `json:"WeaponType"`
 	EffectValue  int32              `json:"EffectValue"`
+	SellPrice    int32              `json:"SellPrice"`
 }
 
 type numericalParameterMapRow struct {

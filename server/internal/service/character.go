@@ -35,6 +35,10 @@ func (s *CharacterServiceServer) Rebirth(ctx context.Context, req *pb.RebirthReq
 		return &pb.RebirthResponse{}, nil
 	}
 
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserMaterial", oldUser, userdata.SortedMaterialRecords, []string{"userId", "materialId"})
+
 	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
 		current := user.CharacterRebirths[req.CharacterId]
 		currentCount := current.RebirthCount
@@ -73,12 +77,9 @@ func (s *CharacterServiceServer) Rebirth(ctx context.Context, req *pb.RebirthReq
 		return nil, err
 	}
 
-	tables := userdata.FullClientTableMap(snapshot)
-	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, []string{
-		"IUserCharacterRebirth",
-		"IUserMaterial",
-		"IUserConsumableItem",
-	}))
+	rebirthTables := []string{"IUserCharacterRebirth", "IUserMaterial", "IUserConsumableItem"}
+	tables := userdata.SelectTables(userdata.FullClientTableMap(snapshot), rebirthTables)
+	diff := tracker.Apply(snapshot, tables)
 
 	return &pb.RebirthResponse{DiffUserData: diff}, nil
 }

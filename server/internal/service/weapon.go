@@ -152,3 +152,60 @@ func (s *WeaponServiceServer) EnhanceByMaterial(ctx context.Context, req *pb.Enh
 		DiffUserData:           diff,
 	}, nil
 }
+
+func (s *WeaponServiceServer) Sell(ctx context.Context, req *pb.SellRequest) (*pb.SellResponse, error) {
+	log.Printf("[WeaponService] Sell: uuids=%v", req.UserWeaponUuid)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserWeapon", oldUser, userdata.SortedWeaponRecords, []string{"userId", "userWeaponUuid"}).
+		Track("IUserWeaponSkill", oldUser, userdata.SortedWeaponSkillRecords, []string{"userId", "userWeaponUuid", "slotNumber"}).
+		Track("IUserWeaponAbility", oldUser, userdata.SortedWeaponAbilityRecords, []string{"userId", "userWeaponUuid", "slotNumber"})
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		totalGold := int32(0)
+		for _, uuid := range req.UserWeaponUuid {
+			weapon, ok := user.Weapons[uuid]
+			if !ok {
+				log.Printf("[WeaponService] Sell: weapon uuid=%s not found, skipping", uuid)
+				continue
+			}
+
+			wm, ok := s.catalog.Weapons[weapon.WeaponId]
+			if !ok {
+				log.Printf("[WeaponService] Sell: weapon master id=%d not found, skipping", weapon.WeaponId)
+				continue
+			}
+
+			if sellFunc, ok := s.catalog.SellPriceByEnhanceId[wm.WeaponSpecificEnhanceId]; ok {
+				totalGold += sellFunc.Evaluate(weapon.Level)
+			}
+
+			if medals, ok := s.catalog.MedalsByWeaponId[weapon.WeaponId]; ok {
+				for itemId, count := range medals {
+					user.ConsumableItems[itemId] += count
+				}
+			}
+
+			delete(user.Weapons, uuid)
+			delete(user.WeaponSkills, uuid)
+			delete(user.WeaponAbilities, uuid)
+		}
+
+		if totalGold > 0 {
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] += totalGold
+			log.Printf("[WeaponService] Sell: granted %d gold", totalGold)
+		}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon sell: %w", err)
+	}
+
+	sellDiffTables := []string{"IUserWeapon", "IUserWeaponSkill", "IUserWeaponAbility", "IUserConsumableItem"}
+	tables := userdata.SelectTables(userdata.FullClientTableMap(snapshot), sellDiffTables)
+	diff := tracker.Apply(snapshot, tables)
+
+	return &pb.SellResponse{DiffUserData: diff}, nil
+}

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/store"
 )
 
 type DiffSet struct {
@@ -56,6 +57,40 @@ func (ds *DiffSet) entry(table, payload string) *pb.DiffData {
 		UpdateRecordsJson: payload,
 		DeleteKeysJson:    deleteKeys,
 	}
+}
+
+type trackedTable struct {
+	tableName  string
+	keyFields  []string
+	oldRecords []map[string]any
+	recordsFn  func(store.UserState) []map[string]any
+}
+
+type DeleteTracker struct {
+	entries []trackedTable
+}
+
+func NewDeleteTracker() *DeleteTracker {
+	return &DeleteTracker{}
+}
+
+func (dt *DeleteTracker) Track(tableName string, old store.UserState, recordsFn func(store.UserState) []map[string]any, keyFields []string) *DeleteTracker {
+	dt.entries = append(dt.entries, trackedTable{
+		tableName:  tableName,
+		keyFields:  keyFields,
+		oldRecords: recordsFn(old),
+		recordsFn:  recordsFn,
+	})
+	return dt
+}
+
+func (dt *DeleteTracker) Apply(newState store.UserState, tables map[string]string) map[string]*pb.DiffData {
+	ds := NewDiffSet(tables)
+	for _, e := range dt.entries {
+		newRecords := e.recordsFn(newState)
+		ds.WithDeletes(e.tableName, ComputeDeleteKeys(e.oldRecords, newRecords, e.keyFields))
+	}
+	return ds.Build()
 }
 
 func ComputeDeleteKeys(oldRecords, newRecords []map[string]any, keyFields []string) string {

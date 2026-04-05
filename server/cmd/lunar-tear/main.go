@@ -154,6 +154,7 @@ func main() {
 		partsCatalog,
 		characterRebirthCatalog,
 		companionCatalog,
+		materialCatalog,
 		gameConfig,
 	)
 }

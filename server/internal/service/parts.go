@@ -32,6 +32,63 @@ func NewPartsServiceServer(users store.UserRepository, sessions store.SessionRep
 	return &PartsServiceServer{users: users, sessions: sessions, catalog: catalog, config: config}
 }
 
+func (s *PartsServiceServer) Sell(ctx context.Context, req *pb.PartsSellRequest) (*pb.PartsSellResponse, error) {
+	log.Printf("[PartsService] Sell: %d part(s)", len(req.UserPartsUuid))
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserParts", oldUser, userdata.SortedPartsRecords, []string{"userId", "userPartsUuid"})
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		totalGold := int32(0)
+		for _, uuid := range req.UserPartsUuid {
+			part, ok := user.Parts[uuid]
+			if !ok {
+				log.Printf("[PartsService] Sell: uuid=%s not found, skipping", uuid)
+				continue
+			}
+			if part.IsProtected {
+				log.Printf("[PartsService] Sell: uuid=%s is protected, skipping", uuid)
+				continue
+			}
+
+			partDef, ok := s.catalog.PartsById[part.PartsId]
+			if !ok {
+				log.Printf("[PartsService] Sell: partsId=%d not in catalog, skipping", part.PartsId)
+				continue
+			}
+
+			sellFunc, ok := s.catalog.SellPriceByRarity[partDef.RarityType]
+			if !ok {
+				log.Printf("[PartsService] Sell: no sell price func for rarity=%d, skipping", partDef.RarityType)
+				continue
+			}
+
+			gold := sellFunc.Evaluate(part.Level)
+			totalGold += gold
+			delete(user.Parts, uuid)
+			log.Printf("[PartsService] Sell: uuid=%s partsId=%d level=%d -> %d gold", uuid, part.PartsId, part.Level, gold)
+		}
+
+		if totalGold > 0 {
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] += totalGold
+			log.Printf("[PartsService] Sell: total gold +%d", totalGold)
+		}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("parts sell: %w", err)
+	}
+
+	tables := userdata.SelectTables(userdata.FullClientTableMap(snapshot), partsDiffTables)
+	diff := tracker.Apply(snapshot, tables)
+
+	return &pb.PartsSellResponse{
+		DiffUserData: diff,
+	}, nil
+}
+
 func (s *PartsServiceServer) Enhance(ctx context.Context, req *pb.PartsEnhanceRequest) (*pb.PartsEnhanceResponse, error) {
 	log.Printf("[PartsService] Enhance: uuid=%s", req.UserPartsUuid)
 

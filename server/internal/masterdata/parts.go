@@ -15,9 +15,10 @@ type PartsRow struct {
 }
 
 type PartsRarityRow struct {
-	RarityType               model.RarityType `json:"RarityType"`
-	PartsLevelUpRateGroupId  int32            `json:"PartsLevelUpRateGroupId"`
-	PartsLevelUpPriceGroupId int32            `json:"PartsLevelUpPriceGroupId"`
+	RarityType                   model.RarityType `json:"RarityType"`
+	PartsLevelUpRateGroupId      int32            `json:"PartsLevelUpRateGroupId"`
+	PartsLevelUpPriceGroupId     int32            `json:"PartsLevelUpPriceGroupId"`
+	SellPriceNumericalFunctionId int32            `json:"SellPriceNumericalFunctionId"`
 }
 
 type partsLevelUpRateRow struct {
@@ -38,6 +39,7 @@ type PartsCatalog struct {
 	RarityByRarityType                   map[model.RarityType]PartsRarityRow
 	RateByGroupAndLevel                  map[int32]map[int32]int32
 	PriceByGroupAndLevel                 map[int32]map[int32]int32
+	SellPriceByRarity                    map[model.RarityType]NumericalFunc
 }
 
 func LoadPartsCatalog() (*PartsCatalog, error) {
@@ -77,9 +79,18 @@ func LoadPartsCatalog() (*PartsCatalog, error) {
 		}
 	}
 
+	funcResolver, err := LoadFunctionResolver()
+	if err != nil {
+		return nil, fmt.Errorf("load function resolver: %w", err)
+	}
+
 	rarityByRarityType := make(map[model.RarityType]PartsRarityRow, len(rarityRows))
+	sellPriceByRarity := make(map[model.RarityType]NumericalFunc, len(rarityRows))
 	for _, r := range rarityRows {
 		rarityByRarityType[r.RarityType] = r
+		if f, ok := funcResolver.Resolve(r.SellPriceNumericalFunctionId); ok {
+			sellPriceByRarity[r.RarityType] = f
+		}
 	}
 
 	rateByGroupAndLevel := make(map[int32]map[int32]int32)
@@ -104,5 +115,6 @@ func LoadPartsCatalog() (*PartsCatalog, error) {
 		RarityByRarityType:                   rarityByRarityType,
 		RateByGroupAndLevel:                  rateByGroupAndLevel,
 		PriceByGroupAndLevel:                 priceByGroupAndLevel,
+		SellPriceByRarity:                    sellPriceByRarity,
 	}, nil
 }

@@ -26,6 +26,12 @@ func (s *CharacterBoardServiceServer) ReleasePanel(ctx context.Context, req *pb.
 	log.Printf("[CharacterBoardService] ReleasePanel: panelIds=%v", req.CharacterBoardPanelId)
 
 	userId := currentUserId(ctx, s.users, s.sessions)
+
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserMaterial", oldUser, userdata.SortedMaterialRecords, []string{"userId", "materialId"}).
+		Track("IUserConsumableItem", oldUser, userdata.SortedConsumableItemRecords, []string{"userId", "consumableItemId"})
+
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		for _, panelId := range req.CharacterBoardPanelId {
 			panel, ok := s.catalog.PanelById[panelId]
@@ -40,17 +46,16 @@ func (s *CharacterBoardServiceServer) ReleasePanel(ctx context.Context, req *pb.
 		}
 	})
 
-	diff := userdata.BuildDiffFromTables(userdata.SelectTables(
-		userdata.FullClientTableMap(user),
-		[]string{
-			"IUserCharacterBoard",
-			"IUserCharacterBoardAbility",
-			"IUserCharacterBoardStatusUp",
-			"IUserMaterial",
-			"IUserConsumableItem",
-			"IUserGem",
-		},
-	))
+	boardTables := []string{
+		"IUserCharacterBoard",
+		"IUserCharacterBoardAbility",
+		"IUserCharacterBoardStatusUp",
+		"IUserMaterial",
+		"IUserConsumableItem",
+		"IUserGem",
+	}
+	tables := userdata.SelectTables(userdata.FullClientTableMap(user), boardTables)
+	diff := tracker.Apply(user, tables)
 
 	return &pb.ReleasePanelResponse{DiffUserData: diff}, nil
 }

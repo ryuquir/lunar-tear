@@ -18,7 +18,7 @@ func init() {
 		return s
 	})
 	register("IUserWeapon", func(user store.UserState) string {
-		s, _ := encodeJSONMaps(sortedWeaponRecords(user)...)
+		s, _ := encodeJSONMaps(SortedWeaponRecords(user)...)
 		return s
 	})
 	register("IUserWeaponStory", func(user store.UserState) string {
@@ -38,11 +38,11 @@ func init() {
 		return s
 	})
 	register("IUserConsumableItem", func(user store.UserState) string {
-		s, _ := encodeJSONMaps(sortedConsumableItemRecords(user)...)
+		s, _ := encodeJSONMaps(SortedConsumableItemRecords(user)...)
 		return s
 	})
 	register("IUserMaterial", func(user store.UserState) string {
-		s, _ := encodeJSONMaps(sortedMaterialRecords(user)...)
+		s, _ := encodeJSONMaps(SortedMaterialRecords(user)...)
 		return s
 	})
 	register("IUserImportantItem", func(user store.UserState) string {
@@ -54,7 +54,7 @@ func init() {
 		return s
 	})
 	register("IUserParts", func(user store.UserState) string {
-		s, _ := encodeJSONMaps(sortedPartsRecords(user)...)
+		s, _ := encodeJSONMaps(SortedPartsRecords(user)...)
 		return s
 	})
 	register("IUserCostumeActiveSkill", func(user store.UserState) string {
@@ -62,11 +62,11 @@ func init() {
 		return s
 	})
 	register("IUserWeaponSkill", func(user store.UserState) string {
-		s, _ := encodeJSONMaps(sortedWeaponSkillRecords(user)...)
+		s, _ := encodeJSONMaps(SortedWeaponSkillRecords(user)...)
 		return s
 	})
 	register("IUserWeaponAbility", func(user store.UserState) string {
-		s, _ := encodeJSONMaps(sortedWeaponAbilityRecords(user)...)
+		s, _ := encodeJSONMaps(SortedWeaponAbilityRecords(user)...)
 		return s
 	})
 	register("IUserExplore", func(user store.UserState) string {
@@ -201,7 +201,7 @@ func sortedCostumeAwakenStatusUpRecords(user store.UserState) []map[string]any {
 	return records
 }
 
-func sortedWeaponRecords(user store.UserState) []map[string]any {
+func SortedWeaponRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.Weapons)
 	records := make([]map[string]any, 0, len(keys))
 	for _, key := range keys {
@@ -309,7 +309,7 @@ func sortedThoughtRecords(user store.UserState) []map[string]any {
 	return records
 }
 
-func sortedConsumableItemRecords(user store.UserState) []map[string]any {
+func SortedConsumableItemRecords(user store.UserState) []map[string]any {
 	ids := make([]int, 0, len(user.ConsumableItems))
 	for id := range user.ConsumableItems {
 		ids = append(ids, int(id))
@@ -330,7 +330,7 @@ func sortedConsumableItemRecords(user store.UserState) []map[string]any {
 	return records
 }
 
-func sortedMaterialRecords(user store.UserState) []map[string]any {
+func SortedMaterialRecords(user store.UserState) []map[string]any {
 	ids := make([]int, 0, len(user.Materials))
 	for id := range user.Materials {
 		ids = append(ids, int(id))
@@ -396,7 +396,7 @@ func sortedPremiumItemRecords(user store.UserState) []map[string]any {
 	return records
 }
 
-func sortedPartsRecords(user store.UserState) []map[string]any {
+func SortedPartsRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.Parts)
 	records := make([]map[string]any, 0, len(keys))
 	for _, key := range keys {
@@ -473,7 +473,7 @@ func sortedCostumeActiveSkillRecords(user store.UserState) []map[string]any {
 	return records
 }
 
-func sortedWeaponSkillRecords(user store.UserState) []map[string]any {
+func SortedWeaponSkillRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.WeaponSkills)
 	records := make([]map[string]any, 0)
 	for _, key := range keys {
@@ -490,7 +490,7 @@ func sortedWeaponSkillRecords(user store.UserState) []map[string]any {
 	return records
 }
 
-func sortedWeaponAbilityRecords(user store.UserState) []map[string]any {
+func SortedWeaponAbilityRecords(user store.UserState) []map[string]any {
 	keys := sortedStringKeys(user.WeaponAbilities)
 	records := make([]map[string]any, 0)
 	for _, key := range keys {

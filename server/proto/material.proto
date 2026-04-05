@@ -7,18 +7,18 @@ import "proto/data.proto";
 package apb.api.material;
 
 service MaterialService {
-	rpc Sell (SellRequest) returns (SellResponse);
+	rpc Sell (MaterialSellRequest) returns (MaterialSellResponse);
 }
 
-message SellRequest {
-	repeated SellPossession materialPossession = 1;
+message MaterialSellRequest {
+	repeated MaterialSellPossession materialPossession = 1;
 }
 
-message SellPossession {
+message MaterialSellPossession {
 	int32 materialId = 1;
 	int32 count = 2;
 }
 
-message SellResponse {
+message MaterialSellResponse {
 	map<string, apb.api.data.DiffData> diffUserData = 99;
 }
