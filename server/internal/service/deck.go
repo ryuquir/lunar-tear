@@ -121,8 +121,11 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 	userId := currentUserId(ctx, s.users, s.sessions)
 
 	oldUser, _ := s.users.SnapshotUser(userId)
-	oldSubWeapons := userdata.DeckSubWeaponRecords(oldUser)
-	oldPartsGroup := userdata.DeckPartsGroupRecords(oldUser)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserDeckSubWeaponGroup", oldUser, userdata.DeckSubWeaponRecords,
+			[]string{"userId", "userDeckCharacterUuid", "userWeaponUuid"}).
+		Track("IUserDeckPartsGroup", oldUser, userdata.DeckPartsGroupRecords,
+			[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"})
 
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		if req.Deck == nil {
@@ -131,23 +134,49 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 		store.ApplyDeckReplacement(user, model.DeckType(req.DeckType), req.UserDeckNumber, deckSlotsFromProto(req.Deck), gametime.NowMillis())
 	})
 
-	newSubWeapons := userdata.DeckSubWeaponRecords(user)
-	subWeaponDeleteKeys := userdata.ComputeDeleteKeys(oldSubWeapons, newSubWeapons,
-		[]string{"userId", "userDeckCharacterUuid", "sortOrder"})
+	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
+		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup", "IUserDeckPartsGroup",
+	})
+	return &pb.ReplaceDeckResponse{
+		DiffUserData: tracker.Apply(user, result),
+	}, nil
+}
 
-	newPartsGroup := userdata.DeckPartsGroupRecords(user)
-	partsDeleteKeys := userdata.ComputeDeleteKeys(oldPartsGroup, newPartsGroup,
-		[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"})
+func (s *DeckServiceServer) ReplaceTripleDeck(ctx context.Context, req *pb.ReplaceTripleDeckRequest) (*pb.ReplaceTripleDeckResponse, error) {
+	log.Printf("[DeckService] ReplaceTripleDeck: deckType=%d deckNumber=%d", req.DeckType, req.UserDeckNumber)
+	userId := currentUserId(ctx, s.users, s.sessions)
+
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserDeckSubWeaponGroup", oldUser, userdata.DeckSubWeaponRecords,
+			[]string{"userId", "userDeckCharacterUuid", "userWeaponUuid"}).
+		Track("IUserDeckPartsGroup", oldUser, userdata.DeckPartsGroupRecords,
+			[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"})
+
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		nowMillis := gametime.NowMillis()
+		for idx, detail := range []*pb.DeckDetail{req.DeckDetail01, req.DeckDetail02, req.DeckDetail03} {
+			if detail == nil || detail.Deck == nil {
+				continue
+			}
+			log.Printf("[DeckService] ReplaceTripleDeck detail %d: deckType=%d deckNumber=%d", idx+1, detail.DeckType, detail.UserDeckNumber)
+			if detail.Deck != nil {
+				for i, ch := range []*pb.DeckCharacter{detail.Deck.Character01, detail.Deck.Character02, detail.Deck.Character03} {
+					if ch == nil {
+						continue
+					}
+					log.Printf("[DeckService] ReplaceTripleDeck detail %d slot %d: costume=%s mainWeapon=%s subWeapons=%v companion=%s thought=%s",
+						idx+1, i+1, ch.UserCostumeUuid, ch.MainUserWeaponUuid, ch.SubUserWeaponUuid, ch.UserCompanionUuid, ch.UserThoughtUuid)
+				}
+			}
+			store.ApplyDeckReplacement(user, model.DeckType(detail.DeckType), detail.UserDeckNumber, deckSlotsFromProto(detail.Deck), nowMillis)
+		}
+	})
 
 	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
 		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup", "IUserDeckPartsGroup",
 	})
-	log.Printf("[DeckService] ReplaceDeck response IUserDeckSubWeaponGroup: %s deleteKeys: %s",
-		result["IUserDeckSubWeaponGroup"], subWeaponDeleteKeys)
-	return &pb.ReplaceDeckResponse{
-		DiffUserData: userdata.NewDiffSet(result).
-			WithDeletes("IUserDeckSubWeaponGroup", subWeaponDeleteKeys).
-			WithDeletes("IUserDeckPartsGroup", partsDeleteKeys).
-			Build(),
+	return &pb.ReplaceTripleDeckResponse{
+		DiffUserData: tracker.Apply(user, result),
 	}, nil
 }
