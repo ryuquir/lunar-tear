@@ -116,6 +116,16 @@ func init() {
 		})
 		return s
 	})
+	register("IUserExtraQuestProgressStatus", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":              user.UserId,
+			"currentQuestId":      user.ExtraQuest.CurrentQuestId,
+			"currentQuestSceneId": user.ExtraQuest.CurrentQuestSceneId,
+			"headQuestSceneId":    user.ExtraQuest.HeadQuestSceneId,
+			"latestVersion":       user.ExtraQuest.LatestVersion,
+		})
+		return s
+	})
 	registerStatic(
 		"IUserEventQuestDailyGroupCompleteReward",
 		"IUserEventQuestLabyrinthSeason",

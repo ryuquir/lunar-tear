@@ -107,13 +107,6 @@ func (h *QuestHandler) HandleMainQuestSceneProgress(user *store.UserState, quest
 		panic(fmt.Sprintf("unknown questId=%d for HandleMainQuestSceneProgress", questSceneId))
 	}
 
-	user.MainQuest.CurrentQuestSceneId = questSceneId
-	if h.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
-		user.MainQuest.HeadQuestSceneId = questSceneId
-	}
-	lastSceneId := h.getChapterLastSceneId(quest.QuestId)
-	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
-
 	if isMainQuestPlayable(quest) {
 		if scene.QuestResultType == model.QuestResultTypeHalfResult {
 			nowMillis := gametime.NowMillis()
@@ -126,5 +119,12 @@ func (h *QuestHandler) HandleMainQuestSceneProgress(user *store.UserState, quest
 		}
 		user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeSubFlow)
 		user.MainQuest.ProgressQuestFlowType = int32(model.QuestFlowTypeSubFlow)
+	} else {
+		user.MainQuest.CurrentQuestSceneId = questSceneId
+		if h.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
+			user.MainQuest.HeadQuestSceneId = questSceneId
+		}
+		lastSceneId := h.getChapterLastSceneId(quest.QuestId)
+		user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 	}
 }

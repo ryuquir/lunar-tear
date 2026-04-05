@@ -84,6 +84,24 @@ func (h *QuestHandler) HandleQuestStart(user *store.UserState, questId int32, is
 	user.Quests[questId] = questState
 }
 
+func (h *QuestHandler) applyQuestVictory(user *store.UserState, questId int32, outcome FinishOutcome, nowMillis int64) {
+	questState := user.Quests[questId]
+	if !questState.IsRewardGranted {
+		h.applyQuestRewards(user, questId, nowMillis)
+		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
+		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
+		questState.IsRewardGranted = true
+	}
+	for _, drop := range outcome.DropRewards {
+		h.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
+	}
+	questState.QuestStateType = model.UserQuestStateTypeCleared
+	questState.ClearCount++
+	questState.DailyClearCount++
+	questState.LastClearDatetime = nowMillis
+	user.Quests[questId] = questState
+}
+
 func (h *QuestHandler) HandleQuestFinish(user *store.UserState, questId int32, isRetired bool, nowMillis int64) FinishOutcome {
 	_, ok := h.QuestById[questId]
 	if !ok {
@@ -91,29 +109,14 @@ func (h *QuestHandler) HandleQuestFinish(user *store.UserState, questId int32, i
 	}
 
 	outcome := h.evaluateFinishOutcome(user, questId)
-
-	questState := user.Quests[questId]
-	if !questState.IsRewardGranted && !isRetired {
-		h.applyQuestRewards(user, questId, nowMillis)
-		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeHalfResult, nowMillis)
-		h.grantWeaponStoryUnlocksForQuestScene(user, questId, model.QuestResultTypeFullResult, nowMillis)
-		questState.IsRewardGranted = true
-	}
 	if !isRetired {
-		for _, drop := range outcome.DropRewards {
-			h.applyRewardPossession(user, drop.PossessionType, drop.PossessionId, drop.Count, nowMillis)
-		}
+		h.applyQuestVictory(user, questId, outcome, nowMillis)
 	}
-	questState.QuestStateType = model.UserQuestStateTypeCleared
-	questState.ClearCount = 1
-	questState.DailyClearCount = 1
-	questState.LastClearDatetime = nowMillis
 
 	user.MainQuest.ProgressQuestSceneId = 0
 	user.MainQuest.ProgressHeadQuestSceneId = 0
 	user.MainQuest.ProgressQuestFlowType = 0
 	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeUnknown)
-	user.Quests[questId] = questState
 
 	h.clearQuestMissions(user, questId, nowMillis)
 

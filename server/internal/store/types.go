@@ -41,6 +41,7 @@ type UserState struct {
 	Tutorials     map[int32]TutorialProgressState
 	MainQuest     MainQuestState
 	EventQuest    EventQuestState
+	ExtraQuest    ExtraQuestState
 	Battle        BattleState
 	Gifts         GiftState
 	Gacha         GachaState
@@ -457,6 +458,13 @@ type EventQuestState struct {
 	CurrentQuestSceneId        int32
 	HeadQuestSceneId           int32
 	LatestVersion              int64
+}
+
+type ExtraQuestState struct {
+	CurrentQuestId      int32
+	CurrentQuestSceneId int32
+	HeadQuestSceneId    int32
+	LatestVersion       int64
 }
 
 type BattleState struct {

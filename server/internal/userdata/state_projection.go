@@ -67,6 +67,7 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserPortalCageStatus":                   projectTable("IUserPortalCageStatus", user),
 		"IUserEventQuestGuerrillaFreeOpen":        projectTable("IUserEventQuestGuerrillaFreeOpen", user),
 		"IUserEventQuestProgressStatus":           projectTable("IUserEventQuestProgressStatus", user),
+		"IUserExtraQuestProgressStatus":           projectTable("IUserExtraQuestProgressStatus", user),
 		"IUserEventQuestDailyGroupCompleteReward": projectTable("IUserEventQuestDailyGroupCompleteReward", user),
 		"IUserEventQuestLabyrinthSeason":          projectTable("IUserEventQuestLabyrinthSeason", user),
 		"IUserEventQuestLabyrinthStage":           projectTable("IUserEventQuestLabyrinthStage", user),
