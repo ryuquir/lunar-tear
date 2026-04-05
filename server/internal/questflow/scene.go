@@ -43,7 +43,7 @@ func (h *QuestHandler) HandleMainFlowSceneProgress(user *store.UserState, questS
 	}
 	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 
-	lastSceneId := h.getLastMainFlowSceneId(scene.QuestId)
+	lastSceneId := h.getChapterLastSceneId(scene.QuestId)
 	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 
 	routeId, ok := h.RouteIdByQuestId[quest.QuestId]
@@ -89,6 +89,13 @@ func (h *QuestHandler) getLastMainFlowSceneId(questId int32) int32 {
 	return sceneIds[len(sceneIds)-1]
 }
 
+func (h *QuestHandler) getChapterLastSceneId(questId int32) int32 {
+	if id, ok := h.ChapterLastSceneByQuestId[questId]; ok {
+		return id
+	}
+	return h.getLastMainFlowSceneId(questId)
+}
+
 func (h *QuestHandler) HandleMainQuestSceneProgress(user *store.UserState, questSceneId int32) {
 	scene, ok := h.SceneById[questSceneId]
 	if !ok {
@@ -104,7 +111,7 @@ func (h *QuestHandler) HandleMainQuestSceneProgress(user *store.UserState, quest
 	if h.isSceneAhead(questSceneId, user.MainQuest.HeadQuestSceneId) {
 		user.MainQuest.HeadQuestSceneId = questSceneId
 	}
-	lastSceneId := h.getLastMainFlowSceneId(quest.QuestId)
+	lastSceneId := h.getChapterLastSceneId(quest.QuestId)
 	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 
 	if isMainQuestPlayable(quest) {

@@ -196,6 +196,7 @@ type QuestCatalog struct {
 	BattleDropsByQuestId               map[int32][]BattleDropInfo
 	RentalQuestIds                     map[int32]bool
 	TutorialUnlockConditions           []TutorialUnlockConditionRow
+	ChapterLastSceneByQuestId          map[int32]int32
 
 	UserExpThresholds       []int32
 	CharacterExpThresholds  []int32
@@ -489,6 +490,23 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 		}
 	}
 
+	chapterLastSceneByQuestId := make(map[int32]int32)
+	for _, chapter := range sortedChapters {
+		seqs := sequencesByGroupId[chapter.MainQuestSequenceGroupId]
+		var chapterLastScene int32
+		for i := len(seqs) - 1; i >= 0; i-- {
+			if sids := sceneIdsByQuestId[seqs[i].QuestId]; len(sids) > 0 {
+				chapterLastScene = sids[len(sids)-1]
+				break
+			}
+		}
+		if chapterLastScene != 0 {
+			for _, seq := range seqs {
+				chapterLastSceneByQuestId[seq.QuestId] = chapterLastScene
+			}
+		}
+	}
+
 	firstClearRewardsByGroupId := make(map[int32][]QuestFirstClearRewardGroupRow, len(firstClearRewards))
 	for _, reward := range firstClearRewards {
 		firstClearRewardsByGroupId[reward.QuestFirstClearRewardGroupId] = append(
@@ -645,6 +663,7 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 		BattleDropsByQuestId:               battleDropsByQuestId,
 		RentalQuestIds:                     rentalQuestIds,
 		TutorialUnlockConditions:           tutorialUnlockConds,
+		ChapterLastSceneByQuestId:          chapterLastSceneByQuestId,
 
 		UserExpThresholds:       BuildExpThresholds(paramMapRows, 1),
 		CharacterExpThresholds:  BuildExpThresholds(paramMapRows, 31),

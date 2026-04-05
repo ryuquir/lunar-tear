@@ -130,6 +130,12 @@ func main() {
 	}
 	log.Printf("character rebirth catalog loaded: %d characters", len(characterRebirthCatalog.StepGroupByCharacterId))
 
+	companionCatalog, err := masterdata.LoadCompanionCatalog()
+	if err != nil {
+		log.Fatalf("load companion catalog: %v", err)
+	}
+	log.Printf("companion catalog loaded: %d companions, %d categories", len(companionCatalog.CompanionById), len(companionCatalog.GoldCostByCategory))
+
 	startGRPC(
 		*host,
 		octoURL,
@@ -147,6 +153,7 @@ func main() {
 		characterBoardCatalog,
 		partsCatalog,
 		characterRebirthCatalog,
+		companionCatalog,
 		gameConfig,
 	)
 }

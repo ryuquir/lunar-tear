@@ -76,7 +76,7 @@ func (h *QuestHandler) HandleQuestStart(user *store.UserState, questId int32, is
 				user.MainQuest.HeadQuestSceneId = firstSceneId
 			}
 			user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
-			lastSceneId := h.getLastMainFlowSceneId(questId)
+			lastSceneId := h.getChapterLastSceneId(questId)
 			user.MainQuest.IsReachedLastQuestScene = firstSceneId == lastSceneId
 			log.Printf("[HandleQuestStart] background quest %d auto-cleared, scene %d -> %d", questId, prevSceneId, firstSceneId)
 		}
