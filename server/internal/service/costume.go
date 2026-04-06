@@ -241,3 +241,98 @@ func (s *CostumeServiceServer) applyAwakenItemAcquire(user *store.UserState, ite
 	}
 	log.Printf("[CostumeService] Awaken: granted thought id=%d", acq.PossessionId)
 }
+
+var activeSkillDiffTables = []string{
+	"IUserCostumeActiveSkill",
+	"IUserMaterial",
+	"IUserConsumableItem",
+}
+
+func (s *CostumeServiceServer) EnhanceActiveSkill(ctx context.Context, req *pb.EnhanceActiveSkillRequest) (*pb.EnhanceActiveSkillResponse, error) {
+	log.Printf("[CostumeService] EnhanceActiveSkill: uuid=%s addLevel=%d", req.UserCostumeUuid, req.AddLevelCount)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		costume, ok := user.Costumes[req.UserCostumeUuid]
+		if !ok {
+			log.Printf("[CostumeService] EnhanceActiveSkill: costume uuid=%s not found", req.UserCostumeUuid)
+			return
+		}
+
+		cm, ok := s.catalog.Costumes[costume.CostumeId]
+		if !ok {
+			log.Printf("[CostumeService] EnhanceActiveSkill: costume master id=%d not found", costume.CostumeId)
+			return
+		}
+
+		groupRows := s.catalog.ActiveSkillGroupsByGroupId[cm.CostumeActiveSkillGroupId]
+		enhanceMatId := int32(-1)
+		for _, g := range groupRows {
+			if g.CostumeLimitBreakCountLowerLimit <= costume.LimitBreakCount {
+				enhanceMatId = g.CostumeActiveSkillEnhancementMaterialId
+				break
+			}
+		}
+		if enhanceMatId < 0 {
+			log.Printf("[CostumeService] EnhanceActiveSkill: no skill group for costumeId=%d groupId=%d lb=%d",
+				costume.CostumeId, cm.CostumeActiveSkillGroupId, costume.LimitBreakCount)
+			return
+		}
+
+		skill := user.CostumeActiveSkills[req.UserCostumeUuid]
+		currentLevel := skill.Level
+
+		maxLevelFunc, ok := s.catalog.ActiveSkillMaxLevelByRarity[cm.RarityType]
+		if !ok {
+			log.Printf("[CostumeService] EnhanceActiveSkill: no max level func for rarity=%d", cm.RarityType)
+			return
+		}
+		maxLevel := maxLevelFunc.Evaluate(0)
+
+		addCount := req.AddLevelCount
+		if currentLevel+addCount > maxLevel {
+			addCount = maxLevel - currentLevel
+		}
+		if addCount <= 0 {
+			log.Printf("[CostumeService] EnhanceActiveSkill: already at max level %d", currentLevel)
+			return
+		}
+
+		for lvl := currentLevel; lvl < currentLevel+addCount; lvl++ {
+			key := [2]int32{enhanceMatId, lvl}
+			mats := s.catalog.ActiveSkillEnhanceMats[key]
+			for _, mat := range mats {
+				cur := user.Materials[mat.MaterialId]
+				cost := mat.Count
+				if cur < cost {
+					log.Printf("[CostumeService] EnhanceActiveSkill: insufficient material id=%d have=%d need=%d", mat.MaterialId, cur, cost)
+					cost = cur
+				}
+				user.Materials[mat.MaterialId] = cur - cost
+			}
+
+			if costFunc, ok := s.catalog.ActiveSkillCostByRarity[cm.RarityType]; ok {
+				goldCost := costFunc.Evaluate(lvl + 1)
+				user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			}
+		}
+
+		skill.UserCostumeUuid = req.UserCostumeUuid
+		skill.Level = currentLevel + addCount
+		skill.LatestVersion = nowMillis
+		user.CostumeActiveSkills[req.UserCostumeUuid] = skill
+		log.Printf("[CostumeService] EnhanceActiveSkill: costumeId=%d level %d -> %d", costume.CostumeId, currentLevel, skill.Level)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("costume enhance active skill: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, activeSkillDiffTables))
+
+	return &pb.EnhanceActiveSkillResponse{
+		DiffUserData: diff,
+	}, nil
+}

@@ -2,23 +2,27 @@ package masterdata
 
 import (
 	"fmt"
+	"sort"
 
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/utils"
 )
 
 type CostumeMasterRow struct {
-	CostumeId          int32 `json:"CostumeId"`
-	CharacterId        int32 `json:"CharacterId"`
-	SkillfulWeaponType int32 `json:"SkillfulWeaponType"`
-	RarityType         int32 `json:"RarityType"`
+	CostumeId                 int32 `json:"CostumeId"`
+	CharacterId               int32 `json:"CharacterId"`
+	SkillfulWeaponType        int32 `json:"SkillfulWeaponType"`
+	RarityType                int32 `json:"RarityType"`
+	CostumeActiveSkillGroupId int32 `json:"CostumeActiveSkillGroupId"`
 }
 
 type costumeRarityRow struct {
-	RarityType                                   int32 `json:"RarityType"`
-	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
-	EnhancementCostByMaterialNumericalFunctionId int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
-	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
+	RarityType                                     int32 `json:"RarityType"`
+	RequiredExpForLevelUpNumericalParameterMapId   int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
+	EnhancementCostByMaterialNumericalFunctionId   int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
+	MaxLevelNumericalFunctionId                    int32 `json:"MaxLevelNumericalFunctionId"`
+	ActiveSkillMaxLevelNumericalFunctionId         int32 `json:"ActiveSkillMaxLevelNumericalFunctionId"`
+	ActiveSkillEnhancementCostNumericalFunctionId  int32 `json:"ActiveSkillEnhancementCostNumericalFunctionId"`
 }
 
 type CostumeAwakenRow struct {
@@ -56,6 +60,21 @@ type CostumeAwakenItemAcquireRow struct {
 	Count                      int32 `json:"Count"`
 }
 
+type CostumeActiveSkillGroupRow struct {
+	CostumeActiveSkillGroupId              int32 `json:"CostumeActiveSkillGroupId"`
+	CostumeLimitBreakCountLowerLimit       int32 `json:"CostumeLimitBreakCountLowerLimit"`
+	CostumeActiveSkillId                   int32 `json:"CostumeActiveSkillId"`
+	CostumeActiveSkillEnhancementMaterialId int32 `json:"CostumeActiveSkillEnhancementMaterialId"`
+}
+
+type CostumeActiveSkillEnhanceMaterialRow struct {
+	CostumeActiveSkillEnhancementMaterialId int32 `json:"CostumeActiveSkillEnhancementMaterialId"`
+	SkillLevel                              int32 `json:"SkillLevel"`
+	MaterialId                              int32 `json:"MaterialId"`
+	Count                                   int32 `json:"Count"`
+	SortOrder                               int32 `json:"SortOrder"`
+}
+
 type CostumeCatalog struct {
 	Costumes            map[int32]CostumeMasterRow
 	Materials           map[int32]MaterialRow
@@ -68,6 +87,11 @@ type CostumeCatalog struct {
 	AwakenEffectsByGroupAndStep map[int32]map[int32]CostumeAwakenEffectRow
 	AwakenStatusUpByGroup       map[int32][]CostumeAwakenStatusUpRow
 	AwakenItemAcquireById       map[int32]CostumeAwakenItemAcquireRow
+
+	ActiveSkillGroupsByGroupId map[int32][]CostumeActiveSkillGroupRow // sorted by CostumeLimitBreakCountLowerLimit desc
+	ActiveSkillEnhanceMats     map[[2]int32][]CostumeActiveSkillEnhanceMaterialRow // key: [enhancementMaterialId, skillLevel]
+	ActiveSkillMaxLevelByRarity map[int32]NumericalFunc
+	ActiveSkillCostByRarity     map[int32]NumericalFunc
 }
 
 func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
@@ -112,6 +136,15 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		return nil, fmt.Errorf("load costume awaken item acquire table: %w", err)
 	}
 
+	activeSkillGroupRows, err := utils.ReadJSON[CostumeActiveSkillGroupRow]("EntityMCostumeActiveSkillGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume active skill group table: %w", err)
+	}
+	activeSkillMatRows, err := utils.ReadJSON[CostumeActiveSkillEnhanceMaterialRow]("EntityMCostumeActiveSkillEnhancementMaterialTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load costume active skill enhancement material table: %w", err)
+	}
+
 	catalog := &CostumeCatalog{
 		Costumes:            make(map[int32]CostumeMasterRow, len(costumes)),
 		Materials:           matCatalog.ByType[model.MaterialTypeCostumeEnhancement],
@@ -124,6 +157,11 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		AwakenEffectsByGroupAndStep: make(map[int32]map[int32]CostumeAwakenEffectRow),
 		AwakenStatusUpByGroup:       make(map[int32][]CostumeAwakenStatusUpRow),
 		AwakenItemAcquireById:       make(map[int32]CostumeAwakenItemAcquireRow, len(awakenItemAcquireRows)),
+
+		ActiveSkillGroupsByGroupId:  make(map[int32][]CostumeActiveSkillGroupRow),
+		ActiveSkillEnhanceMats:      make(map[[2]int32][]CostumeActiveSkillEnhanceMaterialRow),
+		ActiveSkillMaxLevelByRarity: make(map[int32]NumericalFunc, len(rarities)),
+		ActiveSkillCostByRarity:     make(map[int32]NumericalFunc, len(rarities)),
 	}
 
 	for _, row := range costumes {
@@ -142,6 +180,16 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		if _, ok := catalog.MaxLevelByRarity[r.RarityType]; !ok {
 			if f, found := funcResolver.Resolve(r.MaxLevelNumericalFunctionId); found {
 				catalog.MaxLevelByRarity[r.RarityType] = f
+			}
+		}
+		if _, ok := catalog.ActiveSkillMaxLevelByRarity[r.RarityType]; !ok {
+			if f, found := funcResolver.Resolve(r.ActiveSkillMaxLevelNumericalFunctionId); found {
+				catalog.ActiveSkillMaxLevelByRarity[r.RarityType] = f
+			}
+		}
+		if _, ok := catalog.ActiveSkillCostByRarity[r.RarityType]; !ok {
+			if f, found := funcResolver.Resolve(r.ActiveSkillEnhancementCostNumericalFunctionId); found {
+				catalog.ActiveSkillCostByRarity[r.RarityType] = f
 			}
 		}
 	}
@@ -166,6 +214,22 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 	}
 	for _, row := range awakenItemAcquireRows {
 		catalog.AwakenItemAcquireById[row.CostumeAwakenItemAcquireId] = row
+	}
+
+	for _, row := range activeSkillGroupRows {
+		gid := row.CostumeActiveSkillGroupId
+		catalog.ActiveSkillGroupsByGroupId[gid] = append(catalog.ActiveSkillGroupsByGroupId[gid], row)
+	}
+	for gid, rows := range catalog.ActiveSkillGroupsByGroupId {
+		sort.Slice(rows, func(i, j int) bool {
+			return rows[i].CostumeLimitBreakCountLowerLimit > rows[j].CostumeLimitBreakCountLowerLimit
+		})
+		catalog.ActiveSkillGroupsByGroupId[gid] = rows
+	}
+
+	for _, row := range activeSkillMatRows {
+		key := [2]int32{row.CostumeActiveSkillEnhancementMaterialId, row.SkillLevel}
+		catalog.ActiveSkillEnhanceMats[key] = append(catalog.ActiveSkillEnhanceMats[key], row)
 	}
 
 	return catalog, nil
