@@ -330,8 +330,13 @@ func (h *QuestHandler) grantWeapon(user *store.UserState, weaponId int32, nowMil
 	h.populateWeaponSkillsAbilities(user, key, weapon)
 	if weapon.WeaponStoryReleaseConditionGroupId != 0 {
 		for _, cond := range h.ReleaseConditionsByGroupId[weapon.WeaponStoryReleaseConditionGroupId] {
-			if cond.WeaponStoryReleaseConditionType == model.WeaponStoryReleaseConditionTypeAcquisition {
+			switch cond.WeaponStoryReleaseConditionType {
+			case model.WeaponStoryReleaseConditionTypeAcquisition:
 				h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+			case model.WeaponStoryReleaseConditionTypeQuestClear:
+				if qs, ok := user.Quests[cond.ConditionValue]; ok && qs.QuestStateType == model.UserQuestStateTypeCleared {
+					h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+				}
 			}
 		}
 	}
