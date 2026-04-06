@@ -17,12 +17,12 @@ type CostumeMasterRow struct {
 }
 
 type costumeRarityRow struct {
-	RarityType                                     int32 `json:"RarityType"`
-	RequiredExpForLevelUpNumericalParameterMapId   int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
-	EnhancementCostByMaterialNumericalFunctionId   int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
-	MaxLevelNumericalFunctionId                    int32 `json:"MaxLevelNumericalFunctionId"`
-	ActiveSkillMaxLevelNumericalFunctionId         int32 `json:"ActiveSkillMaxLevelNumericalFunctionId"`
-	ActiveSkillEnhancementCostNumericalFunctionId  int32 `json:"ActiveSkillEnhancementCostNumericalFunctionId"`
+	RarityType                                    int32 `json:"RarityType"`
+	RequiredExpForLevelUpNumericalParameterMapId  int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
+	EnhancementCostByMaterialNumericalFunctionId  int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
+	MaxLevelNumericalFunctionId                   int32 `json:"MaxLevelNumericalFunctionId"`
+	ActiveSkillMaxLevelNumericalFunctionId        int32 `json:"ActiveSkillMaxLevelNumericalFunctionId"`
+	ActiveSkillEnhancementCostNumericalFunctionId int32 `json:"ActiveSkillEnhancementCostNumericalFunctionId"`
 }
 
 type CostumeAwakenRow struct {
@@ -61,9 +61,9 @@ type CostumeAwakenItemAcquireRow struct {
 }
 
 type CostumeActiveSkillGroupRow struct {
-	CostumeActiveSkillGroupId              int32 `json:"CostumeActiveSkillGroupId"`
-	CostumeLimitBreakCountLowerLimit       int32 `json:"CostumeLimitBreakCountLowerLimit"`
-	CostumeActiveSkillId                   int32 `json:"CostumeActiveSkillId"`
+	CostumeActiveSkillGroupId               int32 `json:"CostumeActiveSkillGroupId"`
+	CostumeLimitBreakCountLowerLimit        int32 `json:"CostumeLimitBreakCountLowerLimit"`
+	CostumeActiveSkillId                    int32 `json:"CostumeActiveSkillId"`
 	CostumeActiveSkillEnhancementMaterialId int32 `json:"CostumeActiveSkillEnhancementMaterialId"`
 }
 
@@ -88,8 +88,8 @@ type CostumeCatalog struct {
 	AwakenStatusUpByGroup       map[int32][]CostumeAwakenStatusUpRow
 	AwakenItemAcquireById       map[int32]CostumeAwakenItemAcquireRow
 
-	ActiveSkillGroupsByGroupId map[int32][]CostumeActiveSkillGroupRow // sorted by CostumeLimitBreakCountLowerLimit desc
-	ActiveSkillEnhanceMats     map[[2]int32][]CostumeActiveSkillEnhanceMaterialRow // key: [enhancementMaterialId, skillLevel]
+	ActiveSkillGroupsByGroupId  map[int32][]CostumeActiveSkillGroupRow              // sorted by CostumeLimitBreakCountLowerLimit desc
+	ActiveSkillEnhanceMats      map[[2]int32][]CostumeActiveSkillEnhanceMaterialRow // key: [enhancementMaterialId, skillLevel]
 	ActiveSkillMaxLevelByRarity map[int32]NumericalFunc
 	ActiveSkillCostByRarity     map[int32]NumericalFunc
 }

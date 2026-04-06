@@ -209,3 +209,78 @@ func (s *WeaponServiceServer) Sell(ctx context.Context, req *pb.SellRequest) (*p
 
 	return &pb.SellResponse{DiffUserData: diff}, nil
 }
+
+func (s *WeaponServiceServer) Evolve(ctx context.Context, req *pb.EvolveRequest) (*pb.EvolveResponse, error) {
+	log.Printf("[WeaponService] Evolve: uuid=%s", req.UserWeaponUuid)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		weapon, ok := user.Weapons[req.UserWeaponUuid]
+		if !ok {
+			log.Printf("[WeaponService] Evolve: weapon uuid=%s not found", req.UserWeaponUuid)
+			return
+		}
+
+		wm, ok := s.catalog.Weapons[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] Evolve: weapon master id=%d not found", weapon.WeaponId)
+			return
+		}
+
+		evolvedId, ok := s.catalog.EvolutionNextWeaponId[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] Evolve: no evolution for weaponId=%d", weapon.WeaponId)
+			return
+		}
+
+		totalMaterialCount := int32(0)
+		mats := s.catalog.EvolutionMaterials[wm.WeaponEvolutionMaterialGroupId]
+		for _, mat := range mats {
+			cur := user.Materials[mat.MaterialId]
+			cost := mat.Count
+			if cur < cost {
+				log.Printf("[WeaponService] Evolve: insufficient material id=%d have=%d need=%d", mat.MaterialId, cur, cost)
+				cost = cur
+			}
+			user.Materials[mat.MaterialId] = cur - cost
+			totalMaterialCount += cost
+		}
+
+		if costFunc, ok := s.catalog.EvolutionCostByEnhanceId[wm.WeaponSpecificEnhanceId]; ok && totalMaterialCount > 0 {
+			goldCost := costFunc.Evaluate(totalMaterialCount)
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			log.Printf("[WeaponService] Evolve: gold cost=%d", goldCost)
+		}
+
+		weapon.WeaponId = evolvedId
+		weapon.LatestVersion = nowMillis
+		user.Weapons[req.UserWeaponUuid] = weapon
+
+		evolvedMaster, ok := s.catalog.Weapons[evolvedId]
+		if ok {
+			if slots, ok := s.catalog.AbilitySlots[evolvedMaster.WeaponAbilityGroupId]; ok {
+				abilities := make([]store.WeaponAbilityState, len(slots))
+				for i, slot := range slots {
+					abilities[i] = store.WeaponAbilityState{
+						UserWeaponUuid: req.UserWeaponUuid,
+						SlotNumber:     slot,
+						Level:          1,
+					}
+				}
+				user.WeaponAbilities[req.UserWeaponUuid] = abilities
+			}
+		}
+
+		log.Printf("[WeaponService] Evolve: weaponId %d -> %d", wm.WeaponId, evolvedId)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon evolve: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, weaponDiffTables))
+
+	return &pb.EvolveResponse{DiffUserData: diff}, nil
+}
