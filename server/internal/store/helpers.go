@@ -82,6 +82,166 @@ func GrantPossession(user *UserState, possessionType model.PossessionType, posse
 	}
 }
 
+type CostumeRef struct {
+	CharacterId int32
+}
+
+type WeaponRef struct {
+	WeaponSkillGroupId                 int32
+	WeaponAbilityGroupId               int32
+	WeaponStoryReleaseConditionGroupId int32
+}
+
+type WeaponStoryReleaseCond struct {
+	StoryIndex                      int32
+	WeaponStoryReleaseConditionType model.WeaponStoryReleaseConditionType
+	ConditionValue                  int32
+}
+
+type PossessionGranter struct {
+	CostumeById        map[int32]CostumeRef
+	WeaponById         map[int32]WeaponRef
+	WeaponSkillSlots   map[int32][]int32
+	WeaponAbilitySlots map[int32][]int32
+	ReleaseConditions  map[int32][]WeaponStoryReleaseCond
+}
+
+func (g *PossessionGranter) GrantFull(user *UserState, possessionType model.PossessionType, possessionId, count int32, nowMillis int64) {
+	switch possessionType {
+	case model.PossessionTypeCostume, model.PossessionTypeCostumeEnhanced:
+		g.GrantCostume(user, possessionId, nowMillis)
+	case model.PossessionTypeWeapon, model.PossessionTypeWeaponEnhanced:
+		g.GrantWeapon(user, possessionId, nowMillis)
+	default:
+		GrantPossession(user, possessionType, possessionId, count)
+	}
+}
+
+func (g *PossessionGranter) GrantCostume(user *UserState, costumeId int32, nowMillis int64) {
+	for _, row := range user.Costumes {
+		if row.CostumeId == costumeId {
+			return
+		}
+	}
+	if cm, ok := g.CostumeById[costumeId]; ok {
+		if _, exists := user.Characters[cm.CharacterId]; !exists {
+			user.Characters[cm.CharacterId] = CharacterState{
+				CharacterId: cm.CharacterId,
+				Level:       1,
+			}
+		}
+	}
+	key := fmt.Sprintf("reward-costume-%d", costumeId)
+	user.Costumes[key] = CostumeState{
+		UserCostumeUuid:     key,
+		CostumeId:           costumeId,
+		Level:               1,
+		HeadupDisplayViewId: 1,
+		AcquisitionDatetime: nowMillis,
+	}
+	user.CostumeActiveSkills[key] = CostumeActiveSkillState{
+		UserCostumeUuid:     key,
+		Level:               1,
+		AcquisitionDatetime: nowMillis,
+	}
+}
+
+func (g *PossessionGranter) GrantWeapon(user *UserState, weaponId int32, nowMillis int64) {
+	for _, row := range user.Weapons {
+		if row.WeaponId == weaponId {
+			return
+		}
+	}
+	key := fmt.Sprintf("reward-weapon-%d", weaponId)
+	user.Weapons[key] = WeaponState{
+		UserWeaponUuid:      key,
+		WeaponId:            weaponId,
+		Level:               1,
+		AcquisitionDatetime: nowMillis,
+	}
+	if _, exists := user.WeaponNotes[weaponId]; !exists {
+		user.WeaponNotes[weaponId] = WeaponNoteState{
+			WeaponId:                 weaponId,
+			MaxLevel:                 1,
+			MaxLimitBreakCount:       0,
+			FirstAcquisitionDatetime: nowMillis,
+			LatestVersion:            nowMillis,
+		}
+	}
+	weapon, ok := g.WeaponById[weaponId]
+	if !ok {
+		return
+	}
+	g.populateWeaponSkillsAbilities(user, key, weapon)
+	if weapon.WeaponStoryReleaseConditionGroupId != 0 {
+		for _, cond := range g.ReleaseConditions[weapon.WeaponStoryReleaseConditionGroupId] {
+			switch cond.WeaponStoryReleaseConditionType {
+			case model.WeaponStoryReleaseConditionTypeAcquisition:
+				grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+			case model.WeaponStoryReleaseConditionTypeQuestClear:
+				if qs, ok := user.Quests[cond.ConditionValue]; ok && qs.QuestStateType == model.UserQuestStateTypeCleared {
+					grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+				}
+			}
+		}
+	}
+}
+
+func (g *PossessionGranter) populateWeaponSkillsAbilities(user *UserState, weaponUuid string, weapon WeaponRef) {
+	if slots, ok := g.WeaponSkillSlots[weapon.WeaponSkillGroupId]; ok {
+		skills := make([]WeaponSkillState, len(slots))
+		for i, slot := range slots {
+			skills[i] = WeaponSkillState{
+				UserWeaponUuid: weaponUuid,
+				SlotNumber:     slot,
+				Level:          1,
+			}
+		}
+		user.WeaponSkills[weaponUuid] = skills
+	}
+	if slots, ok := g.WeaponAbilitySlots[weapon.WeaponAbilityGroupId]; ok {
+		abilities := make([]WeaponAbilityState, len(slots))
+		for i, slot := range slots {
+			abilities[i] = WeaponAbilityState{
+				UserWeaponUuid: weaponUuid,
+				SlotNumber:     slot,
+				Level:          1,
+			}
+		}
+		user.WeaponAbilities[weaponUuid] = abilities
+	}
+}
+
+func GrantWeaponStoryUnlock(user *UserState, weaponId, storyIndex int32, nowMillis int64) {
+	grantWeaponStoryUnlock(user, weaponId, storyIndex, nowMillis)
+}
+
+func grantWeaponStoryUnlock(user *UserState, weaponId, storyIndex int32, nowMillis int64) {
+	hasWeapon := false
+	for _, row := range user.Weapons {
+		if row.WeaponId == weaponId {
+			hasWeapon = true
+			break
+		}
+	}
+	if !hasWeapon {
+		log.Printf("[grantWeaponStoryUnlock] skipping weaponId=%d (weapon not in user.Weapons)", weaponId)
+		return
+	}
+	if user.WeaponStories == nil {
+		user.WeaponStories = make(map[int32]WeaponStoryState)
+	}
+	cur := user.WeaponStories[weaponId]
+	if storyIndex <= cur.ReleasedMaxStoryIndex {
+		return
+	}
+	user.WeaponStories[weaponId] = WeaponStoryState{
+		WeaponId:              weaponId,
+		ReleasedMaxStoryIndex: storyIndex,
+		LatestVersion:         nowMillis,
+	}
+}
+
 func EnsureDefaultDeck(user *UserState, nowMillis int64) {
 	if len(user.Costumes) == 0 || len(user.Decks) > 0 {
 		return

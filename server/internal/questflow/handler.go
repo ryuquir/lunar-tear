@@ -3,6 +3,7 @@ package questflow
 import (
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
+	"lunar-tear/server/internal/store"
 )
 
 type RewardGrant struct {
@@ -22,9 +23,45 @@ type FinishOutcome struct {
 
 type QuestHandler struct {
 	*masterdata.QuestCatalog
-	Config *masterdata.GameConfig
+	Config  *masterdata.GameConfig
+	Granter *store.PossessionGranter
 }
 
 func NewQuestHandler(catalog *masterdata.QuestCatalog, config *masterdata.GameConfig) *QuestHandler {
-	return &QuestHandler{QuestCatalog: catalog, Config: config}
+	granter := BuildGranter(catalog)
+	return &QuestHandler{QuestCatalog: catalog, Config: config, Granter: granter}
+}
+
+func BuildGranter(catalog *masterdata.QuestCatalog) *store.PossessionGranter {
+	costumeById := make(map[int32]store.CostumeRef, len(catalog.CostumeById))
+	for id, cm := range catalog.CostumeById {
+		costumeById[id] = store.CostumeRef{CharacterId: cm.CharacterId}
+	}
+	weaponById := make(map[int32]store.WeaponRef, len(catalog.WeaponById))
+	for id, wm := range catalog.WeaponById {
+		weaponById[id] = store.WeaponRef{
+			WeaponSkillGroupId:                 wm.WeaponSkillGroupId,
+			WeaponAbilityGroupId:               wm.WeaponAbilityGroupId,
+			WeaponStoryReleaseConditionGroupId: wm.WeaponStoryReleaseConditionGroupId,
+		}
+	}
+	releaseConditions := make(map[int32][]store.WeaponStoryReleaseCond, len(catalog.ReleaseConditionsByGroupId))
+	for groupId, rows := range catalog.ReleaseConditionsByGroupId {
+		conds := make([]store.WeaponStoryReleaseCond, len(rows))
+		for i, r := range rows {
+			conds[i] = store.WeaponStoryReleaseCond{
+				StoryIndex:                      r.StoryIndex,
+				WeaponStoryReleaseConditionType: r.WeaponStoryReleaseConditionType,
+				ConditionValue:                  r.ConditionValue,
+			}
+		}
+		releaseConditions[groupId] = conds
+	}
+	return &store.PossessionGranter{
+		CostumeById:        costumeById,
+		WeaponById:         weaponById,
+		WeaponSkillSlots:   catalog.WeaponSkillSlots,
+		WeaponAbilitySlots: catalog.WeaponAbilitySlots,
+		ReleaseConditions:  releaseConditions,
+	}
 }

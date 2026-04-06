@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
@@ -16,10 +17,11 @@ type CageOrnamentServiceServer struct {
 	users    store.UserRepository
 	sessions store.SessionRepository
 	catalog  *masterdata.CageOrnamentCatalog
+	granter  *store.PossessionGranter
 }
 
-func NewCageOrnamentServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.CageOrnamentCatalog) *CageOrnamentServiceServer {
-	return &CageOrnamentServiceServer{users: users, sessions: sessions, catalog: catalog}
+func NewCageOrnamentServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.CageOrnamentCatalog, granter *store.PossessionGranter) *CageOrnamentServiceServer {
+	return &CageOrnamentServiceServer{users: users, sessions: sessions, catalog: catalog, granter: granter}
 }
 
 func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.ReceiveRewardRequest) (*pb.ReceiveRewardResponse, error) {
@@ -31,16 +33,23 @@ func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.R
 	}
 
 	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.CageOrnamentRewards[req.CageOrnamentId] = store.CageOrnamentRewardState{
 			CageOrnamentId: req.CageOrnamentId,
 		}
-		store.GrantPossession(user, model.PossessionType(reward.PossessionType), reward.PossessionId, reward.Count)
+		s.granter.GrantFull(user, model.PossessionType(reward.PossessionType), reward.PossessionId, reward.Count, nowMillis)
 	})
 
 	diff := userdata.BuildDiffFromTables(userdata.SelectTables(
 		userdata.FullClientTableMap(user),
-		[]string{"IUserMaterial", "IUserConsumableItem", "IUserGem"},
+		[]string{
+			"IUserMaterial", "IUserConsumableItem", "IUserGem",
+			"IUserCostume", "IUserCostumeActiveSkill", "IUserCharacter",
+			"IUserWeapon", "IUserWeaponSkill", "IUserWeaponAbility",
+			"IUserWeaponNote", "IUserWeaponStory",
+			"IUserCageOrnamentReward",
+		},
 	))
 
 	return &pb.ReceiveRewardResponse{

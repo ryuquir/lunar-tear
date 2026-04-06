@@ -25,6 +25,14 @@ var shopDiffTables = []string{
 	"IUserImportantItem",
 	"IUserPremiumItem",
 	"IUserStatus",
+	"IUserCostume",
+	"IUserCostumeActiveSkill",
+	"IUserCharacter",
+	"IUserWeapon",
+	"IUserWeaponSkill",
+	"IUserWeaponAbility",
+	"IUserWeaponNote",
+	"IUserWeaponStory",
 }
 
 type ShopServiceServer struct {
@@ -32,10 +40,11 @@ type ShopServiceServer struct {
 	users    store.UserRepository
 	sessions store.SessionRepository
 	catalog  *masterdata.ShopCatalog
+	granter  *store.PossessionGranter
 }
 
-func NewShopServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.ShopCatalog) *ShopServiceServer {
-	return &ShopServiceServer{users: users, sessions: sessions, catalog: catalog}
+func NewShopServiceServer(users store.UserRepository, sessions store.SessionRepository, catalog *masterdata.ShopCatalog, granter *store.PossessionGranter) *ShopServiceServer {
+	return &ShopServiceServer{users: users, sessions: sessions, catalog: catalog, granter: granter}
 }
 
 func (s *ShopServiceServer) Buy(ctx context.Context, req *pb.BuyRequest) (*pb.BuyResponse, error) {
@@ -59,10 +68,11 @@ func (s *ShopServiceServer) Buy(ctx context.Context, req *pb.BuyRequest) (*pb.Bu
 			}
 
 			for _, content := range s.catalog.Contents[shopItemId] {
-				store.GrantPossession(user,
+				s.granter.GrantFull(user,
 					model.PossessionType(content.PossessionType),
 					content.PossessionId,
 					content.Count*qty,
+					nowMillis,
 				)
 			}
 
@@ -157,10 +167,11 @@ func (s *ShopServiceServer) CreatePurchaseTransaction(ctx context.Context, req *
 		}
 
 		for _, content := range s.catalog.Contents[req.ShopItemId] {
-			store.GrantPossession(user,
+			s.granter.GrantFull(user,
 				model.PossessionType(content.PossessionType),
 				content.PossessionId,
 				content.Count,
+				nowMillis,
 			)
 		}
 

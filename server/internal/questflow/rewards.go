@@ -251,119 +251,12 @@ func (h *QuestHandler) applyQuestRewards(user *store.UserState, questId int32, n
 
 func (h *QuestHandler) applyRewardPossession(user *store.UserState, possType model.PossessionType, possId, count int32, nowMillis int64) {
 	switch possType {
-	case model.PossessionTypeFreeGem:
-		user.Gem.FreeGem += count
-	case model.PossessionTypePaidGem:
-		user.Gem.PaidGem += count
-	case model.PossessionTypeCostume:
-		h.grantCostume(user, possId, nowMillis)
-	case model.PossessionTypeWeapon:
-		h.grantWeapon(user, possId, nowMillis)
 	case model.PossessionTypeCompanion:
 		h.grantCompanion(user, possId, nowMillis)
 	case model.PossessionTypeParts:
 		h.grantParts(user, possId, nowMillis)
-	case model.PossessionTypeCostumeEnhanced:
-		h.grantCostume(user, possId, nowMillis)
-	case model.PossessionTypeMaterial, model.PossessionTypeConsumableItem, model.PossessionTypeImportantItem:
-		store.GrantPossession(user, possType, possId, count)
 	default:
-		log.Printf("[QuestHandler] unsupported reward possession: type=%d id=%d count=%d", possType, possId, count)
-	}
-}
-
-func (h *QuestHandler) grantCostume(user *store.UserState, costumeId int32, nowMillis int64) {
-	for _, row := range user.Costumes {
-		if row.CostumeId == costumeId {
-			return
-		}
-	}
-	if cm, ok := h.CostumeById[costumeId]; ok {
-		if _, exists := user.Characters[cm.CharacterId]; !exists {
-			user.Characters[cm.CharacterId] = store.CharacterState{
-				CharacterId: cm.CharacterId,
-				Level:       1,
-			}
-		}
-	}
-	key := fmt.Sprintf("reward-costume-%d", costumeId)
-	user.Costumes[key] = store.CostumeState{
-		UserCostumeUuid:     key,
-		CostumeId:           costumeId,
-		Level:               1,
-		HeadupDisplayViewId: 1,
-		AcquisitionDatetime: nowMillis,
-	}
-	user.CostumeActiveSkills[key] = store.CostumeActiveSkillState{
-		UserCostumeUuid:     key,
-		Level:               1,
-		AcquisitionDatetime: nowMillis,
-	}
-}
-
-func (h *QuestHandler) grantWeapon(user *store.UserState, weaponId int32, nowMillis int64) {
-	for _, row := range user.Weapons {
-		if row.WeaponId == weaponId {
-			return
-		}
-	}
-	key := fmt.Sprintf("reward-weapon-%d", weaponId)
-	user.Weapons[key] = store.WeaponState{
-		UserWeaponUuid:      key,
-		WeaponId:            weaponId,
-		Level:               1,
-		AcquisitionDatetime: nowMillis,
-	}
-	if _, exists := user.WeaponNotes[weaponId]; !exists {
-		user.WeaponNotes[weaponId] = store.WeaponNoteState{
-			WeaponId:                 weaponId,
-			MaxLevel:                 1,
-			MaxLimitBreakCount:       0,
-			FirstAcquisitionDatetime: nowMillis,
-			LatestVersion:            nowMillis,
-		}
-	}
-	weapon, ok := h.WeaponById[weaponId]
-	if !ok {
-		return
-	}
-	h.populateWeaponSkillsAbilities(user, key, weapon)
-	if weapon.WeaponStoryReleaseConditionGroupId != 0 {
-		for _, cond := range h.ReleaseConditionsByGroupId[weapon.WeaponStoryReleaseConditionGroupId] {
-			switch cond.WeaponStoryReleaseConditionType {
-			case model.WeaponStoryReleaseConditionTypeAcquisition:
-				h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
-			case model.WeaponStoryReleaseConditionTypeQuestClear:
-				if qs, ok := user.Quests[cond.ConditionValue]; ok && qs.QuestStateType == model.UserQuestStateTypeCleared {
-					h.grantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
-				}
-			}
-		}
-	}
-}
-
-func (h *QuestHandler) populateWeaponSkillsAbilities(user *store.UserState, weaponUuid string, weapon masterdata.WeaponMasterRow) {
-	if slots, ok := h.WeaponSkillSlots[weapon.WeaponSkillGroupId]; ok {
-		skills := make([]store.WeaponSkillState, len(slots))
-		for i, slot := range slots {
-			skills[i] = store.WeaponSkillState{
-				UserWeaponUuid: weaponUuid,
-				SlotNumber:     slot,
-				Level:          1,
-			}
-		}
-		user.WeaponSkills[weaponUuid] = skills
-	}
-	if slots, ok := h.WeaponAbilitySlots[weapon.WeaponAbilityGroupId]; ok {
-		abilities := make([]store.WeaponAbilityState, len(slots))
-		for i, slot := range slots {
-			abilities[i] = store.WeaponAbilityState{
-				UserWeaponUuid: weaponUuid,
-				SlotNumber:     slot,
-				Level:          1,
-			}
-		}
-		user.WeaponAbilities[weaponUuid] = abilities
+		h.Granter.GrantFull(user, possType, possId, count, nowMillis)
 	}
 }
 
@@ -414,29 +307,7 @@ func (h *QuestHandler) grantParts(user *store.UserState, partsId int32, nowMilli
 }
 
 func (h *QuestHandler) grantWeaponStoryUnlock(user *store.UserState, weaponId, storyIndex int32, nowMillis int64) {
-	hasWeapon := false
-	for _, row := range user.Weapons {
-		if row.WeaponId == weaponId {
-			hasWeapon = true
-			break
-		}
-	}
-	if !hasWeapon {
-		log.Printf("[QuestHandler] grantWeaponStoryUnlock: skipping weaponId=%d (weapon not in user.Weapons)", weaponId)
-		return
-	}
-	if user.WeaponStories == nil {
-		user.WeaponStories = make(map[int32]store.WeaponStoryState)
-	}
-	cur := user.WeaponStories[weaponId]
-	if storyIndex <= cur.ReleasedMaxStoryIndex {
-		return
-	}
-	user.WeaponStories[weaponId] = store.WeaponStoryState{
-		WeaponId:              weaponId,
-		ReleasedMaxStoryIndex: storyIndex,
-		LatestVersion:         nowMillis,
-	}
+	store.GrantWeaponStoryUnlock(user, weaponId, storyIndex, nowMillis)
 }
 
 var tutorialCompanionChoices = map[int32]int32{
