@@ -9,17 +9,20 @@ import (
 )
 
 type CostumeMasterRow struct {
-	CostumeId                 int32 `json:"CostumeId"`
-	CharacterId               int32 `json:"CharacterId"`
-	SkillfulWeaponType        int32 `json:"SkillfulWeaponType"`
-	RarityType                int32 `json:"RarityType"`
-	CostumeActiveSkillGroupId int32 `json:"CostumeActiveSkillGroupId"`
+	CostumeId                        int32 `json:"CostumeId"`
+	CharacterId                      int32 `json:"CharacterId"`
+	SkillfulWeaponType               int32 `json:"SkillfulWeaponType"`
+	RarityType                       int32 `json:"RarityType"`
+	CostumeLimitBreakMaterialGroupId int32 `json:"CostumeLimitBreakMaterialGroupId"`
+	CostumeActiveSkillGroupId        int32 `json:"CostumeActiveSkillGroupId"`
 }
 
 type costumeRarityRow struct {
 	RarityType                                    int32 `json:"RarityType"`
+	CostumeLimitBreakMaterialRarityGroupId        int32 `json:"CostumeLimitBreakMaterialRarityGroupId"`
 	RequiredExpForLevelUpNumericalParameterMapId  int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
 	EnhancementCostByMaterialNumericalFunctionId  int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
+	LimitBreakCostNumericalFunctionId             int32 `json:"LimitBreakCostNumericalFunctionId"`
 	MaxLevelNumericalFunctionId                   int32 `json:"MaxLevelNumericalFunctionId"`
 	ActiveSkillMaxLevelNumericalFunctionId        int32 `json:"ActiveSkillMaxLevelNumericalFunctionId"`
 	ActiveSkillEnhancementCostNumericalFunctionId int32 `json:"ActiveSkillEnhancementCostNumericalFunctionId"`
@@ -76,11 +79,12 @@ type CostumeActiveSkillEnhanceMaterialRow struct {
 }
 
 type CostumeCatalog struct {
-	Costumes            map[int32]CostumeMasterRow
-	Materials           map[int32]MaterialRow
-	ExpByRarity         map[int32][]int32
-	EnhanceCostByRarity map[int32]NumericalFunc
-	MaxLevelByRarity    map[int32]NumericalFunc
+	Costumes               map[int32]CostumeMasterRow
+	Materials              map[int32]MaterialRow
+	ExpByRarity            map[int32][]int32
+	EnhanceCostByRarity    map[int32]NumericalFunc
+	MaxLevelByRarity       map[int32]NumericalFunc
+	LimitBreakCostByRarity map[int32]NumericalFunc
 
 	AwakenByCostumeId           map[int32]CostumeAwakenRow
 	AwakenPriceByGroup          map[int32]int32
@@ -146,11 +150,12 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 	}
 
 	catalog := &CostumeCatalog{
-		Costumes:            make(map[int32]CostumeMasterRow, len(costumes)),
-		Materials:           matCatalog.ByType[model.MaterialTypeCostumeEnhancement],
-		ExpByRarity:         make(map[int32][]int32, len(rarities)),
-		EnhanceCostByRarity: make(map[int32]NumericalFunc, len(rarities)),
-		MaxLevelByRarity:    make(map[int32]NumericalFunc, len(rarities)),
+		Costumes:               make(map[int32]CostumeMasterRow, len(costumes)),
+		Materials:              matCatalog.ByType[model.MaterialTypeCostumeEnhancement],
+		ExpByRarity:            make(map[int32][]int32, len(rarities)),
+		EnhanceCostByRarity:    make(map[int32]NumericalFunc, len(rarities)),
+		MaxLevelByRarity:       make(map[int32]NumericalFunc, len(rarities)),
+		LimitBreakCostByRarity: make(map[int32]NumericalFunc, len(rarities)),
 
 		AwakenByCostumeId:           make(map[int32]CostumeAwakenRow, len(awakenRows)),
 		AwakenPriceByGroup:          make(map[int32]int32, len(awakenPriceRows)),
@@ -180,6 +185,11 @@ func LoadCostumeCatalog(matCatalog *MaterialCatalog) (*CostumeCatalog, error) {
 		if _, ok := catalog.MaxLevelByRarity[r.RarityType]; !ok {
 			if f, found := funcResolver.Resolve(r.MaxLevelNumericalFunctionId); found {
 				catalog.MaxLevelByRarity[r.RarityType] = f
+			}
+		}
+		if _, ok := catalog.LimitBreakCostByRarity[r.RarityType]; !ok {
+			if f, found := funcResolver.Resolve(r.LimitBreakCostNumericalFunctionId); found {
+				catalog.LimitBreakCostByRarity[r.RarityType] = f
 			}
 		}
 		if _, ok := catalog.ActiveSkillMaxLevelByRarity[r.RarityType]; !ok {

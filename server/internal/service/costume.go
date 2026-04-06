@@ -336,3 +336,61 @@ func (s *CostumeServiceServer) EnhanceActiveSkill(ctx context.Context, req *pb.E
 		DiffUserData: diff,
 	}, nil
 }
+
+func (s *CostumeServiceServer) LimitBreak(ctx context.Context, req *pb.LimitBreakRequest) (*pb.LimitBreakResponse, error) {
+	log.Printf("[CostumeService] LimitBreak: uuid=%s materials=%v", req.UserCostumeUuid, req.Materials)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		costume, ok := user.Costumes[req.UserCostumeUuid]
+		if !ok {
+			log.Printf("[CostumeService] LimitBreak: costume uuid=%s not found", req.UserCostumeUuid)
+			return
+		}
+
+		if costume.LimitBreakCount >= s.config.CostumeLimitBreakAvailableCount {
+			log.Printf("[CostumeService] LimitBreak: already at max limit break %d", costume.LimitBreakCount)
+			return
+		}
+
+		cm, ok := s.catalog.Costumes[costume.CostumeId]
+		if !ok {
+			log.Printf("[CostumeService] LimitBreak: costume master id=%d not found", costume.CostumeId)
+			return
+		}
+
+		totalMaterialCount := int32(0)
+		for materialId, count := range req.Materials {
+			cur := user.Materials[materialId]
+			if cur < count {
+				log.Printf("[CostumeService] LimitBreak: insufficient material id=%d have=%d need=%d", materialId, cur, count)
+				count = cur
+			}
+			user.Materials[materialId] = cur - count
+			totalMaterialCount += count
+		}
+
+		if costFunc, ok := s.catalog.LimitBreakCostByRarity[cm.RarityType]; ok && totalMaterialCount > 0 {
+			goldCost := costFunc.Evaluate(totalMaterialCount)
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			log.Printf("[CostumeService] LimitBreak: gold cost=%d", goldCost)
+		}
+
+		costume.LimitBreakCount++
+		costume.LatestVersion = nowMillis
+		user.Costumes[req.UserCostumeUuid] = costume
+		log.Printf("[CostumeService] LimitBreak: costumeId=%d limitBreak -> %d", costume.CostumeId, costume.LimitBreakCount)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("costume limit break: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, costumeDiffTables))
+
+	return &pb.LimitBreakResponse{
+		DiffUserData: diff,
+	}, nil
+}
