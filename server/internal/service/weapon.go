@@ -21,6 +21,15 @@ var weaponDiffTables = []string{
 	"IUserConsumableItem",
 }
 
+var limitBreakDiffTables = []string{
+	"IUserWeapon",
+	"IUserWeaponSkill",
+	"IUserWeaponAbility",
+	"IUserMaterial",
+	"IUserConsumableItem",
+	"IUserWeaponNote",
+}
+
 type WeaponServiceServer struct {
 	pb.UnimplementedWeaponServiceServer
 	users    store.UserRepository
@@ -481,4 +490,234 @@ func (s *WeaponServiceServer) EnhanceAbility(ctx context.Context, req *pb.Enhanc
 	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, weaponDiffTables))
 
 	return &pb.EnhanceAbilityResponse{DiffUserData: diff}, nil
+}
+
+func (s *WeaponServiceServer) LimitBreakByMaterial(ctx context.Context, req *pb.LimitBreakByMaterialRequest) (*pb.LimitBreakByMaterialResponse, error) {
+	log.Printf("[WeaponService] LimitBreakByMaterial: uuid=%s materials=%v", req.UserWeaponUuid, req.Materials)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		weapon, ok := user.Weapons[req.UserWeaponUuid]
+		if !ok {
+			log.Printf("[WeaponService] LimitBreakByMaterial: weapon uuid=%s not found", req.UserWeaponUuid)
+			return
+		}
+
+		if weapon.LimitBreakCount >= s.config.WeaponLimitBreakAvailableCount {
+			log.Printf("[WeaponService] LimitBreakByMaterial: already at max limit break %d", weapon.LimitBreakCount)
+			return
+		}
+
+		wm, ok := s.catalog.Weapons[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] LimitBreakByMaterial: weapon master id=%d not found", weapon.WeaponId)
+			return
+		}
+
+		totalMaterialCount := int32(0)
+		for materialId, count := range req.Materials {
+			cur := user.Materials[materialId]
+			if cur < count {
+				log.Printf("[WeaponService] LimitBreakByMaterial: insufficient material id=%d have=%d need=%d", materialId, cur, count)
+				count = cur
+			}
+			user.Materials[materialId] = cur - count
+			totalMaterialCount += count
+		}
+
+		if costFunc, ok := s.catalog.LimitBreakCostByMaterialByEnhanceId[wm.WeaponSpecificEnhanceId]; ok && totalMaterialCount > 0 {
+			goldCost := costFunc.Evaluate(totalMaterialCount)
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			log.Printf("[WeaponService] LimitBreakByMaterial: gold cost=%d", goldCost)
+		}
+
+		weapon.LimitBreakCount++
+		weapon.LatestVersion = nowMillis
+		user.Weapons[req.UserWeaponUuid] = weapon
+
+		note := user.WeaponNotes[weapon.WeaponId]
+		if note.MaxLimitBreakCount < weapon.LimitBreakCount {
+			note.MaxLimitBreakCount = weapon.LimitBreakCount
+			note.LatestVersion = nowMillis
+			user.WeaponNotes[weapon.WeaponId] = note
+		}
+
+		log.Printf("[WeaponService] LimitBreakByMaterial: weaponId=%d limitBreak -> %d", weapon.WeaponId, weapon.LimitBreakCount)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon limit break by material: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, limitBreakDiffTables))
+
+	return &pb.LimitBreakByMaterialResponse{DiffUserData: diff}, nil
+}
+
+func (s *WeaponServiceServer) LimitBreakByWeapon(ctx context.Context, req *pb.LimitBreakByWeaponRequest) (*pb.LimitBreakByWeaponResponse, error) {
+	log.Printf("[WeaponService] LimitBreakByWeapon: uuid=%s materialUuids=%v", req.UserWeaponUuid, req.MaterialUserWeaponUuids)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserWeapon", oldUser, userdata.SortedWeaponRecords, []string{"userId", "userWeaponUuid"}).
+		Track("IUserWeaponSkill", oldUser, userdata.SortedWeaponSkillRecords, []string{"userId", "userWeaponUuid", "slotNumber"}).
+		Track("IUserWeaponAbility", oldUser, userdata.SortedWeaponAbilityRecords, []string{"userId", "userWeaponUuid", "slotNumber"})
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		weapon, ok := user.Weapons[req.UserWeaponUuid]
+		if !ok {
+			log.Printf("[WeaponService] LimitBreakByWeapon: weapon uuid=%s not found", req.UserWeaponUuid)
+			return
+		}
+
+		if weapon.LimitBreakCount >= s.config.WeaponLimitBreakAvailableCount {
+			log.Printf("[WeaponService] LimitBreakByWeapon: already at max limit break %d", weapon.LimitBreakCount)
+			return
+		}
+
+		wm, ok := s.catalog.Weapons[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] LimitBreakByWeapon: weapon master id=%d not found", weapon.WeaponId)
+			return
+		}
+
+		consumedCount := int32(0)
+		for _, uuid := range req.MaterialUserWeaponUuids {
+			matWeapon, ok := user.Weapons[uuid]
+			if !ok {
+				log.Printf("[WeaponService] LimitBreakByWeapon: material weapon uuid=%s not found, skipping", uuid)
+				continue
+			}
+
+			if medals, ok := s.catalog.MedalsByWeaponId[matWeapon.WeaponId]; ok {
+				for itemId, count := range medals {
+					user.ConsumableItems[itemId] += count
+				}
+			}
+
+			delete(user.Weapons, uuid)
+			delete(user.WeaponSkills, uuid)
+			delete(user.WeaponAbilities, uuid)
+			consumedCount++
+		}
+
+		if costFunc, ok := s.catalog.LimitBreakCostByWeaponByEnhanceId[wm.WeaponSpecificEnhanceId]; ok && consumedCount > 0 {
+			goldCost := costFunc.Evaluate(consumedCount)
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			log.Printf("[WeaponService] LimitBreakByWeapon: gold cost=%d", goldCost)
+		}
+
+		weapon.LimitBreakCount++
+		weapon.LatestVersion = nowMillis
+		user.Weapons[req.UserWeaponUuid] = weapon
+
+		note := user.WeaponNotes[weapon.WeaponId]
+		if note.MaxLimitBreakCount < weapon.LimitBreakCount {
+			note.MaxLimitBreakCount = weapon.LimitBreakCount
+			note.LatestVersion = nowMillis
+			user.WeaponNotes[weapon.WeaponId] = note
+		}
+
+		log.Printf("[WeaponService] LimitBreakByWeapon: weaponId=%d limitBreak -> %d (consumed %d weapons)", weapon.WeaponId, weapon.LimitBreakCount, consumedCount)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon limit break by weapon: %w", err)
+	}
+
+	tables := userdata.SelectTables(userdata.FullClientTableMap(snapshot), limitBreakDiffTables)
+	diff := tracker.Apply(snapshot, tables)
+
+	return &pb.LimitBreakByWeaponResponse{DiffUserData: diff}, nil
+}
+
+func (s *WeaponServiceServer) EnhanceByWeapon(ctx context.Context, req *pb.EnhanceByWeaponRequest) (*pb.EnhanceByWeaponResponse, error) {
+	log.Printf("[WeaponService] EnhanceByWeapon: uuid=%s materialUuids=%v", req.UserWeaponUuid, req.MaterialUserWeaponUuids)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	oldUser, _ := s.users.SnapshotUser(userId)
+	tracker := userdata.NewDeleteTracker().
+		Track("IUserWeapon", oldUser, userdata.SortedWeaponRecords, []string{"userId", "userWeaponUuid"}).
+		Track("IUserWeaponSkill", oldUser, userdata.SortedWeaponSkillRecords, []string{"userId", "userWeaponUuid", "slotNumber"}).
+		Track("IUserWeaponAbility", oldUser, userdata.SortedWeaponAbilityRecords, []string{"userId", "userWeaponUuid", "slotNumber"})
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		weapon, ok := user.Weapons[req.UserWeaponUuid]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceByWeapon: weapon uuid=%s not found", req.UserWeaponUuid)
+			return
+		}
+
+		wm, ok := s.catalog.Weapons[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceByWeapon: weapon master id=%d not found", weapon.WeaponId)
+			return
+		}
+
+		totalExp := int32(0)
+		consumedCount := int32(0)
+		for _, uuid := range req.MaterialUserWeaponUuids {
+			matWeapon, ok := user.Weapons[uuid]
+			if !ok {
+				log.Printf("[WeaponService] EnhanceByWeapon: material weapon uuid=%s not found, skipping", uuid)
+				continue
+			}
+
+			matMaster, ok := s.catalog.Weapons[matWeapon.WeaponId]
+			if !ok {
+				log.Printf("[WeaponService] EnhanceByWeapon: material weapon master id=%d not found, skipping", matWeapon.WeaponId)
+				continue
+			}
+
+			baseExp := s.catalog.BaseExpByEnhanceId[matMaster.WeaponSpecificEnhanceId]
+			if matMaster.WeaponType != 0 && matMaster.WeaponType == wm.WeaponType {
+				baseExp = baseExp * s.config.MaterialSameWeaponExpCoefficientPermil / 1000
+			}
+			totalExp += baseExp
+
+			if medals, ok := s.catalog.MedalsByWeaponId[matWeapon.WeaponId]; ok {
+				for itemId, count := range medals {
+					user.ConsumableItems[itemId] += count
+				}
+			}
+
+			delete(user.Weapons, uuid)
+			delete(user.WeaponSkills, uuid)
+			delete(user.WeaponAbilities, uuid)
+			consumedCount++
+		}
+
+		if costFunc, ok := s.catalog.EnhanceCostByWeaponByEnhanceId[wm.WeaponSpecificEnhanceId]; ok && consumedCount > 0 {
+			goldCost := costFunc.Evaluate(consumedCount)
+			user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			log.Printf("[WeaponService] EnhanceByWeapon: gold cost=%d (weapons=%d)", goldCost, consumedCount)
+		}
+
+		weapon.Exp += totalExp
+		if thresholds, ok := s.catalog.ExpByEnhanceId[wm.WeaponSpecificEnhanceId]; ok {
+			weapon.Level, weapon.Exp = gameutil.LevelAndCap(weapon.Exp, thresholds)
+		}
+
+		weapon.LatestVersion = nowMillis
+		user.Weapons[req.UserWeaponUuid] = weapon
+		log.Printf("[WeaponService] EnhanceByWeapon: weaponId=%d +%d exp -> total=%d level=%d", weapon.WeaponId, totalExp, weapon.Exp, weapon.Level)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon enhance by weapon: %w", err)
+	}
+
+	tables := userdata.SelectTables(userdata.FullClientTableMap(snapshot), weaponDiffTables)
+	diff := tracker.Apply(snapshot, tables)
+
+	return &pb.EnhanceByWeaponResponse{
+		IsGreatSuccess:       false,
+		SurplusEnhanceWeapon: []string{},
+		DiffUserData:         diff,
+	}, nil
 }

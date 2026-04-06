@@ -42,11 +42,15 @@ type WeaponAbilityGroupRow struct {
 
 type weaponSpecificEnhanceRow struct {
 	WeaponSpecificEnhanceId                      int32 `json:"WeaponSpecificEnhanceId"`
+	BaseEnhancementObtainedExp                   int32 `json:"BaseEnhancementObtainedExp"`
 	SellPriceNumericalFunctionId                 int32 `json:"SellPriceNumericalFunctionId"`
 	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
+	EnhancementCostByWeaponNumericalFunctionId   int32 `json:"EnhancementCostByWeaponNumericalFunctionId"`
 	EnhancementCostByMaterialNumericalFunctionId int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
 	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
 	EvolutionCostNumericalFunctionId             int32 `json:"EvolutionCostNumericalFunctionId"`
+	LimitBreakCostByWeaponNumericalFunctionId    int32 `json:"LimitBreakCostByWeaponNumericalFunctionId"`
+	LimitBreakCostByMaterialNumericalFunctionId  int32 `json:"LimitBreakCostByMaterialNumericalFunctionId"`
 	MaxSkillLevelNumericalFunctionId             int32 `json:"MaxSkillLevelNumericalFunctionId"`
 	SkillEnhancementCostNumericalFunctionId      int32 `json:"SkillEnhancementCostNumericalFunctionId"`
 	MaxAbilityLevelNumericalFunctionId           int32 `json:"MaxAbilityLevelNumericalFunctionId"`
@@ -89,25 +93,29 @@ type WeaponAbilityEnhanceMaterialRow struct {
 }
 
 type WeaponCatalog struct {
-	Weapons                    map[int32]WeaponMasterRow
-	Materials                  map[int32]MaterialRow
-	ExpByEnhanceId             map[int32][]int32
-	GoldCostByEnhanceId        map[int32]NumericalFunc
-	MaxLevelByEnhanceId        map[int32]NumericalFunc
-	SellPriceByEnhanceId       map[int32]NumericalFunc
-	MedalsByWeaponId           map[int32]map[int32]int32 // WeaponId -> ConsumableItemId -> Count
-	EvolutionNextWeaponId      map[int32]int32
-	EvolutionMaterials         map[int32][]WeaponEvolutionMaterialRow // WeaponEvolutionMaterialGroupId -> materials
-	EvolutionCostByEnhanceId   map[int32]NumericalFunc
-	AbilitySlots               map[int32][]int32 // WeaponAbilityGroupId -> slot numbers
-	SkillGroupsByGroupId       map[int32][]WeaponSkillGroupRow
-	SkillEnhanceMats           map[[2]int32][]WeaponSkillEnhanceMaterialRow // key: [enhancementMaterialId, skillLevel]
-	SkillMaxLevelByEnhanceId   map[int32]NumericalFunc
-	SkillCostByEnhanceId       map[int32]NumericalFunc
-	AbilityGroupsByGroupId     map[int32][]WeaponAbilityGroupRow
-	AbilityEnhanceMats         map[[2]int32][]WeaponAbilityEnhanceMaterialRow // key: [enhancementMaterialId, abilityLevel]
-	AbilityMaxLevelByEnhanceId map[int32]NumericalFunc
-	AbilityCostByEnhanceId     map[int32]NumericalFunc
+	Weapons                             map[int32]WeaponMasterRow
+	Materials                           map[int32]MaterialRow
+	ExpByEnhanceId                      map[int32][]int32
+	GoldCostByEnhanceId                 map[int32]NumericalFunc
+	MaxLevelByEnhanceId                 map[int32]NumericalFunc
+	SellPriceByEnhanceId                map[int32]NumericalFunc
+	MedalsByWeaponId                    map[int32]map[int32]int32 // WeaponId -> ConsumableItemId -> Count
+	EvolutionNextWeaponId               map[int32]int32
+	EvolutionMaterials                  map[int32][]WeaponEvolutionMaterialRow // WeaponEvolutionMaterialGroupId -> materials
+	EvolutionCostByEnhanceId            map[int32]NumericalFunc
+	AbilitySlots                        map[int32][]int32 // WeaponAbilityGroupId -> slot numbers
+	SkillGroupsByGroupId                map[int32][]WeaponSkillGroupRow
+	SkillEnhanceMats                    map[[2]int32][]WeaponSkillEnhanceMaterialRow // key: [enhancementMaterialId, skillLevel]
+	SkillMaxLevelByEnhanceId            map[int32]NumericalFunc
+	SkillCostByEnhanceId                map[int32]NumericalFunc
+	AbilityGroupsByGroupId              map[int32][]WeaponAbilityGroupRow
+	AbilityEnhanceMats                  map[[2]int32][]WeaponAbilityEnhanceMaterialRow // key: [enhancementMaterialId, abilityLevel]
+	AbilityMaxLevelByEnhanceId          map[int32]NumericalFunc
+	AbilityCostByEnhanceId              map[int32]NumericalFunc
+	EnhanceCostByWeaponByEnhanceId      map[int32]NumericalFunc
+	LimitBreakCostByWeaponByEnhanceId   map[int32]NumericalFunc
+	LimitBreakCostByMaterialByEnhanceId map[int32]NumericalFunc
+	BaseExpByEnhanceId                  map[int32]int32
 }
 
 func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
@@ -162,25 +170,29 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 	}
 
 	catalog := &WeaponCatalog{
-		Weapons:                    make(map[int32]WeaponMasterRow, len(weapons)),
-		Materials:                  matCatalog.ByType[model.MaterialTypeWeaponEnhancement],
-		ExpByEnhanceId:             make(map[int32][]int32, len(enhanceRows)),
-		GoldCostByEnhanceId:        make(map[int32]NumericalFunc, len(enhanceRows)),
-		MaxLevelByEnhanceId:        make(map[int32]NumericalFunc, len(enhanceRows)),
-		SellPriceByEnhanceId:       make(map[int32]NumericalFunc, len(enhanceRows)),
-		MedalsByWeaponId:           make(map[int32]map[int32]int32),
-		EvolutionNextWeaponId:      make(map[int32]int32),
-		EvolutionMaterials:         make(map[int32][]WeaponEvolutionMaterialRow),
-		EvolutionCostByEnhanceId:   make(map[int32]NumericalFunc, len(enhanceRows)),
-		AbilitySlots:               make(map[int32][]int32),
-		SkillGroupsByGroupId:       make(map[int32][]WeaponSkillGroupRow),
-		SkillEnhanceMats:           make(map[[2]int32][]WeaponSkillEnhanceMaterialRow),
-		SkillMaxLevelByEnhanceId:   make(map[int32]NumericalFunc, len(enhanceRows)),
-		SkillCostByEnhanceId:       make(map[int32]NumericalFunc, len(enhanceRows)),
-		AbilityGroupsByGroupId:     make(map[int32][]WeaponAbilityGroupRow),
-		AbilityEnhanceMats:         make(map[[2]int32][]WeaponAbilityEnhanceMaterialRow),
-		AbilityMaxLevelByEnhanceId: make(map[int32]NumericalFunc, len(enhanceRows)),
-		AbilityCostByEnhanceId:     make(map[int32]NumericalFunc, len(enhanceRows)),
+		Weapons:                             make(map[int32]WeaponMasterRow, len(weapons)),
+		Materials:                           matCatalog.ByType[model.MaterialTypeWeaponEnhancement],
+		ExpByEnhanceId:                      make(map[int32][]int32, len(enhanceRows)),
+		GoldCostByEnhanceId:                 make(map[int32]NumericalFunc, len(enhanceRows)),
+		MaxLevelByEnhanceId:                 make(map[int32]NumericalFunc, len(enhanceRows)),
+		SellPriceByEnhanceId:                make(map[int32]NumericalFunc, len(enhanceRows)),
+		MedalsByWeaponId:                    make(map[int32]map[int32]int32),
+		EvolutionNextWeaponId:               make(map[int32]int32),
+		EvolutionMaterials:                  make(map[int32][]WeaponEvolutionMaterialRow),
+		EvolutionCostByEnhanceId:            make(map[int32]NumericalFunc, len(enhanceRows)),
+		AbilitySlots:                        make(map[int32][]int32),
+		SkillGroupsByGroupId:                make(map[int32][]WeaponSkillGroupRow),
+		SkillEnhanceMats:                    make(map[[2]int32][]WeaponSkillEnhanceMaterialRow),
+		SkillMaxLevelByEnhanceId:            make(map[int32]NumericalFunc, len(enhanceRows)),
+		SkillCostByEnhanceId:                make(map[int32]NumericalFunc, len(enhanceRows)),
+		AbilityGroupsByGroupId:              make(map[int32][]WeaponAbilityGroupRow),
+		AbilityEnhanceMats:                  make(map[[2]int32][]WeaponAbilityEnhanceMaterialRow),
+		AbilityMaxLevelByEnhanceId:          make(map[int32]NumericalFunc, len(enhanceRows)),
+		AbilityCostByEnhanceId:              make(map[int32]NumericalFunc, len(enhanceRows)),
+		EnhanceCostByWeaponByEnhanceId:      make(map[int32]NumericalFunc, len(enhanceRows)),
+		LimitBreakCostByWeaponByEnhanceId:   make(map[int32]NumericalFunc, len(enhanceRows)),
+		LimitBreakCostByMaterialByEnhanceId: make(map[int32]NumericalFunc, len(enhanceRows)),
+		BaseExpByEnhanceId:                  make(map[int32]int32, len(enhanceRows)),
 	}
 
 	for _, w := range weapons {
@@ -230,6 +242,24 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 			if f, found := funcResolver.Resolve(r.AbilityEnhancementCostNumericalFunctionId); found {
 				catalog.AbilityCostByEnhanceId[r.WeaponSpecificEnhanceId] = f
 			}
+		}
+		if _, ok := catalog.EnhanceCostByWeaponByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.EnhancementCostByWeaponNumericalFunctionId); found {
+				catalog.EnhanceCostByWeaponByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.LimitBreakCostByWeaponByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.LimitBreakCostByWeaponNumericalFunctionId); found {
+				catalog.LimitBreakCostByWeaponByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.LimitBreakCostByMaterialByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.LimitBreakCostByMaterialNumericalFunctionId); found {
+				catalog.LimitBreakCostByMaterialByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.BaseExpByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			catalog.BaseExpByEnhanceId[r.WeaponSpecificEnhanceId] = r.BaseEnhancementObtainedExp
 		}
 	}
 
