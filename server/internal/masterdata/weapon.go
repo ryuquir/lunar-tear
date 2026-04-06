@@ -27,13 +27,17 @@ type WeaponStoryReleaseConditionRow struct {
 }
 
 type WeaponSkillGroupRow struct {
-	WeaponSkillGroupId int32 `json:"WeaponSkillGroupId"`
-	SlotNumber         int32 `json:"SlotNumber"`
+	WeaponSkillGroupId               int32 `json:"WeaponSkillGroupId"`
+	SlotNumber                       int32 `json:"SlotNumber"`
+	SkillId                          int32 `json:"SkillId"`
+	WeaponSkillEnhancementMaterialId int32 `json:"WeaponSkillEnhancementMaterialId"`
 }
 
 type WeaponAbilityGroupRow struct {
-	WeaponAbilityGroupId int32 `json:"WeaponAbilityGroupId"`
-	SlotNumber           int32 `json:"SlotNumber"`
+	WeaponAbilityGroupId               int32 `json:"WeaponAbilityGroupId"`
+	SlotNumber                         int32 `json:"SlotNumber"`
+	AbilityId                          int32 `json:"AbilityId"`
+	WeaponAbilityEnhancementMaterialId int32 `json:"WeaponAbilityEnhancementMaterialId"`
 }
 
 type weaponSpecificEnhanceRow struct {
@@ -43,6 +47,10 @@ type weaponSpecificEnhanceRow struct {
 	EnhancementCostByMaterialNumericalFunctionId int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
 	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
 	EvolutionCostNumericalFunctionId             int32 `json:"EvolutionCostNumericalFunctionId"`
+	MaxSkillLevelNumericalFunctionId             int32 `json:"MaxSkillLevelNumericalFunctionId"`
+	SkillEnhancementCostNumericalFunctionId      int32 `json:"SkillEnhancementCostNumericalFunctionId"`
+	MaxAbilityLevelNumericalFunctionId           int32 `json:"MaxAbilityLevelNumericalFunctionId"`
+	AbilityEnhancementCostNumericalFunctionId    int32 `json:"AbilityEnhancementCostNumericalFunctionId"`
 }
 
 type weaponConsumeExchangeRow struct {
@@ -64,18 +72,42 @@ type WeaponEvolutionMaterialRow struct {
 	SortOrder                      int32 `json:"SortOrder"`
 }
 
+type WeaponSkillEnhanceMaterialRow struct {
+	WeaponSkillEnhancementMaterialId int32 `json:"WeaponSkillEnhancementMaterialId"`
+	SkillLevel                       int32 `json:"SkillLevel"`
+	MaterialId                       int32 `json:"MaterialId"`
+	Count                            int32 `json:"Count"`
+	SortOrder                        int32 `json:"SortOrder"`
+}
+
+type WeaponAbilityEnhanceMaterialRow struct {
+	WeaponAbilityEnhancementMaterialId int32 `json:"WeaponAbilityEnhancementMaterialId"`
+	AbilityLevel                       int32 `json:"AbilityLevel"`
+	MaterialId                         int32 `json:"MaterialId"`
+	Count                              int32 `json:"Count"`
+	SortOrder                          int32 `json:"SortOrder"`
+}
+
 type WeaponCatalog struct {
-	Weapons                  map[int32]WeaponMasterRow
-	Materials                map[int32]MaterialRow
-	ExpByEnhanceId           map[int32][]int32
-	GoldCostByEnhanceId      map[int32]NumericalFunc
-	MaxLevelByEnhanceId      map[int32]NumericalFunc
-	SellPriceByEnhanceId     map[int32]NumericalFunc
-	MedalsByWeaponId         map[int32]map[int32]int32 // WeaponId -> ConsumableItemId -> Count
-	EvolutionNextWeaponId    map[int32]int32
-	EvolutionMaterials       map[int32][]WeaponEvolutionMaterialRow // WeaponEvolutionMaterialGroupId -> materials
-	EvolutionCostByEnhanceId map[int32]NumericalFunc
-	AbilitySlots             map[int32][]int32 // WeaponAbilityGroupId -> slot numbers
+	Weapons                    map[int32]WeaponMasterRow
+	Materials                  map[int32]MaterialRow
+	ExpByEnhanceId             map[int32][]int32
+	GoldCostByEnhanceId        map[int32]NumericalFunc
+	MaxLevelByEnhanceId        map[int32]NumericalFunc
+	SellPriceByEnhanceId       map[int32]NumericalFunc
+	MedalsByWeaponId           map[int32]map[int32]int32 // WeaponId -> ConsumableItemId -> Count
+	EvolutionNextWeaponId      map[int32]int32
+	EvolutionMaterials         map[int32][]WeaponEvolutionMaterialRow // WeaponEvolutionMaterialGroupId -> materials
+	EvolutionCostByEnhanceId   map[int32]NumericalFunc
+	AbilitySlots               map[int32][]int32 // WeaponAbilityGroupId -> slot numbers
+	SkillGroupsByGroupId       map[int32][]WeaponSkillGroupRow
+	SkillEnhanceMats           map[[2]int32][]WeaponSkillEnhanceMaterialRow // key: [enhancementMaterialId, skillLevel]
+	SkillMaxLevelByEnhanceId   map[int32]NumericalFunc
+	SkillCostByEnhanceId       map[int32]NumericalFunc
+	AbilityGroupsByGroupId     map[int32][]WeaponAbilityGroupRow
+	AbilityEnhanceMats         map[[2]int32][]WeaponAbilityEnhanceMaterialRow // key: [enhancementMaterialId, abilityLevel]
+	AbilityMaxLevelByEnhanceId map[int32]NumericalFunc
+	AbilityCostByEnhanceId     map[int32]NumericalFunc
 }
 
 func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
@@ -116,19 +148,39 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load weapon ability group table: %w", err)
 	}
+	skillGroupRows, err := utils.ReadJSON[WeaponSkillGroupRow]("EntityMWeaponSkillGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load weapon skill group table: %w", err)
+	}
+	skillMatRows, err := utils.ReadJSON[WeaponSkillEnhanceMaterialRow]("EntityMWeaponSkillEnhancementMaterialTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load weapon skill enhancement material table: %w", err)
+	}
+	abilityMatRows, err := utils.ReadJSON[WeaponAbilityEnhanceMaterialRow]("EntityMWeaponAbilityEnhancementMaterialTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load weapon ability enhancement material table: %w", err)
+	}
 
 	catalog := &WeaponCatalog{
-		Weapons:                  make(map[int32]WeaponMasterRow, len(weapons)),
-		Materials:                matCatalog.ByType[model.MaterialTypeWeaponEnhancement],
-		ExpByEnhanceId:           make(map[int32][]int32, len(enhanceRows)),
-		GoldCostByEnhanceId:      make(map[int32]NumericalFunc, len(enhanceRows)),
-		MaxLevelByEnhanceId:      make(map[int32]NumericalFunc, len(enhanceRows)),
-		SellPriceByEnhanceId:     make(map[int32]NumericalFunc, len(enhanceRows)),
-		MedalsByWeaponId:         make(map[int32]map[int32]int32),
-		EvolutionNextWeaponId:    make(map[int32]int32),
-		EvolutionMaterials:       make(map[int32][]WeaponEvolutionMaterialRow),
-		EvolutionCostByEnhanceId: make(map[int32]NumericalFunc, len(enhanceRows)),
-		AbilitySlots:             make(map[int32][]int32),
+		Weapons:                    make(map[int32]WeaponMasterRow, len(weapons)),
+		Materials:                  matCatalog.ByType[model.MaterialTypeWeaponEnhancement],
+		ExpByEnhanceId:             make(map[int32][]int32, len(enhanceRows)),
+		GoldCostByEnhanceId:        make(map[int32]NumericalFunc, len(enhanceRows)),
+		MaxLevelByEnhanceId:        make(map[int32]NumericalFunc, len(enhanceRows)),
+		SellPriceByEnhanceId:       make(map[int32]NumericalFunc, len(enhanceRows)),
+		MedalsByWeaponId:           make(map[int32]map[int32]int32),
+		EvolutionNextWeaponId:      make(map[int32]int32),
+		EvolutionMaterials:         make(map[int32][]WeaponEvolutionMaterialRow),
+		EvolutionCostByEnhanceId:   make(map[int32]NumericalFunc, len(enhanceRows)),
+		AbilitySlots:               make(map[int32][]int32),
+		SkillGroupsByGroupId:       make(map[int32][]WeaponSkillGroupRow),
+		SkillEnhanceMats:           make(map[[2]int32][]WeaponSkillEnhanceMaterialRow),
+		SkillMaxLevelByEnhanceId:   make(map[int32]NumericalFunc, len(enhanceRows)),
+		SkillCostByEnhanceId:       make(map[int32]NumericalFunc, len(enhanceRows)),
+		AbilityGroupsByGroupId:     make(map[int32][]WeaponAbilityGroupRow),
+		AbilityEnhanceMats:         make(map[[2]int32][]WeaponAbilityEnhanceMaterialRow),
+		AbilityMaxLevelByEnhanceId: make(map[int32]NumericalFunc, len(enhanceRows)),
+		AbilityCostByEnhanceId:     make(map[int32]NumericalFunc, len(enhanceRows)),
 	}
 
 	for _, w := range weapons {
@@ -157,6 +209,26 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 		if _, ok := catalog.EvolutionCostByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
 			if f, found := funcResolver.Resolve(r.EvolutionCostNumericalFunctionId); found {
 				catalog.EvolutionCostByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.SkillMaxLevelByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.MaxSkillLevelNumericalFunctionId); found {
+				catalog.SkillMaxLevelByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.SkillCostByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.SkillEnhancementCostNumericalFunctionId); found {
+				catalog.SkillCostByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.AbilityMaxLevelByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.MaxAbilityLevelNumericalFunctionId); found {
+				catalog.AbilityMaxLevelByEnhanceId[r.WeaponSpecificEnhanceId] = f
+			}
+		}
+		if _, ok := catalog.AbilityCostByEnhanceId[r.WeaponSpecificEnhanceId]; !ok {
+			if f, found := funcResolver.Resolve(r.AbilityEnhancementCostNumericalFunctionId); found {
+				catalog.AbilityCostByEnhanceId[r.WeaponSpecificEnhanceId] = f
 			}
 		}
 	}
@@ -189,6 +261,26 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 	for _, row := range abilityGroupRows {
 		catalog.AbilitySlots[row.WeaponAbilityGroupId] = append(
 			catalog.AbilitySlots[row.WeaponAbilityGroupId], row.SlotNumber)
+	}
+
+	for _, row := range skillGroupRows {
+		catalog.SkillGroupsByGroupId[row.WeaponSkillGroupId] = append(
+			catalog.SkillGroupsByGroupId[row.WeaponSkillGroupId], row)
+	}
+
+	for _, row := range skillMatRows {
+		key := [2]int32{row.WeaponSkillEnhancementMaterialId, row.SkillLevel}
+		catalog.SkillEnhanceMats[key] = append(catalog.SkillEnhanceMats[key], row)
+	}
+
+	for _, row := range abilityGroupRows {
+		catalog.AbilityGroupsByGroupId[row.WeaponAbilityGroupId] = append(
+			catalog.AbilityGroupsByGroupId[row.WeaponAbilityGroupId], row)
+	}
+
+	for _, row := range abilityMatRows {
+		key := [2]int32{row.WeaponAbilityEnhancementMaterialId, row.AbilityLevel}
+		catalog.AbilityEnhanceMats[key] = append(catalog.AbilityEnhanceMats[key], row)
 	}
 
 	return catalog, nil

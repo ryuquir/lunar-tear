@@ -284,3 +284,201 @@ func (s *WeaponServiceServer) Evolve(ctx context.Context, req *pb.EvolveRequest)
 
 	return &pb.EvolveResponse{DiffUserData: diff}, nil
 }
+
+func (s *WeaponServiceServer) EnhanceSkill(ctx context.Context, req *pb.EnhanceSkillRequest) (*pb.EnhanceSkillResponse, error) {
+	log.Printf("[WeaponService] EnhanceSkill: uuid=%s skillId=%d addLevel=%d", req.UserWeaponUuid, req.SkillId, req.AddLevelCount)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		weapon, ok := user.Weapons[req.UserWeaponUuid]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceSkill: weapon uuid=%s not found", req.UserWeaponUuid)
+			return
+		}
+
+		wm, ok := s.catalog.Weapons[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceSkill: weapon master id=%d not found", weapon.WeaponId)
+			return
+		}
+
+		groupRows := s.catalog.SkillGroupsByGroupId[wm.WeaponSkillGroupId]
+		var skillGroup *masterdata.WeaponSkillGroupRow
+		for i := range groupRows {
+			if groupRows[i].SkillId == req.SkillId {
+				skillGroup = &groupRows[i]
+				break
+			}
+		}
+		if skillGroup == nil {
+			log.Printf("[WeaponService] EnhanceSkill: skillId=%d not found in group=%d", req.SkillId, wm.WeaponSkillGroupId)
+			return
+		}
+
+		skills := user.WeaponSkills[req.UserWeaponUuid]
+		skillIdx := -1
+		for i, sk := range skills {
+			if sk.SlotNumber == skillGroup.SlotNumber {
+				skillIdx = i
+				break
+			}
+		}
+		if skillIdx < 0 {
+			log.Printf("[WeaponService] EnhanceSkill: slot=%d not found for weapon uuid=%s", skillGroup.SlotNumber, req.UserWeaponUuid)
+			return
+		}
+
+		maxLevelFunc, ok := s.catalog.SkillMaxLevelByEnhanceId[wm.WeaponSpecificEnhanceId]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceSkill: no max skill level func for enhanceId=%d", wm.WeaponSpecificEnhanceId)
+			return
+		}
+		maxLevel := maxLevelFunc.Evaluate(weapon.LimitBreakCount)
+
+		currentLevel := skills[skillIdx].Level
+		addCount := req.AddLevelCount
+		if currentLevel+addCount > maxLevel {
+			addCount = maxLevel - currentLevel
+		}
+		if addCount <= 0 {
+			log.Printf("[WeaponService] EnhanceSkill: already at max level %d", currentLevel)
+			return
+		}
+
+		enhanceMatId := skillGroup.WeaponSkillEnhancementMaterialId
+		for lvl := currentLevel; lvl < currentLevel+addCount; lvl++ {
+			key := [2]int32{enhanceMatId, lvl}
+			mats := s.catalog.SkillEnhanceMats[key]
+			for _, mat := range mats {
+				cur := user.Materials[mat.MaterialId]
+				cost := mat.Count
+				if cur < cost {
+					log.Printf("[WeaponService] EnhanceSkill: insufficient material id=%d have=%d need=%d", mat.MaterialId, cur, cost)
+					cost = cur
+				}
+				user.Materials[mat.MaterialId] = cur - cost
+			}
+
+			if costFunc, ok := s.catalog.SkillCostByEnhanceId[wm.WeaponSpecificEnhanceId]; ok {
+				goldCost := costFunc.Evaluate(lvl + 1)
+				user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			}
+		}
+
+		skills[skillIdx].Level = currentLevel + addCount
+		user.WeaponSkills[req.UserWeaponUuid] = skills
+		log.Printf("[WeaponService] EnhanceSkill: skillId=%d level %d -> %d", req.SkillId, currentLevel, skills[skillIdx].Level)
+
+		weapon.LatestVersion = nowMillis
+		user.Weapons[req.UserWeaponUuid] = weapon
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon enhance skill: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, weaponDiffTables))
+
+	return &pb.EnhanceSkillResponse{DiffUserData: diff}, nil
+}
+
+func (s *WeaponServiceServer) EnhanceAbility(ctx context.Context, req *pb.EnhanceAbilityRequest) (*pb.EnhanceAbilityResponse, error) {
+	log.Printf("[WeaponService] EnhanceAbility: uuid=%s abilityId=%d addLevel=%d", req.UserWeaponUuid, req.AbilityId, req.AddLevelCount)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+
+	snapshot, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		weapon, ok := user.Weapons[req.UserWeaponUuid]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceAbility: weapon uuid=%s not found", req.UserWeaponUuid)
+			return
+		}
+
+		wm, ok := s.catalog.Weapons[weapon.WeaponId]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceAbility: weapon master id=%d not found", weapon.WeaponId)
+			return
+		}
+
+		groupRows := s.catalog.AbilityGroupsByGroupId[wm.WeaponAbilityGroupId]
+		var abilityGroup *masterdata.WeaponAbilityGroupRow
+		for i := range groupRows {
+			if groupRows[i].AbilityId == req.AbilityId {
+				abilityGroup = &groupRows[i]
+				break
+			}
+		}
+		if abilityGroup == nil {
+			log.Printf("[WeaponService] EnhanceAbility: abilityId=%d not found in group=%d", req.AbilityId, wm.WeaponAbilityGroupId)
+			return
+		}
+
+		abilities := user.WeaponAbilities[req.UserWeaponUuid]
+		abilityIdx := -1
+		for i, ab := range abilities {
+			if ab.SlotNumber == abilityGroup.SlotNumber {
+				abilityIdx = i
+				break
+			}
+		}
+		if abilityIdx < 0 {
+			log.Printf("[WeaponService] EnhanceAbility: slot=%d not found for weapon uuid=%s", abilityGroup.SlotNumber, req.UserWeaponUuid)
+			return
+		}
+
+		maxLevelFunc, ok := s.catalog.AbilityMaxLevelByEnhanceId[wm.WeaponSpecificEnhanceId]
+		if !ok {
+			log.Printf("[WeaponService] EnhanceAbility: no max ability level func for enhanceId=%d", wm.WeaponSpecificEnhanceId)
+			return
+		}
+		maxLevel := maxLevelFunc.Evaluate(weapon.LimitBreakCount)
+
+		currentLevel := abilities[abilityIdx].Level
+		addCount := req.AddLevelCount
+		if currentLevel+addCount > maxLevel {
+			addCount = maxLevel - currentLevel
+		}
+		if addCount <= 0 {
+			log.Printf("[WeaponService] EnhanceAbility: already at max level %d", currentLevel)
+			return
+		}
+
+		enhanceMatId := abilityGroup.WeaponAbilityEnhancementMaterialId
+		for lvl := currentLevel; lvl < currentLevel+addCount; lvl++ {
+			key := [2]int32{enhanceMatId, lvl}
+			mats := s.catalog.AbilityEnhanceMats[key]
+			for _, mat := range mats {
+				cur := user.Materials[mat.MaterialId]
+				cost := mat.Count
+				if cur < cost {
+					log.Printf("[WeaponService] EnhanceAbility: insufficient material id=%d have=%d need=%d", mat.MaterialId, cur, cost)
+					cost = cur
+				}
+				user.Materials[mat.MaterialId] = cur - cost
+			}
+
+			if costFunc, ok := s.catalog.AbilityCostByEnhanceId[wm.WeaponSpecificEnhanceId]; ok {
+				goldCost := costFunc.Evaluate(lvl + 1)
+				user.ConsumableItems[s.config.ConsumableItemIdForGold] -= goldCost
+			}
+		}
+
+		abilities[abilityIdx].Level = currentLevel + addCount
+		user.WeaponAbilities[req.UserWeaponUuid] = abilities
+		log.Printf("[WeaponService] EnhanceAbility: abilityId=%d level %d -> %d", req.AbilityId, currentLevel, abilities[abilityIdx].Level)
+
+		weapon.LatestVersion = nowMillis
+		user.Weapons[req.UserWeaponUuid] = weapon
+	})
+	if err != nil {
+		return nil, fmt.Errorf("weapon enhance ability: %w", err)
+	}
+
+	tables := userdata.FullClientTableMap(snapshot)
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(tables, weaponDiffTables))
+
+	return &pb.EnhanceAbilityResponse{DiffUserData: diff}, nil
+}
