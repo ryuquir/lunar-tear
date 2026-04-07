@@ -77,6 +77,13 @@ type MainQuestSequenceRow struct {
 	QuestId             int32 `json:"QuestId"`
 }
 
+type MainQuestRouteRow struct {
+	MainQuestRouteId  int32 `json:"MainQuestRouteId"`
+	MainQuestSeasonId int32 `json:"MainQuestSeasonId"`
+	SortOrder         int32 `json:"SortOrder"`
+	CharacterId       int32 `json:"CharacterId"`
+}
+
 type MainQuestChapterRow struct {
 	MainQuestChapterId         int32 `json:"MainQuestChapterId"`
 	MainQuestRouteId           int32 `json:"MainQuestRouteId"`
@@ -197,6 +204,7 @@ type QuestCatalog struct {
 	RentalQuestIds                     map[int32]bool
 	TutorialUnlockConditions           []TutorialUnlockConditionRow
 	ChapterLastSceneByQuestId          map[int32]int32
+	SeasonIdByRouteId                  map[int32]int32
 
 	UserExpThresholds       []int32
 	CharacterExpThresholds  []int32
@@ -269,6 +277,15 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 	chapters, err := utils.ReadJSON[MainQuestChapterRow]("EntityMMainQuestChapterTable.json")
 	if err != nil {
 		return nil, fmt.Errorf("load main quest chapter table: %w", err)
+	}
+
+	routes, err := utils.ReadJSON[MainQuestRouteRow]("EntityMMainQuestRouteTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load main quest route table: %w", err)
+	}
+	seasonIdByRouteId := make(map[int32]int32, len(routes))
+	for _, r := range routes {
+		seasonIdByRouteId[r.MainQuestRouteId] = r.MainQuestSeasonId
 	}
 
 	firstClearSwitches, err := utils.ReadJSON[QuestFirstClearRewardSwitchRow]("EntityMQuestFirstClearRewardSwitchTable.json")
@@ -664,6 +681,7 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 		RentalQuestIds:                     rentalQuestIds,
 		TutorialUnlockConditions:           tutorialUnlockConds,
 		ChapterLastSceneByQuestId:          chapterLastSceneByQuestId,
+		SeasonIdByRouteId:                  seasonIdByRouteId,
 
 		UserExpThresholds:       BuildExpThresholds(paramMapRows, 1),
 		CharacterExpThresholds:  BuildExpThresholds(paramMapRows, 31),

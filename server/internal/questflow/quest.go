@@ -78,6 +78,11 @@ func (h *QuestHandler) HandleQuestStart(user *store.UserState, questId int32, is
 			user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 			lastSceneId := h.getChapterLastSceneId(questId)
 			user.MainQuest.IsReachedLastQuestScene = firstSceneId == lastSceneId
+			if routeId, ok := h.RouteIdByQuestId[questId]; ok {
+				if seasonId, ok := h.SeasonIdByRouteId[routeId]; ok {
+					user.MainQuest.MainQuestSeasonId = seasonId
+				}
+			}
 			log.Printf("[HandleQuestStart] background quest %d auto-cleared, scene %d -> %d", questId, prevSceneId, firstSceneId)
 		}
 	}

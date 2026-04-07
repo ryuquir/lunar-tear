@@ -263,6 +263,29 @@ func (s *QuestServiceServer) SkipQuest(ctx context.Context, req *pb.SkipQuestReq
 	}, nil
 }
 
+func (s *QuestServiceServer) SetRoute(ctx context.Context, req *pb.SetRouteRequest) (*pb.SetRouteResponse, error) {
+	log.Printf("[QuestService] SetRoute: mainQuestRouteId=%d", req.MainQuestRouteId)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		user.MainQuest.CurrentMainQuestRouteId = req.MainQuestRouteId
+		if seasonId, ok := s.engine.SeasonIdByRouteId[req.MainQuestRouteId]; ok {
+			user.MainQuest.MainQuestSeasonId = seasonId
+		}
+		now := gametime.NowMillis()
+		user.PortalCageStatus.IsCurrentProgress = false
+		user.PortalCageStatus.LatestVersion = now
+	})
+
+	return &pb.SetRouteResponse{
+		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserMainQuestSeasonRoute",
+			"IUserMainQuestMainFlowStatus",
+			"IUserPortalCageStatus",
+		}),
+	}, nil
+}
+
 func (s *QuestServiceServer) SetQuestSceneChoice(ctx context.Context, req *pb.SetQuestSceneChoiceRequest) (*pb.SetQuestSceneChoiceResponse, error) {
 	log.Printf("[QuestService] SetQuestSceneChoice: questSceneId=%d choiceNumber=%d",
 		req.QuestSceneId, req.ChoiceNumber)
