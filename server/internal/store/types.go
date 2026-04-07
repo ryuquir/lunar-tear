@@ -686,8 +686,9 @@ type GimmickUnlockState struct {
 }
 
 type CageOrnamentRewardState struct {
-	CageOrnamentId int32
-	LatestVersion  int64
+	CageOrnamentId      int32
+	AcquisitionDatetime int64
+	LatestVersion       int64
 }
 
 type PartsState struct {

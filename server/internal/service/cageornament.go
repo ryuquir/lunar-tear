@@ -36,7 +36,9 @@ func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.R
 	nowMillis := gametime.NowMillis()
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		user.CageOrnamentRewards[req.CageOrnamentId] = store.CageOrnamentRewardState{
-			CageOrnamentId: req.CageOrnamentId,
+			CageOrnamentId:      req.CageOrnamentId,
+			AcquisitionDatetime: nowMillis,
+			LatestVersion:       nowMillis,
 		}
 		s.granter.GrantFull(user, model.PossessionType(reward.PossessionType), reward.PossessionId, reward.Count, nowMillis)
 	})
@@ -66,7 +68,25 @@ func (s *CageOrnamentServiceServer) ReceiveReward(ctx context.Context, req *pb.R
 
 func (s *CageOrnamentServiceServer) RecordAccess(ctx context.Context, req *pb.RecordAccessRequest) (*pb.RecordAccessResponse, error) {
 	log.Printf("[CageOrnamentService] RecordAccess: cageOrnamentId=%d", req.CageOrnamentId)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		if _, exists := user.CageOrnamentRewards[req.CageOrnamentId]; !exists {
+			user.CageOrnamentRewards[req.CageOrnamentId] = store.CageOrnamentRewardState{
+				CageOrnamentId:      req.CageOrnamentId,
+				AcquisitionDatetime: nowMillis,
+				LatestVersion:       nowMillis,
+			}
+		}
+	})
+
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(
+		userdata.FullClientTableMap(user),
+		[]string{"IUserCageOrnamentReward"},
+	))
+
 	return &pb.RecordAccessResponse{
-		DiffUserData: userdata.EmptyDiff(),
+		DiffUserData: diff,
 	}, nil
 }

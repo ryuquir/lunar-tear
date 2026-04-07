@@ -97,6 +97,10 @@ func init() {
 		s, _ := encodeJSONMaps(sortedCharacterRebirthRecords(user)...)
 		return s
 	})
+	register("IUserCageOrnamentReward", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedCageOrnamentRewardRecords(user)...)
+		return s
+	})
 	registerStatic(
 		"IUserCostumeLevelBonusReleaseStatus",
 		"IUserCostumeLotteryEffect",
@@ -553,6 +557,26 @@ func sortedExploreScoreRecords(user store.UserState) []map[string]any {
 			"maxScore":               row.MaxScore,
 			"maxScoreUpdateDatetime": row.MaxScoreUpdateDatetime,
 			"latestVersion":          row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func sortedCageOrnamentRewardRecords(user store.UserState) []map[string]any {
+	ids := make([]int, 0, len(user.CageOrnamentRewards))
+	for id := range user.CageOrnamentRewards {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+
+	records := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
+		row := user.CageOrnamentRewards[int32(id)]
+		records = append(records, map[string]any{
+			"userId":              user.UserId,
+			"cageOrnamentId":      row.CageOrnamentId,
+			"acquisitionDatetime": row.AcquisitionDatetime,
+			"latestVersion":       row.LatestVersion,
 		})
 	}
 	return records
