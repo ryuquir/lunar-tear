@@ -554,13 +554,13 @@ func buildProtoPromotionItems(entry store.GachaCatalogEntry) []*pb.GachaOddsItem
 
 	items := make([]*pb.GachaOddsItem, 0, len(entry.PromotionItems))
 	for i, pi := range entry.PromotionItems {
-		bonus := &pb.GachaItem{
-			PossessionType: pi.PossessionType,
-			PossessionId:   pi.PossessionId,
-			Count:          1,
-		}
-		if isMaterial {
-			bonus = &pb.GachaItem{}
+		bonus := &pb.GachaItem{}
+		if !isMaterial && pi.BonusPossessionType != 0 {
+			bonus = &pb.GachaItem{
+				PossessionType: pi.BonusPossessionType,
+				PossessionId:   pi.BonusPossessionId,
+				Count:          1,
+			}
 		}
 		items = append(items, &pb.GachaOddsItem{
 			GachaItem: &pb.GachaItem{

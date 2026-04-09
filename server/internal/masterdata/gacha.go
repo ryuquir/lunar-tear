@@ -35,10 +35,7 @@ type GachaMedalInfo struct {
 	ConversionRate      int32
 }
 
-const (
-	chapterGachaIdBase  int32 = 200000
-	maxMainQuestChapter int32 = 38
-)
+const chapterGachaIdBase int32 = 200000
 
 func LoadGachaCatalog() ([]store.GachaCatalogEntry, map[int32]GachaMedalInfo, error) {
 	medals, err := utils.ReadJSON[gachaMedalRow]("EntityMGachaMedalTable.json")
@@ -117,9 +114,6 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, map[int32]GachaMedalInfo, er
 		relMainQuest := int32(0)
 		if isChapter {
 			relMainQuest = gachaId - chapterGachaIdBase
-			if relMainQuest < 1 || relMainQuest > maxMainQuestChapter {
-				relMainQuest = 1
-			}
 		}
 
 		var descriptionTextId int32
@@ -149,19 +143,12 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, map[int32]GachaMedalInfo, er
 	}
 
 	for groupId, steps := range stepupSteps {
-		if len(steps) == 0 {
-			continue
-		}
 		first := steps[0]
 		gachaId := groupId
 
-		medal, hasMedal := gachaToMedal[first.DestinationDomainId]
-		var medalId int32
-		var medalConsumableId int32
-		if hasMedal {
-			medalId = medal.GachaMedalId
-			medalConsumableId = medal.ConsumableItemId
-		}
+		medal := gachaToMedal[first.DestinationDomainId]
+		medalId := medal.GachaMedalId
+		medalConsumableId := medal.ConsumableItemId
 
 		pricePhases := buildStepUpPricePhases(gachaId, len(steps))
 
@@ -196,42 +183,59 @@ func LoadGachaCatalog() ([]store.GachaCatalogEntry, map[int32]GachaMedalInfo, er
 }
 
 const chapterPromoMaxItems = 4
+const maxSlideFeatured = 13
 
 func EnrichCatalogPromotions(entries []store.GachaCatalogEntry, pool *GachaCatalog) {
-	ssrCostumes := pool.CostumesByRarity[model.RaritySSRare]
-	ssrWeapons := pool.WeaponsByRarity[model.RaritySSRare]
-
 	for i := range entries {
-		if len(entries[i].PromotionItems) > 0 {
-			continue
-		}
-
 		if entries[i].GachaLabelType == model.GachaLabelChapter {
 			entries[i].PromotionItems = buildChapterPromotionItems(pool.Materials)
 			continue
 		}
 
-		isMaterialBanner := model.IsMaterialBanner(entries[i].GachaLabelType)
+		featured := pool.FeaturedByGacha[entries[i].GachaId]
 
-		var items []store.GachaPromotionItem
-
-		if featured, ok := pool.FeaturedByGacha[entries[i].GachaId]; ok {
-			maxCostumes := 2
-			if isMaterialBanner {
-				maxCostumes = 1
+		maxRarity := int32(0)
+		for _, c := range featured.Costumes {
+			if c.RarityType > maxRarity {
+				maxRarity = c.RarityType
 			}
-			for _, c := range featured.Costumes[:min(maxCostumes, len(featured.Costumes))] {
-				items = append(items, toPromoItem(c))
-			}
-			if !isMaterialBanner {
-				for _, w := range featured.Weapons[:min(1, len(featured.Weapons))] {
-					items = append(items, toPromoItem(w))
-				}
+		}
+		for _, w := range featured.Weapons {
+			if w.RarityType > maxRarity {
+				maxRarity = w.RarityType
 			}
 		}
 
-		if len(items) == 0 {
-			items = buildFallbackPromotionItems(entries[i].GachaId, isMaterialBanner, ssrCostumes, ssrWeapons)
+		var topCostumes []GachaPoolItem
+		for _, c := range featured.Costumes {
+			if c.RarityType == maxRarity {
+				topCostumes = append(topCostumes, c)
+			}
+		}
+		var topWeapons []GachaPoolItem
+		for _, w := range featured.Weapons {
+			if w.RarityType == maxRarity {
+				topWeapons = append(topWeapons, w)
+			}
+		}
+
+		if len(topCostumes)+len(topWeapons) > maxSlideFeatured {
+			topCostumes = topCostumes[:min(3, len(topCostumes))]
+			topWeapons = topWeapons[:min(2, len(topWeapons))]
+		}
+
+		var items []store.GachaPromotionItem
+		if entries[i].GachaModeType == model.GachaModeStepup && len(topCostumes) > 0 {
+			items = append(items, toPromoItemWithBonus(topCostumes[0], pool))
+			wid := pool.CostumeWeaponMap[topCostumes[0].PossessionId]
+			items = append(items, toPromoItem(pool.WeaponById[wid]))
+		} else {
+			for _, c := range topCostumes {
+				items = append(items, toPromoItemWithBonus(c, pool))
+			}
+			for _, w := range topWeapons {
+				items = append(items, toPromoItemWithBonus(w, pool))
+			}
 		}
 
 		entries[i].PromotionItems = items
@@ -245,29 +249,25 @@ func EnrichCatalogPromotions(entries []store.GachaCatalogEntry, pool *GachaCatal
 	})
 }
 
-func buildFallbackPromotionItems(gachaId int32, isMaterial bool, ssrCostumes, ssrWeapons []GachaPoolItem) []store.GachaPromotionItem {
-	if len(ssrCostumes) == 0 {
-		return nil
-	}
-	var items []store.GachaPromotionItem
-	idx := int(gachaId) % len(ssrCostumes)
-	items = append(items, toPromoItem(ssrCostumes[idx]))
-
-	if !isMaterial && len(ssrCostumes) > 1 {
-		items = append(items, toPromoItem(ssrCostumes[(idx+1)%len(ssrCostumes)]))
-	}
-	if !isMaterial && len(ssrWeapons) > 0 {
-		items = append(items, toPromoItem(ssrWeapons[int(gachaId)%len(ssrWeapons)]))
-	}
-	return items
-}
-
 func toPromoItem(item GachaPoolItem) store.GachaPromotionItem {
 	return store.GachaPromotionItem{
 		PossessionType: item.PossessionType,
 		PossessionId:   item.PossessionId,
 		IsTarget:       true,
 	}
+}
+
+func toPromoItemWithBonus(item GachaPoolItem, pool *GachaCatalog) store.GachaPromotionItem {
+	pi := store.GachaPromotionItem{
+		PossessionType: item.PossessionType,
+		PossessionId:   item.PossessionId,
+		IsTarget:       true,
+	}
+	if item.PossessionType == int32(model.PossessionTypeCostume) {
+		pi.BonusPossessionType = int32(model.PossessionTypeWeapon)
+		pi.BonusPossessionId = pool.CostumeWeaponMap[item.PossessionId]
+	}
+	return pi
 }
 
 func buildChapterPromotionItems(materials []GachaPoolItem) []store.GachaPromotionItem {

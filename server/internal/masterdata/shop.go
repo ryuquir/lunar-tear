@@ -52,13 +52,19 @@ type shopItemCellRow struct {
 	ShopItemId     int32 `json:"ShopItemId"`
 }
 
+type ExchangeShopCell struct {
+	SortOrder  int32
+	ShopItemId int32
+}
+
 type ShopCatalog struct {
-	Items            map[int32]ShopItemRow
-	Contents         map[int32][]ShopContentRow
-	Effects          map[int32][]ShopContentEffectRow
-	MaxStaminaMillis map[int32]int32 // level -> max stamina in millis
-	LimitedStock     map[int32]int32 // stock id -> max count
-	ItemShopPool     []int32         // shop item IDs for the replaceable item shop, sorted by cell sort order
+	Items             map[int32]ShopItemRow
+	Contents          map[int32][]ShopContentRow
+	Effects           map[int32][]ShopContentEffectRow
+	MaxStaminaMillis  map[int32]int32              // level -> max stamina in millis
+	LimitedStock      map[int32]int32              // stock id -> max count
+	ItemShopPool      []int32                      // shop item IDs for the replaceable item shop, sorted by cell sort order
+	ExchangeShopCells map[int32][]ExchangeShopCell // shopId -> sorted cells for exchange shops
 }
 
 type userLevelEntry struct {
@@ -124,37 +130,46 @@ func LoadShopCatalog() (*ShopCatalog, error) {
 		return nil, fmt.Errorf("load shop item cell table: %w", err)
 	}
 
-	var itemShopCellGroupId int32
-	for _, s := range shops {
-		if s.ShopGroupType == model.ShopGroupTypeItemShop {
-			itemShopCellGroupId = s.ShopItemCellGroupId
-			break
-		}
+	cellIdToItemId := make(map[int32]int32, len(cells))
+	for _, c := range cells {
+		cellIdToItemId[c.ShopItemCellId] = c.ShopItemId
 	}
 
-	if itemShopCellGroupId != 0 {
-		cellIdToItemId := make(map[int32]int32, len(cells))
-		for _, c := range cells {
-			cellIdToItemId[c.ShopItemCellId] = c.ShopItemId
+	cellGroupByCGId := make(map[int32][]shopItemCellGroupRow, len(cellGroups))
+	for _, cg := range cellGroups {
+		cellGroupByCGId[cg.ShopItemCellGroupId] = append(cellGroupByCGId[cg.ShopItemCellGroupId], cg)
+	}
+
+	catalog.ExchangeShopCells = make(map[int32][]ExchangeShopCell)
+	for _, s := range shops {
+		entries := cellGroupByCGId[s.ShopItemCellGroupId]
+		if len(entries) == 0 {
+			continue
 		}
 
-		type sortedCell struct {
-			sortOrder  int32
-			shopItemId int32
-		}
-		var poolCells []sortedCell
-		for _, cg := range cellGroups {
-			if cg.ShopItemCellGroupId != itemShopCellGroupId {
-				continue
+		switch s.ShopGroupType {
+		case model.ShopGroupTypeItemShop:
+			var poolCells []ExchangeShopCell
+			for _, cg := range entries {
+				if itemId, ok := cellIdToItemId[cg.ShopItemCellId]; ok {
+					poolCells = append(poolCells, ExchangeShopCell{cg.SortOrder, itemId})
+				}
 			}
-			if itemId, ok := cellIdToItemId[cg.ShopItemCellId]; ok {
-				poolCells = append(poolCells, sortedCell{cg.SortOrder, itemId})
+			sort.Slice(poolCells, func(i, j int) bool { return poolCells[i].SortOrder < poolCells[j].SortOrder })
+			catalog.ItemShopPool = make([]int32, len(poolCells))
+			for i, pc := range poolCells {
+				catalog.ItemShopPool[i] = pc.ShopItemId
 			}
-		}
-		sort.Slice(poolCells, func(i, j int) bool { return poolCells[i].sortOrder < poolCells[j].sortOrder })
-		catalog.ItemShopPool = make([]int32, len(poolCells))
-		for i, pc := range poolCells {
-			catalog.ItemShopPool[i] = pc.shopItemId
+
+		case model.ShopGroupTypeExchangeShop:
+			var sc []ExchangeShopCell
+			for _, cg := range entries {
+				if itemId, ok := cellIdToItemId[cg.ShopItemCellId]; ok {
+					sc = append(sc, ExchangeShopCell{cg.SortOrder, itemId})
+				}
+			}
+			sort.Slice(sc, func(i, j int) bool { return sc[i].SortOrder < sc[j].SortOrder })
+			catalog.ExchangeShopCells[s.ShopId] = sc
 		}
 	}
 

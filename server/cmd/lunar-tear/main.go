@@ -80,6 +80,14 @@ func main() {
 	log.Printf("gacha pool loaded: costumes=%d rarities, weapons=%d rarities, materials=%d",
 		len(gachaPool.CostumesByRarity), len(gachaPool.WeaponsByRarity), len(gachaPool.Materials))
 
+	shopCatalog, err := masterdata.LoadShopCatalog()
+	if err != nil {
+		log.Fatalf("load shop catalog: %v", err)
+	}
+	log.Printf("shop catalog loaded: %d items, %d content groups, %d exchange shops",
+		len(shopCatalog.Items), len(shopCatalog.Contents), len(shopCatalog.ExchangeShopCells))
+
+	gachaPool.BuildShopFeatured(shopCatalog)
 	gachaPool.BuildFeaturedMapping(gachaEntries)
 	gachaPool.BuildBannerPools(gachaEntries)
 	masterdata.EnrichCatalogPromotions(gachaEntries, gachaPool)
@@ -106,12 +114,6 @@ func main() {
 	loginBonusCatalog := masterdata.LoadLoginBonusCatalog()
 	characterViewerCatalog := masterdata.LoadCharacterViewerCatalog(conditionResolver)
 	omikujiCatalog := masterdata.LoadOmikujiCatalog()
-
-	shopCatalog, err := masterdata.LoadShopCatalog()
-	if err != nil {
-		log.Fatalf("load shop catalog: %v", err)
-	}
-	log.Printf("shop catalog loaded: %d items, %d content groups", len(shopCatalog.Items), len(shopCatalog.Contents))
 
 	materialCatalog, err := masterdata.LoadMaterialCatalog()
 	if err != nil {

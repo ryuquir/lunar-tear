@@ -816,9 +816,11 @@ type GachaBonusEntry struct {
 }
 
 type GachaPromotionItem struct {
-	PossessionType int32
-	PossessionId   int32
-	IsTarget       bool
+	PossessionType      int32
+	PossessionId        int32
+	IsTarget            bool
+	BonusPossessionType int32
+	BonusPossessionId   int32
 }
 
 type GachaBannerState struct {
@@ -827,8 +829,6 @@ type GachaBannerState struct {
 	StepNumber    int32
 	LoopCount     int32
 	DrawCount     int32
-	DailyDraws    int32
-	LastDrawDate  int64
 	BoxDrewCounts map[int32]int32
 	BoxNumber     int32
 }

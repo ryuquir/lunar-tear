@@ -28,18 +28,21 @@ type BannerPool struct {
 	Featured         []GachaPoolItem
 }
 
+type ShopFeaturedEntry struct {
+	CostumeId int32
+	WeaponId  int32
+}
+
 type GachaCatalog struct {
-	CostumesByRarity   map[int32][]GachaPoolItem
-	WeaponsByRarity    map[int32][]GachaPoolItem
-	Materials          []GachaPoolItem
-	CostumeById        map[int32]GachaPoolItem
-	WeaponById         map[int32]GachaPoolItem
-	CostumeWeaponMap   map[int32]int32 // costumeId -> paired weaponId
-	FeaturedByGacha    map[int32]FeaturedSet
-	BannerPools        map[int32]*BannerPool
-	costumesByTermDate map[int64][]int32
-	weaponsByTermDate  map[int64][]int32
-	sortedTermDates    []int64
+	CostumesByRarity    map[int32][]GachaPoolItem
+	WeaponsByRarity     map[int32][]GachaPoolItem
+	Materials           []GachaPoolItem
+	CostumeById         map[int32]GachaPoolItem
+	WeaponById          map[int32]GachaPoolItem
+	CostumeWeaponMap    map[int32]int32 // costumeId -> paired weaponId
+	FeaturedByGacha     map[int32]FeaturedSet
+	BannerPools         map[int32]*BannerPool
+	ShopFeaturedByMedal map[int32][]ShopFeaturedEntry // consumableId -> paired entries
 }
 
 type costumePoolRow struct {
@@ -65,30 +68,10 @@ type catalogWeaponRow struct {
 	CatalogTermId int32 `json:"CatalogTermId"`
 }
 
-type catalogTermRow struct {
-	CatalogTermId int32 `json:"CatalogTermId"`
-	StartDatetime int64 `json:"StartDatetime"`
-}
-
 type materialPoolRow struct {
 	MaterialId   int32 `json:"MaterialId"`
 	MaterialType int32 `json:"MaterialType"`
 	RarityType   int32 `json:"RarityType"`
-}
-
-const featuredWindowMs = 3 * 24 * 3600 * 1000 // 3-day tolerance for matching
-const farFutureDatetime int64 = 4_000_000_000_000
-
-func trackTermDate(dateMap map[int64][]int32, id int32, termIdMap map[int32]int32, termDateById map[int32]int64) {
-	tid, ok := termIdMap[id]
-	if !ok {
-		return
-	}
-	dt, ok := termDateById[tid]
-	if !ok || dt >= farFutureDatetime {
-		return
-	}
-	dateMap[dt] = append(dateMap[dt], id)
 }
 
 func LoadGachaPool() (*GachaCatalog, error) {
@@ -112,15 +95,6 @@ func LoadGachaPool() (*GachaCatalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load material table: %w", err)
 	}
-	catalogTerms, err := utils.ReadJSON[catalogTermRow]("EntityMCatalogTermTable.json")
-	if err != nil {
-		return nil, fmt.Errorf("load catalog term table: %w", err)
-	}
-
-	termDateById := make(map[int32]int64, len(catalogTerms))
-	for _, t := range catalogTerms {
-		termDateById[t.CatalogTermId] = t.StartDatetime
-	}
 
 	catalogCostumeSet := make(map[int32]bool, len(catalogCostumes))
 	costumeTermId := make(map[int32]int32, len(catalogCostumes))
@@ -129,10 +103,8 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		costumeTermId[c.CostumeId] = c.CatalogTermId
 	}
 	catalogWeaponSet := make(map[int32]bool, len(catalogWeapons))
-	weaponTermId := make(map[int32]int32, len(catalogWeapons))
 	for _, w := range catalogWeapons {
 		catalogWeaponSet[w.WeaponId] = true
-		weaponTermId[w.WeaponId] = w.CatalogTermId
 	}
 
 	costumeWeaponType := make(map[int32]int32, len(costumes))
@@ -148,14 +120,12 @@ func LoadGachaPool() (*GachaCatalog, error) {
 	}
 
 	pool := &GachaCatalog{
-		CostumesByRarity:   make(map[int32][]GachaPoolItem),
-		WeaponsByRarity:    make(map[int32][]GachaPoolItem),
-		CostumeById:        make(map[int32]GachaPoolItem),
-		WeaponById:         make(map[int32]GachaPoolItem),
-		CostumeWeaponMap:   make(map[int32]int32),
-		FeaturedByGacha:    make(map[int32]FeaturedSet),
-		costumesByTermDate: make(map[int64][]int32),
-		weaponsByTermDate:  make(map[int64][]int32),
+		CostumesByRarity: make(map[int32][]GachaPoolItem),
+		WeaponsByRarity:  make(map[int32][]GachaPoolItem),
+		CostumeById:      make(map[int32]GachaPoolItem),
+		WeaponById:       make(map[int32]GachaPoolItem),
+		CostumeWeaponMap: make(map[int32]int32),
+		FeaturedByGacha:  make(map[int32]FeaturedSet),
 	}
 
 	for _, c := range costumes {
@@ -173,14 +143,10 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		}
 		pool.CostumesByRarity[c.RarityType] = append(pool.CostumesByRarity[c.RarityType], item)
 		pool.CostumeById[c.CostumeId] = item
-		trackTermDate(pool.costumesByTermDate, c.CostumeId, costumeTermId, termDateById)
 	}
 
 	for _, w := range weapons {
 		if !catalogWeaponSet[w.WeaponId] {
-			continue
-		}
-		if w.RarityType < model.RarityRare {
 			continue
 		}
 		item := GachaPoolItem{
@@ -190,22 +156,7 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		}
 		pool.WeaponsByRarity[w.RarityType] = append(pool.WeaponsByRarity[w.RarityType], item)
 		pool.WeaponById[w.WeaponId] = item
-		trackTermDate(pool.weaponsByTermDate, w.WeaponId, weaponTermId, termDateById)
 	}
-
-	dateSet := make(map[int64]bool)
-	for dt := range pool.costumesByTermDate {
-		dateSet[dt] = true
-	}
-	for dt := range pool.weaponsByTermDate {
-		dateSet[dt] = true
-	}
-	for dt := range dateSet {
-		pool.sortedTermDates = append(pool.sortedTermDates, dt)
-	}
-	sort.Slice(pool.sortedTermDates, func(i, j int) bool {
-		return pool.sortedTermDates[i] < pool.sortedTermDates[j]
-	})
 
 	type weaponKey struct {
 		TermId     int32
@@ -229,16 +180,10 @@ func LoadGachaPool() (*GachaCatalog, error) {
 
 	exact, pattern, bestGuess := 0, 0, 0
 	for costumeId, item := range pool.CostumeById {
-		if item.RarityType < model.RaritySRare {
-			continue
-		}
 		tid := costumeTermId[costumeId]
 		wt := costumeWeaponType[costumeId]
 		k := weaponKey{TermId: tid, WeaponType: wt, Rarity: item.RarityType}
 		candidates := weaponsByKey[k]
-		if len(candidates) == 0 {
-			continue
-		}
 		if len(candidates) == 1 {
 			pool.CostumeWeaponMap[costumeId] = candidates[0]
 			exact++
@@ -273,40 +218,77 @@ func LoadGachaPool() (*GachaCatalog, error) {
 	return pool, nil
 }
 
+func (pool *GachaCatalog) BuildShopFeatured(shop *ShopCatalog) {
+	pool.ShopFeaturedByMedal = make(map[int32][]ShopFeaturedEntry)
+	shopPairs := 0
+	for _, cells := range shop.ExchangeShopCells {
+		consumableId := shop.Items[cells[0].ShopItemId].PriceId
+
+		var entries []ShopFeaturedEntry
+		for _, cell := range cells {
+			contents := shop.Contents[cell.ShopItemId]
+			var costumeId, weaponId int32
+			for _, c := range contents {
+				switch c.PossessionType {
+				case int32(model.PossessionTypeCostume):
+					costumeId = c.PossessionId
+				case int32(model.PossessionTypeWeapon):
+					weaponId = c.PossessionId
+				}
+			}
+			if costumeId == 0 && weaponId == 0 {
+				continue
+			}
+			entries = append(entries, ShopFeaturedEntry{CostumeId: costumeId, WeaponId: weaponId})
+			if costumeId != 0 && weaponId != 0 {
+				pool.CostumeWeaponMap[costumeId] = weaponId
+				shopPairs++
+			}
+		}
+		if len(entries) > 0 {
+			pool.ShopFeaturedByMedal[consumableId] = entries
+		}
+	}
+	log.Printf("[GachaPool] shop featured: %d consumables, %d costume-weapon pairs overridden", len(pool.ShopFeaturedByMedal), shopPairs)
+}
+
 func (pool *GachaCatalog) BuildFeaturedMapping(entries []store.GachaCatalogEntry) {
 	matched := 0
 	for _, entry := range entries {
-		if entry.StartDatetime <= 0 || entry.StartDatetime >= farFutureDatetime {
+		if entry.MedalConsumableItemId == 0 {
+			continue
+		}
+		shopEntries, ok := pool.ShopFeaturedByMedal[entry.MedalConsumableItemId]
+		if !ok || len(shopEntries) == 0 {
 			continue
 		}
 
-		var ssrCostumes []GachaPoolItem
-		var ssrWeapons []GachaPoolItem
-
-		costumeIds := pool.findItemsByDate(pool.costumesByTermDate, entry.StartDatetime)
-		for _, cid := range costumeIds {
-			if item, ok := pool.CostumeById[cid]; ok && item.RarityType >= model.RaritySSRare {
-				ssrCostumes = append(ssrCostumes, item)
-			}
-		}
-		weaponIds := pool.findItemsByDate(pool.weaponsByTermDate, entry.StartDatetime)
-		for _, wid := range weaponIds {
-			if item, ok := pool.WeaponById[wid]; ok && item.RarityType >= model.RaritySSRare {
-				ssrWeapons = append(ssrWeapons, item)
+		seenCostume := make(map[int32]bool)
+		linkedWeapons := make(map[int32]bool)
+		var costumes []GachaPoolItem
+		for _, se := range shopEntries {
+			if se.CostumeId != 0 && !seenCostume[se.CostumeId] {
+				costumes = append(costumes, pool.CostumeById[se.CostumeId])
+				seenCostume[se.CostumeId] = true
+				linkedWeapons[se.WeaponId] = true
 			}
 		}
 
-		if len(ssrCostumes) == 0 && len(ssrWeapons) == 0 {
-			continue
+		seenWeapon := make(map[int32]bool)
+		var weapons []GachaPoolItem
+		for _, se := range shopEntries {
+			if se.WeaponId != 0 && !linkedWeapons[se.WeaponId] && !seenWeapon[se.WeaponId] {
+				if item, ok := pool.WeaponById[se.WeaponId]; ok {
+					weapons = append(weapons, item)
+					seenWeapon[se.WeaponId] = true
+				}
+			}
 		}
 
-		pool.FeaturedByGacha[entry.GachaId] = FeaturedSet{
-			Costumes: ssrCostumes,
-			Weapons:  ssrWeapons,
-		}
+		pool.FeaturedByGacha[entry.GachaId] = FeaturedSet{Costumes: costumes, Weapons: weapons}
 		matched++
 	}
-	log.Printf("[GachaPool] featured mapping: %d/%d banners matched via catalog terms", matched, len(entries))
+	log.Printf("[GachaPool] featured mapping: %d/%d banners matched via shop", matched, len(entries))
 }
 
 func (pool *GachaCatalog) BuildBannerPools(entries []store.GachaCatalogEntry) {
@@ -315,6 +297,7 @@ func (pool *GachaCatalog) BuildBannerPools(entries []store.GachaCatalogEntry) {
 	for _, fs := range pool.FeaturedByGacha {
 		for _, c := range fs.Costumes {
 			allFeaturedCostumes[c.PossessionId] = true
+			allFeaturedWeapons[pool.CostumeWeaponMap[c.PossessionId]] = true
 		}
 		for _, w := range fs.Weapons {
 			allFeaturedWeapons[w.PossessionId] = true
@@ -356,14 +339,17 @@ func (pool *GachaCatalog) BuildBannerPools(entries []store.GachaCatalogEntry) {
 		for rarity, items := range commonCostumes {
 			bannerCostumes[rarity] = append(bannerCostumes[rarity], items...)
 		}
-		for _, c := range fs.Costumes {
-			bannerCostumes[c.RarityType] = append(bannerCostumes[c.RarityType], c)
-			allFeatured = append(allFeatured, c)
-		}
-
 		bannerWeapons := make(map[int32][]GachaPoolItem)
 		for rarity, items := range commonWeapons {
 			bannerWeapons[rarity] = append(bannerWeapons[rarity], items...)
+		}
+		for _, c := range fs.Costumes {
+			bannerCostumes[c.RarityType] = append(bannerCostumes[c.RarityType], c)
+			allFeatured = append(allFeatured, c)
+			wid := pool.CostumeWeaponMap[c.PossessionId]
+			w := pool.WeaponById[wid]
+			bannerWeapons[w.RarityType] = append(bannerWeapons[w.RarityType], w)
+			allFeatured = append(allFeatured, w)
 		}
 		for _, w := range fs.Weapons {
 			bannerWeapons[w.RarityType] = append(bannerWeapons[w.RarityType], w)
@@ -379,26 +365,4 @@ func (pool *GachaCatalog) BuildBannerPools(entries []store.GachaCatalogEntry) {
 
 	log.Printf("[GachaPool] banner pools: %d banners, %d featured costumes stripped, %d featured weapons stripped",
 		len(pool.BannerPools), len(allFeaturedCostumes), len(allFeaturedWeapons))
-}
-
-func (pool *GachaCatalog) findItemsByDate(dateMap map[int64][]int32, targetDate int64) []int32 {
-	if items, ok := dateMap[targetDate]; ok {
-		return items
-	}
-	var best int64
-	bestDist := int64(featuredWindowMs + 1)
-	for _, dt := range pool.sortedTermDates {
-		dist := targetDate - dt
-		if dist < 0 {
-			dist = -dist
-		}
-		if dist <= featuredWindowMs && dist < bestDist {
-			bestDist = dist
-			best = dt
-		}
-	}
-	if bestDist <= featuredWindowMs {
-		return dateMap[best]
-	}
-	return nil
 }

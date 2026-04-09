@@ -151,21 +151,25 @@ func rollOne(bp *masterdata.BannerPool, rates []RateTier, totalWeight int) Drawn
 }
 
 func tryFeaturedRateUp(bp *masterdata.BannerPool, tier RateTier) (DrawnItem, bool) {
+	var matches []masterdata.GachaPoolItem
 	for _, f := range bp.Featured {
-		if f.PossessionType != tier.PossessionType || f.RarityType != tier.RarityType {
-			continue
+		if f.PossessionType == tier.PossessionType && f.RarityType == tier.RarityType {
+			matches = append(matches, f)
 		}
-		if rand.Intn(model.FeaturedRateUpDenom) >= model.FeaturedRateUpPercent {
-			return DrawnItem{}, false
-		}
-		return DrawnItem{
-			PossessionType: f.PossessionType,
-			PossessionId:   f.PossessionId,
-			RarityType:     f.RarityType,
-			CharacterId:    f.CharacterId,
-		}, true
 	}
-	return DrawnItem{}, false
+	if len(matches) == 0 {
+		return DrawnItem{}, false
+	}
+	if rand.Intn(model.FeaturedRateUpDenom) >= model.FeaturedRateUpPercent {
+		return DrawnItem{}, false
+	}
+	f := matches[rand.Intn(len(matches))]
+	return DrawnItem{
+		PossessionType: f.PossessionType,
+		PossessionId:   f.PossessionId,
+		RarityType:     f.RarityType,
+		CharacterId:    f.CharacterId,
+	}, true
 }
 
 func rollAtMinRarity(bp *masterdata.BannerPool, rates []RateTier, minRarity model.RarityType) DrawnItem {
