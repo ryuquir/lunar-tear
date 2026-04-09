@@ -6,14 +6,14 @@ import "proto/data.proto";
 
 package apb.api.contentsstory;
 
-service ContentsstoryService {
-	rpc RegisterPlayed (RegisterPlayedRequest) returns (RegisterPlayedResponse);
+service ContentsStoryService {
+	rpc RegisterPlayed (ContentsStoryRegisterPlayedRequest) returns (ContentsStoryRegisterPlayedResponse);
 }
 
-message RegisterPlayedRequest {
+message ContentsStoryRegisterPlayedRequest {
 	int32 contentsStoryId = 1;
 }
 
-message RegisterPlayedResponse {
+message ContentsStoryRegisterPlayedResponse {
 	map<string, apb.api.data.DiffData> diffUserData = 99;
 }

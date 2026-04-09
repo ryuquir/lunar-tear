@@ -178,6 +178,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 		WeaponNotes:           make(map[int32]store.WeaponNoteState),
 		NaviCutInPlayed:       make(map[int32]bool),
 		ViewedMovies:          make(map[int32]int64),
+		ContentsStories:       make(map[int32]int64),
 		DrawnOmikuji:          make(map[int32]int64),
 		PremiumItems:          make(map[int32]int64),
 		DokanConfirmed:        make(map[int32]bool),

@@ -141,6 +141,7 @@ func registerServices(
 	pb.RegisterFriendServiceServer(srv, service.NewFriendServiceServer(userStore, userStore))
 	pb.RegisterLoginBonusServiceServer(srv, service.NewLoginBonusServiceServer(userStore, userStore, loginBonusCatalog))
 	pb.RegisterNaviCutInServiceServer(srv, service.NewNaviCutInServiceServer(userStore, userStore))
+	pb.RegisterContentsStoryServiceServer(srv, service.NewContentsStoryServiceServer(userStore, userStore))
 	pb.RegisterDokanServiceServer(srv, service.NewDokanServiceServer(userStore, userStore))
 	pb.RegisterPortalCageServiceServer(srv, service.NewPortalCageServiceServer(userStore, userStore))
 	pb.RegisterCharacterViewerServiceServer(srv, service.NewCharacterViewerServiceServer(userStore, userStore, characterViewerCatalog))

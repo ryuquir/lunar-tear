@@ -75,6 +75,7 @@ type UserState struct {
 	DeckParts             map[string][]string
 	NaviCutInPlayed       map[int32]bool
 	ViewedMovies          map[int32]int64
+	ContentsStories       map[int32]int64
 	DrawnOmikuji          map[int32]int64
 	PremiumItems          map[int32]int64
 	DokanConfirmed        map[int32]bool
@@ -180,6 +181,9 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.ViewedMovies == nil {
 		u.ViewedMovies = make(map[int32]int64)
+	}
+	if u.ContentsStories == nil {
+		u.ContentsStories = make(map[int32]int64)
 	}
 	if u.DrawnOmikuji == nil {
 		u.DrawnOmikuji = make(map[int32]int64)
