@@ -229,6 +229,9 @@ func (u *UserState) EnsureMaps() {
 	if u.Gimmick.Unlocks == nil {
 		u.Gimmick.Unlocks = make(map[GimmickKey]GimmickUnlockState)
 	}
+	if u.Gacha.BannerStates == nil {
+		u.Gacha.BannerStates = make(map[int32]GachaBannerState)
+	}
 }
 
 type ExploreState struct {
@@ -752,7 +755,9 @@ type GachaState struct {
 	RewardAvailable        bool
 	TodaysCurrentDrawCount int32
 	DailyMaxCount          int32
+	LastRewardDrawDate     int64
 	ConvertedGachaMedal    ConvertedGachaMedalState
+	BannerStates           map[int32]GachaBannerState
 }
 
 type ConvertedGachaMedalState struct {
@@ -784,6 +789,44 @@ type UserShopReplaceableLineupState struct {
 	LatestVersion int64
 }
 
+type GachaPricePhaseEntry struct {
+	PhaseId        int32
+	PriceType      int32
+	PriceId        int32
+	Price          int32
+	RegularPrice   int32
+	DrawCount      int32
+	FixedRarityMin int32
+	FixedCount     int32
+	LimitExecCount int32
+	StepNumber     int32
+	Bonuses        []GachaBonusEntry
+}
+
+type GachaBonusEntry struct {
+	PossessionType int32
+	PossessionId   int32
+	Count          int32
+}
+
+type GachaPromotionItem struct {
+	PossessionType int32
+	PossessionId   int32
+	IsTarget       bool
+}
+
+type GachaBannerState struct {
+	GachaId       int32
+	MedalCount    int32
+	StepNumber    int32
+	LoopCount     int32
+	DrawCount     int32
+	DailyDraws    int32
+	LastDrawDate  int64
+	BoxDrewCounts map[int32]int32
+	BoxNumber     int32
+}
+
 type GachaCatalogEntry struct {
 	GachaId                    int32
 	GachaLabelType             int32
@@ -798,13 +841,18 @@ type GachaCatalogEntry struct {
 	RelatedEventQuestChapterId int32
 	PromotionMovieAssetId      int32
 	GachaMedalId               int32
+	MedalConsumableItemId      int32
 	GachaDecorationType        int32
 	SortOrder                  int32
 	IsInactive                 bool
 	InformationId              int32
-	GachaMode                  []byte
 	BannerAssetName            string
-	StepupGroupId              int32
+	GroupId                    int32
+	CeilingCount               int32
+	PricePhases                []GachaPricePhaseEntry
+	PromotionItems             []GachaPromotionItem
+	DescriptionTextId          int32
+	MaxStepNumber              int32
 }
 
 type CharacterBoardState struct {

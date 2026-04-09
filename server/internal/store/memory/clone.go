@@ -53,10 +53,12 @@ func cloneUserState(u store.UserState) store.UserState {
 		RewardAvailable:        u.Gacha.RewardAvailable,
 		TodaysCurrentDrawCount: u.Gacha.TodaysCurrentDrawCount,
 		DailyMaxCount:          u.Gacha.DailyMaxCount,
+		LastRewardDrawDate:     u.Gacha.LastRewardDrawDate,
 		ConvertedGachaMedal: store.ConvertedGachaMedalState{
 			ConvertedMedalPossession: append([]store.ConsumableItemState(nil), u.Gacha.ConvertedGachaMedal.ConvertedMedalPossession...),
 			ObtainPossession:         cloneConsumableItemPtr(u.Gacha.ConvertedGachaMedal.ObtainPossession),
 		},
+		BannerStates: cloneBannerStates(u.Gacha.BannerStates),
 	}
 	out.Gifts = store.GiftState{
 		NotReceived: cloneNotReceivedGifts(u.Gifts.NotReceived),
@@ -71,7 +73,21 @@ func cloneUserState(u store.UserState) store.UserState {
 
 func cloneGachaCatalogEntry(entry store.GachaCatalogEntry) store.GachaCatalogEntry {
 	out := entry
-	out.GachaMode = append([]byte(nil), entry.GachaMode...)
+	out.PricePhases = append([]store.GachaPricePhaseEntry(nil), entry.PricePhases...)
+	out.PromotionItems = append([]store.GachaPromotionItem(nil), entry.PromotionItems...)
+	return out
+}
+
+func cloneBannerStates(m map[int32]store.GachaBannerState) map[int32]store.GachaBannerState {
+	if m == nil {
+		return nil
+	}
+	out := make(map[int32]store.GachaBannerState, len(m))
+	for k, v := range m {
+		bs := v
+		bs.BoxDrewCounts = maps.Clone(v.BoxDrewCounts)
+		out[k] = bs
+	}
 	return out
 }
 

@@ -32,9 +32,9 @@ type starterItemDef struct {
 }
 
 var defaultStarterItems = []starterItemDef{
-	{Type: model.PossessionTypeFreeGem, Qty: 300},
+	{Type: model.PossessionTypeFreeGem, Id: 0, Qty: 300},
 	{Type: model.PossessionTypeConsumableItem, Id: 9001, Qty: 1000},
-	{Type: model.PossessionTypeConsumableItem, Id: 2, Qty: 1000},
+	{Type: model.PossessionTypeConsumableItem, Id: model.ConsumableIdChapterTicket, Qty: 1000},
 	{Type: model.PossessionTypeConsumableItem, Id: 5001, Qty: 1000},
 	{Type: model.PossessionTypeConsumableItem, Id: 5002, Qty: 1000},
 	{Type: model.PossessionTypeConsumableItem, Id: 5003, Qty: 1000},
@@ -130,6 +130,7 @@ func seedUserState(userId int64, uuid string, nowMillis int64, sceneId int32, sn
 			ConvertedGachaMedal: store.ConvertedGachaMedalState{
 				ConvertedMedalPossession: []store.ConsumableItemState{},
 			},
+			BannerStates: make(map[int32]store.GachaBannerState),
 		},
 		MainQuest: store.MainQuestState{
 			CurrentMainQuestRouteId: starterMainQuestRouteId,

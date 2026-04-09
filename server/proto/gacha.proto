@@ -90,8 +90,8 @@ message GachaModeBoxComposition {
 	bool isCurrentBoxResettable = 4;
 	string naviCharacterCommentAssetName = 5;
 	string gachaAssetName = 6;
-	int32 gachaPricePhaseId = 7;
-	repeated GachaOddsItem promotionGachaOddsItem = 8;
+	repeated GachaOddsItem promotionGachaOddsItem = 7;
+	int32 gachaPricePhaseId = 8;
 	bool isAlreadyDrawn = 9;
 	bool isResettableByDrawingAllTargets = 10;
 	bool isInvalidReset = 11;

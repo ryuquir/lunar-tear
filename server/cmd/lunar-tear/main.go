@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"lunar-tear/server/internal/gacha"
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/questflow"
@@ -66,12 +67,35 @@ func main() {
 		log.Printf("bootstrap scene: %d (from snapshot)", *scene)
 	}
 
-	gachaEntries, err := masterdata.LoadGachaCatalog()
+	gachaEntries, medalInfo, err := masterdata.LoadGachaCatalog()
 	if err != nil {
 		log.Fatalf("load gacha catalog: %v", err)
 	}
-	userStore.ReplaceCatalog(gachaEntries)
 	log.Printf("gacha catalog loaded: %d entries", len(gachaEntries))
+
+	gachaPool, err := masterdata.LoadGachaPool()
+	if err != nil {
+		log.Fatalf("load gacha pool: %v", err)
+	}
+	log.Printf("gacha pool loaded: costumes=%d rarities, weapons=%d rarities, materials=%d",
+		len(gachaPool.CostumesByRarity), len(gachaPool.WeaponsByRarity), len(gachaPool.Materials))
+
+	gachaPool.BuildFeaturedMapping(gachaEntries)
+	gachaPool.BuildBannerPools(gachaEntries)
+	masterdata.EnrichCatalogPromotions(gachaEntries, gachaPool)
+	userStore.ReplaceCatalog(gachaEntries)
+
+	dupExchange, err := masterdata.LoadDupExchange()
+	if err != nil {
+		log.Fatalf("load dup exchange: %v", err)
+	}
+	dupAdded, err := masterdata.EnrichDupExchange(dupExchange, gachaPool)
+	if err != nil {
+		log.Fatalf("enrich dup exchange: %v", err)
+	}
+	log.Printf("dup exchange loaded: %d entries (%d derived from limit-break materials)", len(dupExchange), dupAdded)
+
+	gachaHandler := gacha.NewGachaHandler(gachaPool, gameConfig, questHandler.Granter, medalInfo, dupExchange)
 
 	conditionResolver, err := masterdata.LoadConditionResolver()
 	if err != nil {
@@ -141,6 +165,7 @@ func main() {
 		octoURL,
 		userStore,
 		questHandler,
+		gachaHandler,
 		cageOrnamentCatalog,
 		loginBonusCatalog,
 		characterViewerCatalog,

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/model"
@@ -20,13 +19,13 @@ func NewBannerServiceServer(gacha store.GachaRepository) *BannerServiceServer {
 }
 
 func (s *BannerServiceServer) GetMamaBanner(ctx context.Context, req *pb.GetMamaBannerRequest) (*pb.GetMamaBannerResponse, error) {
-	log.Printf("[BannerService] GetMamaBanner")
 	catalog, _ := s.gacha.SnapshotCatalog()
-	log.Printf("[BannerService] GetMamaBanner: catalog size=%d", len(catalog))
 	var termLimited []*pb.GachaBanner
 	var latestChapter *pb.GachaBanner
 	for _, entry := range catalog {
-		log.Printf("[BannerService] GetMamaBanner: entry gachaId=%d label=%d asset=%q", entry.GachaId, entry.GachaLabelType, entry.BannerAssetName)
+		if entry.GachaLabelType == model.GachaLabelPortalCage || entry.GachaLabelType == model.GachaLabelRecycle {
+			continue
+		}
 		b := &pb.GachaBanner{
 			GachaLabelType: entry.GachaLabelType,
 			GachaAssetName: entry.BannerAssetName,
@@ -36,7 +35,9 @@ func (s *BannerServiceServer) GetMamaBanner(ctx context.Context, req *pb.GetMama
 		case model.GachaLabelEvent, model.GachaLabelPremium:
 			termLimited = append(termLimited, b)
 		case model.GachaLabelChapter:
-			latestChapter = b
+			if latestChapter == nil || entry.GachaId > latestChapter.GachaId {
+				latestChapter = b
+			}
 		}
 	}
 	return &pb.GetMamaBannerResponse{

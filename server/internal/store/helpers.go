@@ -147,12 +147,7 @@ func (g *PossessionGranter) GrantCostume(user *UserState, costumeId int32, nowMi
 }
 
 func (g *PossessionGranter) GrantWeapon(user *UserState, weaponId int32, nowMillis int64) {
-	for _, row := range user.Weapons {
-		if row.WeaponId == weaponId {
-			return
-		}
-	}
-	key := fmt.Sprintf("reward-weapon-%d", weaponId)
+	key := fmt.Sprintf("reward-weapon-%d-%d", weaponId, nowMillis)
 	user.Weapons[key] = WeaponState{
 		UserWeaponUuid:      key,
 		WeaponId:            weaponId,
@@ -172,6 +167,7 @@ func (g *PossessionGranter) GrantWeapon(user *UserState, weaponId int32, nowMill
 	if !ok {
 		return
 	}
+
 	g.populateWeaponSkillsAbilities(user, key, weapon)
 	if weapon.WeaponStoryReleaseConditionGroupId != 0 {
 		for _, cond := range g.ReleaseConditions[weapon.WeaponStoryReleaseConditionGroupId] {

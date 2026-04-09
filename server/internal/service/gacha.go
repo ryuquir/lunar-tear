@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sort"
 	"time"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gacha"
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
@@ -17,32 +17,55 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+var gachaDiffTables = []string{
+	"IUserGem",
+	"IUserCostume",
+	"IUserWeapon",
+	"IUserConsumableItem",
+	"IUserCostumeActiveSkill",
+	"IUserWeaponNote",
+	"IUserWeaponSkill",
+	"IUserWeaponAbility",
+	"IUserWeaponStory",
+	"IUserCharacter",
+	"IUserMaterial",
+}
+
 type GachaServiceServer struct {
 	pb.UnimplementedGachaServiceServer
 	users    store.UserRepository
 	sessions store.SessionRepository
 	gacha    store.GachaRepository
+	handler  *gacha.GachaHandler
 }
 
-func NewGachaServiceServer(users store.UserRepository, sessions store.SessionRepository, gacha store.GachaRepository) *GachaServiceServer {
-	return &GachaServiceServer{users: users, sessions: sessions, gacha: gacha}
+func NewGachaServiceServer(
+	users store.UserRepository,
+	sessions store.SessionRepository,
+	gachaRepo store.GachaRepository,
+	handler *gacha.GachaHandler,
+) *GachaServiceServer {
+	return &GachaServiceServer{
+		users:    users,
+		sessions: sessions,
+		gacha:    gachaRepo,
+		handler:  handler,
+	}
 }
 
 func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaListRequest) (*pb.GetGachaListResponse, error) {
 	log.Printf("[GachaService] GetGachaList: labels=%v", req.GachaLabelType)
 
 	catalog, _ := s.gacha.SnapshotCatalog()
-	sort.Slice(catalog, func(i, j int) bool {
-		if catalog[i].SortOrder != catalog[j].SortOrder {
-			return catalog[i].SortOrder < catalog[j].SortOrder
-		}
-		return catalog[i].GachaId < catalog[j].GachaId
-	})
-
 	userId := currentUserId(ctx, s.users, s.sessions)
-	user, err := s.users.SnapshotUser(userId)
+	nowMillis := gametime.NowMillis()
+
+	user, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		user.EnsureMaps()
+		s.autoConvertExpiredMedals(user, catalog, nowMillis)
+	})
 	if err != nil {
-		return nil, fmt.Errorf("snapshot user: %w", err)
+		return nil, fmt.Errorf("update user: %w", err)
 	}
 
 	gachaList := make([]*pb.Gacha, 0, len(catalog))
@@ -50,9 +73,12 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 		if !matchesGachaLabel(req.GachaLabelType, entry.GachaLabelType) {
 			continue
 		}
-		gachaList = append(gachaList, toProtoGacha(entry))
+		if entry.GachaLabelType == model.GachaLabelPortalCage || entry.GachaLabelType == model.GachaLabelRecycle {
+			continue
+		}
+		bs := user.Gacha.BannerStates[entry.GachaId]
+		gachaList = append(gachaList, toProtoGacha(entry, &bs))
 	}
-	log.Printf("[GachaService] GetGachaList: returning gachas: %#v", gachaList)
 
 	return &pb.GetGachaListResponse{
 		Gacha:               gachaList,
@@ -61,15 +87,66 @@ func (s *GachaServiceServer) GetGachaList(ctx context.Context, req *pb.GetGachaL
 	}, nil
 }
 
+func (s *GachaServiceServer) autoConvertExpiredMedals(user *store.UserState, catalog []store.GachaCatalogEntry, nowMillis int64) {
+	for _, entry := range catalog {
+		if entry.GachaMedalId == 0 || entry.EndDatetime == 0 {
+			continue
+		}
+		if nowMillis < entry.EndDatetime {
+			continue
+		}
+		bs, exists := user.Gacha.BannerStates[entry.GachaId]
+		if !exists || bs.MedalCount <= 0 {
+			continue
+		}
+
+		medalInfo, ok := s.handler.MedalInfo[entry.GachaId]
+		if !ok {
+			continue
+		}
+
+		conversionRate := medalInfo.ConversionRate
+		if conversionRate <= 0 {
+			conversionRate = 1
+		}
+		bookmarkCount := bs.MedalCount * conversionRate
+
+		user.ConsumableItems[medalInfo.ConsumableItemId] += bookmarkCount
+
+		user.Gacha.ConvertedGachaMedal.ConvertedMedalPossession = append(
+			user.Gacha.ConvertedGachaMedal.ConvertedMedalPossession,
+			store.ConsumableItemState{
+				ConsumableItemId: medalInfo.ConsumableItemId,
+				Count:            bookmarkCount,
+			},
+		)
+
+		originalCount := bs.MedalCount
+		bs.MedalCount = 0
+		user.Gacha.BannerStates[entry.GachaId] = bs
+
+		log.Printf("[GachaService] auto-converted %d medals for gacha %d -> %d bookmarks (item %d)",
+			originalCount, entry.GachaId, bookmarkCount, medalInfo.ConsumableItemId)
+	}
+}
+
 func (s *GachaServiceServer) GetGacha(ctx context.Context, req *pb.GetGachaRequest) (*pb.GetGachaResponse, error) {
 	log.Printf("[GachaService] GetGacha: ids=%v", req.GachaId)
 
 	catalog, _ := s.gacha.SnapshotCatalog()
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, err := s.users.SnapshotUser(userId)
+	if err != nil {
+		return nil, fmt.Errorf("snapshot user: %w", err)
+	}
+
 	byId := make(map[int32]*pb.Gacha, len(req.GachaId))
 	for _, wantedId := range req.GachaId {
 		for _, entry := range catalog {
 			if entry.GachaId == wantedId {
-				byId[wantedId] = toProtoGacha(entry)
+				bs := user.Gacha.BannerStates[entry.GachaId]
+				byId[wantedId] = toProtoGacha(entry, &bs)
 				break
 			}
 		}
@@ -83,19 +160,164 @@ func (s *GachaServiceServer) GetGacha(ctx context.Context, req *pb.GetGachaReque
 
 func (s *GachaServiceServer) Draw(ctx context.Context, req *pb.DrawRequest) (*pb.DrawResponse, error) {
 	log.Printf("[GachaService] Draw: gachaId=%d phaseId=%d execCount=%d", req.GachaId, req.GachaPricePhaseId, req.ExecCount)
+
+	catalog, _ := s.gacha.SnapshotCatalog()
+	entry := findCatalogEntry(catalog, req.GachaId)
+	if entry == nil {
+		return nil, fmt.Errorf("gacha %d not found", req.GachaId)
+	}
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	execCount := req.ExecCount
+	if execCount <= 0 {
+		execCount = 1
+	}
+
+	var drawResult *gacha.DrawResult
+	updatedUser, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		var drawErr error
+		drawResult, drawErr = s.handler.HandleDraw(user, *entry, req.GachaPricePhaseId, execCount)
+		if drawErr != nil {
+			log.Printf("[GachaService] Draw error: %v", drawErr)
+			drawResult = &gacha.DrawResult{}
+		}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+
+	gachaResults := make([]*pb.DrawGachaOddsItem, 0, len(drawResult.Items))
+	dupMap := make(map[int]gacha.DuplicateInfo)
+	for _, d := range drawResult.DuplicateInfos {
+		dupMap[d.Index] = d
+	}
+	bonusDupMap := make(map[int]gacha.DuplicateInfo)
+	for _, d := range drawResult.BonusDuplicateInfos {
+		bonusDupMap[d.Index] = d
+	}
+
+	costumePT := int32(model.PossessionTypeCostume)
+	weaponPT := int32(model.PossessionTypeWeapon)
+	isMaterialDraw := model.IsMaterialBanner(entry.GachaLabelType)
+
+	ownedCostumes := make(map[int32]bool, len(updatedUser.Costumes))
+	for _, c := range updatedUser.Costumes {
+		ownedCostumes[c.CostumeId] = true
+	}
+	ownedWeapons := make(map[int32]bool, len(updatedUser.Weapons))
+	for _, w := range updatedUser.Weapons {
+		ownedWeapons[w.WeaponId] = true
+	}
+
+	for i, item := range drawResult.Items {
+		isNew := !isOwnedByType(item, ownedCostumes, ownedWeapons, updatedUser)
+
+		var oddsItem *pb.DrawGachaOddsItem
+
+		if isMaterialDraw {
+			oddsItem = &pb.DrawGachaOddsItem{
+				GachaItem: &pb.GachaItem{
+					PossessionType: item.PossessionType,
+					PossessionId:   item.PossessionId,
+					Count:          1,
+					IsNew:          isNew,
+				},
+				GachaItemBonus: &pb.GachaItem{},
+			}
+		} else if bonus, hasBonusWeapon := drawResult.BonusItems[i]; hasBonusWeapon {
+			oddsItem = &pb.DrawGachaOddsItem{
+				GachaItem: &pb.GachaItem{
+					PossessionType: costumePT,
+					PossessionId:   item.PossessionId,
+					Count:          1,
+					IsNew:          isNew,
+				},
+				GachaItemBonus: &pb.GachaItem{
+					PossessionType: weaponPT,
+					PossessionId:   bonus.PossessionId,
+					Count:          1,
+					IsNew:          !ownedWeapons[bonus.PossessionId],
+				},
+			}
+		} else {
+			oddsItem = &pb.DrawGachaOddsItem{
+				GachaItem: &pb.GachaItem{
+					PossessionType: item.PossessionType,
+					PossessionId:   item.PossessionId,
+					Count:          1,
+					IsNew:          isNew,
+				},
+				GachaItemBonus: &pb.GachaItem{},
+			}
+		}
+
+		if drawResult.MedalBonus > 0 && entry.MedalConsumableItemId != 0 {
+			oddsItem.MedalBonus = &pb.GachaBonus{
+				PossessionType: int32(model.PossessionTypeConsumableItem),
+				PossessionId:   entry.MedalConsumableItemId,
+				Count:          0,
+			}
+		}
+
+		if dup, ok := dupMap[i]; ok {
+			applyDuplicationBonus(oddsItem, dup)
+		}
+		if bdup, ok := bonusDupMap[i]; ok {
+			applyDuplicationBonus(oddsItem, bdup)
+		}
+
+		gachaResults = append(gachaResults, oddsItem)
+	}
+
+	var bonuses []*pb.GachaBonus
+	for _, b := range drawResult.Bonuses {
+		bonuses = append(bonuses, &pb.GachaBonus{
+			PossessionType: b.PossessionType,
+			PossessionId:   b.PossessionId,
+			Count:          b.Count,
+		})
+	}
+
+	bs := updatedUser.Gacha.BannerStates[entry.GachaId]
+	nextGacha := toProtoGacha(*entry, &bs)
+
+	diff := userdata.BuildDiffFromTables(userdata.SelectTables(
+		userdata.FullClientTableMap(updatedUser),
+		gachaDiffTables,
+	))
+
 	return &pb.DrawResponse{
-		NextGacha:          nil,
-		GachaResult:        []*pb.DrawGachaOddsItem{},
-		GachaBonus:         []*pb.GachaBonus{},
+		NextGacha:          nextGacha,
+		GachaResult:        gachaResults,
+		GachaBonus:         bonuses,
 		MenuGachaBadgeInfo: []*pb.MenuGachaBadgeInfo{},
-		DiffUserData:       userdata.EmptyDiff(),
+		DiffUserData:       diff,
 	}, nil
 }
 
 func (s *GachaServiceServer) ResetBoxGacha(ctx context.Context, req *pb.ResetBoxGachaRequest) (*pb.ResetBoxGachaResponse, error) {
 	log.Printf("[GachaService] ResetBoxGacha: gachaId=%d", req.GachaId)
+
+	catalog, _ := s.gacha.SnapshotCatalog()
+	entry := findCatalogEntry(catalog, req.GachaId)
+	if entry == nil {
+		return nil, fmt.Errorf("gacha %d not found", req.GachaId)
+	}
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	updatedUser, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		if resetErr := s.handler.HandleResetBox(user, *entry); resetErr != nil {
+			log.Printf("[GachaService] ResetBoxGacha error: %v", resetErr)
+		}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+
+	bs := updatedUser.Gacha.BannerStates[entry.GachaId]
+
 	return &pb.ResetBoxGachaResponse{
-		Gacha:        nil,
+		Gacha:        toProtoGacha(*entry, &bs),
 		DiffUserData: userdata.EmptyDiff(),
 	}, nil
 }
@@ -108,20 +330,77 @@ func (s *GachaServiceServer) GetRewardGacha(ctx context.Context, req *emptypb.Em
 		return nil, fmt.Errorf("snapshot user: %w", err)
 	}
 
+	maxCount := s.handler.Config.RewardGachaDailyMaxCount
+	if maxCount <= 0 {
+		maxCount = model.DefaultDailyDrawLimit
+	}
+
+	todayStart := gametime.StartOfDayMillis()
+	drawCount := user.Gacha.TodaysCurrentDrawCount
+	if user.Gacha.LastRewardDrawDate < todayStart {
+		drawCount = 0
+	}
+
 	return &pb.GetRewardGachaResponse{
-		Available:              user.Gacha.RewardAvailable,
-		TodaysCurrentDrawCount: user.Gacha.TodaysCurrentDrawCount,
-		DailyMaxCount:          user.Gacha.DailyMaxCount,
+		Available:              drawCount < maxCount,
+		TodaysCurrentDrawCount: drawCount,
+		DailyMaxCount:          maxCount,
 		DiffUserData:           userdata.EmptyDiff(),
 	}, nil
 }
 
 func (s *GachaServiceServer) RewardDraw(ctx context.Context, req *pb.RewardDrawRequest) (*pb.RewardDrawResponse, error) {
 	log.Printf("[GachaService] RewardDraw: placement=%q reward=%q amount=%q", req.PlacementName, req.RewardName, req.RewardAmount)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+
+	var items []gacha.DrawnItem
+	updatedUser, err := s.users.UpdateUser(userId, func(user *store.UserState) {
+		var drawErr error
+		items, drawErr = s.handler.HandleRewardDraw(user, 1)
+		if drawErr != nil {
+			log.Printf("[GachaService] RewardDraw error: %v", drawErr)
+		}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+
+	ownedCostumes := make(map[int32]bool, len(updatedUser.Costumes))
+	for _, c := range updatedUser.Costumes {
+		ownedCostumes[c.CostumeId] = true
+	}
+	ownedWeapons := make(map[int32]bool, len(updatedUser.Weapons))
+	for _, w := range updatedUser.Weapons {
+		ownedWeapons[w.WeaponId] = true
+	}
+
+	results := make([]*pb.RewardGachaItem, 0, len(items))
+	for _, item := range items {
+		results = append(results, &pb.RewardGachaItem{
+			PossessionType: item.PossessionType,
+			PossessionId:   item.PossessionId,
+			Count:          1,
+			IsNew:          !isOwnedByType(item, ownedCostumes, ownedWeapons, updatedUser),
+		})
+	}
+
+	tables := userdata.FullClientTableMap(updatedUser)
+	diff := userdata.BuildDiffFromTables(tables)
+
 	return &pb.RewardDrawResponse{
-		RewardGachaResult: []*pb.RewardGachaItem{},
-		DiffUserData:      userdata.EmptyDiff(),
+		RewardGachaResult: results,
+		DiffUserData:      diff,
 	}, nil
+}
+
+func findCatalogEntry(catalog []store.GachaCatalogEntry, gachaId int32) *store.GachaCatalogEntry {
+	for i := range catalog {
+		if catalog[i].GachaId == gachaId {
+			return &catalog[i]
+		}
+	}
+	return nil
 }
 
 func matchesGachaLabel(labels []int32, label int32) bool {
@@ -136,61 +415,7 @@ func matchesGachaLabel(labels []int32, label int32) bool {
 	return false
 }
 
-var featuredCostumes = []int32{
-	31000, 31001, 31002, 31004, 31005, 31006, 31007, 31008, 31009, 31010,
-	31011, 31012, 31013, 31014, 31015, 31016, 31017, 31018, 31019, 31020,
-}
-
-var featuredWeapons = []int32{
-	210002, 210022, 210032, 210042, 210062, 210072, 210082, 210102,
-	210112, 210122, 210142, 210152, 210162, 210172, 210182, 210192,
-}
-
-func stubPromotionItems(gachaId int32) []*pb.GachaOddsItem {
-	idx := int(gachaId) % len(featuredCostumes)
-	wIdx := int(gachaId) % len(featuredWeapons)
-	return []*pb.GachaOddsItem{
-		{
-			GachaItem: &pb.GachaItem{PossessionType: 1, PossessionId: featuredCostumes[idx], Count: 1, PromotionOrder: 1},
-			IsTarget:  true,
-		},
-		{
-			GachaItem: &pb.GachaItem{PossessionType: 1, PossessionId: featuredCostumes[(idx+1)%len(featuredCostumes)], Count: 1, PromotionOrder: 2},
-			IsTarget:  true,
-		},
-		{
-			GachaItem: &pb.GachaItem{PossessionType: 2, PossessionId: featuredWeapons[wIdx], Count: 1, PromotionOrder: 3},
-			IsTarget:  true,
-		},
-	}
-}
-
-func stubGachaPricePhases(gachaId, modeType int32) []*pb.GachaPricePhase {
-	phaseId := gachaId*10 + 1
-
-	price := int32(3000)
-	drawCount := int32(10)
-	if modeType == model.GachaModeStepup {
-		price = 1500
-		drawCount = 10
-	}
-
-	return []*pb.GachaPricePhase{{
-		GachaPricePhaseId: phaseId,
-		IsEnabled:         true,
-		EndDatetime:       timestamppb.New(gametime.Now().AddDate(0, 0, 30)),
-		PriceType:         model.PriceTypeGem,
-		Price:             price,
-		RegularPrice:      3000,
-		DrawCount:         drawCount,
-		GachaOddsFixedRarity: &pb.GachaOddsFixedRarity{
-			FixedRarityTypeLowerLimit: 0,
-			FixedCount:                0,
-		},
-	}}
-}
-
-func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
+func toProtoGacha(entry store.GachaCatalogEntry, bs *store.GachaBannerState) *pb.Gacha {
 	g := &pb.Gacha{
 		GachaId:                    entry.GachaId,
 		GachaLabelType:             entry.GachaLabelType,
@@ -202,7 +427,6 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		IsUserGachaUnlock:          entry.IsUserGachaUnlock,
 		StartDatetime:              safeTimestamp(entry.StartDatetime),
 		EndDatetime:                safeTimestamp(entry.EndDatetime),
-		GachaPricePhase:            stubGachaPricePhases(entry.GachaId, entry.GachaModeType),
 		RelatedMainQuestChapterId:  entry.RelatedMainQuestChapterId,
 		RelatedEventQuestChapterId: entry.RelatedEventQuestChapterId,
 		PromotionMovieAssetId:      entry.PromotionMovieAssetId,
@@ -213,40 +437,144 @@ func toProtoGacha(entry store.GachaCatalogEntry) *pb.Gacha {
 		InformationId:              entry.InformationId,
 	}
 
-	phaseId := entry.GachaId*10 + 1
+	g.GachaPricePhase = buildProtoPricePhases(entry, bs)
+
+	promotionItems := buildProtoPromotionItems(entry)
 
 	switch entry.GachaModeType {
 	case model.GachaModeBox:
+		boxNumber := int32(1)
+		if bs != nil && bs.BoxNumber > 0 {
+			boxNumber = bs.BoxNumber
+		}
+		phaseId := int32(0)
+		if len(entry.PricePhases) > 0 {
+			phaseId = entry.PricePhases[0].PhaseId
+		}
 		g.GachaMode = &pb.Gacha_GachaModeBoxComposition{
 			GachaModeBoxComposition: &pb.GachaModeBoxComposition{
-				GachaBoxGroupId:        entry.StepupGroupId,
-				BoxNumber:              1,
-				CurrentBoxNumber:       1,
-				GachaAssetName:         entry.BannerAssetName,
-				GachaPricePhaseId:      phaseId,
-				PromotionGachaOddsItem: stubPromotionItems(entry.GachaId),
+				GachaBoxGroupId:               entry.GroupId,
+				BoxNumber:                     boxNumber,
+				CurrentBoxNumber:              boxNumber,
+				NaviCharacterCommentAssetName: "production",
+				GachaAssetName:                entry.BannerAssetName,
+				GachaPricePhaseId:             phaseId,
+				PromotionGachaOddsItem:        promotionItems,
+				GachaDescriptionTextId:        entry.DescriptionTextId,
 			},
 		}
 	case model.GachaModeStepup:
+		stepNumber := int32(1)
+		loopCount := int32(0)
+		if bs != nil {
+			if bs.StepNumber > 0 {
+				stepNumber = bs.StepNumber
+			}
+			loopCount = bs.LoopCount
+		}
 		g.GachaMode = &pb.Gacha_GachaModeStepupComposition{
 			GachaModeStepupComposition: &pb.GachaModeStepupComposition{
-				GachaStepGroupId:              entry.StepupGroupId,
+				GachaStepGroupId:              entry.GroupId,
 				StepNumber:                    1,
-				CurrentStepNumber:             1,
-				NaviCharacterCommentAssetName: "",
+				CurrentStepNumber:             stepNumber,
+				NaviCharacterCommentAssetName: "production",
 				GachaAssetName:                entry.BannerAssetName,
-				CurrentLoopCount:              0,
+				PromotionGachaOddsItem:        promotionItems,
+				CurrentLoopCount:              loopCount,
 			},
 		}
 	default:
 		g.GachaMode = &pb.Gacha_GachaModeBasic{
 			GachaModeBasic: &pb.GachaModeBasic{
-				GachaAssetName: entry.BannerAssetName,
+				NaviCharacterCommentAssetName: "production",
+				GachaAssetName:                entry.BannerAssetName,
+				PromotionGachaOddsItem:        promotionItems,
 			},
 		}
 	}
 
 	return g
+}
+
+func buildProtoPricePhases(entry store.GachaCatalogEntry, bs *store.GachaBannerState) []*pb.GachaPricePhase {
+	phases := make([]*pb.GachaPricePhase, 0, len(entry.PricePhases))
+
+	for _, p := range entry.PricePhases {
+		isEnabled := true
+		if entry.GachaModeType == model.GachaModeStepup && bs != nil {
+			currentStep := bs.StepNumber
+			if currentStep <= 0 {
+				currentStep = 1
+			}
+			isEnabled = p.StepNumber == currentStep
+		}
+
+		var bonuses []*pb.GachaBonus
+		for _, b := range p.Bonuses {
+			bonuses = append(bonuses, &pb.GachaBonus{
+				PossessionType: b.PossessionType,
+				PossessionId:   b.PossessionId,
+				Count:          b.Count,
+			})
+		}
+
+		limitExec := p.LimitExecCount
+		if limitExec <= 0 {
+			limitExec = 999
+		}
+
+		phases = append(phases, &pb.GachaPricePhase{
+			GachaPricePhaseId: p.PhaseId,
+			IsEnabled:         isEnabled,
+			EndDatetime:       safeTimestamp(entry.EndDatetime),
+			PriceType:         p.PriceType,
+			PriceId:           p.PriceId,
+			Price:             p.Price,
+			RegularPrice:      p.RegularPrice,
+			DrawCount:         p.DrawCount,
+			LimitExecCount:    limitExec,
+			EachMaxExecCount:  p.DrawCount,
+			GachaBonus:        bonuses,
+			GachaOddsFixedRarity: &pb.GachaOddsFixedRarity{
+				FixedRarityTypeLowerLimit: p.FixedRarityMin,
+				FixedCount:                p.FixedCount,
+			},
+			GachaBadgeType: model.GachaBadgeTypeNone,
+		})
+	}
+
+	return phases
+}
+
+func buildProtoPromotionItems(entry store.GachaCatalogEntry) []*pb.GachaOddsItem {
+	if len(entry.PromotionItems) == 0 {
+		return nil
+	}
+	isMaterial := model.IsMaterialBanner(entry.GachaLabelType)
+
+	items := make([]*pb.GachaOddsItem, 0, len(entry.PromotionItems))
+	for i, pi := range entry.PromotionItems {
+		bonus := &pb.GachaItem{
+			PossessionType: pi.PossessionType,
+			PossessionId:   pi.PossessionId,
+			Count:          1,
+		}
+		if isMaterial {
+			bonus = &pb.GachaItem{}
+		}
+		items = append(items, &pb.GachaOddsItem{
+			GachaItem: &pb.GachaItem{
+				PossessionType: pi.PossessionType,
+				PossessionId:   pi.PossessionId,
+				Count:          1,
+				PromotionOrder: int32(i + 1),
+			},
+			GachaItemBonus:   bonus,
+			MaxDrawableCount: 999,
+			IsTarget:         pi.IsTarget,
+		})
+	}
+	return items
 }
 
 func toProtoConvertedGachaMedal(state store.ConvertedGachaMedalState) *pb.ConvertedGachaMedal {
@@ -279,3 +607,31 @@ func safeTimestamp(unixMillis int64) *timestamppb.Timestamp {
 	}
 	return timestamppb.New(time.UnixMilli(unixMillis))
 }
+
+func applyDuplicationBonus(oddsItem *pb.DrawGachaOddsItem, dup gacha.DuplicateInfo) {
+	if oddsItem.DuplicationBonusGrade == 0 {
+		oddsItem.DuplicationBonusGrade = dup.Grade
+	}
+	for _, b := range dup.Bonuses {
+		oddsItem.DuplicationBonus = append(oddsItem.DuplicationBonus, &pb.GachaBonus{
+			PossessionType: b.PossessionType,
+			PossessionId:   b.PossessionId,
+			Count:          b.Count,
+		})
+	}
+}
+
+func isOwnedByType(item gacha.DrawnItem, costumes, weapons map[int32]bool, user store.UserState) bool {
+	switch item.PossessionType {
+	case int32(model.PossessionTypeCostume):
+		return costumes[item.PossessionId]
+	case int32(model.PossessionTypeWeapon):
+		return weapons[item.PossessionId]
+	case int32(model.PossessionTypeMaterial):
+		return user.Materials[item.PossessionId] > 0
+	case int32(model.PossessionTypeWeaponEnhanced):
+		return user.ConsumableItems[item.PossessionId] > 0
+	}
+	return false
+}
+

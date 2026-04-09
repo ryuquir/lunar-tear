@@ -7,6 +7,7 @@ import (
 	"net"
 
 	pb "lunar-tear/server/gen/proto"
+	"lunar-tear/server/internal/gacha"
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/masterdata"
 	"lunar-tear/server/internal/questflow"
@@ -39,6 +40,7 @@ func startGRPC(
 	octoURL string,
 	userStore *memory.MemoryStore,
 	questEngine *questflow.QuestHandler,
+	gachaHandler *gacha.GachaHandler,
 	cageOrnamentCatalog *masterdata.CageOrnamentCatalog,
 	loginBonusCatalog *masterdata.LoginBonusCatalog,
 	characterViewerCatalog *masterdata.CharacterViewerCatalog,
@@ -71,6 +73,7 @@ func startGRPC(
 		octoURL,
 		userStore,
 		questEngine,
+		gachaHandler,
 		cageOrnamentCatalog,
 		loginBonusCatalog,
 		characterViewerCatalog,
@@ -104,6 +107,7 @@ func registerServices(
 	octoURL string,
 	userStore *memory.MemoryStore,
 	questEngine *questflow.QuestHandler,
+	gachaHandler *gacha.GachaHandler,
 	cageOrnamentCatalog *masterdata.CageOrnamentCatalog,
 	loginBonusCatalog *masterdata.LoginBonusCatalog,
 	characterViewerCatalog *masterdata.CharacterViewerCatalog,
@@ -126,7 +130,7 @@ func registerServices(
 	pb.RegisterConfigServiceServer(srv, service.NewConfigServiceServer(host, int32(443), octoURL))
 	pb.RegisterDataServiceServer(srv, service.NewDataServiceServer(userStore, userStore))
 	pb.RegisterTutorialServiceServer(srv, service.NewTutorialServiceServer(userStore, userStore, questEngine))
-	pb.RegisterGachaServiceServer(srv, service.NewGachaServiceServer(userStore, userStore, userStore))
+	pb.RegisterGachaServiceServer(srv, service.NewGachaServiceServer(userStore, userStore, userStore, gachaHandler))
 	pb.RegisterGiftServiceServer(srv, service.NewGiftServiceServer(userStore, userStore))
 	pb.RegisterGamePlayServiceServer(srv, service.NewGameplayServiceServer())
 	pb.RegisterGimmickServiceServer(srv, service.NewGimmickServiceServer(userStore, userStore, gimmickCatalog))
