@@ -102,6 +102,7 @@ func deckSlotsFromProto(deck *pb.Deck) []store.DeckCharacterInput {
 			PartsUuids:         ch.UserPartsUuid,
 			UserCompanionUuid:  ch.UserCompanionUuid,
 			UserThoughtUuid:    ch.UserThoughtUuid,
+			DressupCostumeId:   ch.DressupCostumeId,
 		}
 	}
 	return slots
@@ -125,7 +126,9 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 		Track("IUserDeckSubWeaponGroup", oldUser, userdata.DeckSubWeaponRecords,
 			[]string{"userId", "userDeckCharacterUuid", "userWeaponUuid"}).
 		Track("IUserDeckPartsGroup", oldUser, userdata.DeckPartsGroupRecords,
-			[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"})
+			[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"}).
+		Track("IUserDeckCharacterDressupCostume", oldUser, userdata.DeckDressupCostumeRecords,
+			[]string{"userId", "userDeckCharacterUuid"})
 
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		if req.Deck == nil {
@@ -136,6 +139,7 @@ func (s *DeckServiceServer) ReplaceDeck(ctx context.Context, req *pb.ReplaceDeck
 
 	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
 		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup", "IUserDeckPartsGroup",
+		"IUserDeckCharacterDressupCostume",
 	})
 	return &pb.ReplaceDeckResponse{
 		DiffUserData: tracker.Apply(user, result),
@@ -151,7 +155,9 @@ func (s *DeckServiceServer) ReplaceTripleDeck(ctx context.Context, req *pb.Repla
 		Track("IUserDeckSubWeaponGroup", oldUser, userdata.DeckSubWeaponRecords,
 			[]string{"userId", "userDeckCharacterUuid", "userWeaponUuid"}).
 		Track("IUserDeckPartsGroup", oldUser, userdata.DeckPartsGroupRecords,
-			[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"})
+			[]string{"userId", "userDeckCharacterUuid", "userPartsUuid"}).
+		Track("IUserDeckCharacterDressupCostume", oldUser, userdata.DeckDressupCostumeRecords,
+			[]string{"userId", "userDeckCharacterUuid"})
 
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
 		nowMillis := gametime.NowMillis()
@@ -175,6 +181,7 @@ func (s *DeckServiceServer) ReplaceTripleDeck(ctx context.Context, req *pb.Repla
 
 	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
 		"IUserDeck", "IUserDeckCharacter", "IUserDeckSubWeaponGroup", "IUserDeckPartsGroup",
+		"IUserDeckCharacterDressupCostume",
 	})
 	return &pb.ReplaceTripleDeckResponse{
 		DiffUserData: tracker.Apply(user, result),

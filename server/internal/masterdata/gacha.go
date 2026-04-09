@@ -362,4 +362,3 @@ func buildChapterPricePhases(gachaId int32) []store.GachaPricePhaseEntry {
 		},
 	}
 }
-

@@ -360,6 +360,7 @@ type DeckCharacterState struct {
 	UserCompanionUuid     string
 	Power                 int32
 	UserThoughtUuid       string
+	DressupCostumeId      int32
 	LatestVersion         int64
 }
 
@@ -408,6 +409,7 @@ type DeckCharacterInput struct {
 	PartsUuids         []string
 	UserCompanionUuid  string
 	UserThoughtUuid    string
+	DressupCostumeId   int32
 }
 
 type CostumeActiveSkillState struct {

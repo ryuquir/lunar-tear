@@ -28,8 +28,11 @@ func init() {
 		s, _ := encodeJSONMaps(sortedDeckPartsGroupRecords(user)...)
 		return s
 	})
+	register("IUserDeckCharacterDressupCostume", func(user store.UserState) string {
+		s, _ := encodeJSONMaps(sortedDeckDressupCostumeRecords(user)...)
+		return s
+	})
 	registerStatic(
-		"IUserDeckCharacterDressupCostume",
 		"IUserDeckLimitContentRestricted",
 	)
 }
@@ -153,4 +156,26 @@ func DeckSubWeaponRecords(user store.UserState) []map[string]any {
 
 func DeckPartsGroupRecords(user store.UserState) []map[string]any {
 	return sortedDeckPartsGroupRecords(user)
+}
+
+func sortedDeckDressupCostumeRecords(user store.UserState) []map[string]any {
+	keys := sortedStringKeys(user.DeckCharacters)
+	records := make([]map[string]any, 0)
+	for _, key := range keys {
+		row := user.DeckCharacters[key]
+		if row.DressupCostumeId == 0 {
+			continue
+		}
+		records = append(records, map[string]any{
+			"userId":                user.UserId,
+			"userDeckCharacterUuid": row.UserDeckCharacterUuid,
+			"dressupCostumeId":      row.DressupCostumeId,
+			"latestVersion":         row.LatestVersion,
+		})
+	}
+	return records
+}
+
+func DeckDressupCostumeRecords(user store.UserState) []map[string]any {
+	return sortedDeckDressupCostumeRecords(user)
 }

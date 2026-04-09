@@ -312,6 +312,7 @@ func ApplyDeckReplacement(user *UserState, deckType model.DeckType, userDeckNumb
 		dc.MainUserWeaponUuid = slot.MainUserWeaponUuid
 		dc.UserCompanionUuid = slot.UserCompanionUuid
 		dc.UserThoughtUuid = slot.UserThoughtUuid
+		dc.DressupCostumeId = slot.DressupCostumeId
 		dc.LatestVersion = nowMillis
 		user.DeckCharacters[dcUuid] = dc
 		user.DeckSubWeapons[dcUuid] = slot.SubWeaponUuids

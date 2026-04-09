@@ -634,4 +634,3 @@ func isOwnedByType(item gacha.DrawnItem, costumes, weapons map[int32]bool, user 
 	}
 	return false
 }
-
