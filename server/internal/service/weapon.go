@@ -516,8 +516,16 @@ func (s *WeaponServiceServer) LimitBreakByMaterial(ctx context.Context, req *pb.
 			return
 		}
 
+		remaining := s.config.WeaponLimitBreakAvailableCount - weapon.LimitBreakCount
+
 		totalMaterialCount := int32(0)
 		for materialId, count := range req.Materials {
+			if totalMaterialCount >= remaining {
+				break
+			}
+			if count > remaining-totalMaterialCount {
+				count = remaining - totalMaterialCount
+			}
 			cur := user.Materials[materialId]
 			if cur < count {
 				log.Printf("[WeaponService] LimitBreakByMaterial: insufficient material id=%d have=%d need=%d", materialId, cur, count)
@@ -533,7 +541,7 @@ func (s *WeaponServiceServer) LimitBreakByMaterial(ctx context.Context, req *pb.
 			log.Printf("[WeaponService] LimitBreakByMaterial: gold cost=%d", goldCost)
 		}
 
-		weapon.LimitBreakCount++
+		weapon.LimitBreakCount += totalMaterialCount
 		weapon.LatestVersion = nowMillis
 		user.Weapons[req.UserWeaponUuid] = weapon
 
@@ -586,8 +594,14 @@ func (s *WeaponServiceServer) LimitBreakByWeapon(ctx context.Context, req *pb.Li
 			return
 		}
 
+		remaining := s.config.WeaponLimitBreakAvailableCount - weapon.LimitBreakCount
+
 		consumedCount := int32(0)
 		for _, uuid := range req.MaterialUserWeaponUuids {
+			if consumedCount >= remaining {
+				break
+			}
+
 			matWeapon, ok := user.Weapons[uuid]
 			if !ok {
 				log.Printf("[WeaponService] LimitBreakByWeapon: material weapon uuid=%s not found, skipping", uuid)
@@ -612,7 +626,7 @@ func (s *WeaponServiceServer) LimitBreakByWeapon(ctx context.Context, req *pb.Li
 			log.Printf("[WeaponService] LimitBreakByWeapon: gold cost=%d", goldCost)
 		}
 
-		weapon.LimitBreakCount++
+		weapon.LimitBreakCount += consumedCount
 		weapon.LatestVersion = nowMillis
 		user.Weapons[req.UserWeaponUuid] = weapon
 
