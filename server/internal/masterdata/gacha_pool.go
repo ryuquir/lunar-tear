@@ -3,6 +3,7 @@ package masterdata
 import (
 	"fmt"
 	"log"
+	"slices"
 	"sort"
 
 	"lunar-tear/server/internal/model"
@@ -95,6 +96,11 @@ func LoadGachaPool() (*GachaCatalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load material table: %w", err)
 	}
+	evoGroupRows, err := utils.ReadJSON[WeaponEvolutionGroupRow]("EntityMWeaponEvolutionGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load weapon evolution group table: %w", err)
+	}
+	evolvedWeapons := buildEvolvedWeaponSet(evoGroupRows)
 
 	catalogCostumeSet := make(map[int32]bool, len(catalogCostumes))
 	costumeTermId := make(map[int32]int32, len(catalogCostumes))
@@ -149,6 +155,9 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		if !catalogWeaponSet[w.WeaponId] {
 			continue
 		}
+		if evolvedWeapons[w.WeaponId] {
+			continue
+		}
 		item := GachaPoolItem{
 			PossessionType: int32(model.PossessionTypeWeapon),
 			PossessionId:   w.WeaponId,
@@ -158,6 +167,8 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		pool.WeaponById[w.WeaponId] = item
 	}
 
+	log.Printf("[GachaPool] excluded %d evolved weapons from pool", len(evolvedWeapons))
+
 	type weaponKey struct {
 		TermId     int32
 		WeaponType int32
@@ -165,6 +176,9 @@ func LoadGachaPool() (*GachaCatalog, error) {
 	}
 	weaponsByKey := make(map[weaponKey][]int32)
 	for _, cw := range catalogWeapons {
+		if evolvedWeapons[cw.WeaponId] {
+			continue
+		}
 		wt := weaponTypeById[cw.WeaponId]
 		r := weaponRarityById[cw.WeaponId]
 		if wt == 0 || r < model.RaritySRare {
@@ -174,7 +188,7 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		weaponsByKey[k] = append(weaponsByKey[k], cw.WeaponId)
 	}
 	for k, ids := range weaponsByKey {
-		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+		slices.Sort(ids)
 		weaponsByKey[k] = ids
 	}
 
@@ -184,6 +198,9 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		wt := costumeWeaponType[costumeId]
 		k := weaponKey{TermId: tid, WeaponType: wt, Rarity: item.RarityType}
 		candidates := weaponsByKey[k]
+		if len(candidates) == 0 {
+			continue
+		}
 		if len(candidates) == 1 {
 			pool.CostumeWeaponMap[costumeId] = candidates[0]
 			exact++
@@ -365,4 +382,21 @@ func (pool *GachaCatalog) BuildBannerPools(entries []store.GachaCatalogEntry) {
 
 	log.Printf("[GachaPool] banner pools: %d banners, %d featured costumes stripped, %d featured weapons stripped",
 		len(pool.BannerPools), len(allFeaturedCostumes), len(allFeaturedWeapons))
+}
+
+func buildEvolvedWeaponSet(rows []WeaponEvolutionGroupRow) map[int32]bool {
+	grouped := make(map[int32][]WeaponEvolutionGroupRow)
+	for _, r := range rows {
+		grouped[r.WeaponEvolutionGroupId] = append(grouped[r.WeaponEvolutionGroupId], r)
+	}
+	evolved := make(map[int32]bool)
+	for _, chain := range grouped {
+		sort.Slice(chain, func(i, j int) bool {
+			return chain[i].EvolutionOrder < chain[j].EvolutionOrder
+		})
+		for i := 1; i < len(chain); i++ {
+			evolved[chain[i].WeaponId] = true
+		}
+	}
+	return evolved
 }

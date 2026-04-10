@@ -211,7 +211,7 @@ func sortedNaviCutInRecords(user store.UserState) []map[string]any {
 			"userId":        user.UserId,
 			"naviCutInId":   id,
 			"playDatetime":  now,
-			"latestVersion": 0,
+			"latestVersion": now,
 		})
 	}
 	return records
@@ -223,13 +223,14 @@ func sortedContentsStoryRecords(user store.UserState) []map[string]any {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	now := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
 			"userId":          user.UserId,
 			"contentsStoryId": id,
 			"playDatetime":    user.ContentsStories[id],
-			"latestVersion":   0,
+			"latestVersion":   now,
 		})
 	}
 	return records
@@ -241,13 +242,14 @@ func sortedMovieRecords(user store.UserState) []map[string]any {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	now := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
 			"userId":               user.UserId,
 			"movieId":              id,
 			"latestViewedDatetime": user.ViewedMovies[id],
-			"latestVersion":        0,
+			"latestVersion":        now,
 		})
 	}
 	return records
@@ -259,13 +261,14 @@ func sortedOmikujiRecords(user store.UserState) []map[string]any {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	now := gametime.NowMillis()
 	records := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
 		records = append(records, map[string]any{
 			"userId":             user.UserId,
 			"omikujiId":          id,
 			"latestDrawDatetime": user.DrawnOmikuji[id],
-			"latestVersion":      0,
+			"latestVersion":      now,
 		})
 	}
 	return records
@@ -284,7 +287,7 @@ func sortedDokanRecords(user store.UserState) []map[string]any {
 			"userId":          user.UserId,
 			"dokanId":         id,
 			"displayDatetime": now,
-			"latestVersion":   0,
+			"latestVersion":   now,
 		})
 	}
 	return records
