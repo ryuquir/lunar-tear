@@ -89,6 +89,58 @@ func (s *DeckServiceServer) RefreshDeckPower(ctx context.Context, req *pb.Refres
 	}, nil
 }
 
+func (s *DeckServiceServer) RefreshMultiDeckPower(ctx context.Context, req *pb.RefreshMultiDeckPowerRequest) (*pb.RefreshMultiDeckPowerResponse, error) {
+	log.Printf("[DeckService] RefreshMultiDeckPower: %d entries", len(req.DeckPowerInfo))
+	userId := currentUserId(ctx, s.users, s.sessions)
+
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		for _, info := range req.DeckPowerInfo {
+			if info.DeckPower == nil {
+				continue
+			}
+
+			dt := model.DeckType(info.DeckType)
+			deckKey := store.DeckKey{DeckType: dt, UserDeckNumber: info.UserDeckNumber}
+			deck, ok := user.Decks[deckKey]
+			if !ok {
+				log.Printf("[DeckService] RefreshMultiDeckPower: deck not found deckType=%d deckNumber=%d", info.DeckType, info.UserDeckNumber)
+				continue
+			}
+
+			deck.Power = info.DeckPower.Power
+			user.Decks[deckKey] = deck
+
+			for _, cp := range []*pb.DeckCharacterPower{
+				info.DeckPower.DeckCharacterPower01,
+				info.DeckPower.DeckCharacterPower02,
+				info.DeckPower.DeckCharacterPower03,
+			} {
+				if cp == nil || cp.UserDeckCharacterUuid == "" {
+					continue
+				}
+				if dc, ok := user.DeckCharacters[cp.UserDeckCharacterUuid]; ok {
+					dc.Power = cp.Power
+					user.DeckCharacters[cp.UserDeckCharacterUuid] = dc
+				}
+			}
+
+			note := user.DeckTypeNotes[dt]
+			if info.DeckPower.Power > note.MaxDeckPower {
+				note.DeckType = dt
+				note.MaxDeckPower = info.DeckPower.Power
+				user.DeckTypeNotes[dt] = note
+			}
+		}
+	})
+
+	result := userdata.SelectTables(userdata.FullClientTableMap(user), []string{
+		"IUserDeck", "IUserDeckCharacter", "IUserDeckTypeNote",
+	})
+	return &pb.RefreshMultiDeckPowerResponse{
+		DiffUserData: userdata.BuildDiffFromTables(result),
+	}, nil
+}
+
 func deckSlotsFromProto(deck *pb.Deck) []store.DeckCharacterInput {
 	slots := make([]store.DeckCharacterInput, 3)
 	for i, ch := range []*pb.DeckCharacter{deck.Character01, deck.Character02, deck.Character03} {
