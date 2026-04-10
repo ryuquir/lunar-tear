@@ -74,11 +74,11 @@ message StartBattleRequest {
 }
 
 message StartBattleResponse {
-	repeated DeckCharacter opponentDeckCharacter = 1;
+	repeated PvpDeckCharacter opponentDeckCharacter = 1;
 	map<string, apb.api.data.DiffData> diffUserData = 99;
 }
 
-message DeckCharacter {
+message PvpDeckCharacter {
 	CostumeInfo costume = 1;
 	CompanionInfo companion = 2;
 	WeaponInfo mainWeapon = 3;

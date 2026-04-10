@@ -1,0 +1,366 @@
+package masterdata
+
+import (
+	"log"
+	"sort"
+	"time"
+
+	"lunar-tear/server/internal/utils"
+)
+
+type bigHuntBossQuestRow struct {
+	BigHuntBossQuestId                 int32 `json:"BigHuntBossQuestId"`
+	BigHuntBossId                      int32 `json:"BigHuntBossId"`
+	BigHuntQuestGroupId                int32 `json:"BigHuntQuestGroupId"`
+	BigHuntBossQuestScoreCoefficientId int32 `json:"BigHuntBossQuestScoreCoefficientId"`
+	BigHuntScoreRewardGroupScheduleId  int32 `json:"BigHuntScoreRewardGroupScheduleId"`
+	DailyChallengeCount                int32 `json:"DailyChallengeCount"`
+}
+
+type BigHuntBossQuestRow struct {
+	BigHuntBossQuestId                int32
+	BigHuntBossId                     int32
+	BigHuntQuestGroupId               int32
+	BigHuntScoreRewardGroupScheduleId int32
+	DailyChallengeCount               int32
+}
+
+type bigHuntQuestRow struct {
+	BigHuntQuestId                 int32 `json:"BigHuntQuestId"`
+	QuestId                        int32 `json:"QuestId"`
+	BigHuntQuestScoreCoefficientId int32 `json:"BigHuntQuestScoreCoefficientId"`
+}
+
+type BigHuntQuestRow struct {
+	BigHuntQuestId                 int32
+	QuestId                        int32
+	BigHuntQuestScoreCoefficientId int32
+}
+
+type bigHuntQuestScoreCoefficientRow struct {
+	BigHuntQuestScoreCoefficientId int32 `json:"BigHuntQuestScoreCoefficientId"`
+	ScoreDifficultBonusPermil      int32 `json:"ScoreDifficultBonusPermil"`
+}
+
+type bigHuntBossRow struct {
+	BigHuntBossId           int32 `json:"BigHuntBossId"`
+	BigHuntBossGradeGroupId int32 `json:"BigHuntBossGradeGroupId"`
+	AttributeType           int32 `json:"AttributeType"`
+}
+
+type BigHuntBossRow struct {
+	BigHuntBossId           int32
+	BigHuntBossGradeGroupId int32
+	AttributeType           int32
+}
+
+type bigHuntBossGradeGroupRow struct {
+	BigHuntBossGradeGroupId int32 `json:"BigHuntBossGradeGroupId"`
+	NecessaryScore          int64 `json:"NecessaryScore"`
+	AssetGradeIconId        int32 `json:"AssetGradeIconId"`
+}
+
+type GradeThreshold struct {
+	NecessaryScore   int64
+	AssetGradeIconId int32
+}
+
+type bigHuntScheduleRow struct {
+	BigHuntScheduleId      int32 `json:"BigHuntScheduleId"`
+	ChallengeStartDatetime int64 `json:"ChallengeStartDatetime"`
+	ChallengeEndDatetime   int64 `json:"ChallengeEndDatetime"`
+}
+
+type scoreRewardScheduleRow struct {
+	BigHuntScoreRewardGroupScheduleId int32 `json:"BigHuntScoreRewardGroupScheduleId"`
+	GroupIndex                        int32 `json:"GroupIndex"`
+	BigHuntScoreRewardGroupId         int32 `json:"BigHuntScoreRewardGroupId"`
+	StartDatetime                     int64 `json:"StartDatetime"`
+}
+
+type ScoreRewardScheduleEntry struct {
+	BigHuntScoreRewardGroupId int32
+	StartDatetime             int64
+}
+
+type scoreRewardGroupRow struct {
+	BigHuntScoreRewardGroupId int32 `json:"BigHuntScoreRewardGroupId"`
+	NecessaryScore            int64 `json:"NecessaryScore"`
+	BigHuntRewardGroupId      int32 `json:"BigHuntRewardGroupId"`
+}
+
+type ScoreRewardThreshold struct {
+	NecessaryScore       int64
+	BigHuntRewardGroupId int32
+}
+
+type rewardGroupRow struct {
+	BigHuntRewardGroupId int32 `json:"BigHuntRewardGroupId"`
+	SortOrder            int32 `json:"SortOrder"`
+	PossessionType       int32 `json:"PossessionType"`
+	PossessionId         int32 `json:"PossessionId"`
+	Count                int32 `json:"Count"`
+}
+
+type RewardItem struct {
+	PossessionType int32
+	PossessionId   int32
+	Count          int32
+}
+
+type weeklyRewardScheduleRow struct {
+	BigHuntWeeklyAttributeScoreRewardGroupScheduleId int32 `json:"BigHuntWeeklyAttributeScoreRewardGroupScheduleId"`
+	AttributeType                                    int32 `json:"AttributeType"`
+	GroupIndex                                       int32 `json:"GroupIndex"`
+	BigHuntScoreRewardGroupId                        int32 `json:"BigHuntScoreRewardGroupId"`
+	StartDatetime                                    int64 `json:"StartDatetime"`
+}
+
+type BigHuntWeeklyRewardKey struct {
+	ScheduleId    int32
+	AttributeType int32
+}
+
+type BigHuntCatalog struct {
+	BossQuestById         map[int32]BigHuntBossQuestRow
+	QuestById             map[int32]BigHuntQuestRow
+	ScoreCoefficients     map[int32]int32
+	BossByBossId          map[int32]BigHuntBossRow
+	GradeThresholds       map[int32][]GradeThreshold
+	ActiveScheduleId      int32
+	ScoreRewardSchedules  map[int32][]ScoreRewardScheduleEntry
+	ScoreRewardThresholds map[int32][]ScoreRewardThreshold
+	RewardItems           map[int32][]RewardItem
+	WeeklyRewardSchedules map[BigHuntWeeklyRewardKey][]ScoreRewardScheduleEntry
+}
+
+func (c *BigHuntCatalog) ResolveActiveScoreRewardGroupId(scheduleId int32, nowMillis int64) int32 {
+	entries := c.ScoreRewardSchedules[scheduleId]
+	for _, e := range entries {
+		if nowMillis >= e.StartDatetime {
+			return e.BigHuntScoreRewardGroupId
+		}
+	}
+	if len(entries) > 0 {
+		return entries[len(entries)-1].BigHuntScoreRewardGroupId
+	}
+	return 0
+}
+
+func (c *BigHuntCatalog) ResolveActiveWeeklyRewardGroupId(key BigHuntWeeklyRewardKey, nowMillis int64) int32 {
+	entries := c.WeeklyRewardSchedules[key]
+	for _, e := range entries {
+		if nowMillis >= e.StartDatetime {
+			return e.BigHuntScoreRewardGroupId
+		}
+	}
+	if len(entries) > 0 {
+		return entries[len(entries)-1].BigHuntScoreRewardGroupId
+	}
+	return 0
+}
+
+func (c *BigHuntCatalog) ResolveGradeIconId(bossId int32, score int64) int32 {
+	boss, ok := c.BossByBossId[bossId]
+	if !ok {
+		return 0
+	}
+	thresholds := c.GradeThresholds[boss.BigHuntBossGradeGroupId]
+	var iconId int32
+	for _, t := range thresholds {
+		if score >= t.NecessaryScore {
+			iconId = t.AssetGradeIconId
+		} else {
+			break
+		}
+	}
+	return iconId
+}
+
+func (c *BigHuntCatalog) CollectNewRewards(scoreRewardGroupId int32, oldMax, newMax int64) []RewardItem {
+	thresholds := c.ScoreRewardThresholds[scoreRewardGroupId]
+	var items []RewardItem
+	for _, t := range thresholds {
+		if t.NecessaryScore > oldMax && t.NecessaryScore <= newMax {
+			items = append(items, c.RewardItems[t.BigHuntRewardGroupId]...)
+		}
+	}
+	return items
+}
+
+func LoadBigHuntCatalog() *BigHuntCatalog {
+	bossQuestRows, err := utils.ReadJSON[bigHuntBossQuestRow]("EntityMBigHuntBossQuestTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt boss quest table: %v", err)
+	}
+	bossQuestById := make(map[int32]BigHuntBossQuestRow, len(bossQuestRows))
+	for _, r := range bossQuestRows {
+		bossQuestById[r.BigHuntBossQuestId] = BigHuntBossQuestRow{
+			BigHuntBossQuestId:                r.BigHuntBossQuestId,
+			BigHuntBossId:                     r.BigHuntBossId,
+			BigHuntQuestGroupId:               r.BigHuntQuestGroupId,
+			BigHuntScoreRewardGroupScheduleId: r.BigHuntScoreRewardGroupScheduleId,
+			DailyChallengeCount:               r.DailyChallengeCount,
+		}
+	}
+
+	questRows, err := utils.ReadJSON[bigHuntQuestRow]("EntityMBigHuntQuestTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt quest table: %v", err)
+	}
+	questById := make(map[int32]BigHuntQuestRow, len(questRows))
+	for _, r := range questRows {
+		questById[r.BigHuntQuestId] = BigHuntQuestRow{
+			BigHuntQuestId:                 r.BigHuntQuestId,
+			QuestId:                        r.QuestId,
+			BigHuntQuestScoreCoefficientId: r.BigHuntQuestScoreCoefficientId,
+		}
+	}
+
+	coeffRows, err := utils.ReadJSON[bigHuntQuestScoreCoefficientRow]("EntityMBigHuntQuestScoreCoefficientTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt quest score coefficient table: %v", err)
+	}
+	scoreCoefficients := make(map[int32]int32, len(coeffRows))
+	for _, r := range coeffRows {
+		scoreCoefficients[r.BigHuntQuestScoreCoefficientId] = r.ScoreDifficultBonusPermil
+	}
+
+	bossRows, err := utils.ReadJSON[bigHuntBossRow]("EntityMBigHuntBossTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt boss table: %v", err)
+	}
+	bossByBossId := make(map[int32]BigHuntBossRow, len(bossRows))
+	for _, r := range bossRows {
+		bossByBossId[r.BigHuntBossId] = BigHuntBossRow{
+			BigHuntBossId:           r.BigHuntBossId,
+			BigHuntBossGradeGroupId: r.BigHuntBossGradeGroupId,
+			AttributeType:           r.AttributeType,
+		}
+	}
+
+	gradeRows, err := utils.ReadJSON[bigHuntBossGradeGroupRow]("EntityMBigHuntBossGradeGroupTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt boss grade group table: %v", err)
+	}
+	gradeThresholds := make(map[int32][]GradeThreshold)
+	for _, r := range gradeRows {
+		gradeThresholds[r.BigHuntBossGradeGroupId] = append(gradeThresholds[r.BigHuntBossGradeGroupId], GradeThreshold{
+			NecessaryScore:   r.NecessaryScore,
+			AssetGradeIconId: r.AssetGradeIconId,
+		})
+	}
+	for k := range gradeThresholds {
+		sort.Slice(gradeThresholds[k], func(i, j int) bool {
+			return gradeThresholds[k][i].NecessaryScore < gradeThresholds[k][j].NecessaryScore
+		})
+	}
+
+	scheduleRows, err := utils.ReadJSON[bigHuntScheduleRow]("EntityMBigHuntScheduleTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt schedule table: %v", err)
+	}
+	nowMillis := time.Now().UnixMilli()
+	var activeScheduleId int32
+	var latestEndDatetime int64
+	for _, r := range scheduleRows {
+		if nowMillis >= r.ChallengeStartDatetime && nowMillis <= r.ChallengeEndDatetime {
+			activeScheduleId = r.BigHuntScheduleId
+			break
+		}
+		if r.ChallengeEndDatetime > latestEndDatetime {
+			latestEndDatetime = r.ChallengeEndDatetime
+			activeScheduleId = r.BigHuntScheduleId
+		}
+	}
+
+	rewardSchedRows, err := utils.ReadJSON[scoreRewardScheduleRow]("EntityMBigHuntScoreRewardGroupScheduleTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt score reward group schedule table: %v", err)
+	}
+	scoreRewardSchedules := make(map[int32][]ScoreRewardScheduleEntry)
+	for _, r := range rewardSchedRows {
+		scoreRewardSchedules[r.BigHuntScoreRewardGroupScheduleId] = append(
+			scoreRewardSchedules[r.BigHuntScoreRewardGroupScheduleId],
+			ScoreRewardScheduleEntry{
+				BigHuntScoreRewardGroupId: r.BigHuntScoreRewardGroupId,
+				StartDatetime:             r.StartDatetime,
+			},
+		)
+	}
+	for k := range scoreRewardSchedules {
+		sort.Slice(scoreRewardSchedules[k], func(i, j int) bool {
+			return scoreRewardSchedules[k][i].StartDatetime > scoreRewardSchedules[k][j].StartDatetime
+		})
+	}
+
+	rewardGroupRows, err := utils.ReadJSON[scoreRewardGroupRow]("EntityMBigHuntScoreRewardGroupTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt score reward group table: %v", err)
+	}
+	scoreRewardThresholds := make(map[int32][]ScoreRewardThreshold)
+	for _, r := range rewardGroupRows {
+		scoreRewardThresholds[r.BigHuntScoreRewardGroupId] = append(
+			scoreRewardThresholds[r.BigHuntScoreRewardGroupId],
+			ScoreRewardThreshold{
+				NecessaryScore:       r.NecessaryScore,
+				BigHuntRewardGroupId: r.BigHuntRewardGroupId,
+			},
+		)
+	}
+	for k := range scoreRewardThresholds {
+		sort.Slice(scoreRewardThresholds[k], func(i, j int) bool {
+			return scoreRewardThresholds[k][i].NecessaryScore < scoreRewardThresholds[k][j].NecessaryScore
+		})
+	}
+
+	rewardItemRows, err := utils.ReadJSON[rewardGroupRow]("EntityMBigHuntRewardGroupTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt reward group table: %v", err)
+	}
+	rewardItems := make(map[int32][]RewardItem)
+	for _, r := range rewardItemRows {
+		rewardItems[r.BigHuntRewardGroupId] = append(rewardItems[r.BigHuntRewardGroupId], RewardItem{
+			PossessionType: r.PossessionType,
+			PossessionId:   r.PossessionId,
+			Count:          r.Count,
+		})
+	}
+
+	weeklySchedRows, err := utils.ReadJSON[weeklyRewardScheduleRow]("EntityMBigHuntWeeklyAttributeScoreRewardGroupScheduleTable.json")
+	if err != nil {
+		log.Fatalf("load big hunt weekly attribute score reward group schedule table: %v", err)
+	}
+	weeklyRewardSchedules := make(map[BigHuntWeeklyRewardKey][]ScoreRewardScheduleEntry)
+	for _, r := range weeklySchedRows {
+		key := BigHuntWeeklyRewardKey{
+			ScheduleId:    r.BigHuntWeeklyAttributeScoreRewardGroupScheduleId,
+			AttributeType: r.AttributeType,
+		}
+		weeklyRewardSchedules[key] = append(weeklyRewardSchedules[key], ScoreRewardScheduleEntry{
+			BigHuntScoreRewardGroupId: r.BigHuntScoreRewardGroupId,
+			StartDatetime:             r.StartDatetime,
+		})
+	}
+	for k := range weeklyRewardSchedules {
+		sort.Slice(weeklyRewardSchedules[k], func(i, j int) bool {
+			return weeklyRewardSchedules[k][i].StartDatetime > weeklyRewardSchedules[k][j].StartDatetime
+		})
+	}
+
+	log.Printf("big hunt catalog loaded: %d boss quests, %d quests, %d bosses, %d score coefficients, %d reward groups, schedule=%d",
+		len(bossQuestById), len(questById), len(bossByBossId), len(scoreCoefficients), len(rewardItems), activeScheduleId)
+
+	return &BigHuntCatalog{
+		BossQuestById:         bossQuestById,
+		QuestById:             questById,
+		ScoreCoefficients:     scoreCoefficients,
+		BossByBossId:          bossByBossId,
+		GradeThresholds:       gradeThresholds,
+		ActiveScheduleId:      activeScheduleId,
+		ScoreRewardSchedules:  scoreRewardSchedules,
+		ScoreRewardThresholds: scoreRewardThresholds,
+		RewardItems:           rewardItems,
+		WeeklyRewardSchedules: weeklyRewardSchedules,
+	}
+}

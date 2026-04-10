@@ -127,9 +127,6 @@ func init() {
 		return s
 	})
 	register("IUserMainQuestReplayFlowStatus", func(user store.UserState) string {
-		if user.MainQuest.ReplayFlowCurrentQuestSceneId == 0 {
-			return "[]"
-		}
 		s, _ := encodeJSONMaps(map[string]any{
 			"userId":                  user.UserId,
 			"currentHeadQuestSceneId": user.MainQuest.ReplayFlowHeadQuestSceneId,
@@ -139,9 +136,6 @@ func init() {
 		return s
 	})
 	register("IUserSideStoryQuestSceneProgressStatus", func(user store.UserState) string {
-		if user.SideStoryActiveProgress.CurrentSideStoryQuestId == 0 {
-			return "[]"
-		}
 		s, _ := encodeJSONMaps(map[string]any{
 			"userId":                       user.UserId,
 			"currentSideStoryQuestId":      user.SideStoryActiveProgress.CurrentSideStoryQuestId,

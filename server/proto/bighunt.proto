@@ -8,7 +8,7 @@ import "proto/battle.proto";
 
 package apb.api.bighunt;
 
-service BighuntService {
+service BigHuntService {
 	rpc StartBigHuntQuest (StartBigHuntQuestRequest) returns (StartBigHuntQuestResponse);
 	rpc UpdateBigHuntQuestSceneProgress (UpdateBigHuntQuestSceneProgressRequest) returns (UpdateBigHuntQuestSceneProgressResponse);
 	rpc FinishBigHuntQuest (FinishBigHuntQuestRequest) returns (FinishBigHuntQuestResponse);

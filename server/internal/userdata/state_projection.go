@@ -93,6 +93,12 @@ func FullClientTableMap(user store.UserState) map[string]string {
 		"IUserAutoSaleSettingDetail":              projectTable("IUserAutoSaleSettingDetail", user),
 		"IUserCharacterRebirth":                   projectTable("IUserCharacterRebirth", user),
 		"IUserCageOrnamentReward":                 projectTable("IUserCageOrnamentReward", user),
+		"IUserBigHuntProgressStatus":              projectTable("IUserBigHuntProgressStatus", user),
+		"IUserBigHuntMaxScore":                    projectTable("IUserBigHuntMaxScore", user),
+		"IUserBigHuntStatus":                      projectTable("IUserBigHuntStatus", user),
+		"IUserBigHuntScheduleMaxScore":            projectTable("IUserBigHuntScheduleMaxScore", user),
+		"IUserBigHuntWeeklyMaxScore":              projectTable("IUserBigHuntWeeklyMaxScore", user),
+		"IUserBigHuntWeeklyStatus":                projectTable("IUserBigHuntWeeklyStatus", user),
 	}
 }
 

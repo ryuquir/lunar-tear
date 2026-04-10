@@ -57,6 +57,7 @@ func startGRPC(
 	materialCatalog *masterdata.MaterialCatalog,
 	gameConfig *masterdata.GameConfig,
 	sideStoryCatalog *masterdata.SideStoryCatalog,
+	bigHuntCatalog *masterdata.BigHuntCatalog,
 ) {
 	lis, err := net.Listen("tcp", ":443")
 	if err != nil {
@@ -91,6 +92,7 @@ func startGRPC(
 		materialCatalog,
 		gameConfig,
 		sideStoryCatalog,
+		bigHuntCatalog,
 	)
 
 	reflection.Register(grpcServer)
@@ -126,6 +128,7 @@ func registerServices(
 	materialCatalog *masterdata.MaterialCatalog,
 	gameConfig *masterdata.GameConfig,
 	sideStoryCatalog *masterdata.SideStoryCatalog,
+	bigHuntCatalog *masterdata.BigHuntCatalog,
 ) {
 	pb.RegisterBannerServiceServer(srv, service.NewBannerServiceServer(userStore))
 	pb.RegisterUserServiceServer(srv, service.NewUserServiceServer(userStore, userStore))
@@ -161,6 +164,8 @@ func registerServices(
 	pb.RegisterCompanionServiceServer(srv, service.NewCompanionServiceServer(userStore, userStore, companionCatalog, gameConfig))
 	pb.RegisterMaterialServiceServer(srv, service.NewMaterialServiceServer(userStore, userStore, materialCatalog, gameConfig))
 	pb.RegisterSideStoryQuestServiceServer(srv, service.NewSideStoryQuestServiceServer(userStore, userStore, sideStoryCatalog))
+	pb.RegisterBigHuntServiceServer(srv, service.NewBigHuntServiceServer(userStore, userStore, bigHuntCatalog, questEngine))
+	pb.RegisterRewardServiceServer(srv, service.NewRewardServiceServer(userStore, userStore, bigHuntCatalog, questEngine.Granter))
 }
 
 func loggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {

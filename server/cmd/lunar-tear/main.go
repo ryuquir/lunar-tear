@@ -163,6 +163,7 @@ func main() {
 	log.Printf("companion catalog loaded: %d companions, %d categories", len(companionCatalog.CompanionById), len(companionCatalog.GoldCostByCategory))
 
 	sideStoryCatalog := masterdata.LoadSideStoryCatalog()
+	bigHuntCatalog := masterdata.LoadBigHuntCatalog()
 
 	startGRPC(
 		*host,
@@ -186,5 +187,6 @@ func main() {
 		materialCatalog,
 		gameConfig,
 		sideStoryCatalog,
+		bigHuntCatalog,
 	)
 }

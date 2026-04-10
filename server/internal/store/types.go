@@ -45,10 +45,21 @@ type UserState struct {
 	SideStoryQuests         map[int32]SideStoryQuestProgress
 	SideStoryActiveProgress SideStoryActiveProgress
 	QuestLimitContentStatus map[int32]QuestLimitContentStatus
-	Battle                  BattleState
-	Gifts                   GiftState
-	Gacha                   GachaState
-	Notifications           NotificationState
+
+	BigHuntProgress          BigHuntProgress
+	BigHuntMaxScores         map[int32]BigHuntMaxScore
+	BigHuntStatuses          map[int32]BigHuntStatus
+	BigHuntScheduleMaxScores map[BigHuntScheduleScoreKey]BigHuntScheduleMaxScore
+	BigHuntWeeklyMaxScores   map[BigHuntWeeklyScoreKey]BigHuntWeeklyMaxScore
+	BigHuntWeeklyStatuses    map[int64]BigHuntWeeklyStatus
+	BigHuntBattleBinary      []byte
+	BigHuntBattleDetail      BigHuntBattleDetail
+	BigHuntDeckNumber        int32
+
+	Battle        BattleState
+	Gifts         GiftState
+	Gacha         GachaState
+	Notifications NotificationState
 
 	Characters            map[int32]CharacterState
 	Costumes              map[string]CostumeState
@@ -139,6 +150,21 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.QuestLimitContentStatus == nil {
 		u.QuestLimitContentStatus = make(map[int32]QuestLimitContentStatus)
+	}
+	if u.BigHuntMaxScores == nil {
+		u.BigHuntMaxScores = make(map[int32]BigHuntMaxScore)
+	}
+	if u.BigHuntStatuses == nil {
+		u.BigHuntStatuses = make(map[int32]BigHuntStatus)
+	}
+	if u.BigHuntScheduleMaxScores == nil {
+		u.BigHuntScheduleMaxScores = make(map[BigHuntScheduleScoreKey]BigHuntScheduleMaxScore)
+	}
+	if u.BigHuntWeeklyMaxScores == nil {
+		u.BigHuntWeeklyMaxScores = make(map[BigHuntWeeklyScoreKey]BigHuntWeeklyMaxScore)
+	}
+	if u.BigHuntWeeklyStatuses == nil {
+		u.BigHuntWeeklyStatuses = make(map[int64]BigHuntWeeklyStatus)
 	}
 	if u.QuestMissions == nil {
 		u.QuestMissions = make(map[QuestMissionKey]UserQuestMissionState)
@@ -383,24 +409,16 @@ type DeckKey struct {
 }
 
 func (k DeckKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d", k.DeckType, k.UserDeckNumber), nil
+	return marshalKey(int64(k.DeckType), int64(k.UserDeckNumber)), nil
 }
 
 func (k *DeckKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid DeckKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "DeckKey", 2)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.DeckType = model.DeckType(a)
-	k.UserDeckNumber = int32(b)
+	k.DeckType = model.DeckType(v[0])
+	k.UserDeckNumber = int32(v[1])
 	return nil
 }
 
@@ -508,6 +526,88 @@ type QuestLimitContentStatus struct {
 	LatestVersion               int64
 }
 
+type BigHuntProgress struct {
+	CurrentBigHuntBossQuestId int32
+	CurrentBigHuntQuestId     int32
+	CurrentQuestSceneId       int32
+	IsDryRun                  bool
+	LatestVersion             int64
+}
+
+type BigHuntMaxScore struct {
+	MaxScore               int64
+	MaxScoreUpdateDatetime int64
+	LatestVersion          int64
+}
+
+type BigHuntStatus struct {
+	DailyChallengeCount     int32
+	LatestChallengeDatetime int64
+	LatestVersion           int64
+}
+
+type BigHuntScheduleScoreKey struct {
+	BigHuntScheduleId int32
+	BigHuntBossId     int32
+}
+
+func (k BigHuntScheduleScoreKey) MarshalText() ([]byte, error) {
+	return marshalKey(int64(k.BigHuntScheduleId), int64(k.BigHuntBossId)), nil
+}
+
+func (k *BigHuntScheduleScoreKey) UnmarshalText(text []byte) error {
+	v, err := unmarshalKey(text, "BigHuntScheduleScoreKey", 2)
+	if err != nil {
+		return err
+	}
+	k.BigHuntScheduleId = int32(v[0])
+	k.BigHuntBossId = int32(v[1])
+	return nil
+}
+
+type BigHuntScheduleMaxScore struct {
+	MaxScore               int64
+	MaxScoreUpdateDatetime int64
+	LatestVersion          int64
+}
+
+type BigHuntWeeklyScoreKey struct {
+	BigHuntWeeklyVersion int64
+	AttributeType        int32
+}
+
+func (k BigHuntWeeklyScoreKey) MarshalText() ([]byte, error) {
+	return marshalKey(k.BigHuntWeeklyVersion, int64(k.AttributeType)), nil
+}
+
+func (k *BigHuntWeeklyScoreKey) UnmarshalText(text []byte) error {
+	v, err := unmarshalKey(text, "BigHuntWeeklyScoreKey", 2)
+	if err != nil {
+		return err
+	}
+	k.BigHuntWeeklyVersion = v[0]
+	k.AttributeType = int32(v[1])
+	return nil
+}
+
+type BigHuntWeeklyMaxScore struct {
+	MaxScore      int64
+	LatestVersion int64
+}
+
+type BigHuntWeeklyStatus struct {
+	IsReceivedWeeklyReward bool
+	LatestVersion          int64
+}
+
+type BigHuntBattleDetail struct {
+	DeckType             int32
+	UserTripleDeckNumber int32
+	BossKnockDownCount   int32
+	MaxComboCount        int32
+	TotalDamage          int64
+}
+
 type BattleState struct {
 	IsActive              bool
 	StartCount            int32
@@ -540,24 +640,16 @@ type QuestMissionKey struct {
 }
 
 func (k QuestMissionKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d", k.QuestId, k.QuestMissionId), nil
+	return marshalKey(int64(k.QuestId), int64(k.QuestMissionId)), nil
 }
 
 func (k *QuestMissionKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid QuestMissionKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "QuestMissionKey", 2)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.QuestId = int32(a)
-	k.QuestMissionId = int32(b)
+	k.QuestId = int32(v[0])
+	k.QuestMissionId = int32(v[1])
 	return nil
 }
 
@@ -599,24 +691,16 @@ type GimmickSequenceKey struct {
 }
 
 func (k GimmickSequenceKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d", k.GimmickSequenceScheduleId, k.GimmickSequenceId), nil
+	return marshalKey(int64(k.GimmickSequenceScheduleId), int64(k.GimmickSequenceId)), nil
 }
 
 func (k *GimmickSequenceKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid GimmickSequenceKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "GimmickSequenceKey", 2)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.GimmickSequenceScheduleId = int32(a)
-	k.GimmickSequenceId = int32(b)
+	k.GimmickSequenceScheduleId = int32(v[0])
+	k.GimmickSequenceId = int32(v[1])
 	return nil
 }
 
@@ -627,29 +711,17 @@ type GimmickKey struct {
 }
 
 func (k GimmickKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d:%d", k.GimmickSequenceScheduleId, k.GimmickSequenceId, k.GimmickId), nil
+	return marshalKey(int64(k.GimmickSequenceScheduleId), int64(k.GimmickSequenceId), int64(k.GimmickId)), nil
 }
 
 func (k *GimmickKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 3 {
-		return fmt.Errorf("invalid GimmickKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "GimmickKey", 3)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	c, err := strconv.ParseInt(parts[2], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.GimmickSequenceScheduleId = int32(a)
-	k.GimmickSequenceId = int32(b)
-	k.GimmickId = int32(c)
+	k.GimmickSequenceScheduleId = int32(v[0])
+	k.GimmickSequenceId = int32(v[1])
+	k.GimmickId = int32(v[2])
 	return nil
 }
 
@@ -661,34 +733,18 @@ type GimmickOrnamentKey struct {
 }
 
 func (k GimmickOrnamentKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d:%d:%d", k.GimmickSequenceScheduleId, k.GimmickSequenceId, k.GimmickId, k.GimmickOrnamentIndex), nil
+	return marshalKey(int64(k.GimmickSequenceScheduleId), int64(k.GimmickSequenceId), int64(k.GimmickId), int64(k.GimmickOrnamentIndex)), nil
 }
 
 func (k *GimmickOrnamentKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 4 {
-		return fmt.Errorf("invalid GimmickOrnamentKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "GimmickOrnamentKey", 4)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	c, err := strconv.ParseInt(parts[2], 10, 32)
-	if err != nil {
-		return err
-	}
-	d, err := strconv.ParseInt(parts[3], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.GimmickSequenceScheduleId = int32(a)
-	k.GimmickSequenceId = int32(b)
-	k.GimmickId = int32(c)
-	k.GimmickOrnamentIndex = int32(d)
+	k.GimmickSequenceScheduleId = int32(v[0])
+	k.GimmickSequenceId = int32(v[1])
+	k.GimmickId = int32(v[2])
+	k.GimmickOrnamentIndex = int32(v[3])
 	return nil
 }
 
@@ -908,24 +964,16 @@ type CharacterBoardAbilityKey struct {
 }
 
 func (k CharacterBoardAbilityKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d", k.CharacterId, k.AbilityId), nil
+	return marshalKey(int64(k.CharacterId), int64(k.AbilityId)), nil
 }
 
 func (k *CharacterBoardAbilityKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid CharacterBoardAbilityKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "CharacterBoardAbilityKey", 2)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.CharacterId = int32(a)
-	k.AbilityId = int32(b)
+	k.CharacterId = int32(v[0])
+	k.AbilityId = int32(v[1])
 	return nil
 }
 
@@ -942,24 +990,16 @@ type CharacterBoardStatusUpKey struct {
 }
 
 func (k CharacterBoardStatusUpKey) MarshalText() ([]byte, error) {
-	return fmt.Appendf(nil, "%d:%d", k.CharacterId, k.StatusCalculationType), nil
+	return marshalKey(int64(k.CharacterId), int64(k.StatusCalculationType)), nil
 }
 
 func (k *CharacterBoardStatusUpKey) UnmarshalText(text []byte) error {
-	parts := strings.Split(string(text), ":")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid CharacterBoardStatusUpKey: %s", text)
-	}
-	a, err := strconv.ParseInt(parts[0], 10, 32)
+	v, err := unmarshalKey(text, "CharacterBoardStatusUpKey", 2)
 	if err != nil {
 		return err
 	}
-	b, err := strconv.ParseInt(parts[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	k.CharacterId = int32(a)
-	k.StatusCalculationType = int32(b)
+	k.CharacterId = int32(v[0])
+	k.StatusCalculationType = int32(v[1])
 	return nil
 }
 
