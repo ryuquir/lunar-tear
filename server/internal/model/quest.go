@@ -150,3 +150,11 @@ const (
 	UserQuestStateTypeActive  UserQuestStateType = 1
 	UserQuestStateTypeCleared UserQuestStateType = 2
 )
+
+type SideStoryQuestStateType int32
+
+const (
+	SideStoryQuestStateUnknown SideStoryQuestStateType = 0
+	SideStoryQuestStateActive  SideStoryQuestStateType = 1
+	SideStoryQuestStateCleared SideStoryQuestStateType = 2
+)

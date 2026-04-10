@@ -6,7 +6,7 @@ import "proto/data.proto";
 
 package apb.api.sidestoryquest;
 
-service SidestoryquestService {
+service SideStoryQuestService {
 	rpc MoveSideStoryQuestProgress (MoveSideStoryQuestRequest) returns (MoveSideStoryQuestResponse);
 	rpc UpdateSideStoryQuestSceneProgress (UpdateSideStoryQuestSceneProgressRequest) returns (UpdateSideStoryQuestSceneProgressResponse);
 }

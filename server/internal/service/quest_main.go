@@ -6,6 +6,7 @@ import (
 
 	pb "lunar-tear/server/gen/proto"
 	"lunar-tear/server/internal/gametime"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/questflow"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
@@ -47,6 +48,7 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
 			"IUserPortalCageStatus",
+			"IUserSideStoryQuestSceneProgressStatus",
 			"IUserQuest",
 			"IUserCharacter",
 			"IUserCostume",
@@ -68,8 +70,17 @@ func (s *QuestServiceServer) UpdateMainFlowSceneProgress(ctx context.Context, re
 
 func (s *QuestServiceServer) UpdateReplayFlowSceneProgress(ctx context.Context, req *pb.UpdateReplayFlowSceneProgressRequest) (*pb.UpdateReplayFlowSceneProgressResponse, error) {
 	log.Printf("[QuestService] UpdateReplayFlowSceneProgress: questSceneId=%d", req.QuestSceneId)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		s.engine.HandleReplayFlowSceneProgress(user, req.QuestSceneId, gametime.NowMillis())
+	})
+
 	return &pb.UpdateReplayFlowSceneProgressResponse{
-		DiffUserData: userdata.EmptyDiff(),
+		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserMainQuestFlowStatus",
+			"IUserMainQuestReplayFlowStatus",
+		}),
 	}, nil
 }
 
@@ -100,7 +111,11 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 	userId := currentUserId(ctx, s.users, s.sessions)
 	nowMillis := gametime.NowMillis()
 	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
-		s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, req.UserDeckNumber, nowMillis)
+		if req.IsReplayFlow {
+			s.engine.HandleQuestStartReplay(user, req.QuestId, req.IsBattleOnly, req.UserDeckNumber, nowMillis)
+		} else {
+			s.engine.HandleQuestStart(user, req.QuestId, req.IsBattleOnly, req.UserDeckNumber, nowMillis)
+		}
 	})
 
 	drops := s.engine.BattleDropRewards(req.QuestId)
@@ -123,6 +138,7 @@ func (s *QuestServiceServer) StartMainQuest(ctx context.Context, req *pb.StartMa
 			"IUserMainQuestMainFlowStatus",
 			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
+			"IUserMainQuestReplayFlowStatus",
 		}),
 	}, nil
 }
@@ -161,7 +177,7 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 		AutoOrbitResult:                 []*pb.QuestReward{},
 		IsBigWin:                        outcome.IsBigWin,
 		BigWinClearedQuestMissionIdList: outcome.BigWinClearedQuestMissionIds,
-		ReplayFlowFirstClearReward:      []*pb.QuestReward{},
+		ReplayFlowFirstClearReward:      toProtoRewards(outcome.ReplayFlowFirstClearRewards),
 		UserStatusCampaignReward:        []*pb.QuestReward{},
 		DiffUserData: buildSelectedQuestDiff(user, []string{
 			"IUserQuest",
@@ -170,6 +186,7 @@ func (s *QuestServiceServer) FinishMainQuest(ctx context.Context, req *pb.Finish
 			"IUserMainQuestMainFlowStatus",
 			"IUserMainQuestProgressStatus",
 			"IUserMainQuestSeasonRoute",
+			"IUserMainQuestReplayFlowStatus",
 			"IUserStatus",
 			"IUserGem",
 			"IUserCharacter",
@@ -291,6 +308,39 @@ func (s *QuestServiceServer) SetQuestSceneChoice(ctx context.Context, req *pb.Se
 		req.QuestSceneId, req.ChoiceNumber)
 	return &pb.SetQuestSceneChoiceResponse{
 		DiffUserData: userdata.EmptyDiff(),
+	}, nil
+}
+
+func (s *QuestServiceServer) ResetLimitContentQuestProgress(ctx context.Context, req *pb.ResetLimitContentQuestProgressRequest) (*pb.ResetLimitContentQuestProgressResponse, error) {
+	log.Printf("[QuestService] ResetLimitContentQuestProgress: eventQuestChapterId=%d questId=%d",
+		req.EventQuestChapterId, req.QuestId)
+
+	userId := currentUserId(ctx, s.users, s.sessions)
+	nowMillis := gametime.NowMillis()
+	user, _ := s.users.UpdateUser(userId, func(user *store.UserState) {
+		if _, exists := user.SideStoryQuests[req.QuestId]; exists {
+			user.SideStoryQuests[req.QuestId] = store.SideStoryQuestProgress{
+				HeadSideStoryQuestSceneId: 0,
+				SideStoryQuestStateType:   model.SideStoryQuestStateUnknown,
+				LatestVersion:             nowMillis,
+			}
+		}
+
+		delete(user.QuestLimitContentStatus, req.QuestId)
+
+		if user.SideStoryActiveProgress.CurrentSideStoryQuestId == req.QuestId {
+			user.SideStoryActiveProgress = store.SideStoryActiveProgress{
+				LatestVersion: nowMillis,
+			}
+		}
+	})
+
+	return &pb.ResetLimitContentQuestProgressResponse{
+		DiffUserData: buildSelectedQuestDiff(user, []string{
+			"IUserSideStoryQuest",
+			"IUserSideStoryQuestSceneProgressStatus",
+			"IUserQuestLimitContentStatus",
+		}),
 	}, nil
 }
 

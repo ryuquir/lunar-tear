@@ -15,6 +15,7 @@ type RewardGrant struct {
 type FinishOutcome struct {
 	DropRewards                  []RewardGrant
 	FirstClearRewards            []RewardGrant
+	ReplayFlowFirstClearRewards  []RewardGrant
 	MissionClearRewards          []RewardGrant
 	MissionClearCompleteRewards  []RewardGrant
 	BigWinClearedQuestMissionIds []int32

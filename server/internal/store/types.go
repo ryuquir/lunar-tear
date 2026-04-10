@@ -32,20 +32,23 @@ type UserState struct {
 	BackupToken          string
 	ChargeMoneyThisMonth int64
 
-	Setting       UserSettingState
-	Status        UserStatusState
-	Gem           UserGemState
-	Profile       UserProfileState
-	Login         UserLoginState
-	LoginBonus    UserLoginBonusState
-	Tutorials     map[int32]TutorialProgressState
-	MainQuest     MainQuestState
-	EventQuest    EventQuestState
-	ExtraQuest    ExtraQuestState
-	Battle        BattleState
-	Gifts         GiftState
-	Gacha         GachaState
-	Notifications NotificationState
+	Setting                 UserSettingState
+	Status                  UserStatusState
+	Gem                     UserGemState
+	Profile                 UserProfileState
+	Login                   UserLoginState
+	LoginBonus              UserLoginBonusState
+	Tutorials               map[int32]TutorialProgressState
+	MainQuest               MainQuestState
+	EventQuest              EventQuestState
+	ExtraQuest              ExtraQuestState
+	SideStoryQuests         map[int32]SideStoryQuestProgress
+	SideStoryActiveProgress SideStoryActiveProgress
+	QuestLimitContentStatus map[int32]QuestLimitContentStatus
+	Battle                  BattleState
+	Gifts                   GiftState
+	Gacha                   GachaState
+	Notifications           NotificationState
 
 	Characters            map[int32]CharacterState
 	Costumes              map[string]CostumeState
@@ -130,6 +133,12 @@ func (u *UserState) EnsureMaps() {
 	}
 	if u.Quests == nil {
 		u.Quests = make(map[int32]UserQuestState)
+	}
+	if u.SideStoryQuests == nil {
+		u.SideStoryQuests = make(map[int32]SideStoryQuestProgress)
+	}
+	if u.QuestLimitContentStatus == nil {
+		u.QuestLimitContentStatus = make(map[int32]QuestLimitContentStatus)
 	}
 	if u.QuestMissions == nil {
 		u.QuestMissions = make(map[QuestMissionKey]UserQuestMissionState)
@@ -459,6 +468,11 @@ type MainQuestState struct {
 	ProgressQuestFlowType    int32
 	MainQuestSeasonId        int32
 	LatestVersion            int64
+
+	SavedCurrentQuestSceneId      int32
+	SavedHeadQuestSceneId         int32
+	ReplayFlowCurrentQuestSceneId int32
+	ReplayFlowHeadQuestSceneId    int32
 }
 
 type EventQuestState struct {
@@ -474,6 +488,24 @@ type ExtraQuestState struct {
 	CurrentQuestSceneId int32
 	HeadQuestSceneId    int32
 	LatestVersion       int64
+}
+
+type SideStoryQuestProgress struct {
+	HeadSideStoryQuestSceneId int32
+	SideStoryQuestStateType   model.SideStoryQuestStateType
+	LatestVersion             int64
+}
+
+type SideStoryActiveProgress struct {
+	CurrentSideStoryQuestId      int32
+	CurrentSideStoryQuestSceneId int32
+	LatestVersion                int64
+}
+
+type QuestLimitContentStatus struct {
+	LimitContentQuestStatusType int32
+	EventQuestChapterId         int32
+	LatestVersion               int64
 }
 
 type BattleState struct {

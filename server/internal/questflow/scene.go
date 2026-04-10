@@ -43,6 +43,12 @@ func (h *QuestHandler) HandleMainFlowSceneProgress(user *store.UserState, questS
 	}
 	user.MainQuest.CurrentQuestFlowType = int32(model.QuestFlowTypeMainFlow)
 
+	if user.SideStoryActiveProgress.CurrentSideStoryQuestId != 0 {
+		user.SideStoryActiveProgress = store.SideStoryActiveProgress{
+			LatestVersion: nowMillis,
+		}
+	}
+
 	lastSceneId := h.getChapterLastSceneId(scene.QuestId)
 	user.MainQuest.IsReachedLastQuestScene = questSceneId == lastSceneId
 
@@ -94,6 +100,15 @@ func (h *QuestHandler) getChapterLastSceneId(questId int32) int32 {
 		return id
 	}
 	return h.getLastMainFlowSceneId(questId)
+}
+
+func (h *QuestHandler) HandleReplayFlowSceneProgress(user *store.UserState, questSceneId int32, nowMillis int64) {
+	user.MainQuest.ReplayFlowCurrentQuestSceneId = questSceneId
+	if user.MainQuest.ReplayFlowHeadQuestSceneId == 0 || h.isSceneAhead(questSceneId, user.MainQuest.ReplayFlowHeadQuestSceneId) {
+		user.MainQuest.ReplayFlowHeadQuestSceneId = questSceneId
+	}
+	user.MainQuest.LatestVersion = nowMillis
+	log.Printf("[HandleReplayFlowSceneProgress] sceneId=%d replayHead=%d", questSceneId, user.MainQuest.ReplayFlowHeadQuestSceneId)
 }
 
 func (h *QuestHandler) HandleMainQuestSceneProgress(user *store.UserState, questSceneId int32) {

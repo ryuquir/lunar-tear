@@ -111,6 +111,14 @@ type QuestFirstClearRewardGroupRow struct {
 	IsPickup                     bool                 `json:"IsPickup"`
 }
 
+type QuestReplayFlowRewardGroupRow struct {
+	QuestReplayFlowRewardGroupId int32                `json:"QuestReplayFlowRewardGroupId"`
+	SortOrder                    int32                `json:"SortOrder"`
+	PossessionType               model.PossessionType `json:"PossessionType"`
+	PossessionId                 int32                `json:"PossessionId"`
+	Count                        int32                `json:"Count"`
+}
+
 type QuestSceneGrantRow struct {
 	QuestSceneId   int32                `json:"QuestSceneId"`
 	PossessionType model.PossessionType `json:"PossessionType"`
@@ -201,6 +209,7 @@ type QuestCatalog struct {
 	BattleDropRewardById               map[int32]BattleDropRewardRow
 	PickupRewardIdsByGroupId           map[int32][]int32
 	BattleDropsByQuestId               map[int32][]BattleDropInfo
+	ReplayFlowRewardsByGroupId         map[int32][]QuestReplayFlowRewardGroupRow
 	RentalQuestIds                     map[int32]bool
 	TutorialUnlockConditions           []TutorialUnlockConditionRow
 	ChapterLastSceneByQuestId          map[int32]int32
@@ -305,6 +314,17 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 			return firstClearRewards[i].SortOrder < firstClearRewards[j].SortOrder
 		}
 		return firstClearRewards[i].QuestFirstClearRewardType < firstClearRewards[j].QuestFirstClearRewardType
+	})
+
+	replayFlowRewards, err := utils.ReadJSON[QuestReplayFlowRewardGroupRow]("EntityMQuestReplayFlowRewardGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load quest replay flow reward group table: %w", err)
+	}
+	sort.Slice(replayFlowRewards, func(i, j int) bool {
+		if replayFlowRewards[i].QuestReplayFlowRewardGroupId != replayFlowRewards[j].QuestReplayFlowRewardGroupId {
+			return replayFlowRewards[i].QuestReplayFlowRewardGroupId < replayFlowRewards[j].QuestReplayFlowRewardGroupId
+		}
+		return replayFlowRewards[i].SortOrder < replayFlowRewards[j].SortOrder
 	})
 
 	missionRewards, err := utils.ReadJSON[QuestMissionRewardRow]("EntityMQuestMissionRewardTable.json")
@@ -530,6 +550,12 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 			firstClearRewardsByGroupId[reward.QuestFirstClearRewardGroupId], reward)
 	}
 
+	replayFlowRewardsByGroupId := make(map[int32][]QuestReplayFlowRewardGroupRow, len(replayFlowRewards))
+	for _, reward := range replayFlowRewards {
+		replayFlowRewardsByGroupId[reward.QuestReplayFlowRewardGroupId] = append(
+			replayFlowRewardsByGroupId[reward.QuestReplayFlowRewardGroupId], reward)
+	}
+
 	firstClearRewardSwitchesByQuestId := make(map[int32][]QuestFirstClearRewardSwitchRow, len(firstClearSwitches))
 	for _, switchRow := range firstClearSwitches {
 		firstClearRewardSwitchesByQuestId[switchRow.QuestId] = append(
@@ -678,6 +704,7 @@ func LoadQuestCatalog(partsCatalog *PartsCatalog) (*QuestCatalog, error) {
 		BattleDropRewardById:               battleDropRewardById,
 		PickupRewardIdsByGroupId:           pickupRewardIdsByGroupId,
 		BattleDropsByQuestId:               battleDropsByQuestId,
+		ReplayFlowRewardsByGroupId:         replayFlowRewardsByGroupId,
 		RentalQuestIds:                     rentalQuestIds,
 		TutorialUnlockConditions:           tutorialUnlockConds,
 		ChapterLastSceneByQuestId:          chapterLastSceneByQuestId,

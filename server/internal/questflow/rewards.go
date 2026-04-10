@@ -62,6 +62,16 @@ func (h *QuestHandler) evaluateFinishOutcome(user *store.UserState, questId int3
 		}
 	}
 
+	if user.MainQuest.CurrentQuestFlowType == int32(model.QuestFlowTypeReplayFlow) && questDef.QuestReplayFlowRewardGroupId > 0 {
+		for _, reward := range h.ReplayFlowRewardsByGroupId[questDef.QuestReplayFlowRewardGroupId] {
+			outcome.ReplayFlowFirstClearRewards = append(outcome.ReplayFlowFirstClearRewards, RewardGrant{
+				PossessionType: reward.PossessionType,
+				PossessionId:   reward.PossessionId,
+				Count:          reward.Count,
+			})
+		}
+	}
+
 	pendingClearCount := 0
 	regularMissionCount := 0
 	for _, questMissionId := range h.MissionIdsByQuestId[questId] {

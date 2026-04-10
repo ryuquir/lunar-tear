@@ -126,10 +126,84 @@ func init() {
 		})
 		return s
 	})
+	register("IUserMainQuestReplayFlowStatus", func(user store.UserState) string {
+		if user.MainQuest.ReplayFlowCurrentQuestSceneId == 0 {
+			return "[]"
+		}
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":                  user.UserId,
+			"currentHeadQuestSceneId": user.MainQuest.ReplayFlowHeadQuestSceneId,
+			"currentQuestSceneId":     user.MainQuest.ReplayFlowCurrentQuestSceneId,
+			"latestVersion":           user.MainQuest.LatestVersion,
+		})
+		return s
+	})
+	register("IUserSideStoryQuestSceneProgressStatus", func(user store.UserState) string {
+		if user.SideStoryActiveProgress.CurrentSideStoryQuestId == 0 {
+			return "[]"
+		}
+		s, _ := encodeJSONMaps(map[string]any{
+			"userId":                       user.UserId,
+			"currentSideStoryQuestId":      user.SideStoryActiveProgress.CurrentSideStoryQuestId,
+			"currentSideStoryQuestSceneId": user.SideStoryActiveProgress.CurrentSideStoryQuestSceneId,
+			"latestVersion":                user.SideStoryActiveProgress.LatestVersion,
+		})
+		return s
+	})
+	register("IUserSideStoryQuest", func(user store.UserState) string {
+		if len(user.SideStoryQuests) == 0 {
+			return "[]"
+		}
+		ids := make([]int, 0, len(user.SideStoryQuests))
+		for id := range user.SideStoryQuests {
+			ids = append(ids, int(id))
+		}
+		sort.Ints(ids)
+		records := make([]map[string]any, 0, len(ids))
+		for _, id := range ids {
+			progress := user.SideStoryQuests[int32(id)]
+			records = append(records, map[string]any{
+				"userId":                    user.UserId,
+				"sideStoryQuestId":          int32(id),
+				"headSideStoryQuestSceneId": progress.HeadSideStoryQuestSceneId,
+				"sideStoryQuestStateType":   progress.SideStoryQuestStateType,
+				"latestVersion":             progress.LatestVersion,
+			})
+		}
+		s, _ := encodeJSONMaps(records...)
+		return s
+	})
+	register("IUserQuestLimitContentStatus", func(user store.UserState) string {
+		if len(user.QuestLimitContentStatus) == 0 {
+			return "[]"
+		}
+		ids := make([]int, 0, len(user.QuestLimitContentStatus))
+		for id := range user.QuestLimitContentStatus {
+			ids = append(ids, int(id))
+		}
+		sort.Ints(ids)
+		records := make([]map[string]any, 0, len(ids))
+		for _, id := range ids {
+			st := user.QuestLimitContentStatus[int32(id)]
+			records = append(records, map[string]any{
+				"userId":                      user.UserId,
+				"questId":                     int32(id),
+				"limitContentQuestStatusType": st.LimitContentQuestStatusType,
+				"eventQuestChapterId":         st.EventQuestChapterId,
+				"latestVersion":               st.LatestVersion,
+			})
+		}
+		s, _ := encodeJSONMaps(records...)
+		return s
+	})
 	registerStatic(
 		"IUserEventQuestDailyGroupCompleteReward",
 		"IUserEventQuestLabyrinthSeason",
 		"IUserEventQuestLabyrinthStage",
 		"IUserEventQuestTowerAccumulationReward",
+		"IUserQuestReplayFlowRewardGroup",
+		"IUserQuestAutoOrbit",
+		"IUserQuestSceneChoice",
+		"IUserQuestSceneChoiceHistory",
 	)
 }
