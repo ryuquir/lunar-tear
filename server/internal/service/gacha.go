@@ -186,6 +186,17 @@ func (s *GachaServiceServer) Draw(ctx context.Context, req *pb.DrawRequest) (*pb
 		return nil, fmt.Errorf("update user: %w", err)
 	}
 
+	for i, item := range drawResult.Items {
+		if bonus, ok := drawResult.BonusItems[i]; ok {
+			log.Printf("[GachaService] drawn[%d]: type=%d id=%d rarity=%d + bonus type=%d id=%d rarity=%d",
+				i, item.PossessionType, item.PossessionId, item.RarityType,
+				bonus.PossessionType, bonus.PossessionId, bonus.RarityType)
+		} else {
+			log.Printf("[GachaService] drawn[%d]: type=%d id=%d rarity=%d",
+				i, item.PossessionType, item.PossessionId, item.RarityType)
+		}
+	}
+
 	gachaResults := make([]*pb.DrawGachaOddsItem, 0, len(drawResult.Items))
 	dupMap := make(map[int]gacha.DuplicateInfo)
 	for _, d := range drawResult.DuplicateInfos {

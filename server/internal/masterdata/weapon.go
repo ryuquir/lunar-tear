@@ -2,6 +2,7 @@ package masterdata
 
 import (
 	"fmt"
+	"log"
 	"sort"
 
 	"lunar-tear/server/internal/model"
@@ -10,6 +11,7 @@ import (
 
 type WeaponMasterRow struct {
 	WeaponId                           int32 `json:"WeaponId"`
+	RarityType                         int32 `json:"RarityType"`
 	WeaponType                         int32 `json:"WeaponType"`
 	WeaponSpecificEnhanceId            int32 `json:"WeaponSpecificEnhanceId"`
 	WeaponSkillGroupId                 int32 `json:"WeaponSkillGroupId"`
@@ -92,6 +94,23 @@ type WeaponAbilityEnhanceMaterialRow struct {
 	SortOrder                          int32 `json:"SortOrder"`
 }
 
+type weaponRarityEnhanceRow struct {
+	RarityType                                   int32 `json:"RarityType"`
+	BaseEnhancementObtainedExp                   int32 `json:"BaseEnhancementObtainedExp"`
+	SellPriceNumericalFunctionId                 int32 `json:"SellPriceNumericalFunctionId"`
+	RequiredExpForLevelUpNumericalParameterMapId int32 `json:"RequiredExpForLevelUpNumericalParameterMapId"`
+	EnhancementCostByWeaponNumericalFunctionId   int32 `json:"EnhancementCostByWeaponNumericalFunctionId"`
+	EnhancementCostByMaterialNumericalFunctionId int32 `json:"EnhancementCostByMaterialNumericalFunctionId"`
+	MaxLevelNumericalFunctionId                  int32 `json:"MaxLevelNumericalFunctionId"`
+	EvolutionCostNumericalFunctionId             int32 `json:"EvolutionCostNumericalFunctionId"`
+	LimitBreakCostByWeaponNumericalFunctionId    int32 `json:"LimitBreakCostByWeaponNumericalFunctionId"`
+	LimitBreakCostByMaterialNumericalFunctionId  int32 `json:"LimitBreakCostByMaterialNumericalFunctionId"`
+	MaxSkillLevelNumericalFunctionId             int32 `json:"MaxSkillLevelNumericalFunctionId"`
+	SkillEnhancementCostNumericalFunctionId      int32 `json:"SkillEnhancementCostNumericalFunctionId"`
+	MaxAbilityLevelNumericalFunctionId           int32 `json:"MaxAbilityLevelNumericalFunctionId"`
+	AbilityEnhancementCostNumericalFunctionId    int32 `json:"AbilityEnhancementCostNumericalFunctionId"`
+}
+
 type WeaponCatalog struct {
 	Weapons                             map[int32]WeaponMasterRow
 	Materials                           map[int32]MaterialRow
@@ -101,6 +120,7 @@ type WeaponCatalog struct {
 	SellPriceByEnhanceId                map[int32]NumericalFunc
 	MedalsByWeaponId                    map[int32]map[int32]int32 // WeaponId -> ConsumableItemId -> Count
 	EvolutionNextWeaponId               map[int32]int32
+	EvolutionOrder                      map[int32]int32                        // WeaponId -> 0-based position in evolution chain
 	EvolutionMaterials                  map[int32][]WeaponEvolutionMaterialRow // WeaponEvolutionMaterialGroupId -> materials
 	EvolutionCostByEnhanceId            map[int32]NumericalFunc
 	AbilitySlots                        map[int32][]int32 // WeaponAbilityGroupId -> slot numbers
@@ -116,6 +136,7 @@ type WeaponCatalog struct {
 	LimitBreakCostByWeaponByEnhanceId   map[int32]NumericalFunc
 	LimitBreakCostByMaterialByEnhanceId map[int32]NumericalFunc
 	BaseExpByEnhanceId                  map[int32]int32
+	ReleaseConditionsByGroupId          map[int32][]WeaponStoryReleaseConditionRow
 }
 
 func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
@@ -127,6 +148,11 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 	enhanceRows, err := utils.ReadJSON[weaponSpecificEnhanceRow]("EntityMWeaponSpecificEnhanceTable.json")
 	if err != nil {
 		return nil, fmt.Errorf("load weapon specific enhance table: %w", err)
+	}
+
+	rarityEnhanceRows, err := utils.ReadJSON[weaponRarityEnhanceRow]("EntityMWeaponRarityTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load weapon rarity table: %w", err)
 	}
 
 	paramMapRows, err := LoadParameterMap()
@@ -168,6 +194,10 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load weapon ability enhancement material table: %w", err)
 	}
+	releaseConditions, err := utils.ReadJSON[WeaponStoryReleaseConditionRow]("EntityMWeaponStoryReleaseConditionGroupTable.json")
+	if err != nil {
+		return nil, fmt.Errorf("load weapon story release condition table: %w", err)
+	}
 
 	catalog := &WeaponCatalog{
 		Weapons:                             make(map[int32]WeaponMasterRow, len(weapons)),
@@ -178,6 +208,7 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 		SellPriceByEnhanceId:                make(map[int32]NumericalFunc, len(enhanceRows)),
 		MedalsByWeaponId:                    make(map[int32]map[int32]int32),
 		EvolutionNextWeaponId:               make(map[int32]int32),
+		EvolutionOrder:                      make(map[int32]int32),
 		EvolutionMaterials:                  make(map[int32][]WeaponEvolutionMaterialRow),
 		EvolutionCostByEnhanceId:            make(map[int32]NumericalFunc, len(enhanceRows)),
 		AbilitySlots:                        make(map[int32][]int32),
@@ -193,6 +224,7 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 		LimitBreakCostByWeaponByEnhanceId:   make(map[int32]NumericalFunc, len(enhanceRows)),
 		LimitBreakCostByMaterialByEnhanceId: make(map[int32]NumericalFunc, len(enhanceRows)),
 		BaseExpByEnhanceId:                  make(map[int32]int32, len(enhanceRows)),
+		ReleaseConditionsByGroupId:          make(map[int32][]WeaponStoryReleaseConditionRow),
 	}
 
 	for _, w := range weapons {
@@ -278,8 +310,11 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 		sort.Slice(rows, func(i, j int) bool {
 			return rows[i].EvolutionOrder < rows[j].EvolutionOrder
 		})
-		for i := 0; i < len(rows)-1; i++ {
-			catalog.EvolutionNextWeaponId[rows[i].WeaponId] = rows[i+1].WeaponId
+		for i, row := range rows {
+			catalog.EvolutionOrder[row.WeaponId] = int32(i)
+			if i < len(rows)-1 {
+				catalog.EvolutionNextWeaponId[row.WeaponId] = rows[i+1].WeaponId
+			}
 		}
 	}
 
@@ -312,6 +347,73 @@ func LoadWeaponCatalog(matCatalog *MaterialCatalog) (*WeaponCatalog, error) {
 		key := [2]int32{row.WeaponAbilityEnhancementMaterialId, row.AbilityLevel}
 		catalog.AbilityEnhanceMats[key] = append(catalog.AbilityEnhanceMats[key], row)
 	}
+
+	for _, c := range releaseConditions {
+		catalog.ReleaseConditionsByGroupId[c.WeaponStoryReleaseConditionGroupId] = append(
+			catalog.ReleaseConditionsByGroupId[c.WeaponStoryReleaseConditionGroupId], c)
+	}
+
+	// Rarity-based enhancement fallback: for weapons with WeaponSpecificEnhanceId == 0,
+	// use EntityMWeaponRarityTable curves via synthetic enhance IDs (-RarityType).
+	rarityByType := make(map[int32]weaponRarityEnhanceRow, len(rarityEnhanceRows))
+	for _, r := range rarityEnhanceRows {
+		rarityByType[r.RarityType] = r
+	}
+
+	registeredRarity := make(map[int32]bool, len(rarityEnhanceRows))
+	fallbackCount := 0
+	for wid, w := range catalog.Weapons {
+		if w.WeaponSpecificEnhanceId != 0 {
+			continue
+		}
+		syntheticId := -w.RarityType
+		if !registeredRarity[w.RarityType] {
+			r, ok := rarityByType[w.RarityType]
+			if !ok {
+				continue
+			}
+			catalog.ExpByEnhanceId[syntheticId] = BuildExpThresholds(paramMapRows, r.RequiredExpForLevelUpNumericalParameterMapId)
+			if f, found := funcResolver.Resolve(r.EnhancementCostByMaterialNumericalFunctionId); found {
+				catalog.GoldCostByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.MaxLevelNumericalFunctionId); found {
+				catalog.MaxLevelByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.SellPriceNumericalFunctionId); found {
+				catalog.SellPriceByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.EvolutionCostNumericalFunctionId); found {
+				catalog.EvolutionCostByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.MaxSkillLevelNumericalFunctionId); found {
+				catalog.SkillMaxLevelByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.SkillEnhancementCostNumericalFunctionId); found {
+				catalog.SkillCostByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.MaxAbilityLevelNumericalFunctionId); found {
+				catalog.AbilityMaxLevelByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.AbilityEnhancementCostNumericalFunctionId); found {
+				catalog.AbilityCostByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.EnhancementCostByWeaponNumericalFunctionId); found {
+				catalog.EnhanceCostByWeaponByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.LimitBreakCostByWeaponNumericalFunctionId); found {
+				catalog.LimitBreakCostByWeaponByEnhanceId[syntheticId] = f
+			}
+			if f, found := funcResolver.Resolve(r.LimitBreakCostByMaterialNumericalFunctionId); found {
+				catalog.LimitBreakCostByMaterialByEnhanceId[syntheticId] = f
+			}
+			catalog.BaseExpByEnhanceId[syntheticId] = r.BaseEnhancementObtainedExp
+			registeredRarity[w.RarityType] = true
+		}
+		w.WeaponSpecificEnhanceId = syntheticId
+		catalog.Weapons[wid] = w
+		fallbackCount++
+	}
+	log.Printf("[WeaponCatalog] rarity fallback: assigned synthetic enhance IDs to %d weapons", fallbackCount)
 
 	return catalog, nil
 }

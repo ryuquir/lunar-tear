@@ -54,9 +54,10 @@ type costumePoolRow struct {
 }
 
 type weaponPoolRow struct {
-	WeaponId   int32 `json:"WeaponId"`
-	WeaponType int32 `json:"WeaponType"`
-	RarityType int32 `json:"RarityType"`
+	WeaponId          int32 `json:"WeaponId"`
+	WeaponType        int32 `json:"WeaponType"`
+	RarityType        int32 `json:"RarityType"`
+	IsRestrictDiscard bool  `json:"IsRestrictDiscard"`
 }
 
 type catalogCostumeRow struct {
@@ -120,9 +121,13 @@ func LoadGachaPool() (*GachaCatalog, error) {
 
 	weaponTypeById := make(map[int32]int32, len(weapons))
 	weaponRarityById := make(map[int32]int32, len(weapons))
+	restrictedWeapons := make(map[int32]bool)
 	for _, w := range weapons {
 		weaponTypeById[w.WeaponId] = w.WeaponType
 		weaponRarityById[w.WeaponId] = w.RarityType
+		if w.IsRestrictDiscard {
+			restrictedWeapons[w.WeaponId] = true
+		}
 	}
 
 	pool := &GachaCatalog{
@@ -151,6 +156,7 @@ func LoadGachaPool() (*GachaCatalog, error) {
 		pool.CostumeById[c.CostumeId] = item
 	}
 
+	restrictedCount := 0
 	for _, w := range weapons {
 		if !catalogWeaponSet[w.WeaponId] {
 			continue
@@ -163,11 +169,15 @@ func LoadGachaPool() (*GachaCatalog, error) {
 			PossessionId:   w.WeaponId,
 			RarityType:     w.RarityType,
 		}
-		pool.WeaponsByRarity[w.RarityType] = append(pool.WeaponsByRarity[w.RarityType], item)
 		pool.WeaponById[w.WeaponId] = item
+		if w.IsRestrictDiscard {
+			restrictedCount++
+			continue
+		}
+		pool.WeaponsByRarity[w.RarityType] = append(pool.WeaponsByRarity[w.RarityType], item)
 	}
 
-	log.Printf("[GachaPool] excluded %d evolved weapons from pool", len(evolvedWeapons))
+	log.Printf("[GachaPool] excluded %d evolved weapons, %d restricted weapons from pool", len(evolvedWeapons), restrictedCount)
 
 	type weaponKey struct {
 		TermId     int32
@@ -176,7 +186,7 @@ func LoadGachaPool() (*GachaCatalog, error) {
 	}
 	weaponsByKey := make(map[weaponKey][]int32)
 	for _, cw := range catalogWeapons {
-		if evolvedWeapons[cw.WeaponId] {
+		if evolvedWeapons[cw.WeaponId] || restrictedWeapons[cw.WeaponId] {
 			continue
 		}
 		wt := weaponTypeById[cw.WeaponId]
@@ -267,6 +277,26 @@ func (pool *GachaCatalog) BuildShopFeatured(shop *ShopCatalog) {
 		}
 	}
 	log.Printf("[GachaPool] shop featured: %d consumables, %d costume-weapon pairs overridden", len(pool.ShopFeaturedByMedal), shopPairs)
+}
+
+func (pool *GachaCatalog) PruneUnpairedCostumes() {
+	pruned := 0
+	for costumeId := range pool.CostumeById {
+		if _, ok := pool.CostumeWeaponMap[costumeId]; !ok {
+			delete(pool.CostumeById, costumeId)
+			pruned++
+		}
+	}
+	for rarity, items := range pool.CostumesByRarity {
+		filtered := items[:0]
+		for _, item := range items {
+			if _, ok := pool.CostumeWeaponMap[item.PossessionId]; ok {
+				filtered = append(filtered, item)
+			}
+		}
+		pool.CostumesByRarity[rarity] = filtered
+	}
+	log.Printf("[GachaPool] pruned %d unpaired costumes", pruned)
 }
 
 func (pool *GachaCatalog) BuildFeaturedMapping(entries []store.GachaCatalogEntry) {

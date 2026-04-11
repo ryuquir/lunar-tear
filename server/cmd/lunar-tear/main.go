@@ -88,6 +88,7 @@ func main() {
 		len(shopCatalog.Items), len(shopCatalog.Contents), len(shopCatalog.ExchangeShopCells))
 
 	gachaPool.BuildShopFeatured(shopCatalog)
+	gachaPool.PruneUnpairedCostumes()
 	gachaPool.BuildFeaturedMapping(gachaEntries)
 	gachaPool.BuildBannerPools(gachaEntries)
 	masterdata.EnrichCatalogPromotions(gachaEntries, gachaPool)

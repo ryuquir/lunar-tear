@@ -9,6 +9,7 @@ import (
 	"lunar-tear/server/internal/gametime"
 	"lunar-tear/server/internal/gameutil"
 	"lunar-tear/server/internal/masterdata"
+	"lunar-tear/server/internal/model"
 	"lunar-tear/server/internal/store"
 	"lunar-tear/server/internal/userdata"
 )
@@ -19,6 +20,7 @@ var weaponDiffTables = []string{
 	"IUserWeaponAbility",
 	"IUserMaterial",
 	"IUserConsumableItem",
+	"IUserWeaponStory",
 }
 
 var limitBreakDiffTables = []string{
@@ -283,6 +285,8 @@ func (s *WeaponServiceServer) Evolve(ctx context.Context, req *pb.EvolveRequest)
 		}
 
 		log.Printf("[WeaponService] Evolve: weaponId %d -> %d", wm.WeaponId, evolvedId)
+
+		s.checkEvolutionStoryUnlocks(user, evolvedId, nowMillis)
 	})
 	if err != nil {
 		return nil, fmt.Errorf("weapon evolve: %w", err)
@@ -734,4 +738,23 @@ func (s *WeaponServiceServer) EnhanceByWeapon(ctx context.Context, req *pb.Enhan
 		SurplusEnhanceWeapon: []string{},
 		DiffUserData:         diff,
 	}, nil
+}
+
+func (s *WeaponServiceServer) checkEvolutionStoryUnlocks(user *store.UserState, weaponId int32, nowMillis int64) {
+	wm, ok := s.catalog.Weapons[weaponId]
+	if !ok || wm.WeaponStoryReleaseConditionGroupId == 0 {
+		return
+	}
+	evoOrder, hasEvo := s.catalog.EvolutionOrder[weaponId]
+	conditions := s.catalog.ReleaseConditionsByGroupId[wm.WeaponStoryReleaseConditionGroupId]
+	for _, cond := range conditions {
+		switch cond.WeaponStoryReleaseConditionType {
+		case model.WeaponStoryReleaseConditionTypeReachSpecifiedEvolutionCount:
+			if hasEvo && evoOrder >= cond.ConditionValue {
+				store.GrantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+			}
+		case model.WeaponStoryReleaseConditionTypeAcquisition:
+			store.GrantWeaponStoryUnlock(user, weaponId, cond.StoryIndex, nowMillis)
+		}
+	}
 }
