@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-04-11
+
+### Working
+
+- Memoir enhancement and deck/memoir management updates
+- Companion enhancement
+- Costume awakening
+- Costume ascending
+- Character exalt
+- Costume skills level up
+- Weapon ascending
+- Weapon evolution
+- Weapon skills level up
+- Quest skipping and auto sale settings
+- Item shop
+- Deck skins
+- [MVP] Gacha system
+- [MVP] EX Chapter Quests
+- [MVP] Subjugation Battles
+
+### Fixed
+
+- Retire navigation
+- Scene transitions mid new arcs
+
 ## 2026-04-04
 
 ### Working
