@@ -50,26 +50,17 @@ sudo setcap cap_net_bind_service=+ep ./lunar-tear
 | `--resources-base-url` | (derived from host) | base URL for list.bin rewrite (must be exactly 43 chars) |
 | `--scene`              | `0`                 | bootstrap new users to scene N (0 = fresh start)         |
 
-## ⚠️ Legal Disclaimer & Notice
+## ⚠️ Legal Disclaimer
 
-**Lunar Tear** is an independent **research and preservation project** for the now-discontinued mobile game _NieR Re[in]carnation_.
+**Lunar Tear** is a fan-made, non-commercial **preservation and research project** dedicated to keeping the now-discontinued mobile game *NieR Re[in]carnation* playable for educational and archival purposes.
 
 - This project is **not affiliated with**, **endorsed by**, or **approved by** Square Enix Co., Ltd. or any of its subsidiaries.
-- All trademarks, copyrights, and intellectual property related to _NieR Re[in]carnation_, _NieR_ series, and associated assets belong to their respective owners (Square Enix and relevant parties).
-- The code in this repository is original work developed through clean-room reverse engineering and interoperability research.
+- All trademarks, copyrights, and intellectual property related to *NieR Re[in]carnation*, the *NieR* series, and associated assets belong to their respective owners.
+- All code in this repository is original work developed through clean-room reverse engineering for interoperability with the game client.
+- No copyrighted game assets, binaries, or master data are distributed in this repository.
 
-**This project is provided strictly for educational, research, and private preservation purposes.**
+**Use at your own risk.** The author assumes no liability for any damages or legal consequences that may arise from using this software. By using or contributing to this project, you are solely responsible for ensuring your usage complies with all applicable laws in your jurisdiction.
 
-### Important Warnings:
+This project is released under the [MIT License](LICENSE).
 
-- Using this software requires modifying the official game client (APK patching). Such modifications may violate Square Enix's End User License Agreement (EULA) and Terms of Service.
-- Running a private server or using a patched client can constitute unauthorized access or derivative works under copyright law in some jurisdictions.
-- **I do not encourage or condone any use that violates applicable laws, EULAs, or Square Enix's rights.**
-- No copyrighted game assets, binaries, or master data are provided in this repository. Users must obtain and provide their own legitimate copies of the game files.
-- The project may bypass technical protection measures (e.g., SSL pinning) solely for research and local interoperability.
-
-**Use at your own risk.** The author assumes no liability for any damages, legal consequences, or account issues that may arise from using this software.
-
-This project is released under the [MIT License](LICENSE). By using or contributing to this repository, you agree that you are solely responsible for ensuring your usage complies with all applicable laws in your jurisdiction.
-
-**If you are Square Enix or a representative:** Please contact me directly if you have any concerns regarding this project.
+**If you are a Square Enix representative:** Please contact me directly if you have any concerns regarding this project.
