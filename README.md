@@ -50,12 +50,26 @@ sudo setcap cap_net_bind_service=+ep ./lunar-tear
 | `--resources-base-url` | (derived from host) | base URL for list.bin rewrite (must be exactly 43 chars) |
 | `--scene`              | `0`                 | bootstrap new users to scene N (0 = fresh start)         |
 
+### `--resources-base-url`
+
+Overrides the base URL the client uses to fetch resources. The replacement string **must be exactly 43 characters**. If omitted, the server derives it from `--host` and `--http-port` automatically (when the result happens to be 43 characters). If the length doesn't match, the server logs a warning and serves the resource list unchanged.
+
+```bash
+sudo go run ./cmd/lunar-tear \
+  --host 10.0.2.2 \
+  --http-port 8080 \
+  --resources-base-url "http://192.168.1.50:8080/res-bundle-srv" \
+  --scene 13
+```
+
+> **Tip:** verify the length with `printf "your-url-here" | wc -c`.
+
 ## ⚠️ Legal Disclaimer
 
-**Lunar Tear** is a fan-made, non-commercial **preservation and research project** dedicated to keeping the now-discontinued mobile game *NieR Re[in]carnation* playable for educational and archival purposes.
+**Lunar Tear** is a fan-made, non-commercial **preservation and research project** dedicated to keeping the now-discontinued mobile game _NieR Re[in]carnation_ playable for educational and archival purposes.
 
 - This project is **not affiliated with**, **endorsed by**, or **approved by** Square Enix Co., Ltd. or any of its subsidiaries.
-- All trademarks, copyrights, and intellectual property related to *NieR Re[in]carnation*, the *NieR* series, and associated assets belong to their respective owners.
+- All trademarks, copyrights, and intellectual property related to _NieR Re[in]carnation_, the _NieR_ series, and associated assets belong to their respective owners.
 - All code in this repository is original work developed through clean-room reverse engineering for interoperability with the game client.
 - No copyrighted game assets, binaries, or master data are distributed in this repository.
 
