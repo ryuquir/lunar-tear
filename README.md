@@ -1,6 +1,6 @@
 # Lunar Tear
 
-Private/local server research project for **NieR Reincarnation**.
+Private server research project for a certain discontinued mobile game.
 Discord server: https://discord.gg/G3anrfcV
 
 ## How To Launch The Server
@@ -67,10 +67,10 @@ sudo go run ./cmd/lunar-tear \
 
 ## ⚠️ Legal Disclaimer
 
-**Lunar Tear** is a fan-made, non-commercial **preservation and research project** dedicated to keeping the now-discontinued mobile game _NieR Re[in]carnation_ playable for educational and archival purposes.
+**Lunar Tear** is a fan-made, non-commercial **preservation and research project** dedicated to keeping a certain discontinued mobile game playable for educational and archival purposes.
 
-- This project is **not affiliated with**, **endorsed by**, or **approved by** Square Enix Co., Ltd. or any of its subsidiaries.
-- All trademarks, copyrights, and intellectual property related to _NieR Re[in]carnation_, the _NieR_ series, and associated assets belong to their respective owners.
+- This project is **not affiliated with**, **endorsed by**, or **approved by** the original publisher or any of its subsidiaries.
+- All trademarks, copyrights, and intellectual property related to the original game and its associated franchises belong to their respective owners.
 - All code in this repository is original work developed through clean-room reverse engineering for interoperability with the game client.
 - No copyrighted game assets, binaries, or master data are distributed in this repository.
 
@@ -78,4 +78,4 @@ sudo go run ./cmd/lunar-tear \
 
 This project is released under the [MIT License](LICENSE).
 
-**If you are a Square Enix representative:** Please contact me directly if you have any concerns regarding this project.
+**If you are a rights holder with concerns regarding this project**, please contact me directly.
