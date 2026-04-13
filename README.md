@@ -1,6 +1,7 @@
 # Lunar Tear
 
-Private server research project for **NieR Reincarnation**.
+Private/local server research project for **NieR Reincarnation**.
+Discord server: https://discord.gg/G3anrfcV
 
 ## How To Launch The Server
 
