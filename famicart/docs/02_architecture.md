@@ -16,6 +16,7 @@ famicart/
 │   ├── bus.c            コア 0 割り込み（CPU バス）、コア 1 ループ（PPU バス）
 │   ├── audio_out.c      PWM + DMA リングバッファ出力
 │   ├── romslot.c        フラッシュ ROM スロットの読み取り
+│   ├── usb_cmd.c        USB-CDC コマンド（INFO / RESET / BOOTSEL / LOAD / PROFILE）
 │   └── board_*.h        ピン割当
 ├── tools/gen_romdb.py   Mesen DB → romdb_gen.h / docs/03_mapper_coverage.md
 ├── tools/rom2uf2.py     .nes → UF2（プロファイル付き）
@@ -57,6 +58,13 @@ PPU read  A ($2000-$2FFF): nt_map[(A>>10)&3] ? それ : 本体 CIRAM（CIRAM A10
 - **コア 0**: PIO IRQ（最高優先度、SRAM 常駐）で CPU バス語を処理。残り時間でメインループ（音源合成・USB ログ）。
 - **コア 1**: PPU バス専用のブロッキングループ。CIRAM A10 / CIRAM /CE を SIO で直接駆動。
 - **/IRQ**: 74LVC1G07 オープンドレインバッファ経由（GPIO Low でアサート）。
+
+## USB 経由の ROM 転送（`usb_cmd.c` / `tools/fcload.py`）
+
+1. ホストが `LOAD <bytes> <crc32>` を送る → ファームは `READY` を返し、バス処理（PIO・コア 1）を停止する（フラッシュ書き込み中は XIP が使えないため。本体側はこの時点でバスがオープンになり、ゲームは止まる）。
+2. 4 KB セクタ単位で受信・消去・書き込み。先頭 256 B のプロファイルは保持（無効なら既定値を書く）。
+3. 受信完了後に CRC32 を照合して `OK` を返し、ウォッチドッグで再起動 → 新 ROM を判別して起動。**本体のリセットボタンを押す**と新しいゲームが始まる。
+4. `PROFILE <hex>` でプロファイルのみ差し替え（マッパー強制・音源構成の変更）。`RESET` / `BOOTSEL` は再起動／UF2 モード。
 
 ## 既知の制約・未検証事項（正直に）
 

@@ -5,6 +5,13 @@ Qty,Value,Footprint,References,Suggested part
 2,74LVC245,TSSOP-20_4.4x6.5mm_P0.65mm,U5 U8,Nexperia 74LVC245APW (TSSOP-20)
 1,74LVC139,TSSOP-16_4.4x5mm_P0.65mm,U9,Nexperia 74LVC139PW (TSSOP-16)
 1,74LVC1G17,SOT-23-5,U10,Nexperia 74LVC1G17GW / TI SN74LVC1G17DBV
+1,USB-C,USB_C_Receptacle_HRO_TYPE-C-31-M-12,J3,HRO TYPE-C-31-M-12 (16-pin USB 2.0 receptacle) or GCT USB4105-GF-A
+2,5.1k,R_0603_1608Metric,R6 R7,0603 1% (USB-C CC pull-down)
+1,USB D+ -> TP_A | TP_B,SolderJumper-3_P1.6mm_Open,JP3,"solder jumper, bridge after checking TP2/TP3"
+1,USB D- -> TP_B | TP_A,SolderJumper-3_P1.6mm_Open,JP4,"solder jumper, bridge after checking TP2/TP3"
+1,TP wire pads,WirePads_1x3,W1,no part (solder wires from Pico TP2/TP3/TP1 if hand-assembling)
+1,RESET,SW_SPST_TL3342,SW1,E-Switch TL3342 / any 4.7x3.5 mm low-profile tactile
+1,RUN/GND,PinHeader_1x02_P2.54mm_Vertical,J2,"2-pin 2.54 mm header (optional, wire to the console reset switch)"
 1,74LVC1G08,SOT-23-5,U11,Nexperia 74LVC1G08GW / TI SN74LVC1G08DBV
 1,74LVC1G07,SOT-23-5,U12,Nexperia 74LVC1G07GW / TI SN74LVC1G07DBV
 2,2.2k,R_0603_1608Metric,R1 R2,0603 1%

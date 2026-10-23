@@ -21,6 +21,7 @@ add_executable(famicart
   src/pico/bus.c
   src/pico/audio_out.c
   src/pico/romslot.c
+  src/pico/usb_cmd.c
 )
 pico_generate_pio_header(famicart ${CMAKE_CURRENT_LIST_DIR}/src/pico/fc_bus.pio)
 target_include_directories(famicart PRIVATE src src/core src/pico)
@@ -28,10 +29,10 @@ target_compile_definitions(famicart PRIVATE PICO_BUILD=1 FC_BOARD_${FC_BOARD}=1)
 if(FC_BOARD STREQUAL "pico2")
   target_compile_definitions(famicart PRIVATE FC_ROM_POOL_SIZE=450560 FC_RAM_POOL_SIZE=49152)   # 440K + 48K of 520K
 else()
-  target_compile_definitions(famicart PRIVATE FC_ROM_POOL_SIZE=200704 FC_RAM_POOL_SIZE=45056)   # 196K + 44K of 264K
+  target_compile_definitions(famicart PRIVATE FC_ROM_POOL_SIZE=192512 FC_RAM_POOL_SIZE=45056)   # 188K + 44K of 264K (4K USB transfer buffer)
 endif()
 target_compile_options(famicart PRIVATE -O2 -Wall -Wextra -Wno-unused-parameter)
-target_link_libraries(famicart pico_stdlib pico_multicore hardware_pio hardware_dma hardware_pwm hardware_flash hardware_irq hardware_clocks)
+target_link_libraries(famicart pico_stdlib pico_multicore pico_bootrom hardware_pio hardware_dma hardware_pwm hardware_flash hardware_irq hardware_clocks hardware_watchdog)
 pico_enable_stdio_usb(famicart 1)
 pico_enable_stdio_uart(famicart 0)
 pico_add_extra_outputs(famicart)

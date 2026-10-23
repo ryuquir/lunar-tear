@@ -13,8 +13,9 @@
 | 拡張音源レジスタ・ルーター（組み合わせ機構） | 実装済み |
 | 拡張音源の合成（VRC6/VRC7/MMC5/N163/5B/FDS） | **フェーズ 2**（レジスタは捕捉済み、`expaudio_render()` は無音） |
 | PIO バス・フロントエンド、2 コア処理、PWM 音声出力 | 実装済み・**実機未検証** |
+| USB-CDC コマンド（INFO / RESET / BOOTSEL / LOAD / PROFILE）と転送ツール `tools/fcload.py` | 実装済み・**実機未検証** |
 | Pico / Pico 2 / XIAO 向けビルド | 通過（Pico: text 93KB, BSS 254KB） |
-| 回路図・基板（KiCad 7、90×46.1 mm ファミコン実寸、自動配線 未接続 0・DRC 違反 0）・ガーバー・BOM | [hardware/](hardware/) と [docs/04_hardware.md](docs/04_hardware.md) |
+| 回路図・基板 rev B（KiCad 7、90×46.1 mm ファミコン実寸、USB-C・リセット付き、自動配線 未接続 0・DRC 違反 0）・ガーバー・BOM | [hardware/](hardware/) と [docs/04_hardware.md](docs/04_hardware.md) |
 
 ## ビルド
 
@@ -40,6 +41,16 @@ python3 tools/rom2uf2.py game.nes -o game.uf2 --mapper 5 --audio vrc7:exclusive 
 
 # レジスタ窓が衝突する組み合わせは窓を移動（VRC6 のレジスタを $C000 へ）
 python3 tools/rom2uf2.py game.nes -o game.uf2 --audio vrc6@0xC000
+```
+
+## 本体に挿したまま ROM を転送（USB-C）
+
+```sh
+pip install pyserial
+python3 tools/fcload.py /dev/ttyACM0 info          # 判別結果・バス統計
+python3 tools/fcload.py /dev/ttyACM0 load game.nes # 転送 → カートリッジ自動再起動 → 本体のリセットを押す
+python3 tools/fcload.py /dev/ttyACM0 reset         # ソフトからカートリッジをリセット
+python3 tools/fcload.py /dev/ttyACM0 bootsel       # ファーム更新用 UF2 モードへ
 ```
 
 ROM はフラッシュ先頭から 256KB の位置（`FC_FLASH_ROM_SLOT`）に、48 バイトのプロファイル（256 バイト境界にパディング）＋画像の形で書き込まれます。ツールを介さず `.nes` を直接その位置に焼いた場合もヘッダ/DB で判別します。起動後、USB CDC（115200）に判別結果とバス統計が 2 秒ごとに出ます。
