@@ -14,7 +14,21 @@
 | `tools/pcb/design.py` | **設計の唯一の情報源**（部品・配置座標・ネット）。回路図・基板・BOM はここから生成 |
 | `tools/pcb/gen_sch.py`, `gen_pcb.py`, `route_pcb.py`, `gen_bom.py` | 生成スクリプト（Freerouting による自動配線含む） |
 
-再生成: `python3 tools/pcb/gen_sch.py && python3 tools/pcb/gen_pcb.py && python3 tools/pcb/route_pcb.py && python3 tools/pcb/gen_bom.py`
+再生成: `python3 tools/pcb/gen_sch.py && python3 tools/pcb/gen_pcb.py && FREEROUTING_JAR=~/freerouting-2.0.1.jar python3 tools/pcb/route_pcb.py && python3 tools/pcb/gen_bom.py`
+（KiCad 7.0.11 の `pcbnew` Python モジュール、Java 21、Freerouting 2.0.1、X サーバ（`xvfb-run`）が必要。Freerouting 1.9.0 では 3 本の未配線が残った）
+
+## 配線結果（rev A）
+
+| 項目 | 値 |
+|---|---|
+| 層数 | 2（表: 部品・信号、裏: GND ベタ + 信号） |
+| 配線幅 / クリアランス | 0.15 mm / 0.15 mm（製造仕様 5 mil 相当） |
+| ビア | 0.5 mm / ドリル 0.25 mm |
+| 配線本数 / ビア数 | 約 1,490 セグメント / 151 個 |
+| 未接続 | **0** |
+| DRC 違反 | **0**（KiCad 7 標準ルール + 基板端 0.3 mm） |
+| キープアウト | 端子タブ（マスク境界 4 mm 線より下は端子以外の銅箔禁止）、Pico 直下はビア禁止 |
+| パスコン | 各 IC の真裏（裏面）に配置 |
 
 ## 基板外形（nesdev「Famicom cartridge dimensions」HVC-TGROM-01 実測値）
 
@@ -81,4 +95,5 @@ GP26 (PWM ~246 kHz) ─ R1 2.2k ─┬─ R2 2.2k ─┬─ R3 4.7k ─┬──
 
 - **CIRAM タイミング**: RP2040 がアドレス解読後に A10 / /CE を駆動するため約 80 ns 遅れる。問題が出れば 74LVC153 で A10 をハードウェア選択（空き GPIO 2 本が必要 → 素の RP2040 / RP2350B 基板で）。
 - **CPU 読み出し余裕**: 約 ±50 ns。252 MHz 動作、または RP2350（Pico 2）推奨。
-- **自動配線**: Freerouting の結果をそのまま収録。手直し（GND ベタの分断、端子付近の配線整理）はフェーズ 3 の実機検証と合わせて行う。
+- **自動配線**: Freerouting 2.0.1 の結果をそのまま収録（未接続 0 / DRC 0）。表面 GND ベタは配線で分断されるため、裏面ベタが主 GND。見た目の整理や GND スティッチングビア追加はフェーズ 3 の実機検証と合わせて行う。
+- **シェル適合**: 外形は nesdev の HVC-TGROM-01 実測値に基づくが、シェル内側の切り欠きは未反映。初回試作で現物合わせを推奨。

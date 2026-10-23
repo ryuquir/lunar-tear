@@ -14,7 +14,7 @@
 | 拡張音源の合成（VRC6/VRC7/MMC5/N163/5B/FDS） | **フェーズ 2**（レジスタは捕捉済み、`expaudio_render()` は無音） |
 | PIO バス・フロントエンド、2 コア処理、PWM 音声出力 | 実装済み・**実機未検証** |
 | Pico / Pico 2 / XIAO 向けビルド | 通過（Pico: text 93KB, BSS 254KB） |
-| 回路図・基板（KiCad 7、90×46.1 mm ファミコン実寸、自動配線・DRC 済み）・ガーバー・BOM | [hardware/](hardware/) と [docs/04_hardware.md](docs/04_hardware.md) |
+| 回路図・基板（KiCad 7、90×46.1 mm ファミコン実寸、自動配線 未接続 0・DRC 違反 0）・ガーバー・BOM | [hardware/](hardware/) と [docs/04_hardware.md](docs/04_hardware.md) |
 
 ## ビルド
 
