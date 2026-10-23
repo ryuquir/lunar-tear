@@ -15,9 +15,8 @@
 volatile uint32_t bus_stat_cpu_cycles, bus_stat_cpu_reads, bus_stat_cpu_writes, bus_stat_ppu_reads, bus_stat_ppu_writes, bus_stat_late;
 
 #if FC_BUS_CAPABLE
-_Static_assert(PIN_CPU_M2 == 22, "fc_bus.pio hardcodes 'wait gpio 22' for M2; update both");
-_Static_assert(PIN_PPU_ACC == 17, "fc_bus.pio hardcodes 'wait gpio 17' for /PPUACC; update both");
-_Static_assert(PIN_CPU_ROMSEL == PIN_CPU_PORT_BASE + 8, "/ROMSEL must sit right above the CPU port");
+_Static_assert(PIN_CPU_M2 == 17, "fc_bus.pio hardcodes 'wait gpio 17' for M2; update both");
+_Static_assert(PIN_PPU_ACC == 16, "fc_bus.pio hardcodes 'wait gpio 16' for /PPUACC; update both");
 
 static cart_t *g_cart;
 static PIO pio_cpu = pio0, pio_ppu = pio1;
@@ -29,9 +28,8 @@ static uint sm_cpu = 0, sm_ppu = 0;
 #define RSP_CAPTURE   2u
 
 FC_INLINE void irq_pin_set(bool assert_low) {
-    /* open-drain: output-low when asserted, input (hi-Z, pulled up on the console) otherwise */
-    if (assert_low) { sio_hw->gpio_clr = 1u << PIN_IRQ; sio_hw->gpio_oe_set = 1u << PIN_IRQ; }
-    else sio_hw->gpio_oe_clr = 1u << PIN_IRQ;
+    /* 74LVC1G07 open-drain buffer on the board: GPIO low -> /IRQ pulled low, GPIO high -> released */
+    if (assert_low) sio_hw->gpio_clr = 1u << PIN_IRQ; else sio_hw->gpio_set = 1u << PIN_IRQ;
 }
 
 /* -------- CPU bus ISR (core0) -------- */
@@ -48,9 +46,10 @@ static void FC_FASTCODE(cpu_bus_isr)(void) {
             irq_pin_set(c->irq_line);
             continue;
         }
-        bool romsel_n = (w >> 8) & 1;            /* 1 = /ROMSEL high = not $8000-$FFFF */
-        bool rw       = (w >> 16) & 1;           /* 1 = read */
-        uint16_t addr = (uint16_t)((w & 0xFF) | ((w >> 9) & 0x7F) << 8 | (romsel_n ? 0 : 0x8000));
+        /* word = CTRL<<16 | AHI<<8 | ALO  (ISR shifts left) */
+        bool rw       = (w >> (16 + CPU_CTRL_RW_BIT)) & 1;        /* 1 = read */
+        bool romsel_n = (w >> (16 + CPU_CTRL_ROMSEL_BIT)) & 1;    /* 1 = /ROMSEL high = not $8000-$FFFF */
+        uint16_t addr = (uint16_t)((w & 0xFF) | ((w >> 8) & 0x7F) << 8 | (romsel_n ? 0 : 0x8000));
         bus_stat_cpu_cycles++;
         if (rw) {
             if (addr >= 0x4020) {
@@ -135,7 +134,7 @@ void bus_init(cart_t *c) {
     g_cart = c;
     gpio_init(PIN_CPU_M2); gpio_set_input_hysteresis_enabled(PIN_CPU_M2, true);
     gpio_init(PIN_PPU_ACC); gpio_set_input_hysteresis_enabled(PIN_PPU_ACC, true);
-    gpio_init(PIN_IRQ); gpio_set_dir(PIN_IRQ, false); gpio_put(PIN_IRQ, 0);
+    gpio_init(PIN_IRQ); gpio_put(PIN_IRQ, 1); gpio_set_dir(PIN_IRQ, true);
     gpio_init(PIN_CIRAM_A10); gpio_set_dir(PIN_CIRAM_A10, true);
     gpio_init(PIN_CIRAM_CE); gpio_set_dir(PIN_CIRAM_CE, true); gpio_put(PIN_CIRAM_CE, 1);
 
@@ -143,7 +142,7 @@ void bus_init(cart_t *c) {
     uint off_ppu = pio_add_program(pio_ppu, &fc_ppu_program);
     sm_cpu = pio_claim_unused_sm(pio_cpu, true);
     sm_ppu = pio_claim_unused_sm(pio_ppu, true);
-    port_init(pio_cpu, sm_cpu, off_cpu, &fc_cpu_program, PIN_CPU_PORT_BASE, 9, PIN_CPU_SEL_BASE);
+    port_init(pio_cpu, sm_cpu, off_cpu, &fc_cpu_program, PIN_CPU_PORT_BASE, 8, PIN_CPU_SEL_BASE);
     port_init(pio_ppu, sm_ppu, off_ppu, &fc_ppu_program, PIN_PPU_PORT_BASE, 8, PIN_PPU_SEL_BASE);
 
     /* PPU on core1 first so CHR is served as soon as the PPU starts fetching */

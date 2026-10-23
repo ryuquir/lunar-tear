@@ -1,0 +1,9 @@
+{
+  "board": { "design_settings": { "defaults": {}, "rules": {} } },
+  "libraries": { "pinned_footprint_libs": [], "pinned_symbol_libs": [] },
+  "meta": { "filename": "famicart.kicad_pro", "version": 1 },
+  "net_settings": { "classes": [ { "bus_width": 12, "clearance": 0.2, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "diff_pair_width": 0.2, "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1, "name": "Default", "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "track_width": 0.25, "via_diameter": 0.6, "via_drill": 0.3, "wire_width": 6 } ], "meta": { "version": 3 } },
+  "schematic": { "legacy_lib_dir": "", "legacy_lib_list": [] },
+  "sheets": [ [ "8e7c1580-4b4b-59e1-9722-29cf444c0001", "" ] ],
+  "text_variables": {}
+}

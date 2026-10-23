@@ -10,12 +10,14 @@
 .side_set 2
 .wrap_target
 cpu_start:
-    wait 0 gpio 22       side 0      ; M2 low  (pin numbers patched at init, see bus.c)
-    wait 1 gpio 22       side 2      ; M2 high: address valid; enable A-hi buffer
+    wait 0 gpio 17       side 0      ; M2 low. SEL=0: CTRL buffer (R/W, /ROMSEL) visible on the port
+    wait 1 gpio 17       side 0      ; M2 high: address valid
+    nop            [7]   side 0      ; let /ROMSEL (NAND of M2,A15 on the mainboard) settle ~32 ns
+    in pins, 8           side 2      ; CTRL: bit0 R/W, bit1 /ROMSEL ; enable A-hi buffer
     nop            [3]   side 2
-    in pins, 8           side 1      ; A8-14 + R/W ; switch to A-lo buffer (also lets /ROMSEL settle)
+    in pins, 8           side 1      ; A8-14 ; switch to A-lo buffer
     nop            [3]   side 1
-    in pins, 9           side 0      ; A0-7 + /ROMSEL
+    in pins, 8           side 0      ; A0-7 ; back to CTRL/idle
     push                 side 0
     pull block           side 0      ; wait for core0 response
     out x, 1             side 0
@@ -23,7 +25,7 @@ cpu_start:
     out pins, 8          side 0
     mov osr, ~null       side 0
     out pindirs, 8       side 3      ; drive port, enable data transceiver (DIR = R/W = read -> to console)
-    wait 0 gpio 22       side 3      ; hold through the end of phi2
+    wait 0 gpio 17       side 3      ; hold through the end of phi2
     mov osr, null        side 0
     out pindirs, 8       side 0
     jmp cpu_start        side 0
@@ -31,7 +33,7 @@ cpu_nodrive:
     out y, 1             side 0
     jmp !y, cpu_start    side 0
     nop                  side 3      ; write cycle: transceiver toward us (DIR = R/W = 0)
-    wait 0 gpio 22       side 3      ; data valid at the falling edge of M2
+    wait 0 gpio 17       side 3      ; data valid at the falling edge of M2
     in pins, 8           side 0
     push                 side 0
 .wrap
@@ -40,8 +42,8 @@ cpu_nodrive:
 .side_set 2
 .wrap_target
 ppu_start:
-    wait 1 gpio 17       side 0      ; previous access finished
-    wait 0 gpio 17       side 2      ; /RD or /WR fell: address (and write data) stable
+    wait 1 gpio 16       side 0      ; previous access finished
+    wait 0 gpio 16       side 2      ; /RD or /WR fell: address (and write data) stable
     nop            [2]   side 2
     in pins, 8           side 1      ; A8-13 + /RD + /WR
     nop            [2]   side 1
@@ -53,7 +55,7 @@ ppu_start:
     out pins, 8          side 0
     mov osr, ~null       side 0
     out pindirs, 8       side 3      ; transceiver DIR = /RD = 0 -> toward console
-    wait 1 gpio 17       side 3
+    wait 1 gpio 16       side 3
     mov osr, null        side 0
     out pindirs, 8       side 0
     jmp ppu_start        side 0

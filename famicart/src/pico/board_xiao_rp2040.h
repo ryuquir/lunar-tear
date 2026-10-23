@@ -10,13 +10,13 @@
 #define PIN_CIRAM_A10         28
 #define PIN_CIRAM_CE          29
 #define PIN_CPU_PORT_BASE     0
-#define PIN_CPU_ROMSEL        0
 #define PIN_PPU_PORT_BASE     0
 #define PIN_PPU_ACC           0
 #define PIN_CPU_SEL_BASE      0
 #define PIN_PPU_SEL_BASE      0
 #define PIN_CPU_M2            0
-#define CPU_HI_RW_BIT         7
+#define CPU_CTRL_RW_BIT       0
+#define CPU_CTRL_ROMSEL_BIT   1
 #define PPU_HI_RD_BIT         6
 #define PPU_HI_WR_BIT         7
 #define FC_SYS_CLOCK_KHZ      200000
