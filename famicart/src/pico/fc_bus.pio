@@ -1,0 +1,66 @@
+; Famicom cartridge bus front-end for RP2040/RP2350 PIO.
+; Shared 8-bit port per bus; the two side-set pins select which buffer drives the port:
+;   0 = none, 1 = address low byte, 2 = address high byte, 3 = data transceiver.
+; Response word from the CPU core (pulled from TX FIFO):
+;   bit0 = 1 -> drive data (bits 1..8) until the strobe ends
+;   bit0 = 0, bit1 = 1 -> capture written data at the end of the strobe and push it
+;   0 -> nothing to do
+
+.program fc_cpu
+.side_set 2
+.wrap_target
+cpu_start:
+    wait 0 gpio 22       side 0      ; M2 low  (pin numbers patched at init, see bus.c)
+    wait 1 gpio 22       side 2      ; M2 high: address valid; enable A-hi buffer
+    nop            [3]   side 2
+    in pins, 8           side 1      ; A8-14 + R/W ; switch to A-lo buffer (also lets /ROMSEL settle)
+    nop            [3]   side 1
+    in pins, 9           side 0      ; A0-7 + /ROMSEL
+    push                 side 0
+    pull block           side 0      ; wait for core0 response
+    out x, 1             side 0
+    jmp !x, cpu_nodrive  side 0
+    out pins, 8          side 0
+    mov osr, ~null       side 0
+    out pindirs, 8       side 3      ; drive port, enable data transceiver (DIR = R/W = read -> to console)
+    wait 0 gpio 22       side 3      ; hold through the end of phi2
+    mov osr, null        side 0
+    out pindirs, 8       side 0
+    jmp cpu_start        side 0
+cpu_nodrive:
+    out y, 1             side 0
+    jmp !y, cpu_start    side 0
+    nop                  side 3      ; write cycle: transceiver toward us (DIR = R/W = 0)
+    wait 0 gpio 22       side 3      ; data valid at the falling edge of M2
+    in pins, 8           side 0
+    push                 side 0
+.wrap
+
+.program fc_ppu
+.side_set 2
+.wrap_target
+ppu_start:
+    wait 1 gpio 17       side 0      ; previous access finished
+    wait 0 gpio 17       side 2      ; /RD or /WR fell: address (and write data) stable
+    nop            [2]   side 2
+    in pins, 8           side 1      ; A8-13 + /RD + /WR
+    nop            [2]   side 1
+    in pins, 8           side 0      ; A0-7
+    push                 side 0
+    pull block           side 0
+    out x, 1             side 0
+    jmp !x, ppu_nodrive  side 0
+    out pins, 8          side 0
+    mov osr, ~null       side 0
+    out pindirs, 8       side 3      ; transceiver DIR = /RD = 0 -> toward console
+    wait 1 gpio 17       side 3
+    mov osr, null        side 0
+    out pindirs, 8       side 0
+    jmp ppu_start        side 0
+ppu_nodrive:
+    out y, 1             side 0
+    jmp !y, ppu_start    side 0
+    nop            [1]   side 3      ; write: DIR = /RD = 1 -> toward us
+    in pins, 8           side 0
+    push                 side 0
+.wrap

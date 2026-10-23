@@ -1,0 +1,5 @@
+build*/
+test/test_core
+*.uf2
+*.elf
+*.bin
