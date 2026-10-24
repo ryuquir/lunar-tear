@@ -8,7 +8,7 @@
                  MMC5 scanline IRQ, USB (J4).
   U5  S29GL01GS PRG ROM: 1 Gbit parallel NOR, used as 64M x 8 (DQ0-7; DQ8-15 pulled up).
   U6  S29GL01GS CHR ROM: same part, 64 MB.
-  U7  IS62WV5128 WRAM 512 KB (banked 8 KB through the PRG bank lines A13-A18).
+  U7  FM28V100  WRAM 128 KB F-RAM: non-volatile save RAM without a battery (banked 8 KB through PRG_A13-A16).
   U8  IS62WV5128 CHR RAM 512 KB (banked 1 KB through the CHR bank lines A10-A18; also holds 4-screen / ExRAM
                  nametables).
   The console bus (5 V) is level-shifted by 74LVC541/245 to a local 3.3 V bus shared by MCUs, flash and SRAM.
@@ -48,9 +48,9 @@ GPIO_PIN = {0:77,1:78,2:79,3:80,4:1,5:2,6:3,7:4,8:6,9:7,10:8,11:9,12:11,13:12,14
 GPIO_A = {}
 for i in range(15): GPIO_A[i] = f'CA{i}'                 # local CPU address
 for i in range(8):  GPIO_A[15 + i] = f'CD{i}'            # local CPU data
-GPIO_A.update({23: 'CRW', 24: 'CM2', 25: 'CnROMSEL'})
-for i in range(13): GPIO_A[26 + i] = f'PRG_A{13 + i}'    # PRG flash / WRAM bank address A13-A25
-GPIO_A.update({39: 'WRAM_nCE', 40: 'nDRIVE', 41: 'nIRQ_A', 42: 'PWM', 43: 'LINK_CLK', 44: 'LINK_DATA', 45: 'LINK_B2A', 46: 'PRG_nWE', 47: 'ISOLATE'})
+GPIO_A.update({23: 'CRW', 24: 'CM2', 25: 'CnROMSEL', 26: 'nDRIVE'})   # nDRIVE inside PIO0's GPIO window (side-set while driving data)
+for i in range(13): GPIO_A[27 + i] = f'PRG_A{13 + i}'    # PRG flash / WRAM bank address A13-A25 (one contiguous masked write)
+GPIO_A.update({40: 'WRAM_nCE', 41: 'nIRQ_A', 42: 'PWM', 43: 'LINK_CLK', 44: 'LINK_DATA', 45: 'LINK_B2A', 46: 'PRG_nWE', 47: 'ISOLATE'})
 GPIO_B = {}
 for i in range(14): GPIO_B[i] = f'PA{i}'                 # local PPU address
 GPIO_B.update({14: 'PnRD', 15: 'PnWR'})
@@ -171,7 +171,15 @@ def sram(ref, x, y, addr_lo, addr_hi, data, cs, oe, we):
         elif nm.startswith('IO'): c(ref, p, data[int(nm[2:])])
         else: c(ref, p, {'WE#': we, 'CS#': cs, 'OE#': oe, 'VDD': '+3V3', 'GND': 'GND'}[nm])
     cap('100n', C0402, x + 8.5, y, 90, 'B', '+3V3')
-sram('U7', 20.0, 26.0, CA[:13], PRG_HI, CD, 'WRAM_nCE', 'CRWn', 'WRAM_nWE')
+# WRAM = 128 KB F-RAM (non-volatile, no battery, SRAM-compatible timing; 16 x 8 KB banks on PRG_A13-A16)
+FM = {1:'A11',2:'A9',3:'A8',4:'A13',5:'WE#',6:'CE2',7:'A15',8:'VDD',9:'NC',10:'A16',11:'A14',12:'A12',13:'A7',14:'A6',15:'A5',16:'A4',17:'A3',18:'A2',19:'A1',20:'A0',
+      21:'DQ0',22:'DQ1',23:'DQ2',24:'VSS',25:'DQ3',26:'DQ4',27:'DQ5',28:'DQ6',29:'DQ7',30:'CE1#',31:'A10',32:'OE#'}
+P('U7', 'famicart', 'FM28V100_TSOP32', 'FM28V100 128Kx8 F-RAM (WRAM/save)', 'Package_SO:TSOP-I-32_11.8x8mm_P0.5mm', 20.0, 26.0, 0, 'B')
+for p, nm in FM.items():
+    if nm.startswith('A') and nm[1:].isdigit(): a = int(nm[1:]); c('U7', p, CA[a] if a < 13 else PRG_HI[a - 13])
+    elif nm.startswith('DQ'): c('U7', p, CD[int(nm[2:])])
+    else: c('U7', p, {'WE#': 'WRAM_nWE', 'CE1#': 'WRAM_nCE', 'CE2': '+3V3', 'OE#': 'CRWn', 'VDD': '+3V3', 'VSS': 'GND', 'NC': None}[nm])
+cap('100n', C0402, 28.5, 26.0, 90, 'B', '+3V3')
 sram('U8', 70.0, 26.0, PA[:10], CHR_HI, PD, 'CHR_RAM_nCE', 'PnRD', 'PnWR')
 
 # ------------------------------------------------------------------ bus level shifters and glue (back side)
@@ -218,6 +226,13 @@ for i, (ref, sym, fp, val, pins) in enumerate(G):
     x = 34.0 + 4.6 * i      # front, bottom row; decoupling caps on the back directly behind each gate
     P(ref, '74xGxx', sym, f'{sym} {val}', fp, x, 33.0, 0, 'F'); cap('100n', C0402, x, 33.3, 0, 'B', '+3V3')
     for p, nn in pins.items(): c(ref, p, nn)
+
+# PRG bank-line pull-ups: before the MCUs boot (and whenever U1 is held in reset) every CPU window maps to the
+# top 8 KB bank of the PRG flash ("boot bank"), which holds a stub that parks the console in RAM until U1 is ready.
+for i in range(3):
+    rn = f'RN{7 + i}'; P(rn, 'Device', 'R_Pack04', '10k x4', RARR, 31.5 + 3.5 * (i % 2), 14.3 + 4.1 * (i // 2))
+    for k in range(4): c(rn, 1 + k, f'PRG_A{13 + 4 * i + k}'); c(rn, 8 - k, '+3V3')
+res('10k', R0603, 35.0, 18.6, 90, 'F', 'PRG_A25', '+3V3')
 
 # status LED on U2 GPIO35
 P('D3', 'Device', 'LED', 'green 0603', 'LED_SMD:LED_0603_1608Metric', 58.0, 30.0, 0, 'F'); c('D3', 2, 'LED_A'); c('D3', 1, 'GND')

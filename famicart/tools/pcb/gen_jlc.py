@@ -46,6 +46,7 @@ DEFAULT_PARTS = {   # value-key [or "value@pkg"] -> (LCSC, comment, note)   (loo
  'B5819W': ('C64885', 'B5819W', 'MDD 1 A 40 V Schottky, SOD-123'),
  # ---- rev D (split PRG / CHR / mapper chips) ----
  'S29GL01GS 1Gbit NOR (x8 use)': ('C2684783', 'S29GL01GS10TFI010', 'Infineon 1 Gbit (64M x 16) parallel NOR, TSOP-56, 100 ns; used as 64M x 8. Alt: S29GL512S10TFI010 = C393876 (64 MB), S29GL128S10TFI010 = C914940 (16 MB) -- same pinout'),
+ 'FM28V100 128Kx8 F-RAM (WRAM/save)': ('C66026', 'FM28V100-TGTR', 'Infineon/Cypress 1 Mbit parallel F-RAM, 32-pin TSOP-I (8 x 13.4 mm); non-volatile save RAM, no battery'),
  'IS62WV5128 512Kx8 SRAM': ('C1348955', 'IS62WV5128EBLL-45HLI', 'ISSI 512K x 8 SRAM 3.3 V 45 ns, 32-pin sTSOP (package H)'),
  'AMS1117-3.3': ('C6186', 'AMS1117-3.3', 'basic part, SOT-223, 1 A LDO'),
  'W25Q16JVSSIQ': ('C131025', 'W25Q16JVSSIQ', 'Winbond 2 MB QSPI flash for the RP2350B firmware (same footprint/pinout as W25Q128)'),
