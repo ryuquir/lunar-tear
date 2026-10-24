@@ -6,6 +6,10 @@ from pcbnew import ToMM
 RES = 10  # units per micrometre -> coordinates in 0.1 um
 def U(mm): return int(round(mm * 1000 * RES))
 LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.B_Cu, 'B.Cu')]
+def set_layers(board):
+    global LAYERS
+    LAYERS = [(pcbnew.F_Cu, 'F.Cu')] + ([(pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu')] if board.GetCopperLayerCount() == 4 else []) + [(pcbnew.B_Cu, 'B.Cu')]
+def lname_of(lid): return dict(LAYERS).get(lid, 'F.Cu')
 
 def q(s): return '"' + s.replace('"', '') + '"'
 
@@ -39,6 +43,7 @@ def pad_padstack(pad, fp_flipped):
     return name, f'(padstack {q(name)} ' + ' '.join(shapes) + ' (attach off))'
 
 def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False):
+    set_layers(board)
     padstacks = {}
     images = {}
     placements = []
@@ -81,7 +86,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
             pins.append(f'(pin {q(name)} {q(pid)} {U(lx)} {U(ly)})')
         images[img_name] = f'(image {q(img_name)} ' + ' '.join(pins) + ')'
     via_name = f'Via[0-1]_{U(via_dia)}:{U(via_drill)}_um'
-    padstacks[via_name] = f'(padstack {q(via_name)} (shape (circle F.Cu {U(via_dia)})) (shape (circle B.Cu {U(via_dia)})) (attach off))'
+    padstacks[via_name] = f'(padstack {q(via_name)} ' + ' '.join(f'(shape (circle {l} {U(via_dia)}))' for _, l in LAYERS) + ' (attach off))'
     # nets
     nets = {}
     for fp in board.GetFootprints():
@@ -104,12 +109,14 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
     out.append(f'    (boundary (path pcb 0 {boundary}))')
     out.append(f'    (via {q(via_name)})')
     out.append(f'    (rule (width {U(track)}) (clearance {U(clearance)}) (clearance {U(pad_clearance)} (type default_smd)) (clearance {U(0.1)} (type smd_smd)) (clearance {U(via_via)} (type via_via)))')
-    # copper zones on B.Cu -> Specctra planes (the router connects pads to them with vias instead of tracks)
+    # copper zones -> Specctra planes: always for inner layers (4-layer stack), for B.Cu only when planes=True
     for z in board.Zones():
-        if not planes or z.GetIsRuleArea() or not z.IsOnLayer(pcbnew.B_Cu): continue
-        ol = z.Outline().Outline(0)
-        pts = ' '.join(f'{U(ToMM(ol.CPoint(i).x))} {-U(ToMM(ol.CPoint(i).y))}' for i in range(ol.PointCount()))
-        out.append(f'    (plane {q(z.GetNetname())} (polygon B.Cu 0 {pts}))')
+        if z.GetIsRuleArea(): continue
+        zl = z.GetFirstLayer()
+        if zl in (pcbnew.In1_Cu, pcbnew.In2_Cu) or (planes and zl == pcbnew.B_Cu):
+            ol = z.Outline().Outline(0)
+            pts = ' '.join(f'{U(ToMM(ol.CPoint(i).x))} {-U(ToMM(ol.CPoint(i).y))}' for i in range(ol.PointCount()))
+            out.append(f'    (plane {q(z.GetNetname())} (polygon {lname_of(zl)} 0 {pts}))')
     out.extend(npth_keepouts)
     # rule areas -> Specctra keepouts (all signal layers)
     for z in board.Zones():
@@ -138,7 +145,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         if t.GetClass() == 'PCB_VIA':
             wires.append(f'    (via {q(via_name)} {U(ToMM(t.GetPosition().x))} {-U(ToMM(t.GetPosition().y))} (net {q(t.GetNetname())}) (type protect))')
         elif t.GetClass() == 'PCB_TRACK':
-            lname = 'F.Cu' if t.GetLayer() == pcbnew.F_Cu else 'B.Cu'
+            lname = lname_of(t.GetLayer())
             s_, e_ = t.GetStart(), t.GetEnd()
             wires.append(f'    (wire (path {lname} {U(ToMM(t.GetWidth()))} {U(ToMM(s_.x))} {-U(ToMM(s_.y))} {U(ToMM(e_.x))} {-U(ToMM(e_.y))}) (net {q(t.GetNetname())}) (type protect))')
     out.append('  (wiring')

@@ -44,6 +44,23 @@ DEFAULT_PARTS = {   # value-key [or "value@pkg"] -> (LCSC, comment, note)   (loo
  '12MHz ABM8-272-T3': ('C20625731', 'ABM8-272-T3', 'Abracon 12 MHz 3225 (the crystal Raspberry Pi uses on Pico 2); alt X322512MSB4SI = C9002'),
  '3.3uH AOTA-B201610S3R3': ('C42411119', 'AOTA-B201610S3R3-101-T', '3.3 uH 0806 (2016) power inductor for the RP2350 core regulator; alt CKCSA201610-3.3uH = C5125966'),
  'B5819W': ('C64885', 'B5819W', 'MDD 1 A 40 V Schottky, SOD-123'),
+ # ---- rev D (split PRG / CHR / mapper chips) ----
+ 'S29GL01GS 1Gbit NOR (x8 use)': ('C2684783', 'S29GL01GS10TFI010', 'Infineon 1 Gbit (64M x 16) parallel NOR, TSOP-56, 100 ns; used as 64M x 8. Alt: S29GL512S10TFI010 = C393876 (64 MB), S29GL128S10TFI010 = C914940 (16 MB) -- same pinout'),
+ 'IS62WV5128 512Kx8 SRAM': ('C1348955', 'IS62WV5128EBLL-45HLI', 'ISSI 512K x 8 SRAM 3.3 V 45 ns, 32-pin sTSOP (package H)'),
+ 'AMS1117-3.3': ('C6186', 'AMS1117-3.3', 'basic part, SOT-223, 1 A LDO'),
+ 'W25Q16JVSSIQ': ('C131025', 'W25Q16JVSSIQ', 'Winbond 2 MB QSPI flash for the RP2350B firmware (same footprint/pinout as W25Q128)'),
+ '74LVC00 PPU access / CIRAM glue': ('C7803', 'SN74LVC00APWR', 'TI quad NAND, TSSOP-14'),
+ '74LVC139 CHR ROM/RAM select': ('C7662', 'SN74LVC139APWR', 'TI'),
+ '74LVC1G11 AND3: CPU data enable': ('C460526', '74LVC1G11W6-7', 'Diodes Inc, SOT-26 (= SOT-23-6)'),
+ '74LVC1G32 OR: CPU 245 /OE': ('C10096', 'SN74LVC1G32DBVR', 'TI'), '74LVC1G32 OR: PPU 245 /OE': ('C10096', 'SN74LVC1G32DBVR', 'TI'),
+ '74LVC1G04 INV: R/W': ('C7827', 'SN74LVC1G04DBVR', 'TI'), '74LVC1G00 NAND: WRAM /WE': ('C7826', 'SN74LVC1G00DBVR', 'TI'),
+ '74LVC1G07 OD: /IRQ A': ('C7829', 'SN74LVC1G07DBVR', 'TI'), '74LVC1G07 OD: /IRQ B': ('C7829', 'SN74LVC1G07DBVR', 'TI'),
+ '10k x4': ('C29718', '4D03WGJ0103T5E 10k x4 0603', 'basic'), 'green 0603': ('C84267', 'NCD0603G1 0603 green LED', 'extended, large stock'),
+ 'RESET': ('C2886898', 'TL3342F160QG', 'E-Switch'), 'BOOTSEL A': ('C2886898', 'TL3342F160QG', 'E-Switch'), 'BOOTSEL B': ('C2886898', 'TL3342F160QG', 'E-Switch'),
+ 'B5819W (VBUS A->+5V)': ('C64885', 'B5819W', 'MDD'), 'B5819W (VBUS B->+5V)': ('C64885', 'B5819W', 'MDD'),
+ 'USB-C PRG/mapper (U1)': ('C165948', 'TYPE-C-31-M-12', 'Korean Hroparts'), 'USB-C CHR (U2)': ('C165948', 'TYPE-C-31-M-12', 'Korean Hroparts'),
+ 'RUN/GND': ('', '2.54 mm 1x2 header', 'DNP: solder by hand if you want an external reset switch'),
+ 'SWD A (SWCLK GND SWDIO)': ('', '2.54 mm 1x3 header', 'DNP'), 'SWD B (SWCLK GND SWDIO)': ('', '2.54 mm 1x3 header', 'DNP'),
 }
 
 README_B = '''# JLCPCB 注文パッケージ（famicart rev B）
@@ -87,6 +104,25 @@ README_C = '''# JLCPCB 注文パッケージ（famicart rev C: RP2350B + XIAO RP
 - 別途 Seeed XIAO RP2040 × 5（約 US$ 5.4/個）
 '''
 
+README_D = '''# JLCPCB 注文パッケージ（famicart rev D: PRG ROM / CHR ROM / マッパーチップ分離構成）
+
+## PCB（Instant Quote → Add gerber file → gerbers.zip）
+- **Layers 4**（F.Cu 信号 / In1 GND プレーン / In2 +3V3 プレーン / B.Cu 信号）/ Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm**
+- Surface Finish **ENIG** / **Gold Fingers: Yes** → **Bevelling: 30°** / Copper 1 oz / Via Covering: Tented / Impedance Control: No
+- 層構成は JLC の標準 4 層スタック（JLC04161H-1080 等、1.2 mm 指定可）で可。Min Track/Spacing 0.15/0.15 mm、Via 0.5/0.25 mm（標準仕様内）。
+
+## SMT Assembly（PCB Assembly → Assembly Side: Top + Bottom）
+- BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`（両面実装。表: RP2350B x2・水晶・USB-C x2・スイッチ・LDO・単ゲート、裏: NOR フラッシュ x2・SRAM x2・74LVC541/245/139/00・パスコン）
+- 実装しない部品（DNP）: @DNP@（スルーホールのピンヘッダ J2/J5/J6 と、部品の無いジャンパ／パッド）
+- 部品プレビュー画面で **極性と回転** を必ず確認: U1/U2 RP2350B（1 番ピン）、U5/U6 S29GL01GS（TSOP-56 の 1 番ピン・マーク側）、U7/U8 IS62WV5128、U3/U4 W25Q16、U28 AMS1117（タブ = VOUT）、D1/D2 ショットキー、D3 LED、Y1/Y2 水晶、J3/J4 USB-C。
+- 拡張部品: U1/U2（C42415655）、U5/U6（C2684783、在庫少。切れている場合は同ピン配置の S29GL512S = C393876 / S29GL128S = C914940 に差し替え可。容量が変わるだけでファームは自動認識）、U7/U8（C1348955）、Y1/Y2（C20625731）、L1/L2（C42411119）。
+- 両面実装のため、裏面に TSOP-56 x2 と TSOP-32 x2 が載る。JLC の「Bottom side」実装費が追加になる。
+
+## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
+- PCB 5 枚（4 層・金フィンガー・ENIG・1.2 mm）: 約 US$ 60–90
+- 実装（両面、約 135 点/枚）: セットアップ約 US$ 25（両面）+ 部品代（S29GL01GS 約 US$ 9 x2、IS62WV5128 約 US$ 8 x2、RP2350B 約 US$ 1.5 x2、他 US$ 6–8/枚 → 約 US$ 43/枚）＋実装費 → 5 枚で約 US$ 260–320
+'''
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     if not os.path.exists(PARTS_JSON):
@@ -103,6 +139,9 @@ def main():
         for (key, fp), refs in groups.items():
             pkg = next((t for t in ('0402', '0603', '0805', '1206') if t in fp), '')
             lcsc, comment, note = parts.get(f'{key}@{pkg}', parts.get(key, ('', key, 'NOT FOUND')))
+            if note == 'NOT FOUND':
+                for k2 in ('74LVC541', '74LVC245', '74LVC139', '74LVC1G07', '74LVC1G32', '74LVC1G04', '74LVC1G00', '74LVC1G11', '74LVC00'):
+                    if key.startswith(k2) and k2 in parts: lcsc, comment, note = parts[k2]; break
             if note == 'NOT FOUND': print('WARNING: no LCSC part for', key, fp)
             refs.sort(key=lambda r: (r.rstrip('0123456789'), int(''.join(ch for ch in r if ch.isdigit()) or 0)))
             if not lcsc: dnp += refs; continue
@@ -123,7 +162,7 @@ def main():
     if os.path.exists(z): os.remove(z)
     shutil.make_archive(z[:-4], 'zip', fab)
     with open(os.path.join(OUT, 'README.md'), 'w') as f:
-        f.write((README_B if D.REV == 'rev B' else README_C).replace('@DNP@', ', '.join(dnp)))
+        f.write({'rev B': README_B, 'rev C': README_C}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp)))
     print('written:', OUT, 'DNP:', dnp)
 
 if __name__ == '__main__':

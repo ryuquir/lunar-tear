@@ -17,7 +17,8 @@
 | Pico / Pico 2 / RP2350B / XIAO（コプロセッサ）向けビルド | 通過（Pico: text 120KB, BSS 249KB / RP2350B: text 106KB, BSS 512KB / XIAO audio: text 42KB） |
 | 2 MCU 間 UART リンク（3 Mbaud、音源レジスタのストリーム） | 実装済み・**実機未検証** |
 | 回路図・基板 rev B（Pico 2、KiCad 7、90×46.1 mm ファミコン実寸、USB-C・リセット付き、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/](hardware/)、[hardware/jlcpcb/](hardware/jlcpcb/) |
-| 回路図・基板 rev C（RP2350B + XIAO RP2040、USB 3 口、リセット端子 J2）・ガーバー・JLCPCB 実装パッケージ | [hardware/revc/](hardware/revc/)、状態は docs/04_hardware.md の rev C 節 |
+| 回路図・基板 rev C（RP2350B + XIAO RP2040、USB 3 口、リセット端子 J2、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/revc/](hardware/revc/) |
+| 回路図・基板 rev D（実カセット型分離構成: RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + SRAM 512 KB×2、4 層）・ガーバー・JLCPCB 実装パッケージ | [hardware/revd/](hardware/revd/)、docs/04_hardware.md の rev D 節。**ファームのバンク出力層はフェーズ 4** |
 
 ## ビルド
 
@@ -80,12 +81,14 @@ python3 tools/gen_romdb.py   # data/MesenNesDB.txt -> src/core/romdb_gen.h, docs
 cd famicart/tools/pcb
 python3 gen_sch.py && python3 route_pcb.py && python3 gen_bom.py && python3 gen_jlc.py            # rev B -> hardware/
 FC_DESIGN=design_revc FC_HW_DIR=../../hardware/revc python3 gen_sch.py   # rev C -> hardware/revc/（route_pcb / gen_bom / gen_jlc も同じ環境変数で）
+FC_DESIGN=design_revd FC_HW_DIR=../../hardware/revd python3 gen_sch.py   # rev D（4 層）-> hardware/revd/
 ```
 
 ## ロードマップ
 
 1. **フェーズ 3**: 基板の試作・実機検証（ロジアナでタイミング確認）、配線の手直し、VRC7 音色の実機比較による校正、USB マスストレージからの ROM 選択、セーブ（バッテリ RAM）のフラッシュ退避
-2. 未実装マッパー（海賊版マルチカート系）は対象外のまま
+2. **フェーズ 4（rev D 向けファーム）**: `prg_map/chr_map` テーブルをバンク線出力に変換するコア 1 ループ、U1↔U2 PIO リンク、PPU 側の MMC2/MMC3/MMC5 検出、S29GL フラッシュ書き込み（USB 経由）、ROM ライブラリ選択メニュー
+3. 未実装マッパー（海賊版マルチカート系）は対象外のまま
 
 ## ライセンス・出典
 

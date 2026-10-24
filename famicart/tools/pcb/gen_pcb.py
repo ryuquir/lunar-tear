@@ -53,7 +53,8 @@ def add_zone(board, net, layer, pts, clearance=0.25):
 def main():
     board = pcbnew.BOARD()
     ds = board.GetDesignSettings()
-    ds.SetCopperLayerCount(2)
+    NL = getattr(D, 'LAYERS', 2)
+    ds.SetCopperLayerCount(NL)
     ds.m_TrackMinWidth = FromMM(0.15); ds.m_ViasMinSize = FromMM(0.5); ds.m_MinThroughDrill = FromMM(0.25)
     ds.m_MinClearance = FromMM(0.15); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM(0.12)
     ds.m_SolderMaskMinWidth = FromMM(0.0); ds.m_SolderMaskExpansion = FromMM(0.0); ds.m_CopperEdgeClearance = FromMM(0.3)
@@ -116,13 +117,18 @@ def main():
     # rule areas: no tracks/vias/pour on the card-edge tab (fingers only; traces may enter the top 1.1 mm of a pad),
     # and no vias under the Pico module (its underside carries exposed test pads)
     KEEP_Y = H + 4.0            # = solder-mask boundary: fingers only below this line
-    add_rule_area(board, 'card_edge_keepout', [(x0 - 0.5, KEEP_Y), (x1 + 0.5, KEEP_Y), (x1 + 0.5, T + 0.5), (x0 - 0.5, T + 0.5)], [pcbnew.F_Cu, pcbnew.B_Cu])
+    CU = [pcbnew.F_Cu, pcbnew.B_Cu] + ([pcbnew.In1_Cu, pcbnew.In2_Cu] if NL == 4 else [])
+    add_rule_area(board, 'card_edge_keepout', [(x0 - 0.5, KEEP_Y), (x1 + 0.5, KEEP_Y), (x1 + 0.5, T + 0.5), (x0 - 0.5, T + 0.5)], CU)
     ux, uy, _, _ = D.PARTS['U1'][4]
     # (vias under the Pico are allowed: they are tented by the solder mask; the Pico's own test points sit on our TP pads)
     # GND pours on both layers over the body (not the tab)
     body = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
-    add_zone(board, netmap['GND'], pcbnew.F_Cu, body)
-    add_zone(board, netmap['GND'], pcbnew.B_Cu, body)
+    if NL == 4:   # inner planes: In1 = GND, In2 = +3V3 (outer layers stay free for routing)
+        add_zone(board, netmap['GND'], pcbnew.In1_Cu, body)
+        add_zone(board, netmap['+3V3'], pcbnew.In2_Cu, body)
+    else:
+        add_zone(board, netmap['GND'], pcbnew.F_Cu, body)
+        add_zone(board, netmap['GND'], pcbnew.B_Cu, body)
 
     pcbnew.SaveBoard(OUT, board)
     print('board written:', OUT, 'footprints', len(board.GetFootprints()), 'nets', board.GetNetCount())
