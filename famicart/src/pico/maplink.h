@@ -2,6 +2,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
+#include "board.h"
 
 #define LINK_TAG            0xAu
 #define LINK_T_SYNC         0x0   /* payload 0 */

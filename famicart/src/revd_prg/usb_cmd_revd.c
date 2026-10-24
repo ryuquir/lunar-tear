@@ -121,6 +121,7 @@ void usb_cmd_print_info(void) {
     printf("\n[famicart rev D / U1] sysclk=%lu kHz lib: %s current=%lu prg_used=%lu chr_used=%lu\n", clock_get_hz(clk_sys) / 1000, g_lib.magic == LIB_MAGIC ? "ok" : "empty", (unsigned long)g_lib.current, (unsigned long)g_lib.prg_used, (unsigned long)g_lib.chr_used);
     if (g_running) printf("  game : %s mapper=%u sub=%u prg=%luK chr=%luK %s\n  bus  : m2=%lu rd=%lu wr=%lu resets=%lu irq=%u\n", g_entry.name, g_info.mapper, g_info.submapper, (unsigned long)g_info.prg_size / 1024, (unsigned long)g_info.chr_size / 1024, g_info.note,
                           (unsigned long)bus_stat_cpu_cycles, (unsigned long)bus_stat_cpu_reads, (unsigned long)bus_stat_cpu_writes, (unsigned long)bus_stat_resets, g_cart.irq_line);
+    if (bus_stat_link_drops) printf("  WARN link frames dropped: %lu\n", (unsigned long)bus_stat_link_drops);
     else printf("  no game loaded (%s)\n", cart_load_strerror(g_load));
     printf("  cmds : INFO | RESET | BOOTSEL | LIB | LIBSEL n | LIBDEL n | LIBADD <prg> <chr> <name> | BOOTBANK | FLASHID | WRAMDUMP\n");
 }

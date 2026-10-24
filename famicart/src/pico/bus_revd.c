@@ -14,7 +14,12 @@
 #include "hardware/structs/sio.h"
 #include "fc_bus_revd.pio.h"
 
-volatile uint32_t bus_stat_cpu_cycles, bus_stat_cpu_reads, bus_stat_cpu_writes, bus_stat_resets;
+volatile uint32_t bus_stat_cpu_cycles, bus_stat_cpu_reads, bus_stat_cpu_writes, bus_stat_resets, bus_stat_link_drops;
+/* link frames queued by the ISR, drained by busd_pump() (main loop) so bursts of register writes never drop */
+#define LQ 512
+static uint32_t lq[LQ]; static volatile unsigned lq_w, lq_r;
+FC_INLINE void lq_push(uint32_t f) { unsigned n = (lq_w + 1) % LQ; if (n == lq_r) { bus_stat_link_drops++; return; } lq[lq_w] = f; lq_w = n; }
+void busd_pump(void) { while (lq_r != lq_w) { if (!maplink_send_try(lq[lq_r])) return; lq_r = (lq_r + 1) % LQ; } }
 static cart_t *g_cart;
 static PIO pio_cpu = pio0; static uint sm_cpu;
 static volatile uint8_t boot_ready = 0, boot_cmd = 0;
@@ -35,7 +40,7 @@ static void __not_in_flash_func(cpu_isr)(void) {
             uint8_t v = (uint8_t)(w >> 15);
             cart_cpu_write(c, waddr, v);
             if (c->tables_dirty) bankout_update(c);
-            maplink_send_try(link_frame(LINK_T_CPU_WRITE, ((uint32_t)waddr << 8) | v));
+            lq_push(link_frame(LINK_T_CPU_WRITE, ((uint32_t)waddr << 8) | v));
             bus_stat_cpu_writes++;
             irq_pin_set(c->irq_line);
             continue;
@@ -48,7 +53,7 @@ static void __not_in_flash_func(cpu_isr)(void) {
                 uint8_t v; bool have = false;
                 if (addr == 0x5F00) { v = boot_ready ? 0xA5 : 0x00; have = true; }
                 else if (addr == 0x5F01) { v = boot_cmd; have = true; if (boot_cmd == 1) { bankout_go(true); } }
-                else if (c->mapper && c->has_read_hook) { v = c->mapper->read(c, addr, c->open_bus); have = true; maplink_send_try(link_frame(LINK_T_CPU_READ, addr)); }
+                else if (c->mapper && c->has_read_hook) { v = c->mapper->read(c, addr, c->open_bus); have = true; lq_push(link_frame(LINK_T_CPU_READ, addr)); }
                 if (have) { pio_sm_put(pio_cpu, sm_cpu, RSP_DRIVE(v)); c->open_bus = v; bus_stat_cpu_reads++; }
                 else pio_sm_put(pio_cpu, sm_cpu, RSP_NONE);
             } else {

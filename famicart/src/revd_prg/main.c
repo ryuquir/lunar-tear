@@ -15,6 +15,7 @@
 #include "../core/mapper.h"
 #include "../core/rom.h"
 #include "../core/audio/expaudio.h"
+#include "../core/mapper_state.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -71,6 +72,9 @@ int main(void) {
     usb_cmd_init();
     absolute_time_t next = make_timeout_time_ms(2000);
     for (;;) {
+        busd_pump();
+        int b = maplink_recv_byte(0);
+        if (b >= 0x80 && g_running && g_cart.mapper_id == 5) { g_cart.s.mmc5.in_frame = (b >> 6) & 1; g_cart.s.mmc5.irq_pending = (b >> 0) & 1; }   /* MMC5 $5204 status mirrored from U2 */
         if (g_running) audio_out_pump();
         usb_cmd_poll();
         if (time_reached(next)) { next = make_timeout_time_ms(10000); extern void usb_cmd_print_info(void); usb_cmd_print_info(); }

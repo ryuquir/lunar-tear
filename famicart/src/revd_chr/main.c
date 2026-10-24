@@ -158,6 +158,11 @@ int main(void) {
             default: break;
             }
         }
+        if (loaded && cart.mapper_id == 5) {              /* MMC5: tell U1 about in-frame / IRQ-pending so its $5204 reads are right */
+            static uint8_t last_st = 0xFF;
+            uint8_t st = (uint8_t)(0x80 | (cart.s.mmc5.in_frame ? 0x40 : 0) | (cart.s.mmc5.irq_pending ? 0x01 : 0));
+            if (st != last_st) { last_st = st; maplink_reply(st); }
+        }
         if (time_reached(blink)) { blink = make_timeout_time_ms(loaded ? 1000 : 200); gpio_put(PIN_LED, led ^= 1); }
     }
 }
