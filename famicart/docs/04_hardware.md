@@ -126,7 +126,7 @@ GP26 (PWM ~246 kHz) ─ R1 2.2k ─┬─ R2 2.2k ─┬─ R3 4.7k ─┬──
 # rev C: RP2350B（ベアチップ）+ Seeed XIAO RP2040 の 2 MCU 構成
 
 rev B の「Pico 2 モジュール 1 個」を、**基板直付けの RP2350B（QFN-80、GPIO 48 本）** と **音源コプロセッサとしての XIAO RP2040** に分けた版。ユーザー要望（XIAO を使う／全マッパー／全拡張音源の横断利用／USB 3 口／リセット端子）を満たすための設計。
-生成物は `hardware/revc/`（回路図・基板・fab・jlcpcb）。ジェネレータは `tools/pcb/design_revc.py`（`FC_DESIGN=design_revc FC_HW_DIR=hardware/revc` で各スクリプトを実行）。
+生成物は `hardware/revc/`（回路図・基板・fab・jlcpcb）。**配線結果: 2 層、未接続 0、DRC エラー 0**（Freerouting 1.9、トラック/クリアランス 0.15 mm、ビア 0.5/0.25 mm。DRC 報告の警告 58 件は KiCad 標準ライブラリとの照合警告で製造には無関係）。RP2350B の露出パッドは 0.4 mm ピッチのピン列に囲まれて自動配線が届かないため、サーマルビアから上下のパスコン GND パッドへの固定配線（`FIXED_LINKS`）で接続している。ジェネレータは `tools/pcb/design_revc.py`（`FC_DESIGN=design_revc FC_HW_DIR=hardware/revc` で各スクリプトを実行）。
 
 ## 役割分担
 
