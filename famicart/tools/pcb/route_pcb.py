@@ -50,7 +50,8 @@ def main():
     pcbnew.WriteDRCReport(board, drc, pcbnew.EDA_UNITS_MILLIMETRES, True)
     txt = open(drc).read()
     m = re.findall(r'\*\* Found (\d+) ([A-Za-z ]+?) \*\*', txt)
-    print('DRC:', m if m else txt[:300])
+    errors = txt.count('Severity: error'); warnings = txt.count('Severity: warning')
+    print('DRC:', m if m else txt[:300], '| errors:', errors, 'warnings (library checks etc.):', warnings)
     # fab exports
     fab = os.path.join(HW, 'fab'); shutil.rmtree(fab, ignore_errors=True); os.makedirs(fab)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', 'F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts,F.Fab,B.Fab', '-o', fab + '/', PCB], check=True, capture_output=True)

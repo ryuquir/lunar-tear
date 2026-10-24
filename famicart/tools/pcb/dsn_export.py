@@ -51,6 +51,10 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         pos = fp.GetPosition(); rot = fp.GetOrientationDegrees()
         ox, oy = ToMM(pos.x), -ToMM(pos.y)
         placements.append((img_name, fp.GetReference(), U(ox), U(oy), 'front', rot))
+        for pad in fp.Pads():                             # NPTH mounting holes of EVERY instance (also the ones sharing an image)
+            if pad.GetNumber() == '':
+                pp = pad.GetPosition(); d = max(ToMM(pad.GetDrillSize().x), ToMM(pad.GetSize().x)) + 2 * 0.5
+                npth_keepouts.append(f'    (keepout "npth_{fp.GetReference()}_{len(npth_keepouts)}" (circle signal {U(d)} {U(ToMM(pp.x))} {-U(ToMM(pp.y))}))')
         if img_name in images: continue
         # image-local pin coordinates derived from the actual pad positions:
         #   P = O + R(rot) * L  (for 'back' placement Freerouting applies the mirror itself)
@@ -59,9 +63,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         edge = 'CardEdge' in fpid
         seen_ids = {}
         for pad in fp.Pads():
-            if pad.GetNumber() == '':                     # NPTH mounting hole: keep tracks/vias away (all layers)
-                pp = pad.GetPosition(); d = max(ToMM(pad.GetDrillSize().x), ToMM(pad.GetSize().x)) + 2 * 0.5
-                npth_keepouts.append(f'    (keepout "npth_{fp.GetReference()}_{len(npth_keepouts)}" (circle signal {U(d)} {U(ToMM(pp.x))} {-U(ToMM(pp.y))}))')
+            if pad.GetNumber() == '':                     # NPTH mounting hole (keepout emitted above)
                 continue
             pp = pad.GetPosition(); dx, dy = ToMM(pp.x) - ox, -ToMM(pp.y) - oy
             lx, ly = dx * c_ - dy * s_, dx * s_ + dy * c_
