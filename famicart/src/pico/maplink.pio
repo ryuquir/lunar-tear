@@ -1,0 +1,41 @@
+; famicart rev D inter-MCU link.
+; link_tx: 32-bit frames MSB first on DATA (out pin) with a clock on the side-set pin (U1 -> U2).
+; Idle: the SM stalls on autopull, clock rests high, no edges.
+.program link_tx
+.side_set 1
+.wrap_target
+    out pins, 1          side 0
+    nop                  side 1
+.wrap
+
+; link_rx: sample DATA on every rising clock edge (U2). in_base = DATA; the clock is waited on as "pin 1"
+; relative to in_base, so wire CLK = DATA - 1 ... we instead set in_base = CLK and read DATA as pin 1 below.
+.program link_rx
+.wrap_target
+    wait 0 pin 0
+    wait 1 pin 0
+    in pins, 2            ; bit0 = CLK (always 1 here), bit1 = DATA
+.wrap
+
+; uart_tx / uart_rx: 8N1 PIO UART for the U2 -> U1 return channel (pico-examples).
+.program uart_tx
+.side_set 1 opt
+    pull       side 1 [7]
+    set x, 7   side 0 [7]
+bitloop:
+    out pins, 1
+    jmp x-- bitloop   [6]
+    nop        side 1 [6]
+
+.program uart_rx
+start:
+    wait 0 pin 0
+    set x, 7    [10]
+bitloop:
+    in pins, 1
+    jmp x-- bitloop [6]
+    jmp pin good_stop
+    wait 1 pin 0
+    jmp start
+good_stop:
+    push

@@ -14,7 +14,7 @@ static inline uint32_t wrap_prg(const cart_t *c, int32_t bank, uint32_t pages) {
 void cart_set_prg8k(cart_t *c, unsigned slot, int32_t bank) {
     uint32_t b = wrap_prg(c, bank, c->prg_pages);
     c->prg_map[4 + (slot & 3)]  = c->prg_rom + (b << PRG_PAGE_SHIFT);
-    c->prg_wmap[4 + (slot & 3)] = NULL;
+    c->prg_wmap[4 + (slot & 3)] = NULL; c->tables_dirty = 1;
 }
 void cart_set_prg16k(cart_t *c, unsigned slot, int32_t bank) {
     uint32_t pages16 = c->prg_pages >> 1;
@@ -30,16 +30,16 @@ void cart_set_prg32k(cart_t *c, int32_t bank) {
 void cart_set_prg8k_6000(cart_t *c, int32_t bank) {
     uint32_t b = wrap_prg(c, bank, c->prg_pages);
     c->prg_map[3]  = c->prg_rom + (b << PRG_PAGE_SHIFT);
-    c->prg_wmap[3] = NULL;
+    c->prg_wmap[3] = NULL; c->tables_dirty = 1;
 }
 void cart_set_wram_6000(cart_t *c, uint32_t bank8k, bool writable) {
     if (!c->wram || c->wram_size == 0) { cart_unmap_6000(c); return; }
     uint32_t pages = c->wram_size >> PRG_PAGE_SHIFT; if (!pages) pages = 1;
     uint8_t *p = c->wram + ((bank8k % pages) << PRG_PAGE_SHIFT);
     c->prg_map[3]  = p;
-    c->prg_wmap[3] = writable ? p : NULL;
+    c->prg_wmap[3] = writable ? p : NULL; c->tables_dirty = 1;
 }
-void cart_unmap_6000(cart_t *c) { c->prg_map[3] = NULL; c->prg_wmap[3] = NULL; }
+void cart_unmap_6000(cart_t *c) { c->prg_map[3] = NULL; c->prg_wmap[3] = NULL; c->tables_dirty = 1; }
 
 /* ---------------- CHR ---------------- */
 void cart_set_chr1k(cart_t *c, unsigned slot, int32_t bank) {
@@ -47,6 +47,7 @@ void cart_set_chr1k(cart_t *c, unsigned slot, int32_t bank) {
     slot &= 7;
     c->chr_map[slot] = c->chr + (b << CHR_PAGE_SHIFT);
     if (c->chr_is_ram) c->chr_wmask |= (uint8_t)(1u << slot); else c->chr_wmask &= (uint8_t)~(1u << slot);
+    c->tables_dirty = 1;
 }
 void cart_set_chr2k(cart_t *c, unsigned slot, int32_t bank) {
     slot &= 3; cart_set_chr1k(c, slot * 2, bank * 2); cart_set_chr1k(c, slot * 2 + 1, bank * 2 + 1);
@@ -56,21 +57,21 @@ void cart_set_chr4k(cart_t *c, unsigned slot, int32_t bank) {
 }
 void cart_set_chr8k(cart_t *c, int32_t bank) { for (unsigned i = 0; i < 8; i++) cart_set_chr1k(c, i, bank * 8 + (int32_t)i); }
 void cart_set_chr1k_ptr(cart_t *c, unsigned slot, uint8_t *p, bool writable) {
-    slot &= 7; c->chr_map[slot] = p;
+    slot &= 7; c->chr_map[slot] = p; c->tables_dirty = 1;
     if (writable) c->chr_wmask |= (uint8_t)(1u << slot); else c->chr_wmask &= (uint8_t)~(1u << slot);
 }
 
 /* ---------------- nametables ---------------- */
-void cart_set_nt_ciram(cart_t *c, unsigned nt, unsigned page) { nt &= 3; c->nt_map[nt] = NULL; c->nt_ciram_a10[nt] = page & 1; }
-void cart_set_nt_ptr(cart_t *c, unsigned nt, uint8_t *p) {
+void cart_set_nt_ciram(cart_t *c, unsigned nt, unsigned page) { c->tables_dirty = 1; nt &= 3; c->nt_map[nt] = NULL; c->nt_ciram_a10[nt] = page & 1; }
+void cart_set_nt_ptr(cart_t *c, unsigned nt, uint8_t *p) { c->tables_dirty = 1;
     nt &= 3;
     if (p) c->nt_map[nt] = p; else cart_set_mirroring(c, c->mirroring);
 }
-void cart_set_nt_chr1k(cart_t *c, unsigned nt, int32_t bank) {
+void cart_set_nt_chr1k(cart_t *c, unsigned nt, int32_t bank) { c->tables_dirty = 1;
     uint32_t b = wrap_prg(c, bank, c->chr_pages);
     c->nt_map[nt & 3] = c->chr + (b << CHR_PAGE_SHIFT);
 }
-void cart_set_mirroring(cart_t *c, mirroring_t m) {
+void cart_set_mirroring(cart_t *c, mirroring_t m) { c->tables_dirty = 1;
     c->mirroring = m;
     switch (m) {
     case MIRROR_H:  cart_set_nt_ciram(c,0,0); cart_set_nt_ciram(c,1,0); cart_set_nt_ciram(c,2,1); cart_set_nt_ciram(c,3,1); break;
@@ -100,6 +101,10 @@ void FC_FASTCODE(cart_cpu_write)(cart_t *c, uint16_t addr, uint8_t v) {
     if (c->audio_mask && expaudio_cpu_write(c, addr, v)) return;   /* exclusive audio register hit */
     if (addr < 0x4020) { if (c->mapper->flags & MF_SNOOP_PPU_REGS) c->mapper->write(c, addr, v); return; }
     uint8_t *w = c->prg_wmap[addr >> 13];
+#if FC_VIRTUAL_ROM
+    if (w && !((c->mapper->flags & MF_WRITE_6000) && addr < 0x8000)) return;   /* the external RAM chip took the write */
+    if (c->mapper->write) c->mapper->write(c, addr, v);                        /* no bus-conflict AND: ROM is not readable here */
+#else
     if (w && !((c->mapper->flags & MF_WRITE_6000) && addr < 0x8000)) { w[addr & 0x1FFF] = v; return; }
     if (c->mapper->write) {
         if ((c->mapper->flags & MF_BUS_CONFLICT) && c->bus_conflicts && addr >= 0x8000) {
@@ -108,6 +113,7 @@ void FC_FASTCODE(cart_cpu_write)(cart_t *c, uint16_t addr, uint8_t v) {
         }
         c->mapper->write(c, addr, v);
     }
+#endif
 }
 uint8_t FC_FASTCODE(cart_ppu_read)(cart_t *c, uint16_t addr) {
     addr &= 0x3FFF;

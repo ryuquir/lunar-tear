@@ -42,6 +42,7 @@ typedef struct cart {
     uint8_t        has_read_hook;      /* mapper->read must be consulted when prg_map[] is NULL */
     const uint8_t *ppu_override;       /* set by ppu_addr hook: serve this byte instead of the table lookup */
     uint8_t        audio_mask;         /* bitmask of enabled expansion audio chips (see profile.h) */
+    volatile uint8_t tables_dirty;     /* set by every cart_set_* call; rev D bank-line drivers clear it after re-encoding */
 
     /* ---- ROM / RAM backing storage ---- */
     const uint8_t *prg_rom;  uint32_t prg_size;   uint32_t prg_pages;  /* 8K pages */

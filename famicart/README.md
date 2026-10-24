@@ -18,7 +18,8 @@
 | 2 MCU 間 UART リンク（3 Mbaud、音源レジスタのストリーム） | 実装済み・**実機未検証** |
 | 回路図・基板 rev B（Pico 2、KiCad 7、90×46.1 mm ファミコン実寸、USB-C・リセット付き、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/](hardware/)、[hardware/jlcpcb/](hardware/jlcpcb/) |
 | 回路図・基板 rev C（RP2350B + XIAO RP2040、USB 3 口、リセット端子 J2、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/revc/](hardware/revc/) |
-| 回路図・基板 rev D（実カセット型分離構成: RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + SRAM 512 KB×2、4 層）・ガーバー・JLCPCB 実装パッケージ | [hardware/revd/](hardware/revd/)、docs/04_hardware.md の rev D 節。**ファームのバンク出力層はフェーズ 4** |
+| 回路図・基板 rev D（**実機動作の本命**: 実カセット型分離構成、RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + F-RAM 128 KB + CHR SRAM 512 KB、4 層、起動バンク付き） | [hardware/revd/](hardware/revd/)、docs/04_hardware.md の rev D 節 |
+| rev D ファームウェア（バンク線出力、2 MCU リンク、外部フラッシュ書き込み、ROM ライブラリ、ブートスタブ） | 実装済み・ビルド通過（U1 text 130 KB / U2 37 KB）、ホストテスト通過、**実機未検証** |
 
 ## ビルド
 
@@ -87,8 +88,9 @@ FC_DESIGN=design_revd FC_HW_DIR=../../hardware/revd python3 gen_sch.py   # rev D
 ## ロードマップ
 
 1. **フェーズ 3**: 基板の試作・実機検証（ロジアナでタイミング確認）、配線の手直し、VRC7 音色の実機比較による校正、USB マスストレージからの ROM 選択、セーブ（バッテリ RAM）のフラッシュ退避
-2. **フェーズ 4（rev D 向けファーム）**: `prg_map/chr_map` テーブルをバンク線出力に変換するコア 1 ループ、U1↔U2 PIO リンク、PPU 側の MMC2/MMC3/MMC5 検出、S29GL フラッシュ書き込み（USB 経由）、ROM ライブラリ選択メニュー
-3. 未実装マッパー（海賊版マルチカート系）は対象外のまま
+2. **フェーズ 4（rev D 向けファーム）**: 実装済み（バンク出力・リンク・フラッシュ書き込み・ライブラリ・ブートスタブ）。残り: 起動メニュー（コントローラでライブラリ選択）、MMC5 $5204 状態の U2→U1 同期、$6000 PRG-ROM マッパーの F-RAM コピー対応
+3. **フェーズ 5（実機ブリングアップ）**: 基板到着後 `FLASHID` → `BOOTBANK` → `libadd` NROM → MMC1 → MMC3 → MMC5 の順に確認。ロジアナで M2 ↔ バンク線・/RD ↔ CHR バンク線の遅延を測る
+4. 未実装マッパー（海賊版マルチカート系）は対象外のまま
 
 ## ライセンス・出典
 

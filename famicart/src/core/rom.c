@@ -105,6 +105,18 @@ static void heuristic(const uint8_t *img, uint32_t len, rom_info_t *o) {
     (void)img;
 }
 
+/* Inspect from the 16-byte header + the CRC32 of the PRG+CHR data only (rev D: the image lives in an external
+ * flash that the MCU cannot address as memory). Headerless images are not supported on this path. */
+bool rom_inspect_header(const uint8_t hdr[16], uint32_t data_len, uint32_t data_crc, rom_info_t *out) {
+    memset(out, 0, sizeof *out);
+    if (!parse_header(hdr, 16, out)) return false;
+    if (out->prg_size + out->chr_size > data_len) { snprintf(out->note, sizeof out->note, "truncated image"); return false; }
+    out->crc32 = out->file_crc32 = data_crc;
+    const romdb_entry_t *e = (const romdb_entry_t *)romdb_lookup(out->crc32);
+    if (e) { uint32_t dof = out->data_offset; apply_db(out, e); out->has_header = true; out->data_offset = dof; snprintf(out->note, sizeof out->note, "DB match (header kept)"); }
+    return true;
+}
+
 bool rom_inspect(const uint8_t *img, uint32_t len, rom_info_t *out) {
     memset(out, 0, sizeof *out);
     if (!img || len < 16384) return false;

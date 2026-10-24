@@ -55,8 +55,9 @@ GPIO_B = {}
 for i in range(14): GPIO_B[i] = f'PA{i}'                 # local PPU address
 GPIO_B.update({14: 'PnRD', 15: 'PnWR'})
 for i in range(16): GPIO_B[16 + i] = f'CHR_A{10 + i}'    # CHR flash / CHR RAM bank address A10-A25
-GPIO_B.update({32: 'CHR_SEL', 33: 'nFOURSCR', 34: 'CIRAM_A10', 35: 'LED', 36: 'CHR_nWE', 37: 'LINK_CLK', 38: 'LINK_DATA', 39: 'LINK_B2A', 40: 'nIRQ_B', 41: 'nBRIDGE'})
-for g in range(42, 48): GPIO_B[g] = None                 # spare
+GPIO_B.update({32: 'CHR_SEL', 33: 'nFOURSCR', 34: 'CIRAM_A10', 35: 'LED', 36: 'CHR_nWE', 37: 'LINK_CLK', 38: 'LINK_DATA', 39: 'LINK_B2A', 40: 'nIRQ_B', 41: 'nBRIDGE',
+               42: 'BRIDGE_DIR', 43: 'CHR_RYBY'})        # bridge direction (1 = CPU->PPU data, 0 = read back), CHR flash RY/BY#
+for g in range(44, 48): GPIO_B[g] = None                 # spare
 
 def mcu(ref, s, x, y, gpio_net, mirror):
     """RP2350B + flash + crystal + regulator passives + BOOTSEL + USB series/CC. mirror=-1 flips the support parts in x."""
@@ -150,7 +151,7 @@ def flash(ref, x, y, addr_lo, addr_hi, data, ce, oe, we, rn_x):
         elif nm.startswith('DQ'):
             d = int(nm[2:]); c(ref, p, data[d] if d < 8 else f'{ref}_DQ{d}')
         else:
-            c(ref, p, {'WE#': we, 'RESET#': 'RUN', 'WP#': '+3V3', 'RY/BY#': None, 'RFU': None, 'DNU': None, 'VIO': '+3V3', 'VCC': '+3V3', 'VSS': 'GND', 'CE#': ce, 'OE#': oe}[nm])
+            c(ref, p, {'WE#': we, 'RESET#': 'RUN', 'WP#': '+3V3', 'RY/BY#': ('CHR_RYBY' if ref == 'U6' else None), 'RFU': None, 'DNU': None, 'VIO': '+3V3', 'VCC': '+3V3', 'VSS': 'GND', 'CE#': ce, 'OE#': oe}[nm])
     # DQ8-15 pull-ups (x16 device programmed with 0xFF in the upper byte)
     for k in range(2):
         rn = f'RN{3 + 2 * (ref == "U6") + k}'; P(rn, 'Device', 'R_Pack04', '10k x4', RARR, rn_x, y - 1.5 + 5 * k, 90, 'B')
@@ -201,7 +202,7 @@ buf541('U9',  [f'CPU_A{i}' for i in range(8)], CA[:8], 'ISOLATE', LX, SROWS[0], 
 buf541('U10', [f'CPU_A{i}' for i in range(8, 15)] + ['CPU_RW'], CA[8:15] + ['CRW'], 'ISOLATE', LX, SROWS[1], (LX, SCAP[1]))
 buf541('U11', ['M2', 'nROMSEL'], ['CM2', 'CnROMSEL'], 'ISOLATE', LX, SROWS[2], (LX, SCAP[2]))
 xcvr245('U12', [f'CPU_D{i}' for i in range(8)], CD, 'CRWn', 'CD_nOE', COLS[0], ROWS[0], (COLS[0] - 1.8, CY1), '74LVC245 CPU data (console<->local)')
-xcvr245('U24', CD, PD, '+3V3', 'nBRIDGE', COLS[1], ROWS[0], (COLS[1] - 1.8, CY1), '74LVC245 CPU->PPU data bridge (CHR flash programming)')
+xcvr245('U24', CD, PD, 'BRIDGE_DIR', 'nBRIDGE', COLS[1], ROWS[0], (COLS[1] - 1.8, CY1), '74LVC245 CPU->PPU data bridge (CHR flash programming)')
 logic('U22', '74xx', '74LS139', '74LVC139 CHR ROM/RAM select', TSSOP16, COLS[0], ROWS[1], (COLS[0] + 1.8, CY1))
 c('U22', 1, 'nCART_ACC'); c('U22', 2, 'CHR_SEL'); c('U22', 3, 'GND'); c('U22', 4, 'CHR_ROM_nCE'); c('U22', 5, 'CHR_RAM_nCE'); c('U22', 6, None); c('U22', 7, None)
 c('U22', 15, '+3V3'); c('U22', 14, 'GND'); c('U22', 13, 'GND'); c('U22', 12, None); c('U22', 11, None); c('U22', 10, None); c('U22', 9, None); c('U22', 8, 'GND'); c('U22', 16, '+3V3')
@@ -233,6 +234,8 @@ for i in range(3):
     rn = f'RN{7 + i}'; P(rn, 'Device', 'R_Pack04', '10k x4', RARR, 31.5 + 3.5 * (i % 2), 14.3 + 4.1 * (i // 2))
     for k in range(4): c(rn, 1 + k, f'PRG_A{13 + 4 * i + k}'); c(rn, 8 - k, '+3V3')
 res('10k', R0603, 35.0, 18.6, 90, 'F', 'PRG_A25', '+3V3')
+
+res('10k', R0603, 66.0, 27.5, 90, 'F', 'BRIDGE_DIR', '+3V3'); res('10k', R0603, 69.0, 27.5, 90, 'F', 'CHR_RYBY', '+3V3')
 
 # status LED on U2 GPIO35
 P('D3', 'Device', 'LED', 'green 0603', 'LED_SMD:LED_0603_1608Metric', 58.0, 30.0, 0, 'F'); c('D3', 2, 'LED_A'); c('D3', 1, 'GND')

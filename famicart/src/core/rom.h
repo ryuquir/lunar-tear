@@ -35,6 +35,7 @@ typedef struct {
 uint32_t fc_crc32(uint32_t crc, const uint8_t *p, size_t n);
 
 /* Inspect an image in memory (flash or RAM). Returns false when nothing usable was found. */
+bool rom_inspect_header(const uint8_t hdr[16], uint32_t data_len, uint32_t data_crc, rom_info_t *out);
 bool rom_inspect(const uint8_t *img, uint32_t len, rom_info_t *out);
 
 /* Database lookup by PRG+CHR CRC32. Returns NULL when unknown. */

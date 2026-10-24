@@ -1,0 +1,28 @@
+; famicart rev D, U1: CPU-bus snoop on the 3.3 V local bus (GPIO0..25) with nDRIVE (GPIO26) as side-set.
+; Response word (TX FIFO): bit0 = drive data (bits 1..8) for this read cycle, else bit1 = capture the write data.
+.program fc_cpu_revd
+.side_set 1
+.wrap_target
+cpu_start:
+    wait 0 gpio 24       side 1   ; M2 low
+    wait 1 gpio 24       side 1   ; M2 high: address valid on the local bus
+    nop             [3]  side 1   ; let /ROMSEL (NAND of M2) settle
+    in pins, 26          side 1   ; A0-14 | D0-7 | R/W | M2 | /ROMSEL
+    push                 side 1
+    pull block           side 1
+    out x, 1             side 1
+    jmp !x, cpu_nodrive  side 1
+    out pins, 8          side 1   ; D0-7
+    mov osr, ~null       side 1
+    out pindirs, 8       side 0   ; drive, open the 245 towards the console
+    wait 0 gpio 24       side 0   ; hold until the end of phi2
+    mov osr, null        side 1
+    out pindirs, 8       side 1
+    jmp cpu_start        side 1
+cpu_nodrive:
+    out y, 1             side 1
+    jmp !y, cpu_start    side 1
+    wait 0 gpio 24       side 1   ; write: data valid at the falling edge of M2
+    in pins, 26          side 1
+    push                 side 1
+.wrap

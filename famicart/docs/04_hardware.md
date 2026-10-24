@@ -288,7 +288,25 @@ CD0-7 ─245(ブリッジ, /OE=nBRIDGE)→ PD0-7   … CHR フラッシュ書き
 | 37 / 38 / 39 | LINK_CLK / LINK_DATA / LINK_B2A | 40 / 41 | nIRQ_B / nBRIDGE |
 | 42–47 | 予備 | | |
 
-## 動作の仕組み（ファームウェア フェーズ 4 の設計）
+## ファームウェア（フェーズ 4、実装済み・実機未検証）
+
+| ファイル | 役割 |
+|---|---|
+| `src/pico/board_revd_prg.h` / `board_revd_chr.h` | U1 / U2 のピン定義（`FC_VIRTUAL_ROM=1`: ROM/RAM は外部チップ） |
+| `src/core/cartload.c`（`cart_load_from_info`） | 画像を SRAM にコピーせず、`prg_map/chr_map` を **仮想アドレス**（`FC_VROM_*`）で構築。既存 63 マッパーのコードは無変更 |
+| `src/core/rom.c`（`rom_inspect_header`） | ヘッダ 16 バイト＋データ CRC だけで判別（DB 照合込み） |
+| `src/pico/bankout.c` | U1 コア 1: CA13/CA14//ROMSEL を監視し `PRG_A13–25` と `WRAM_nCE` を出力（テーブルは `tables_dirty` で再符号化） |
+| `src/pico/bus_revd.c` + `fc_bus_revd.pio` | U1 の M2 ごとの取り込み、$4020–$5FFF の応答（nDRIVE を PIO の side-set で駆動）、レジスタ書き込みをマッパーと U2 へ転送、$FFFC/$FFFD 読み出しでリセット検出 |
+| `src/pico/maplink.c` + `maplink.pio` | U1→U2 32 bit フレーム（25 Mbit/s、1.3 µs）、U2→U1 PIO UART 2 Mbaud |
+| `src/revd_chr/main.c` | U2: 同じマッパーコアを U1 から届く書き込みで同期、コア 1 が PA10–13 から `CHR_A10–25`/`CHR_SEL`/`CIRAM_A10`/`nFOURSCR` を出力、/RD 立ち下がりで `ppu_addr` フック（MMC2/MMC3/MMC5）→ nIRQ_B |
+| `src/pico/norflash.c` | 外部 S29GL の書き込み（ライトバッファ 512 B、DQ7 ポーリング）、F-RAM 読み書き、CHR 側は U2 とブリッジ経由 |
+| `src/revd_prg/usb_cmd_revd.c` + `src/pico/library.h` | ROM ライブラリ（U1 の QSPI に索引、最大 63 本）: `LIBADD/LIB/LIBSEL/LIBDEL/BOOTBANK/FLASHID/WRAMDUMP` |
+| `tools/bootstub.py` → `bootstub_gen.h` | 起動バンク（6502 スタブ 50 バイト） |
+| `tools/fcload.py` | ホスト側: `libadd game.nes` でフラッシュ書き込み＋登録＋起動 |
+
+ビルド: `cmake -S . -B build-revd_prg -DFC_BOARD=revd_prg && cmake --build build-revd_prg`（U2 は `revd_chr`）。ホストテスト `test/test_virtual.c` が仮想アドレス→バンク番号の変換（MMC3/UNROM/4 画面）を確認する。
+
+## 動作の仕組み（設計メモ）
 
 - **PRG バンク**: U1 のコア 1 が CA13/CA14/CnROMSEL を監視し、現在のウィンドウ（$6000/$8000/$A000/$C000/$E000）に対応するバンク番号を `PRG_A13–25` に出力する（既存の `prg_map[]` 8 KB テーブルがそのままバンク表になる）。応答はアドレス確定から約 40 ns、フラッシュ 100 ns、バッファ 10 ns → M2 の H 期間 350 ns 内。
 - **レジスタ書き込み**: 既存 PIO `fc_cpu_direct` が M2 ごとに 26 bit を取り込み、コア 0 がマッパーの `write()` を呼ぶ（rev C と同じコード）。変化した CHR バンク・ミラーリング・IRQ 設定はリンクで U2 に送る（16 bit フレーム ≒ 0.4 µs）。
