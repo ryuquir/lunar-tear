@@ -87,6 +87,11 @@ def main():
     # bridge runs behind the pad row and the other in front; exported as fixed wires for the autorouter.
     def track(x1, y1, x2, y2, net, w=0.15):
         t = pcbnew.PCB_TRACK(board); t.SetStart(mm(x1, y1)); t.SetEnd(mm(x2, y2)); t.SetWidth(FromMM(w)); t.SetLayer(pcbnew.F_Cu); t.SetNet(netmap[net]); board.Add(t)
+    for (ra, pa, rb, pb, net, layer, w) in getattr(D, 'FIXED_LINKS', []):
+        fa, fb = board.FindFootprintByReference(ra), board.FindFootprintByReference(rb)
+        pB = [p for p in fb.Pads() if p.GetNumber() == pb][0].GetPosition()
+        pA = min((p for p in fa.Pads() if p.GetNumber() == pa and p.GetDrillSize().x > 0), key=lambda p: (p.GetPosition() - pB).EuclideanNorm()).GetPosition()
+        t = pcbnew.PCB_TRACK(board); t.SetStart(pA); t.SetEnd(pB); t.SetWidth(FromMM(w)); t.SetLayer(board.GetLayerID(layer)); t.SetNet(netmap[net]); board.Add(t)
     for j in [f for f in board.GetFootprints() if 'USB_C_Receptacle' in f.GetFPIDAsString()]:
         def padpos(n): p = j.FindPadByNumber(n).GetPosition(); return (ToMM(p.x), ToMM(p.y))
         dp, dm = j.FindPadByNumber('A6').GetNetname(), j.FindPadByNumber('A7').GetNetname()

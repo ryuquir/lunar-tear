@@ -23,12 +23,12 @@ PARTS = {
  'SW1': ('Switch', 'SW_Push', 'RESET', 'Button_Switch_SMD:SW_SPST_TL3342', (76.0, 20.0, 0, 'F')),
  'SW2': ('Switch', 'SW_Push', 'BOOTSEL', 'Button_Switch_SMD:SW_SPST_TL3342', (31.0, 15.5, 0, 'F')),
  # audio (XIAO PWM -> RC -> mix)
- 'R1':  ('Device', 'R', '2.2k', 'Resistor_SMD:R_0603_1608Metric', (4.0, 24.0, 90, 'F')),
- 'R2':  ('Device', 'R', '2.2k', 'Resistor_SMD:R_0603_1608Metric', (7.0, 24.0, 90, 'F')),
- 'R3':  ('Device', 'R', '4.7k', 'Resistor_SMD:R_0603_1608Metric', (10.0, 24.0, 90, 'F')),
+ 'R1':  ('Device', 'R', '2.2k', 'Resistor_SMD:R_0603_1608Metric', (4.0, 24.0, 0, 'F')),     # PWM -> AF1  (filter laid out as a row: R1 R2 R3, caps below)
+ 'R2':  ('Device', 'R', '2.2k', 'Resistor_SMD:R_0603_1608Metric', (7.0, 24.0, 0, 'F')),     # AF1 -> AF2
+ 'R3':  ('Device', 'R', '4.7k', 'Resistor_SMD:R_0603_1608Metric', (10.0, 24.0, 0, 'F')),    # AF2 -> AUDIO_OUT
  'R4':  ('Device', 'R', '1k',   'Resistor_SMD:R_0603_1608Metric', (13.0, 24.0, 90, 'F')),
- 'C1':  ('Device', 'C', '10n',  'Capacitor_SMD:C_0603_1608Metric', (4.0, 27.0, 90, 'F')),
- 'C2':  ('Device', 'C', '10n',  'Capacitor_SMD:C_0603_1608Metric', (7.0, 27.0, 90, 'F')),
+ 'C1':  ('Device', 'C', '10n',  'Capacitor_SMD:C_0603_1608Metric', (5.5, 26.5, 270, 'F')),  # pad1 (AF1) up, pad2 (GND) down
+ 'C2':  ('Device', 'C', '10n',  'Capacitor_SMD:C_0603_1608Metric', (8.5, 26.5, 270, 'F')),
  # misc R
  'R5':  ('Device', 'R', '10k',  'Resistor_SMD:R_0603_1608Metric', (16.0, 24.0, 90, 'F')),   # /IRQ pull-up to +5V
  'R6':  ('Device', 'R', '5.1k', 'Resistor_SMD:R_0603_1608Metric', (64.0, 11.5, 0, 'F')),     # J3 CC1
@@ -157,3 +157,8 @@ if __name__ == '__main__':
         if len(nodes) < 2: print('  single-node net:', nn, nodes)
     print('parts without connections:', [r for r in PARTS if r not in NETS])
     print('GPIO used:', len(GPIO_NET))
+
+# Pre-routed (fixed) tracks the autorouter must keep: (ref_a, pad_a, ref_b, pad_b, net, layer, width_mm).
+# The RP2350B exposed pad is unreachable for Freerouting (0.4 mm pin ring), so its thermal vias are tied to the
+# GND pads of the decoupling caps above and below the chip on B.Cu.
+FIXED_LINKS = [('U1', '81', 'C12', '2', 'GND', 'B.Cu', 0.3), ('U1', '81', 'C20', '2', 'GND', 'B.Cu', 0.3)]
