@@ -8,6 +8,7 @@
 #include "hardware/dma.h"
 #include "hardware/clocks.h"
 #include <string.h>
+#if PIN_AUDIO_PWM >= 0
 
 #define AUDIO_RING 1024
 #define AUDIO_PWM_TOP 1023
@@ -16,7 +17,8 @@ static int dma_ch; static uint slice;
 static volatile unsigned write_pos;
 static int16_t tmp[256];
 
-uint32_t audio_sample_rate(void) { return clock_get_hz(clk_sys) / (AUDIO_PWM_TOP + 1); }
+#define AUDIO_HOLD 4
+uint32_t audio_sample_rate(void) { return clock_get_hz(clk_sys) / (AUDIO_PWM_TOP + 1) / AUDIO_HOLD; }
 
 void audio_out_init(void) {
     gpio_set_function(PIN_AUDIO_PWM, GPIO_FUNC_PWM);
@@ -44,8 +46,14 @@ void audio_out_pump(void) {
     while (free >= 64) {
         unsigned n = free > 256 ? 256 : free;
         unsigned to_end = AUDIO_RING - write_pos; if (n > to_end) n = to_end;
-        expaudio_render(tmp, n);
-        for (unsigned i = 0; i < n; i++) ring[write_pos + i] = (uint16_t)(((int32_t)tmp[i] + 32768) >> 6);
+        n &= ~(AUDIO_HOLD - 1); if (!n) break;
+        expaudio_render(tmp, n / AUDIO_HOLD);
+        for (unsigned i = 0; i < n; i++) ring[write_pos + i] = (uint16_t)(((int32_t)tmp[i / AUDIO_HOLD] + 32768) >> 6);
         write_pos = (write_pos + n) % AUDIO_RING; free -= n;
     }
 }
+#else
+uint32_t audio_sample_rate(void) { return 0; }
+void audio_out_init(void) {}
+void audio_out_pump(void) {}
+#endif

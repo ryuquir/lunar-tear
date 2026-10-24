@@ -10,7 +10,7 @@ famicart/
 │   ├── romdb_gen.h      生成物: CRC32 → マッパー等（2,840 件、約 45KB）
 │   ├── cartload.[ch]    ROM 画像 → SRAM プール配置 → マッパー接続 → 音源構成
 │   ├── profile.[ch]     カートリッジ・プロファイル（上書き設定、音源の組み合わせ）
-│   └── audio/expaudio.* 拡張音源レジスタ・ルーター（合成コアはフェーズ 2）
+│   └── audio/expaudio.* 拡張音源レジスタ・ルーター / audio/synth.c 6 音源の合成コアとミキサー
 ├── src/pico/            RP2040/RP2350 依存部
 │   ├── fc_bus.pio       CPU/PPU バス取り込み・応答の PIO プログラム
 │   ├── bus.c            コア 0 割り込み（CPU バス）、コア 1 ループ（PPU バス）
@@ -49,7 +49,8 @@ PPU read  A ($2000-$2FFF): nt_map[(A>>10)&3] ? それ : 本体 CIRAM（CIRAM A10
 - マッパー = バンク切替・IRQ・ミラーリング。音源チップ = レジスタ窓 + 合成。
 - すべての CPU 書き込みはまず `expaudio_cpu_write()` を通る。プロファイルで有効化された音源チップが自分のレジスタ範囲（VRC7 なら $9010/$9030）を捕捉する。`exclusive` 指定ならマッパーには渡さない。
 - 衝突する場合（例: MMC3 + VRC6、MMC3 の $8000–$9FFF と VRC6 の $9000–$9003）は `base` でレジスタ窓を移動できる（`--audio vrc6@0xC000`）。MMC5 + VRC7 は MMC5 側で $9010/$9030 が ROM 領域なので無衝突。
-- フェーズ 2 で各チップの合成（VRC6 矩形×2+鋸、VRC7 OPLL 2-op FM 6ch、MMC5 矩形×2+PCM、N163 波形メモリ 8ch、5B PSG 3ch、FDS 波形）を `expaudio_render()` に接続する。ミキサー出力は PWM → RC フィルタ → カートリッジ端子 46 へ本体音声（45）と抵抗加算。
+- 各チップの合成（VRC6 矩形×2+鋸、VRC7 OPLL 2-op FM 6ch（パッチ ROM 15 音色＋リズム無し、エンベロープ・AM/VIB・KSL を近似）、MMC5 矩形×2+PCM、N163 波形メモリ 8ch、5B PSG 3ch（トーン＋ノイズ＋エンベロープ）、FDS 波形＋変調）は `synth.c` の `expaudio_render()` が 1 サンプルずつミックスし、`expaudio_chip_volume()` でチップごとの音量を掛けてクリップする。出力は PWM（4× ホールド・アップサンプリング）→ 2 段 RC フィルタ → カートリッジ端子 46 へ本体音声（45）と抵抗加算。
+- rev C 基板では主 MCU（RP2350B）はレジスタ書き込みを UART フレーム（`audio_link.c`）で XIAO RP2040 に転送するだけで、合成は XIAO 側 `src/xiao_audio/main.c` が同じ `expaudio_apply()` → `expaudio_render()` で行う。
 
 ## バス・フロントエンド（`src/pico`）
 

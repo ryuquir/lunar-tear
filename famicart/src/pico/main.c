@@ -9,6 +9,7 @@
 #include "../core/cartload.h"
 #include "../core/mapper.h"
 #include "usb_cmd.h"
+#include "audio_link.h"
 #include <stdio.h>
 
 void audio_out_init(void); void audio_out_pump(void); uint32_t audio_sample_rate(void);
@@ -29,8 +30,11 @@ int main(void) {
     const uint8_t *img = romslot_image(&g_len, &g_prof);
     g_r = cart_load(&cart, img, g_len, g_prof, &info);
 
+    audio_link_init();
     if (g_r == LOAD_OK) {
+#if PIN_AUDIO_PWM >= 0
         audio_out_init();
+#endif
 #if FC_BUS_CAPABLE
         bus_init(&cart);
         g_running = true;
@@ -40,7 +44,9 @@ int main(void) {
 
     absolute_time_t next_report = make_timeout_time_ms(1000);
     for (;;) {
+#if PIN_AUDIO_PWM >= 0
         if (g_r == LOAD_OK) audio_out_pump();
+#endif
         usb_cmd_poll();
         if (time_reached(next_report)) { next_report = make_timeout_time_ms(10000); usb_cmd_print_info(); }
     }

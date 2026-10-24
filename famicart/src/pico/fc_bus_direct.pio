@@ -1,0 +1,57 @@
+; famicart rev C bus front-end (RP2350B, direct wiring).
+; Response word (TX FIFO): bit0 = drive data (bits 1..8), else bit1 = capture write data.
+
+; ---------- CPU bus: GPIO0..25 (A0-14, D0-7, R/W, M2, /ROMSEL) ----------
+.program fc_cpu_direct
+.wrap_target
+cpu_start:
+    wait 0 gpio 24            ; M2 low
+    wait 1 gpio 24            ; M2 high: address valid
+    nop             [7]       ; ~27 ns @300 MHz for /ROMSEL to settle
+    in pins, 26               ; A0-14 | D0-7 | R/W | M2 | /ROMSEL
+    push
+    pull block
+    out x, 1
+    jmp !x, cpu_nodrive
+    out pins, 8               ; D0-7
+    mov osr, ~null
+    out pindirs, 8
+    wait 0 gpio 24            ; hold until the end of phi2
+    mov osr, null
+    out pindirs, 8
+    jmp cpu_start
+cpu_nodrive:
+    out y, 1
+    jmp !y, cpu_start
+    wait 0 gpio 24            ; write: data valid at the falling edge of M2
+    in pins, 26
+    push
+.wrap
+
+; ---------- PPU bus: GPIO30..45 captured in one 16-bit read; side-set = PPU_SEL (GPIO46) ----------
+.program fc_ppu_direct
+.side_set 1
+.wrap_target
+ppu_start:
+    wait 1 pin 14    side 0   ; /PPUACC high (pin index relative to IN base GPIO30 -> GPIO44)
+    wait 0 pin 14    side 0   ; /RD or /WR fell. A0-7 already on the port (541 enabled while SEL=0)
+    nop             [2] side 0
+    in pins, 16      side 0   ; port(A0-7) | A8-13 | /PPUACC | /RD
+    push             side 0
+    pull block       side 0
+    out x, 1         side 0
+    jmp !x, ppu_nodrive side 0
+    out pins, 8      side 1   ; SEL=1: 541 off, 245 on (DIR=/RD=0 -> toward console)
+    mov osr, ~null   side 1
+    out pindirs, 8   side 1
+    wait 1 pin 14    side 1
+    mov osr, null    side 0
+    out pindirs, 8   side 0
+    jmp ppu_start    side 0
+ppu_nodrive:
+    out y, 1         side 0
+    jmp !y, ppu_start side 0
+    nop             [2] side 1   ; write: 245 toward us (DIR=/RD=1)
+    in pins, 8       side 0   ; D0-7 on the port
+    push             side 0
+.wrap

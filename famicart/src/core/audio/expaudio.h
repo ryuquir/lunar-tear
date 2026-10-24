@@ -21,5 +21,10 @@ void expaudio_reset(struct cart *c);
 void expaudio_configure(struct cart *c, const expaudio_slot_t *slots, unsigned n);
 bool expaudio_cpu_write(struct cart *c, uint16_t addr, uint8_t v);
 bool expaudio_cpu_read(struct cart *c, uint16_t addr, uint8_t *out);   /* MMC5 $5015, N163 $4800 data, S5B none */
+/* Apply one register write of `chip` at its *native* address (used by the coprocessor and by tests). */
+void expaudio_apply(uint8_t chip, uint16_t native_addr, uint8_t v);
+void expaudio_regs_n163_set(uint8_t addr, uint8_t v);   /* direct RAM poke (tests, mapper 19 $4800 writes) */
+/* Set the output sample rate before rendering. */
+void expaudio_set_rate(uint32_t hz);
 /* Render n mono samples (signed 16-bit) into buf at the configured rate. */
 void expaudio_render(int16_t *buf, unsigned n);

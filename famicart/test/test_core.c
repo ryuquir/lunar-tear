@@ -129,8 +129,31 @@ static void test_all_mappers_init(void) {
         free(img);
     }
 }
+#include "../src/core/audio/expaudio.h"
+static void test_synth(void) {
+    static int16_t buf[4800]; expaudio_set_rate(48000);
+    uint8_t chips[] = { AUDIO_VRC6, AUDIO_VRC7, AUDIO_MMC5, AUDIO_N163, AUDIO_S5B, AUDIO_FDS };
+    for (unsigned k = 0; k < sizeof chips; k++) {
+        expaudio_slot_t sl = { chips[k], 0, 0, 128 }; expaudio_reset(NULL); expaudio_configure(&C, &sl, 1);
+        switch (chips[k]) {
+        case AUDIO_VRC6: expaudio_apply(AUDIO_VRC6, 0x9000, 0x7F); expaudio_apply(AUDIO_VRC6, 0x9001, 0x80); expaudio_apply(AUDIO_VRC6, 0x9002, 0x81); break;
+        case AUDIO_VRC7: expaudio_apply(AUDIO_VRC7, 0x9010, 0x30); expaudio_apply(AUDIO_VRC7, 0x9030, 0x10); expaudio_apply(AUDIO_VRC7, 0x9010, 0x10); expaudio_apply(AUDIO_VRC7, 0x9030, 0xAC); expaudio_apply(AUDIO_VRC7, 0x9010, 0x20); expaudio_apply(AUDIO_VRC7, 0x9030, 0x18); break;
+        case AUDIO_MMC5: expaudio_apply(AUDIO_MMC5, 0x5015, 3); expaudio_apply(AUDIO_MMC5, 0x5000, 0xBF); expaudio_apply(AUDIO_MMC5, 0x5002, 0xFD); expaudio_apply(AUDIO_MMC5, 0x5003, 0x00); break;
+        case AUDIO_N163:
+                         for (int i = 0; i < 32; i++) expaudio_regs_n163_set(i, (uint8_t)((i & 1) ? 0xFF : 0x00));
+                         expaudio_regs_n163_set(0x7F, 0x0F); expaudio_regs_n163_set(0x78, 0x00); expaudio_regs_n163_set(0x7A, 0x40); expaudio_regs_n163_set(0x7C, 0xE0); expaudio_regs_n163_set(0x7E, 0x00); break;
+        case AUDIO_S5B: expaudio_apply(AUDIO_S5B, 0xC000, 0); expaudio_apply(AUDIO_S5B, 0xE000, 0xFE); expaudio_apply(AUDIO_S5B, 0xC000, 7); expaudio_apply(AUDIO_S5B, 0xE000, 0x3E); expaudio_apply(AUDIO_S5B, 0xC000, 8); expaudio_apply(AUDIO_S5B, 0xE000, 0x0F); break;
+        case AUDIO_FDS: expaudio_apply(AUDIO_FDS, 0x4089, 0x80); for (int i = 0; i < 64; i++) expaudio_apply(AUDIO_FDS, 0x4040 + i, (uint8_t)(i < 32 ? 63 : 0)); expaudio_apply(AUDIO_FDS, 0x4089, 0x00);
+                        expaudio_apply(AUDIO_FDS, 0x4080, 0xA0); expaudio_apply(AUDIO_FDS, 0x4082, 0x00); expaudio_apply(AUDIO_FDS, 0x4083, 0x02); break;
+        }
+        expaudio_render(buf, 4800);
+        int32_t peak = 0; for (int i = 0; i < 4800; i++) { int v = buf[i] < 0 ? -buf[i] : buf[i]; if (v > peak) peak = v; }
+        CHECK(peak > 200 && peak < 32767, "chip %u produces audio (peak %ld)", chips[k], (long)peak);
+    }
+}
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
+    test_synth();
     test_crc(); test_header(); test_db(); test_mmc1(); test_mmc3(); test_mmc5_profile_vrc7(); test_vrc4_irq(); test_all_mappers_init();
     printf("%d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;

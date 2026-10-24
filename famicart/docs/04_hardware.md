@@ -120,3 +120,102 @@ GP26 (PWM ~246 kHz) ─ R1 2.2k ─┬─ R2 2.2k ─┬─ R3 4.7k ─┬──
 - **CPU 読み出し余裕**: 約 ±50 ns。252 MHz 動作、または RP2350（Pico 2）推奨。
 - **自動配線**: Freerouting 1.9.0 の結果をそのまま収録（未接続 0 / DRC 0）。表面 GND ベタは配線で分断されるため、裏面ベタが主 GND。見た目の整理や GND スティッチングビア追加はフェーズ 3 の実機検証と合わせて行う。
 - **シェル適合**: 外形は nesdev の HVC-TGROM-01 実測値に基づくが、シェル内側の切り欠きは未反映。初回試作で現物合わせを推奨。
+
+---
+
+# rev C: RP2350B（ベアチップ）+ Seeed XIAO RP2040 の 2 MCU 構成
+
+rev B の「Pico 2 モジュール 1 個」を、**基板直付けの RP2350B（QFN-80、GPIO 48 本）** と **音源コプロセッサとしての XIAO RP2040** に分けた版。ユーザー要望（XIAO を使う／全マッパー／全拡張音源の横断利用／USB 3 口／リセット端子）を満たすための設計。
+生成物は `hardware/revc/`（回路図・基板・fab・jlcpcb）。ジェネレータは `tools/pcb/design_revc.py`（`FC_DESIGN=design_revc FC_HW_DIR=hardware/revc` で各スクリプトを実行）。
+
+## 役割分担
+
+| MCU | 役割 | 理由 |
+|---|---|---|
+| **U1 RP2350B** @300 MHz | カートリッジバス全体（CPU 26 本・PPU 16 本）、マッパーエンジン、ROM 保持（SRAM 440 KB + QSPI フラッシュ 16 MB）、USB データ転送（J3）、拡張音源レジスタの受付と転送 | GPIO 48 本・5 V トレラント入力・520 KB SRAM。バスは **バッファ無しで直結**（rev B の 541/245/139 による多重化が不要になり、M2 1 サイクルあたりの PIO 取り込みが 1 回で済む） |
+| **U8 XIAO RP2040** @200 MHz | 拡張音源 6 種（VRC6/VRC7/MMC5/N163/5B/FDS）のソフトシンセと PWM 出力、ステータス LED | 音源合成を主 MCU から追い出し、バス応答のタイミング余裕を確保。XIAO の USB は専用ポートとして露出（ファーム更新・音源デバッグ）。 |
+
+PPU 側だけは GPIO 節約のため rev B 同様に **PPU A0–7 / D0–7 を 1 ポート共有**（U4 74LVC541 ＋ U5 74LVC245、PPU_SEL で切替、U6 1G08 で /PPUACC = /RD AND /WR、U7 1G04 で 245 の OE 反転）。CPU 側は直結。
+
+## RP2350B GPIO 割当（48 本全使用）
+
+| GPIO | 信号 | GPIO | 信号 |
+|---|---|---|---|
+| 0–14 | CPU A0–A14 | 30–37 | PPU 共有ポート（A0–7 / D0–7） |
+| 15–22 | CPU D0–D7 | 38–43 | PPU A8–A13 |
+| 23 | CPU R/W | 44 | /PPUACC（= /RD & /WR） |
+| 24 | M2 | 45 | PPU /RD |
+| 25 | /ROMSEL | 46 | PPU_SEL（541/245 切替） |
+| 26 | /IRQ（オープンドレイン模擬、R5 10k で +5V プルアップ） | 47 | CIRAM A10 |
+| 27 | CIRAM /CE | 28 / 29 | UART0 TX / RX → XIAO |
+
+PIO: `src/pico/fc_bus_direct.pio`。`fc_cpu_direct` が M2 立ち上がりで GPIO0–25 を 26 bit 一括取り込み、`fc_ppu_direct` が GPIO30–45 を 16 bit 取り込み（side-set で PPU_SEL）。
+
+## XIAO RP2040 ピン割当
+
+| XIAO | 信号 | 備考 |
+|---|---|---|
+| D6 (GPIO0) TX | UART_RX → RP2350B GPIO29 | 3 Mbaud |
+| D7 (GPIO1) RX | UART_TX ← RP2350B GPIO28 | 3 Mbaud、音源レジスタ・制御フレーム |
+| D0 (GPIO26) | PWM 音声 → R1 2.2k / C1 10n / R2 2.2k / C2 10n（2 段 LPF）→ R3 4.7k → AUDIO_OUT（pin 46） | rev B と同じフィルタ定数 |
+| 5V | XIAO_5V ← D2 ← +5V | 本体 5 V から給電。XIAO 側 USB からの逆流は D2 で遮断 |
+| RST | RUN | SW1 / J2 で RP2350B と同時にリセット |
+| GND ×3 | GND | |
+| 残り 12 ピン | 未接続（NC） | 将来の拡張用 |
+
+XIAO は JLCPCB の在庫に無いため **DNP（手実装）**。基板には XIAO 用 14 パッドのフットプリント（`famicart:XIAO-RP2040-SMD`）があり、裏返して載せて側面キャステレーションをハンダ付けする。
+
+## USB 3 口の構成
+
+| コネクタ | 接続先 | 用途 |
+|---|---|---|
+| **J3 USB-C（DATA）** | RP2350B USB（R10/R11 27 Ω 直列、CC1/CC2 5.1k） | ROM のリアルタイム転送（`tools/fcload.py`：INFO / LOAD / PROFILE / RESET / BOOTSEL）。**本体に挿したままでも使用可**。VBUS → D1 → +5V で本体電源と OR 結合（本体 OFF でも USB だけで動く） |
+| **J4 USB-C（RP2350 予備）** | J3 と D+/D− が並列（CC3/CC4 5.1k） | 標準 **DNP**。ケース開口の都合で J3 と別位置に出したい時用。J3 と J4 を同時に PC に挿さないこと |
+| **XIAO の USB-C** | XIAO RP2040 固有 | コプロセッサのファーム書き込み（BOOTSEL は XIAO 本体のボタン）、音源デバッグログ |
+
+RP2350B の BOOTSEL は SW2（QSPI_SS を R13 1k 経由で GND）。J3 を挿して SW2 を押しながら SW1 を離すと UF2 ドライブとして現れる。ソフトからは `BOOTSEL` コマンドで同じ状態に入る。
+
+## リセット端子
+
+- **SW1**（タクトスイッチ）と **J2 1×2 ピンヘッダ（RUN / GND）** を RUN ネットに並列接続。J2 にケース外へ出すスイッチや本体リセット線を付けられる。
+- RUN は RP2350B の RUN ピンと XIAO の RST を兼ねるので、両 MCU が同時にリセットされる。
+- ソフトからのリセットは USB `RESET` コマンド（ウォッチドッグ再起動）。本体側の CPU リセットはカートリッジ端子に出ていない（ファミコンの仕様）ため、**ゲーム側の再起動は電源 OFF/ON か本体リセットボタン**になる。カートリッジのリセット（ROM 差し替え後の再起動）はこれで完結する。
+- J5 1×3（SWCLK / GND / SWDIO）: RP2350B の SWD デバッグ用。DNP。
+
+## 電源
+
+本体 +5V（pin 1/60 相当）→ U3 AP2112K-3.3（600 mA）→ +3V3（RP2350B IOVDD/QSPI/ロジック）。RP2350B 内蔵スイッチングレギュレータ（L1 3.3 µH, C3/C4/C5 4.7 µF, R12 33 Ω）が +1V1 コアを生成。XIAO は +5V から D2 経由。消費電流の見積: RP2350B@300 MHz 約 80 mA、XIAO 約 40 mA、ロジック約 10 mA → 本体 5 V から約 130 mA（ファミコンのカートリッジ供給能力内）。
+
+## MCU 間リンク（UART0, 3 Mbaud, 4 バイト固定長フレーム）
+
+```
+byte0 = 0xF0 | chip   (chip: 0 = 制御, 1 VRC6, 2 VRC7, 3 MMC5, 4 N163, 5 S5B, 6 FDS)
+byte1 = addr_hi, byte2 = addr_lo  (チップ固有のネイティブレジスタアドレス、例 VRC7 $9010/$9030、MMC5 $5000-$5015、FDS $4040-$408A)
+byte3 = value
+制御: addr 0 = 全音源リセット / 1 = マスター音量 / 2 = LED 色（RGB565 上位・下位）
+```
+主 MCU 側 `expaudio.c` は、ゲームがどのチップのどの窓に書いたかを **プロファイルで自由に再配置**した上で（例: VRC7 の $9010/$9030 を MMC5 ゲームの空き領域 $5800/$5810 に移す）、ネイティブアドレスへ正規化してフレーム化する。XIAO 側 `src/xiao_audio/main.c` は `expaudio_apply()` で同じレジスタモデルに流し込み、`synth.c` が 6 音源を同時にミックスする。これにより **MMC5 のマッパー機能（ExRAM・拡張属性・スキャンライン IRQ）と VRC7 の FM 音源を同時に使う**といった横断構成が、ハード変更無しでプロファイル 1 つで成立する。
+
+## 部品表（rev C、`hardware/revc/jlcpcb/bom_jlc.csv`）
+
+| Ref | 部品 | LCSC |
+|---|---|---|
+| U1 | RP2350B QFN-80 | C42415655 |
+| U2 | W25Q128JVSIQ 16 MB QSPI | C97521 |
+| U3 | AP2112K-3.3 | C51118 |
+| U4 / U5 | SN74LVC541APWR / 74LVC245APW | C113281 / C6082 |
+| U6 / U7 | SN74LVC1G08DBVR / SN74LVC1G04DBVR | C7666 / C7827 |
+| U8 | Seeed XIAO RP2040 | DNP（手実装） |
+| Y1 | ABM8-272-T3 12 MHz（Pico 2 と同一品） | C20625731 |
+| L1 | AOTA-B201610S3R3 3.3 µH | C42411119 |
+| J3 / J4 | HRO TYPE-C-31-M-12 | C165948（J4 は DNP） |
+| SW1 / SW2 | TL3342F160QG | C2886898 |
+| D1 / D2 | B5819W ショットキー | C64885 |
+| R/C | 0603/0402 ベーシック部品 | bom_jlc.csv 参照 |
+
+## 既知のリスク（rev C 固有）
+
+- **5 V トレラント GPIO の条件**: RP2350 は IOVDD=3.3 V のとき入力が 5 V トレラント（データシート §14.8.2.1）。ただし出力は 3.3 V なので、CPU D0–7 を駆動する時のハイレベルは 3.3 V。本体 CPU（RP2A03）は 2.0 V 以上を H と見るため動作上は問題無い（rev B の 245 経由と同じ条件）。
+- **QFN-80 0.4 mm ピッチ**: 手ハンダは難しいため JLCPCB SMT 実装前提。
+- **バスタイミング**: 300 MHz でも M2 の H 期間 350 ns 中にアドレス取り込み → テーブル参照 → データ駆動を 1 サイクルで終える必要がある。rev B と同じソフト構造だが、`fc_cpu_direct` は取り込みが 1 回なので約 60 ns 余裕が増える。実機測定まではオーバークロック無しの 150 MHz でも動くかは未確認。
+- **XIAO の手実装**: キャステレーションのピッチは 2.54 mm で手付け可だが、裏面の中央パッド群（NC）はハンダ不要。
