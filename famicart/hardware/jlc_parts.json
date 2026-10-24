@@ -1,0 +1,122 @@
+{
+ "Raspberry Pi Pico 2": [
+  "C41407547",
+  "Raspberry Pi Pico 2",
+  "extended part, stock ~450; JLCPCB can place the module on the castellated pads"
+ ],
+ "74LVC541": [
+  "C113281",
+  "SN74LVC541APWR",
+  "TI; alt Nexperia 74LVC541APW,118 = C6093"
+ ],
+ "74LVC245": [
+  "C6082",
+  "74LVC245APW,118",
+  "Nexperia; alt TI SN74LVC245APWR = C7848"
+ ],
+ "74LVC139": [
+  "C7662",
+  "SN74LVC139APWR",
+  "TI; alt Nexperia 74LVC139PW,118 = C672267"
+ ],
+ "74LVC1G17": [
+  "C7836",
+  "SN74LVC1G17DBVR",
+  "TI"
+ ],
+ "74LVC1G08": [
+  "C7666",
+  "SN74LVC1G08DBVR",
+  "TI"
+ ],
+ "74LVC1G07": [
+  "C7829",
+  "SN74LVC1G07DBVR",
+  "TI"
+ ],
+ "2.2k": [
+  "C4190",
+  "2.2kΩ 0603 1%",
+  "basic"
+ ],
+ "4.7k": [
+  "C23162",
+  "4.7kΩ 0603 1%",
+  "basic"
+ ],
+ "1k": [
+  "C21190",
+  "1kΩ 0603 1%",
+  "basic"
+ ],
+ "10k": [
+  "C25804",
+  "10kΩ 0603 1%",
+  "basic"
+ ],
+ "5.1k": [
+  "C23186",
+  "5.1kΩ 0603 1%",
+  "basic"
+ ],
+ "100n": [
+  "C14663",
+  "100nF 50V X7R 0603",
+  "basic"
+ ],
+ "10n": [
+  "C100042",
+  "10nF 50V X7R 0603",
+  "extended"
+ ],
+ "10u": [
+  "C380332",
+  "10uF 16V X5R 0805",
+  "extended"
+ ],
+ "USB-C": [
+  "C165948",
+  "TYPE-C-31-M-12",
+  "Korean Hroparts, matches the KiCad footprint"
+ ],
+ "RESET": [
+  "C2886898",
+  "TL3342F160QG",
+  "E-Switch; alt basic part TS-1187A-B-A-B = C318884 (different footprint)"
+ ],
+ "RUN/GND": [
+  "",
+  "2.54 mm 1x2 header",
+  "DNP: through-hole, solder by hand if you want the console-reset wire"
+ ],
+ "Famicom 60-pin edge": [
+  "",
+  "",
+  "PCB feature"
+ ],
+ "AUDIO bypass": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "CART_PRESENT": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "USB D+ -> TP_A | TP_B": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "USB D- -> TP_B | TP_A": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "TP wire pads": [
+  "",
+  "",
+  "pads only"
+ ]
+}
