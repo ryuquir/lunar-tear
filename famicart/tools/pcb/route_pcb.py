@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Autoroute hardware/famicart.kicad_pcb with Freerouting, import the result, fill zones, run DRC, export fab files."""
-import os, sys, subprocess, shutil, re
+import os, re, sys, subprocess, shutil, re
 sys.path.insert(0, os.path.dirname(__file__))
 import pcbnew
 import dsn_export, ses_import, gen_pcb
@@ -47,6 +47,22 @@ def main():
         # stage 2: everything routed so far becomes fixed wiring; the router only works on what is still open
         dsn2 = os.path.join(WORK, 'famicart_stage2.dsn'); ses2 = os.path.join(WORK, 'famicart_stage2.ses')
         if os.path.exists(ses2): os.remove(ses2)
+        # rip up the imported routing around the still-open connections (from the previous DRC report) so the router has room
+        rip = float(os.environ.get('FC_RIP_RADIUS', '0'))
+        drc_prev = os.path.join(HW, 'drc_report.txt')
+        if rip > 0 and os.path.exists(drc_prev):
+            pts = []
+            for blk in open(drc_prev).read().split('\n['):
+                if blk.startswith('unconnected_items]'):
+                    pts += [(float(a), float(b)) for a, b in re.findall(r'@\(([0-9.]+) mm, ([0-9.]+) mm\)', blk)]
+            doomed = []
+            for t in board.GetTracks():
+                if t.GetNetname() in ('GND', '+3V3'): continue                  # keep the power stubs
+                pos = [t.GetPosition()] if t.GetClass() == 'PCB_VIA' else [t.GetStart(), t.GetEnd()]
+                if any(((ToMM(p.x) - x) ** 2 + (ToMM(p.y) - y) ** 2) ** 0.5 < rip for p in pos for (x, y) in pts): doomed.append(t)
+            for t in doomed: board.Remove(t)
+            print('stage 2: ripped up', len(doomed), 'items around', len(pts), 'open points (radius', rip, 'mm)')
+            pcbnew.SaveBoard(PCB, board); board = pcbnew.LoadBoard(PCB)
         dsn_export.export(board, dsn2, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR)
         cmd = ['xvfb-run', '-a', 'java', '-jar', JAR, '-de', dsn2, '-do', ses2, '-mp', str(PASSES), '-mt', '1', '-oit', os.environ.get('FC_OIT', '8'), '-da']
         print('stage 2:', ' '.join(cmd))
