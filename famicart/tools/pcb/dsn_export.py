@@ -124,6 +124,10 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
             if k: pid = f'{pid}@{k}'
             n = pad.GetNetname()
             if n in PLANE_NETS and (fp.GetReference(), pad.GetPosition().x, pad.GetPosition().y) in stubbed: continue
+            # through-hole pads of the plane nets (QFN exposed-pad thermal vias, connector shells, headers) reach the
+            # inner planes by themselves; handing them to the router only creates unroutable targets inside pin rings
+            if n in PLANE_NETS and pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD: continue
+            if n in PLANE_NETS and pad.GetShape() == pcbnew.PAD_SHAPE_RECT and ToMM(pad.GetSize().x) > 2.5 and ToMM(pad.GetSize().y) > 2.5: continue   # QFN exposed pad itself
             if n: nets.setdefault(n, []).append(f'{fp.GetReference()}-{pid}')
     boundary = ' '.join(f'{U(x)} {-U(y)}' for x, y in outline_mm)
     out = []
