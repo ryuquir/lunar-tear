@@ -27,8 +27,10 @@ def import_ses(board, path, res=10, via_dia_mm=0.6, via_drill_mm=0.3):
     netmap = {board.GetNetInfo().GetNetItem(i).GetNetname(): board.GetNetInfo().GetNetItem(i) for i in range(board.GetNetCount())}
     ntracks = nvias = 0
     # pre-routed (fixed) items come back in the session as well: do not add them twice
-    have_vias = {(t.GetPosition().x // 1000, t.GetPosition().y // 1000) for t in board.GetTracks() if t.GetClass() == 'PCB_VIA'}
-    have_trk = {(t.GetStart().x // 1000, t.GetStart().y // 1000, t.GetEnd().x // 1000, t.GetEnd().y // 1000, t.GetLayer()) for t in board.GetTracks() if t.GetClass() == 'PCB_TRACK'}
+    Q = 20000   # 20 um grid for duplicate detection
+    def qk(v): return int(round(v / Q))
+    have_vias = {(qk(t.GetPosition().x), qk(t.GetPosition().y)) for t in board.GetTracks() if t.GetClass() == 'PCB_VIA'}
+    have_trk = {(qk(t.GetStart().x), qk(t.GetStart().y), qk(t.GetEnd().x), qk(t.GetEnd().y), t.GetLayer()) for t in board.GetTracks() if t.GetClass() == 'PCB_TRACK'}
     have_trk |= {(e, f, a, b, l) for (a, b, e, f, l) in have_trk}
     for net in find_all(find(routes, 'network_out'), 'net'):
         name = str(net[1]); ni = netmap.get(name)
@@ -37,12 +39,13 @@ def import_ses(board, path, res=10, via_dia_mm=0.6, via_drill_mm=0.3):
             p = find(w, 'path'); layer = layer_id[str(p[1])]; width = P(p[2])
             pts = [(P(p[i]), P(p[i + 1])) for i in range(3, len(p) - 1, 2)]
             for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
-                if (int(x1) // 1000, int(-y1) // 1000, int(x2) // 1000, int(-y2) // 1000, layer) in have_trk: continue
+                if (qk(int(x1)), qk(int(-y1)), qk(int(x2)), qk(int(-y2)), layer) in have_trk: continue
                 t = pcbnew.PCB_TRACK(board); t.SetStart(VECTOR2I(int(x1), int(-y1))); t.SetEnd(VECTOR2I(int(x2), int(-y2)))
                 t.SetWidth(int(width)); t.SetLayer(layer); t.SetNet(ni); board.Add(t); ntracks += 1
         for v in find_all(net, 'via'):
             name_ps = str(v[1]); x, y = P(v[2]), P(v[3])
-            if (int(x) // 1000, int(-y) // 1000) in have_vias: continue
+            if (qk(int(x)), qk(int(-y))) in have_vias: continue
+            have_vias.add((qk(int(x)), qk(int(-y))))
             dia, drill = FromMM(via_dia_mm), FromMM(via_drill_mm)   # single via class, sizes known from the DSN export
             via = pcbnew.PCB_VIA(board); via.SetPosition(VECTOR2I(int(x), int(-y))); via.SetViaType(pcbnew.VIATYPE_THROUGH)
             via.SetWidth(int(dia)); via.SetDrill(int(drill)); via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); via.SetNet(ni); board.Add(via); nvias += 1

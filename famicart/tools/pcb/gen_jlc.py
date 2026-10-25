@@ -108,9 +108,9 @@ README_C = '''# JLCPCB 注文パッケージ（famicart rev C: RP2350B + XIAO RP
 README_D = '''# JLCPCB 注文パッケージ（famicart rev D: PRG ROM / CHR ROM / マッパーチップ分離構成）
 
 ## PCB（Instant Quote → Add gerber file → gerbers.zip）
-- **Layers 4**（F.Cu 信号 / In1 GND プレーン / In2 +3V3 プレーン / B.Cu 信号）/ Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm**
-- Surface Finish **ENIG** / **Gold Fingers: Yes** → **Bevelling: 30°** / Copper 1 oz / Via Covering: Tented / Impedance Control: No
-- 層構成は JLC の標準 4 層スタック（JLC04161H-1080 等、1.2 mm 指定可）で可。Min Track/Spacing 0.15/0.15 mm、Via 0.5/0.25 mm（標準仕様内）。
+- **Layers 6**（F.Cu 信号 / In1 GND プレーン / In2・In3 信号 / In4 +3V3 プレーン / B.Cu 信号）/ Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm**（6 層で 1.2 mm を選択。無い場合は 1.6 mm でもシェルには入るが端子の嵌合がきつくなる）
+- Surface Finish **ENIG** / **Gold Fingers: Yes** → **Bevelling: 30°** / Copper 1 oz（外層・内層とも）/ Via Covering: Tented / Impedance Control: No
+- 層構成は JLC の標準 6 層スタックで可。**Min Track/Spacing 0.1/0.1 mm（4 mil）、Via 0.5/0.2 mm** — JLC の 6 層仕様（3.5 mil / 0.2 mm 穴）内。
 
 ## SMT Assembly（PCB Assembly → Assembly Side: Top + Bottom）
 - BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`（両面実装。表: RP2350B x2・水晶・USB-C x2・スイッチ・LDO・単ゲート、裏: NOR フラッシュ x2・SRAM x2・74LVC541/245/139/00・パスコン）
@@ -120,7 +120,7 @@ README_D = '''# JLCPCB 注文パッケージ（famicart rev D: PRG ROM / CHR ROM
 - 両面実装のため、裏面に TSOP-56 x2 と TSOP-32 x2 が載る。JLC の「Bottom side」実装費が追加になる。
 
 ## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
-- PCB 5 枚（4 層・金フィンガー・ENIG・1.2 mm）: 約 US$ 60–90
+- PCB 5 枚（6 層・金フィンガー・ENIG・1.2 mm）: 約 US$ 110–160
 - 実装（両面、約 135 点/枚）: セットアップ約 US$ 25（両面）+ 部品代（S29GL01GS 約 US$ 9 x2、IS62WV5128 約 US$ 8 x2、RP2350B 約 US$ 1.5 x2、他 US$ 6–8/枚 → 約 US$ 43/枚）＋実装費 → 5 枚で約 US$ 260–320
 '''
 

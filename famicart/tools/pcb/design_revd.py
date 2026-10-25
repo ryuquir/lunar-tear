@@ -12,11 +12,11 @@
   U8  IS62WV5128 CHR RAM 512 KB (banked 1 KB through the CHR bank lines A10-A18; also holds 4-screen / ExRAM
                  nametables).
   The console bus (5 V) is level-shifted by 74LVC541/245 to a local 3.3 V bus shared by MCUs, flash and SRAM.
-  4-layer board (F.Cu signal, In1 GND plane, In2 +3V3 plane, B.Cu signal), same 90 x 46.1 mm Famicom outline.
+  6-layer board (F/In2/In3/B signal, In1 GND plane, In4 +3V3 plane), same 90 x 46.1 mm Famicom outline.
 See docs/04_hardware.md (rev D section)."""
 
 REV = 'rev D'
-LAYERS = 4
+LAYERS = 6          # F sig | In1 GND | In2 sig | In3 sig | In4 +3V3 | B sig  (4 layers did not converge in the autorouter)
 
 PARTS = {}
 def P(ref, lib, sym, val, fp, x, y, rot=0, side='F'): PARTS[ref] = (lib, sym, val, fp, (x, y, rot, side))

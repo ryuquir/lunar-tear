@@ -43,6 +43,20 @@ def main():
     nt, nv = ses_import.import_ses(board, ses, via_dia_mm=VIA, via_drill_mm=VDR)
     pcbnew.SaveBoard(PCB, board); board = pcbnew.LoadBoard(PCB)   # reload: avoids SWIG ownership issues before zone filling
     print('imported tracks', nt, 'vias', nv)
+    if pre and os.environ.get('FC_REROUTE', '0') == '1':
+        # stage 2: everything routed so far becomes fixed wiring; the router only works on what is still open
+        dsn2 = os.path.join(WORK, 'famicart_stage2.dsn'); ses2 = os.path.join(WORK, 'famicart_stage2.ses')
+        if os.path.exists(ses2): os.remove(ses2)
+        dsn_export.export(board, dsn2, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR)
+        cmd = ['xvfb-run', '-a', 'java', '-jar', JAR, '-de', dsn2, '-do', ses2, '-mp', str(PASSES), '-mt', '1', '-oit', os.environ.get('FC_OIT', '8'), '-da']
+        print('stage 2:', ' '.join(cmd))
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=int(os.environ.get('FC_TIMEOUT', '1500')))
+        open(os.path.join(WORK, 'freerouting_stage2.log'), 'w').write(r.stdout + r.stderr)
+        if os.path.exists(ses2):
+            nt2, nv2 = ses_import.import_ses(board, ses2, via_dia_mm=VIA, via_drill_mm=VDR)
+            pcbnew.SaveBoard(PCB, board); board = pcbnew.LoadBoard(PCB)
+            print('stage 2 imported tracks', nt2, 'vias', nv2)
+        else: print('stage 2 produced no session')
     filler = pcbnew.ZONE_FILLER(board); filler.Fill(board.Zones())
     board.BuildConnectivity()
     unconnected = board.GetConnectivity().GetUnconnectedCount(True)
