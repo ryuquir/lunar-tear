@@ -3,6 +3,7 @@
 import os, re, sys, subprocess, shutil, re
 sys.path.insert(0, os.path.dirname(__file__))
 import pcbnew
+from pcbnew import ToMM
 import dsn_export, ses_import, gen_pcb
 HW_LIB = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'hardware'))
 HW = os.path.abspath(os.environ.get('FC_HW_DIR', HW_LIB))
