@@ -58,7 +58,7 @@ def main():
     TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
     VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
     ds.m_TrackMinWidth = FromMM(TRK); ds.m_ViasMinSize = FromMM(VIA); ds.m_MinThroughDrill = FromMM(VDR)
-    ds.m_MinClearance = FromMM(CLR); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM((VIA - VDR) / 2 - 0.005)
+    ds.m_MinClearance = FromMM(CLR); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM((VIA - VDR) / 2 - 0.005); ds.m_HoleClearance = FromMM(0.2)
     ds.m_SolderMaskMinWidth = FromMM(0.0); ds.m_SolderMaskExpansion = FromMM(0.0); ds.m_CopperEdgeClearance = FromMM(0.3)
     nc = ds.m_NetSettings.m_DefaultNetClass
     nc.SetTrackWidth(FromMM(TRK)); nc.SetClearance(FromMM(CLR)); nc.SetViaDiameter(FromMM(VIA)); nc.SetViaDrill(FromMM(VDR))
@@ -105,6 +105,110 @@ def main():
         (ax, ay), (bx, by) = padpos('A7'), padpos('B7')
         yf = ay - sign * (1.45 / 2 + 0.33)
         track(ax, ay, ax, yf, dm); track(ax, yf, bx, yf, dm); track(bx, yf, bx, by, dm)
+
+    # 4-layer boards: GND / +3V3 are inner planes. Give every SMD pad of those nets a fixed via stub so the
+    # autorouter never has to route them (dsn_export drops these nets); the KiCad zone fill does the rest.
+    PLANE_NETS = {'GND': pcbnew.In1_Cu, '+3V3': pcbnew.In2_Cu} if (NL == 4 and os.environ.get('FC_STUBS', '0') == '1') else {}   # FC_STUBS=1: fixed via stubs; default: the router fans out power on the inner layers
+    def add_via(x, y, net):
+        v = pcbnew.PCB_VIA(board); v.SetPosition(mm(x, y)); v.SetViaType(pcbnew.VIATYPE_THROUGH)
+        v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(VDR)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(netmap[net]); board.Add(v)
+    def add_track(x1, y1, x2, y2, net, layer, w=0.2):
+        t = pcbnew.PCB_TRACK(board); t.SetStart(mm(x1, y1)); t.SetEnd(mm(x2, y2)); t.SetWidth(FromMM(w)); t.SetLayer(layer); t.SetNet(netmap[net]); board.Add(t)
+    import math
+    # obstacles for stub-via placement: every pad (any layer: vias go through the board) and every via placed so far
+    obstacles = []   # (x, y, radius_mm, net)
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            r = max(ToMM(pad.GetSize().x), ToMM(pad.GetSize().y)) / 2
+            if pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD: r = max(r, ToMM(pad.GetDrillSize().x) / 2 + 0.3)
+            obstacles.append((ToMM(pad.GetPosition().x), ToMM(pad.GetPosition().y), r, pad.GetNetname(), pad.GetAttribute() == pcbnew.PAD_ATTRIB_SMD, pad.GetLayerSet().Contains(pcbnew.B_Cu)))
+    def via_margin(x, y, net):
+        """Smallest (distance - required) over all obstacles; >= 0 means the via fits."""
+        if not (0.8 <= x <= BOARD_W - 0.8 and 0.8 <= y <= BODY_H - 0.6): return -9.0
+        worst = 9.0
+        for (ox, oy, r, onet, smd, onb) in obstacles:
+            if r > 5: continue
+            d = math.hypot(x - ox, y - oy)
+            if onet == 'VIA': need = VIA + 0.15                              # via to via (hole-to-hole 0.25)
+            elif onet.startswith('TRK:'): need = 0.0 if onet[4:] == net else VIA / 2 + r + CLR + 0.03
+            else: need = VIA / 2 + r + (0.0 if onet == net else CLR + 0.05)
+            worst = min(worst, d - need)
+        return worst
+    def via_ok(x, y, net, layer_b): return via_margin(x, y, net) >= 0.0
+    def track_margin(x1, y1, x2, y2, w, net, layer_b):
+        """Clearance margin of a straight stub track (same outer layer as the pad) against other-net items."""
+        worst = 9.0; n = max(2, int(math.hypot(x2 - x1, y2 - y1) / 0.15) + 1)
+        for i in range(1, n):
+            t = i / n; x = x1 + (x2 - x1) * t; y = y1 + (y2 - y1) * t
+            for (ox, oy, r, onet, smd, onb) in obstacles:
+                if r > 5 or onet == net: continue
+                if onet.startswith('TRK:'):
+                    if onet[4:] == net or onb != layer_b: continue                        # same net, or on the other side
+                elif smd and onb != layer_b: continue                                     # SMD pad on the other side
+                d = math.hypot(x - ox, y - oy) - (w / 2 + r + CLR + 0.03)
+                if d < worst: worst = d
+        return worst
+    def note_track(x1, y1, x2, y2, w, net, layer_b=False):
+        n = max(2, int(math.hypot(x2 - x1, y2 - y1) / 0.2) + 1)
+        for i in range(n + 1):
+            t = i / n; obstacles.append((x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, w / 2, 'TRK:' + net, False, layer_b))
+    def place_stub(fp, n, pads, pad0):
+        cx, cy = ToMM(fp.GetPosition().x), ToMM(fp.GetPosition().y)
+        xs = [p[0] for p in pads]; ys = [p[1] for p in pads]
+        gx, gy = sum(xs) / len(xs), sum(ys) / len(ys)
+        dx, dy = gx - cx, gy - cy
+        if abs(dx) < 0.05 and abs(dy) < 0.05: dx = 1.0
+        ux, uy = ((1.0 if dx > 0 else -1.0), 0.0) if abs(dx) >= abs(dy) else (0.0, (1.0 if dy > 0 else -1.0))
+        bb = pad0.GetBoundingBox(); hx, hy = ToMM(bb.GetWidth()) / 2, ToMM(bb.GetHeight()) / 2
+        half = hx if ux else hy
+        layer_b = pad0.GetLayerSet().Contains(pcbnew.B_Cu)
+        layer = pcbnew.B_Cu if layer_b else pcbnew.F_Cu
+        w = 0.2 if len(pads) == 1 else 0.15
+        # two-segment stub: pad -> P1 (straight out of the pad, in its own lane) -> via. Candidate vias on a grid.
+        p1d = half + 0.38
+        p1 = [(px + ux * p1d, py + uy * p1d) for (px, py) in pads]
+        p1x, p1y = sum(q[0] for q in p1) / len(p1), sum(q[1] for q in p1) / len(p1)
+        cands = []
+        for extra in (VIA / 2 + CLR + 0.05, 0.6, 0.9, 1.2, 1.6, 2.0, 2.5):
+            for lat in (0.0, 0.45, -0.45, 0.9, -0.9, 1.35, -1.35, 1.8, -1.8):
+                cands.append((p1x + ux * extra - uy * lat, p1y + uy * extra + ux * lat))
+        best = None; bestm = -99
+        for (vx, vy) in cands:
+            m = via_margin(vx, vy, n)
+            if m >= 0:
+                m2 = min(track_margin(px, py, qx, qy, w, n, layer_b) for (px, py), (qx, qy) in zip(pads, p1))
+                m3 = min(track_margin(qx, qy, vx, vy, w, n, layer_b) for (qx, qy) in p1)
+                m = min(m, m2, m3)
+            if m >= 0: best = (vx, vy); bestm = m; break
+            if m > bestm: bestm = m; best = (vx, vy)
+        vx, vy = best
+        if bestm < 0: print('WARN: stub via for', fp.GetReference(), n, 'at', round(gx, 2), round(gy, 2), 'placed with margin', round(bestm, 2))
+        for (px, py), (qx, qy) in zip(pads, p1):
+            add_track(px, py, qx, qy, n, layer, w); note_track(px, py, qx, qy, w, n, layer_b)
+            add_track(qx, qy, vx, vy, n, layer, w); note_track(qx, qy, vx, vy, w, n, layer_b)
+        add_via(vx, vy, n); obstacles.append((vx, vy, VIA / 2, 'VIA', False, layer_b)); return True
+    for fp in board.GetFootprints():
+        if not PLANE_NETS: break
+        if fp.GetReference() == 'J1':
+            for pad in fp.Pads():
+                if pad.GetNetname() in PLANE_NETS:          # finger: short stub up into the body, then a via into the plane
+                    px = ToMM(pad.GetPosition().x); layer = pcbnew.B_Cu if pad.GetLayerSet().Contains(pcbnew.B_Cu) else pcbnew.F_Cu
+                    vx = px + (1.8 if px < 10 else 0.0); vy = BODY_H - 0.9          # pin 1 sits under the SWD header
+                    add_track(px, BODY_H + 3.5, px, BODY_H - 0.3, pad.GetNetname(), layer, 0.4); add_track(px, BODY_H - 0.3, vx, vy, pad.GetNetname(), layer, 0.4)
+                    add_via(vx, vy, pad.GetNetname()); obstacles.append((vx, vy, VIA / 2, 'VIA', False, False))
+                    note_track(px, BODY_H + 3.5, px, BODY_H - 0.3, 0.4, pad.GetNetname(), layer == pcbnew.B_Cu); note_track(px, BODY_H - 0.3, vx, vy, 0.4, pad.GetNetname(), layer == pcbnew.B_Cu)
+            continue
+        groups = {}
+        for pad in fp.Pads():
+            n = pad.GetNetname()
+            if n not in PLANE_NETS or pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD: continue
+            px, py = ToMM(pad.GetPosition().x), ToMM(pad.GetPosition().y)
+            placed = False
+            for g in groups.setdefault(n, []):
+                if abs(g['x'] - px) + abs(g['y'] - py) < 0.9: g['pads'].append((px, py)); placed = True; break
+            if not placed: groups[n].append({'x': px, 'y': py, 'pads': [(px, py)], 'pad': pad})
+        for n, gl in groups.items():
+            for g in gl: place_stub(fp, n, g['pads'], g['pad'])
 
     # outline: body + card-edge tab with 1 mm chamfers at the tab tip
     W, H, T = BOARD_W, BODY_H, TOTAL_H

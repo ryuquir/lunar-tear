@@ -225,7 +225,7 @@ G = [('U13', '74LVC1G11', SOT236, 'AND3: CPU data enable', {1: 'CnROMSEL', 3: 'W
      ('U27', '74LVC1G07', SOT235, 'OD: /IRQ B', {2: 'nIRQ_B', 4: 'nIRQ', 3: 'GND', 5: '+3V3'})]
 for i, (ref, sym, fp, val, pins) in enumerate(G):
     x = 34.0 + 4.6 * i      # front, bottom row; decoupling caps on the back directly behind each gate
-    P(ref, '74xGxx', sym, f'{sym} {val}', fp, x, 33.0, 0, 'F'); cap('100n', C0402, x, 33.3, 0, 'B', '+3V3')
+    P(ref, '74xGxx', sym, f'{sym} {val}', fp, x, 32.5, 0, 'F'); cap('100n', C0402, x, 32.8, 0, 'B', '+3V3')
     for p, nn in pins.items(): c(ref, p, nn)
 
 # PRG bank-line pull-ups: before the MCUs boot (and whenever U1 is held in reset) every CPU window maps to the

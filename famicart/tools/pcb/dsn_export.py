@@ -6,9 +6,19 @@ from pcbnew import ToMM
 RES = 10  # units per micrometre -> coordinates in 0.1 um
 def U(mm): return int(round(mm * 1000 * RES))
 LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.B_Cu, 'B.Cu')]
+PLANE_NETS = ()
+POWER_NETS = ()
 def set_layers(board):
-    global LAYERS
-    LAYERS = [(pcbnew.F_Cu, 'F.Cu')] + ([(pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu')] if board.GetCopperLayerCount() == 4 else []) + [(pcbnew.B_Cu, 'B.Cu')]
+    """Signal layers offered to the autorouter. On 4-layer boards the inner layers are solid GND/+3V3 planes that
+    the router must not touch (FC_DSN_INNER=1 offers them anyway), and the plane nets are left out of the netlist:
+    gen_pcb already gave every plane pad a fixed via stub."""
+    global LAYERS, PLANE_NETS, POWER_NETS
+    four = board.GetCopperLayerCount() == 4
+    stubs = os.environ.get('FC_STUBS', '0') == '1'
+    inner = four and (os.environ.get('FC_DSN_INNER', '1') == '1') and not stubs
+    LAYERS = [(pcbnew.F_Cu, 'F.Cu')] + ([(pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu')] if inner else []) + [(pcbnew.B_Cu, 'B.Cu')]
+    PLANE_NETS = ('GND', '+3V3') if (four and stubs) else ()          # stubs: plane nets are pre-wired, not routed
+    POWER_NETS = ('GND', '+3V3') if (four and inner) else ()          # router: power nets may use the inner (plane) layers, signals may not
 def lname_of(lid): return dict(LAYERS).get(lid, 'F.Cu')
 
 def q(s): return '"' + s.replace('"', '') + '"'
@@ -97,7 +107,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
             k = seen_ids.get(pid, 0); seen_ids[pid] = k + 1
             if k: pid = f'{pid}@{k}'
             n = pad.GetNetname()
-            if n: nets.setdefault(n, []).append(f'{fp.GetReference()}-{pid}')
+            if n and n not in PLANE_NETS: nets.setdefault(n, []).append(f'{fp.GetReference()}-{pid}')
     boundary = ' '.join(f'{U(x)} {-U(y)}' for x, y in outline_mm)
     out = []
     out.append(f'(pcb {q(os.path.basename(path))}')
@@ -113,7 +123,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
     for z in board.Zones():
         if z.GetIsRuleArea(): continue
         zl = z.GetFirstLayer()
-        if zl in (pcbnew.In1_Cu, pcbnew.In2_Cu) or (planes and zl == pcbnew.B_Cu):
+        if planes and zl == pcbnew.B_Cu:
             ol = z.Outline().Outline(0)
             pts = ' '.join(f'{U(ToMM(ol.CPoint(i).x))} {-U(ToMM(ol.CPoint(i).y))}' for i in range(ol.PointCount()))
             out.append(f'    (plane {q(z.GetNetname())} (polygon {lname_of(zl)} 0 {pts}))')
@@ -137,7 +147,13 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
     out.append('  )')
     out.append('  (network')
     for n, pins in nets.items(): out.append(f'    (net {q(n)} (pins ' + ' '.join(pins) + '))')
-    out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in nets) + f' (circuit (use_via {q(via_name)})) (rule (width {U(track)}) (clearance {U(clearance)})))')
+    sig = [n for n in nets if n not in POWER_NETS]; pwr = [n for n in nets if n in POWER_NETS]
+    outer = ' '.join(l for _, l in LAYERS if l in ('F.Cu', 'B.Cu')); alll = ' '.join(l for _, l in LAYERS)
+    if pwr:
+        out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in sig) + f' (circuit (use_via {q(via_name)}) (use_layer {outer})) (rule (width {U(track)}) (clearance {U(clearance)})))')
+        out.append(f'    (class power ' + ' '.join(q(n) for n in pwr) + f' (circuit (use_via {q(via_name)}) (use_layer {alll})) (rule (width {U(max(track, 0.2))}) (clearance {U(clearance)})))')
+    else:
+        out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in nets) + f' (circuit (use_via {q(via_name)})) (rule (width {U(track)}) (clearance {U(clearance)})))')
     out.append('  )')
     # existing tracks/vias -> fixed ("protect") wiring so the autorouter keeps them
     wires = []
@@ -145,6 +161,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         if t.GetClass() == 'PCB_VIA':
             wires.append(f'    (via {q(via_name)} {U(ToMM(t.GetPosition().x))} {-U(ToMM(t.GetPosition().y))} (net {q(t.GetNetname())}) (type protect))')
         elif t.GetClass() == 'PCB_TRACK':
+            if t.GetLayer() not in dict(LAYERS): continue
             lname = lname_of(t.GetLayer())
             s_, e_ = t.GetStart(), t.GetEnd()
             wires.append(f'    (wire (path {lname} {U(ToMM(t.GetWidth()))} {U(ToMM(s_.x))} {-U(ToMM(s_.y))} {U(ToMM(e_.x))} {-U(ToMM(e_.y))}) (net {q(t.GetNetname())}) (type protect))')
