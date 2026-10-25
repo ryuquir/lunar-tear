@@ -162,7 +162,8 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
     sig = [n for n in nets if n not in POWER_NETS]; pwr = [n for n in nets if n in POWER_NETS]
     outer = ' '.join(l for _, l in LAYERS if l in ('F.Cu', 'B.Cu')); alll = ' '.join(l for _, l in LAYERS)
     if pwr:
-        out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in sig) + f' (circuit (use_via {q(via_name)}) (use_layer {outer})) (rule (width {U(track)}) (clearance {U(clearance)})))')
+        sig_layers = alll if os.environ.get('FC_SIG_INNER', '0') == '1' else outer     # FC_SIG_INNER=1: signals may also use the inner layers
+        out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in sig) + f' (circuit (use_via {q(via_name)}) (use_layer {sig_layers})) (rule (width {U(track)}) (clearance {U(clearance)})))')
         out.append(f'    (class power ' + ' '.join(q(n) for n in pwr) + f' (circuit (use_via {q(via_name)}) (use_layer {alll})) (rule (width {U(max(track, 0.2))}) (clearance {U(clearance)})))')
     else:
         out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in nets) + f' (circuit (use_via {q(via_name)})) (rule (width {U(track)}) (clearance {U(clearance)})))')
