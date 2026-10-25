@@ -55,11 +55,13 @@ def main():
     ds = board.GetDesignSettings()
     NL = getattr(D, 'LAYERS', 2)
     ds.SetCopperLayerCount(NL)
-    ds.m_TrackMinWidth = FromMM(0.15); ds.m_ViasMinSize = FromMM(0.5); ds.m_MinThroughDrill = FromMM(0.25)
-    ds.m_MinClearance = FromMM(0.15); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM(0.12)
+    TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
+    VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
+    ds.m_TrackMinWidth = FromMM(TRK); ds.m_ViasMinSize = FromMM(VIA); ds.m_MinThroughDrill = FromMM(VDR)
+    ds.m_MinClearance = FromMM(CLR); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM((VIA - VDR) / 2 - 0.005)
     ds.m_SolderMaskMinWidth = FromMM(0.0); ds.m_SolderMaskExpansion = FromMM(0.0); ds.m_CopperEdgeClearance = FromMM(0.3)
     nc = ds.m_NetSettings.m_DefaultNetClass
-    nc.SetTrackWidth(FromMM(0.15)); nc.SetClearance(FromMM(0.15)); nc.SetViaDiameter(FromMM(0.5)); nc.SetViaDrill(FromMM(0.25))
+    nc.SetTrackWidth(FromMM(TRK)); nc.SetClearance(FromMM(CLR)); nc.SetViaDiameter(FromMM(VIA)); nc.SetViaDrill(FromMM(VDR))
 
     # nets
     names = sorted({n for pins in D.NETS.values() for n in pins.values() if n})

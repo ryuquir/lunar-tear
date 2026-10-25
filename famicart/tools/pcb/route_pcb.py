@@ -24,7 +24,9 @@ def main():
     gen_pcb.main()                     # always start from a freshly generated, unrouted board
     board = pcbnew.LoadBoard(PCB)
     dsn = os.path.join(WORK, 'famicart.dsn'); ses = os.path.join(WORK, 'famicart.ses')
-    n = dsn_export.export(board, dsn, outline(), track=0.15, clearance=0.15, pad_clearance=0.15, via_dia=0.5, via_drill=0.25)
+    TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
+    VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
+    n = dsn_export.export(board, dsn, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR)
     print('DSN written with', n, 'nets')
     pre = os.environ.get('FC_SES')            # import an existing session file instead of running the router
     if pre and os.path.exists(pre): ses = pre
@@ -38,7 +40,7 @@ def main():
       tail = [l for l in log.splitlines() if 'INFO' in l and ('pass' in l.lower() or 'complete' in l.lower() or 'routed' in l.lower() or 'incomplete' in l.lower())][-6:]
       print('\n'.join(tail))
     if not os.path.exists(ses): raise SystemExit('Freerouting produced no session file; see ' + os.path.join(WORK, 'freerouting.log'))
-    nt, nv = ses_import.import_ses(board, ses, via_dia_mm=0.5, via_drill_mm=0.25)
+    nt, nv = ses_import.import_ses(board, ses, via_dia_mm=VIA, via_drill_mm=VDR)
     pcbnew.SaveBoard(PCB, board); board = pcbnew.LoadBoard(PCB)   # reload: avoids SWIG ownership issues before zone filling
     print('imported tracks', nt, 'vias', nv)
     filler = pcbnew.ZONE_FILLER(board); filler.Fill(board.Zones())
