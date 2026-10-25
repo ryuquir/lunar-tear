@@ -92,8 +92,8 @@ def mcu(ref, s, x, y, gpio_net, mirror):
     # USB series resistors
     res('27', R0603, X(11), y - 4, 0, 'F', f'USB{s}_DM', f'USB{s}_DM_R'); res('27', R0603, X(11), y - 2, 0, 'F', f'USB{s}_DP', f'USB{s}_DP_R')
     # decoupling ring (front, outside the QFN pad ring)
-    for dx, dy in ((-3.0, -6.6), (0, 6.3), (4.5, -6.3)): cap('100n', C0402, X(dx), y + dy, 0, 'F', v11)
-    for dx, dy in ((-6.3, -2), (-6.3, 2), (6.3, -2), (6.3, 2), (-2.5, 6.3), (2.5, 6.3), (0, -6.3)): cap('100n', C0402, X(dx), y + dy, 0 if abs(dx) < 6 else 90, 'F', '+3V3')
+    for dx, dy in ((-3.0, -7.1), (0, 6.9), (4.5, -6.9)): cap('100n', C0402, X(dx), y + dy, 0, 'F', v11)          # ring at ~6.9 mm: leaves an escape lane for the pin rows
+    for dx, dy in ((-6.9, -2), (-6.9, 2), (6.9, -2), (6.9, 2), (-2.8, 6.9), (2.8, 6.9), (0, -6.9)): cap('100n', C0402, X(dx), y + dy, 0 if abs(dx) < 6 else 90, 'F', '+3V3')
 
 mcu('U1', 'A', 17.0, 15.0, GPIO_A, +1)
 mcu('U2', 'B', 73.0, 15.0, GPIO_B, -1)
