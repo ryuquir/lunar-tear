@@ -23,7 +23,7 @@ def import_ses(board, path, res=10, via_dia_mm=0.6, via_drill_mm=0.3):
         r = find(routes, 'resolution'); res = int(r[2]) if r else res
         scale = res * 1000.0
     def P(v): return FromMM(float(v) / scale)
-    layer_id = {'F.Cu': pcbnew.F_Cu, 'B.Cu': pcbnew.B_Cu, 'In1.Cu': pcbnew.In1_Cu, 'In2.Cu': pcbnew.In2_Cu}
+    layer_id = {'F.Cu': pcbnew.F_Cu, 'B.Cu': pcbnew.B_Cu, 'In1.Cu': pcbnew.In1_Cu, 'In2.Cu': pcbnew.In2_Cu, 'In3.Cu': pcbnew.In3_Cu, 'In4.Cu': pcbnew.In4_Cu}
     netmap = {board.GetNetInfo().GetNetItem(i).GetNetname(): board.GetNetInfo().GetNetItem(i) for i in range(board.GetNetCount())}
     ntracks = nvias = 0
     # pre-routed (fixed) items come back in the session as well: do not add them twice

@@ -53,7 +53,7 @@ def add_zone(board, net, layer, pts, clearance=0.25):
 def main():
     board = pcbnew.BOARD()
     ds = board.GetDesignSettings()
-    NL = getattr(D, 'LAYERS', 2)
+    NL = int(os.environ.get('FC_LAYERS', getattr(D, 'LAYERS', 2)))     # 2, 4 or 6 copper layers
     ds.SetCopperLayerCount(NL)
     TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
     VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
@@ -108,7 +108,7 @@ def main():
 
     # 4-layer boards: GND / +3V3 are inner planes. Give every SMD pad of those nets a fixed via stub so the
     # autorouter never has to route them (dsn_export drops these nets); the KiCad zone fill does the rest.
-    PLANE_NETS = {'GND': pcbnew.In1_Cu, '+3V3': pcbnew.In2_Cu} if (NL == 4 and os.environ.get('FC_STUBS', '0') == '1') else {}   # FC_STUBS=1: fixed via stubs; default: the router fans out power on the inner layers
+    PLANE_NETS = {'GND': pcbnew.In1_Cu, '+3V3': (pcbnew.In2_Cu if NL == 4 else pcbnew.In4_Cu)} if (NL >= 4 and os.environ.get('FC_STUBS', '0') == '1') else {}   # FC_STUBS=1: fixed via stubs; default: the router fans out power on the inner layers
     stub_groups = []
     def add_via(x, y, net):
         v = pcbnew.PCB_VIA(board); v.SetPosition(mm(x, y)); v.SetViaType(pcbnew.VIATYPE_THROUGH)
@@ -268,15 +268,15 @@ def main():
     # rule areas: no tracks/vias/pour on the card-edge tab (fingers only; traces may enter the top 1.1 mm of a pad),
     # and no vias under the Pico module (its underside carries exposed test pads)
     KEEP_Y = H + 4.0            # = solder-mask boundary: fingers only below this line
-    CU = [pcbnew.F_Cu, pcbnew.B_Cu] + ([pcbnew.In1_Cu, pcbnew.In2_Cu] if NL == 4 else [])
+    CU = [pcbnew.F_Cu, pcbnew.B_Cu] + [pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu][:NL - 2]
     add_rule_area(board, 'card_edge_keepout', [(x0 - 0.5, KEEP_Y), (x1 + 0.5, KEEP_Y), (x1 + 0.5, T + 0.5), (x0 - 0.5, T + 0.5)], CU)
     ux, uy, _, _ = D.PARTS['U1'][4]
     # (vias under the Pico are allowed: they are tented by the solder mask; the Pico's own test points sit on our TP pads)
     # GND pours on both layers over the body (not the tab)
     body = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
-    if NL == 4:   # inner planes: In1 = GND, In2 = +3V3 (outer layers stay free for routing)
+    if NL >= 4:   # inner planes: In1 = GND, last inner = +3V3 (6 layers: In2/In3 are extra signal layers)
         add_zone(board, netmap['GND'], pcbnew.In1_Cu, body)
-        add_zone(board, netmap['+3V3'], pcbnew.In2_Cu, body)
+        add_zone(board, netmap['+3V3'], pcbnew.In2_Cu if NL == 4 else pcbnew.In4_Cu, body)
     else:
         add_zone(board, netmap['GND'], pcbnew.F_Cu, body)
         add_zone(board, netmap['GND'], pcbnew.B_Cu, body)

@@ -56,7 +56,7 @@ def main():
     print('DRC:', m if m else txt[:300], '| errors:', errors, 'warnings (library checks etc.):', warnings)
     # fab exports
     fab = os.path.join(HW, 'fab'); shutil.rmtree(fab, ignore_errors=True); os.makedirs(fab)
-    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', ('F.Cu,In1.Cu,In2.Cu,B.Cu' if board.GetCopperLayerCount() == 4 else 'F.Cu,B.Cu') + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts,F.Fab,B.Fab', '-o', fab + '/', PCB], check=True, capture_output=True)
+    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', {6: 'F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu', 4: 'F.Cu,In1.Cu,In2.Cu,B.Cu'}.get(board.GetCopperLayerCount(), 'F.Cu,B.Cu') + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts,F.Fab,B.Fab', '-o', fab + '/', PCB], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', fab + '/', PCB], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'pdf', '--layers', 'F.Cu,F.SilkS,F.Fab,Edge.Cuts', '-o', os.path.join(HW, 'famicart_front.pdf'), PCB], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'pdf', '--layers', 'B.Cu,B.SilkS,Edge.Cuts', '--mirror', '-o', os.path.join(HW, 'famicart_back.pdf'), PCB], check=True, capture_output=True)

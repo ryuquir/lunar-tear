@@ -13,13 +13,18 @@ def set_layers(board):
     the router must not touch (FC_DSN_INNER=1 offers them anyway), and the plane nets are left out of the netlist:
     gen_pcb already gave every plane pad a fixed via stub."""
     global LAYERS, PLANE_NETS, POWER_NETS
-    four = board.GetCopperLayerCount() == 4
+    ncu = board.GetCopperLayerCount()
     stubs = os.environ.get('FC_STUBS', '0') == '1'
-    inner = four and (os.environ.get('FC_DSN_INNER', '1') == '1') and not stubs
-    LAYERS = [(pcbnew.F_Cu, 'F.Cu')] + ([(pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu')] if inner else []) + [(pcbnew.B_Cu, 'B.Cu')]
-    PLANE_NETS = ('GND', '+3V3') if (four and stubs) else ()          # stubs: pads that already have a via stub are left out of the netlist
-    POWER_NETS = ('GND', '+3V3') if four else ()                      # router: power nets may use the inner (plane) layers, signals may not
-    if stubs: LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu'), (pcbnew.B_Cu, 'B.Cu')]
+    if ncu == 6:      # F sig | In1 GND | In2 sig | In3 sig | In4 +3V3 | B sig  -> the router only sees the 4 signal layers
+        LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.In2_Cu, 'In2.Cu'), (pcbnew.In3_Cu, 'In3.Cu'), (pcbnew.B_Cu, 'B.Cu')]
+    elif ncu == 4:
+        inner = (os.environ.get('FC_DSN_INNER', '1') == '1') and not stubs
+        LAYERS = [(pcbnew.F_Cu, 'F.Cu')] + ([(pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu')] if inner else []) + [(pcbnew.B_Cu, 'B.Cu')]
+        if stubs: LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu'), (pcbnew.B_Cu, 'B.Cu')]
+    else:
+        LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.B_Cu, 'B.Cu')]
+    PLANE_NETS = ('GND', '+3V3') if (ncu >= 4 and stubs) else ()      # stubs: pads that already have a via stub are left out of the netlist
+    POWER_NETS = ('GND', '+3V3') if ncu == 4 else ()                   # 4 layers: power nets may use the plane layers, signals may not
 def lname_of(lid): return dict(LAYERS).get(lid, 'F.Cu')
 
 def q(s): return '"' + s.replace('"', '') + '"'
