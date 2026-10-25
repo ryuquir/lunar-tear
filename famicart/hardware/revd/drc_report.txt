@@ -1,0 +1,1714 @@
+** Drc report for /home/user/lunar-tear/famicart/hardware/revd/famicart.kicad_pcb **
+** Created on 2026-10-25 05:53:37 **
+
+** Found 343 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(45.0000 mm, 2.0000 mm): PCB Text 'famicart rev D  (back)' on B.Silkscreen
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(25.0000 mm, 22.0000 mm): Footprint C5
+[lib_footprint_issues]: Footprint 'Crystal_SMD_3225-4Pin_3.2x2.5mm' not found in library 'Crystal'.
+    Local override; Severity: warning
+    @(62.0000 mm, 6.0000 mm): Footprint Y2
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(61.5000 mm, 24.8000 mm): Footprint C22
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(23.0000 mm, 30.0000 mm): Footprint R19
+[lib_footprint_issues]: Footprint 'SW_SPST_TL3342' not found in library 'Button_Switch_SMD'.
+    Local override; Severity: warning
+    @(76.0000 mm, 29.0000 mm): Footprint SW3
+[lib_footprint_issues]: Footprint 'Crystal_SMD_3225-4Pin_3.2x2.5mm' not found in library 'Crystal'.
+    Local override; Severity: warning
+    @(28.0000 mm, 6.0000 mm): Footprint Y1
+[lib_footprint_issues]: Footprint 'SOT-23-6' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(34.0000 mm, 33.0000 mm): Footprint U13
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(14.0000 mm, 8.4000 mm): Footprint C7
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(36.0000 mm, 11.0000 mm): Footprint R13
+[lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(61.6000 mm, 33.0000 mm): Footprint U27
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(66.7000 mm, 17.0000 mm): Footprint C29
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(10.7000 mm, 17.0000 mm): Footprint C11
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(38.0000 mm, 14.5000 mm): Footprint D1
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(73.0000 mm, 21.3000 mm): Footprint C24
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(59.0000 mm, 22.0000 mm): Footprint C20
+[lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(52.4000 mm, 33.0000 mm): Footprint U21
+[lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(8.0000 mm, 5.5000 mm): Footprint U3
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(75.5000 mm, 21.3000 mm): Footprint C30
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(31.5000 mm, 14.3000 mm): Footprint RN7
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(69.0000 mm, 27.5000 mm): Footprint R27
+[lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
+    Local override; Severity: warning
+    @(58.0000 mm, 30.0000 mm): Footprint D3
+[lib_footprint_issues]: Footprint 'USB_C_Receptacle_HRO_TYPE-C-31-M-12' not found in library 'Connector_USB'.
+    Local override; Severity: warning
+    @(38.0000 mm, 4.3000 mm): Footprint J3
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(19.5000 mm, 21.3000 mm): Footprint C15
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(75.5000 mm, 6.5000 mm): Footprint R7
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(65.0000 mm, 22.0000 mm): Footprint C21
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(62.0000 mm, 11.0000 mm): Footprint R11
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(14.5000 mm, 21.3000 mm): Footprint C14
+[lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(64.0000 mm, 24.5000 mm): Footprint R10
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(66.0000 mm, 27.5000 mm): Footprint R26
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(66.7000 mm, 13.0000 mm): Footprint C28
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(29.0000 mm, 30.0000 mm): Footprint R21
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(31.0000 mm, 22.0000 mm): Footprint C4
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(73.0000 mm, 8.7000 mm): Footprint C32
+[lib_footprint_issues]: Footprint 'PinHeader_1x03_P2.54mm_Vertical' not found in library 'Connector_PinHeader_2.54mm'.
+    Local override; Severity: warning
+    @(82.3000 mm, 33.5000 mm): Footprint J6
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(36.5000 mm, 23.0000 mm): Footprint R23
+[lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(47.8000 mm, 33.0000 mm): Footprint U16
+[lib_footprint_issues]: Footprint 'SOT-223-3_TabPin2' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(45.0000 mm, 23.0000 mm): Footprint U28
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(24.0000 mm, 6.0000 mm): Footprint C2
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(60.0000 mm, 8.5000 mm): Footprint C19
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(26.0000 mm, 30.0000 mm): Footprint R20
+[lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(26.0000 mm, 24.5000 mm): Footprint R4
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(66.0000 mm, 6.0000 mm): Footprint C18
+[lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(38.6000 mm, 33.0000 mm): Footprint U14
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(34.0000 mm, 23.0000 mm): Footprint R22
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(70.5000 mm, 21.3000 mm): Footprint C31
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(53.5000 mm, 28.5000 mm): Footprint RN2
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(31.5000 mm, 18.4000 mm): Footprint RN9
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(79.3000 mm, 17.0000 mm): Footprint C27
+[lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(57.0000 mm, 33.0000 mm): Footprint U26
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(68.5000 mm, 8.7000 mm): Footprint C25
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(40.0000 mm, 11.0000 mm): Footprint R14
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(76.0000 mm, 8.4000 mm): Footprint C23
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(56.0000 mm, 23.0000 mm): Footprint R24
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(23.3000 mm, 13.0000 mm): Footprint C12
+[lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(58.5000 mm, 6.0000 mm): Footprint R9
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(35.0000 mm, 14.3000 mm): Footprint RN8
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(28.0000 mm, 13.0000 mm): Footprint R6
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(54.0000 mm, 11.0000 mm): Footprint R16
+[lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(39.5000 mm, 23.0000 mm): Footprint C33
+[lib_footprint_issues]: Footprint 'PinHeader_1x03_P2.54mm_Vertical' not found in library 'Connector_PinHeader_2.54mm'.
+    Local override; Severity: warning
+    @(7.7000 mm, 33.5000 mm): Footprint J5
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(81.5000 mm, 10.5000 mm): Footprint C17
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(17.0000 mm, 8.7000 mm): Footprint C16
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(79.3000 mm, 13.0000 mm): Footprint C26
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(30.0000 mm, 8.5000 mm): Footprint C3
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(50.0000 mm, 11.0000 mm): Footprint R15
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(24.5000 mm, 32.5000 mm): Footprint C36
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(28.5000 mm, 24.8000 mm): Footprint C6
+[lib_footprint_issues]: Footprint 'SW_SPST_TL3342' not found in library 'Button_Switch_SMD'.
+    Local override; Severity: warning
+    @(14.0000 mm, 29.0000 mm): Footprint SW2
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(28.0000 mm, 11.0000 mm): Footprint R5
+[lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(31.5000 mm, 6.0000 mm): Footprint R3
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(14.5000 mm, 4.0000 mm): Footprint R2
+[lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(50.5000 mm, 23.0000 mm): Footprint C34
+[lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(43.2000 mm, 33.0000 mm): Footprint U15
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(52.0000 mm, 14.5000 mm): Footprint D2
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(21.5000 mm, 8.7000 mm): Footprint C9
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(61.0000 mm, 30.0000 mm): Footprint R28
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(10.7000 mm, 13.0000 mm): Footprint C10
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(23.3000 mm, 17.0000 mm): Footprint C13
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(14.5000 mm, 6.5000 mm): Footprint R1
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(45.0000 mm, 28.5000 mm): Footprint R17
+[lib_footprint_issues]: Footprint 'SW_SPST_TL3342' not found in library 'Button_Switch_SMD'.
+    Local override; Severity: warning
+    @(45.0000 mm, 15.0000 mm): Footprint SW1
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(17.0000 mm, 21.3000 mm): Footprint C8
+[lib_footprint_issues]: Footprint 'PinHeader_1x02_P2.54mm_Vertical' not found in library 'Connector_PinHeader_2.54mm'.
+    Local override; Severity: warning
+    @(67.0000 mm, 33.5000 mm): Footprint J2
+[lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(82.0000 mm, 5.5000 mm): Footprint U4
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(20.0000 mm, 30.0000 mm): Footprint R18
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(75.5000 mm, 4.0000 mm): Footprint R8
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(35.0000 mm, 18.6000 mm): Footprint R25
+[lib_footprint_issues]: Footprint 'USB_C_Receptacle_HRO_TYPE-C-31-M-12' not found in library 'Connector_USB'.
+    Local override; Severity: warning
+    @(52.0000 mm, 4.3000 mm): Footprint J4
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(62.0000 mm, 13.0000 mm): Footprint R12
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(36.5000 mm, 28.5000 mm): Footprint RN1
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(21.5000 mm, 32.5000 mm): Footprint C35
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(8.5000 mm, 10.5000 mm): Footprint C1
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(34.0000 mm, 33.3000 mm): Footprint C53
+[lib_footprint_issues]: Footprint 'TSSOP-14_4.4x5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(48.8000 mm, 22.4000 mm): Footprint U20
+[lib_footprint_issues]: Footprint 'TSOP-I-32_11.8x8mm_P0.5mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(70.0000 mm, 26.0000 mm): Footprint U8
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(47.8000 mm, 33.3000 mm): Footprint C56
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(85.5000 mm, 22.6000 mm): Footprint C50
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(78.5000 mm, 26.0000 mm): Footprint C42
+[lib_footprint_issues]: Footprint 'TSOP-I-56_18.4x14mm_P0.5mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(20.0000 mm, 12.0000 mm): Footprint U5
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(57.0000 mm, 33.3000 mm): Footprint C58
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(85.5000 mm, 8.5000 mm): Footprint U17
+[lib_footprint_issues]: Footprint 'TSOP-I-32_11.8x8mm_P0.5mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(20.0000 mm, 26.0000 mm): Footprint U7
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(48.8000 mm, 13.0000 mm): Footprint U24
+[lib_footprint_issues]: Footprint 'TSOP-I-56_18.4x14mm_P0.5mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(70.0000 mm, 12.0000 mm): Footprint U6
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(50.6000 mm, 17.7000 mm): Footprint C52
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(85.5000 mm, 13.2000 mm): Footprint C49
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(66.0000 mm, 20.3000 mm): Footprint C39
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(33.0000 mm, 15.5000 mm): Footprint RN4
+[lib_footprint_issues]: Footprint 'SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm' not found in library 'Jumper'.
+    Local override; Severity: warning
+    @(31.0000 mm, 24.0000 mm): Footprint JP1
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(52.4000 mm, 33.3000 mm): Footprint C57
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(4.5000 mm, 27.3000 mm): Footprint U11
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(24.0000 mm, 20.3000 mm): Footprint C38
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(4.5000 mm, 13.2000 mm): Footprint C43
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(39.6000 mm, 17.7000 mm): Footprint C46
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(28.5000 mm, 26.0000 mm): Footprint C41
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(43.2000 mm, 33.3000 mm): Footprint C55
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(4.5000 mm, 8.5000 mm): Footprint U9
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(61.6000 mm, 33.3000 mm): Footprint C59
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(85.5000 mm, 32.0000 mm): Footprint C51
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(85.5000 mm, 27.3000 mm): Footprint U19
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(85.5000 mm, 17.9000 mm): Footprint U18
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(43.2000 mm, 17.7000 mm): Footprint C48
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(47.0000 mm, 17.7000 mm): Footprint C47
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(4.5000 mm, 32.0000 mm): Footprint C45
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(74.0000 mm, 20.3000 mm): Footprint C40
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(56.8000 mm, 15.5000 mm): Footprint RN6
+[lib_footprint_issues]: Footprint 'TSSOP-16_4.4x5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(41.4000 mm, 22.4000 mm): Footprint U22
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(16.0000 mm, 20.3000 mm): Footprint C37
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(41.4000 mm, 13.0000 mm): Footprint U12
+[lib_footprint_issues]: Footprint 'TSSOP-20_4.4x6.5mm_P0.65mm' not found in library 'Package_SO'.
+    Local override; Severity: warning
+    @(4.5000 mm, 17.9000 mm): Footprint U10
+[lib_footprint_issues]: Footprint 'SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm' not found in library 'Jumper'.
+    Local override; Severity: warning
+    @(31.0000 mm, 27.2000 mm): Footprint JP2
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(56.8000 mm, 10.5000 mm): Footprint RN5
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(38.6000 mm, 33.3000 mm): Footprint C54
+[lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(4.5000 mm, 22.6000 mm): Footprint C44
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(33.0000 mm, 10.5000 mm): Footprint RN3
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2304 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.2000 mm, 9.5618 mm): Track [+1V1A] on F.Cu, length 0.9877 mm
+    @(19.9233 mm, 9.3764 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.3392 mm, 15.4122 mm): Track [+1V1A] on F.Cu, length 0.3188 mm
+    @(13.9625 mm, 15.5682 mm): Via [CD0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2425 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(18.7902 mm, 16.9628 mm): Track [+1V1A] on F.Cu, length 0.6744 mm
+    @(18.8695 mm, 17.5972 mm): Via [CD3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2455 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.2000 mm, 12.4290 mm): Track [+1V1A] on F.Cu, length 4.4371 mm
+    @(16.6401 mm, 12.0335 mm): Via [PRG_A21] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.2000 mm, 13.3943 mm): Track [+1V1A] on F.Cu, length 1.9880 mm
+    @(20.2304 mm, 13.8921 mm): Via [PRG_A14] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(21.0342 mm, 23.6596 mm): Track [+1V1A] on F.Cu, length 1.2510 mm
+    @(21.0664 mm, 23.0947 mm): Via [PRG_A15] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2326 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.1138 mm, 15.1868 mm): Track [+1V1A] on F.Cu, length 1.1051 mm
+    @(12.9601 mm, 15.5663 mm): Via [CA6] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2314 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.1138 mm, 15.1868 mm): Track [+1V1A] on F.Cu, length 1.1051 mm
+    @(13.9625 mm, 15.5682 mm): Via [CD0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.8984 mm, 8.8634 mm): Track [+1V1A] on F.Cu, length 0.5265 mm
+    @(20.1238 mm, 8.4867 mm): Via [PRG_A21] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.1030 mm, 17.9739 mm): Track [+1V1A] on F.Cu, length 0.4138 mm
+    @(18.8695 mm, 17.5972 mm): Via [CD3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2476 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.2671 mm, 17.4397 mm): Track [+1V1A] on F.Cu, length 0.3701 mm
+    @(18.8695 mm, 17.5972 mm): Via [CD3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2303 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(26.5872 mm, 20.9983 mm): Track [+1V1A] on F.Cu, length 1.3584 mm
+    @(25.8023 mm, 21.2454 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.0682 mm, 23.6596 mm): Track [+1V1A] on F.Cu, length 1.9660 mm
+    @(19.5369 mm, 23.2829 mm): Via [SWCLKA] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.3392 mm, 16.0161 mm): Track [+1V1A] on F.Cu, length 0.6039 mm
+    @(13.9625 mm, 15.5682 mm): Via [CD0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(20.6057 mm, 15.0927 mm): Track [+1V1A] on F.Cu, length 2.5675 mm
+    @(19.6221 mm, 16.6089 mm): Via [RUN] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2326 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(13.0087 mm, 15.1868 mm): Track [+1V1A] on F.Cu, length 0.5141 mm
+    @(12.9601 mm, 15.5663 mm): Via [CA6] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2283 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(13.0087 mm, 15.1868 mm): Track [+1V1A] on F.Cu, length 0.5141 mm
+    @(13.1363 mm, 14.7794 mm): Via [CA10] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2427 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.4510 mm, 12.6450 mm): Track [CD0] on In2.Cu, length 1.7094 mm
+    @(14.4373 mm, 12.1034 mm): Via [+1V1A] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2317 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.5802 mm, 7.3765 mm): Track [QSPIA_SD0] on F.Cu, length 1.7269 mm
+    @(13.1468 mm, 7.7582 mm): Via [+1V1A] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2488 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(13.6507 mm, 7.8183 mm): Track [RUN] on In2.Cu, length 0.5316 mm
+    @(13.1468 mm, 7.7582 mm): Via [+1V1A] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(13.1468 mm, 9.0432 mm): Track [+1V1A] on In1.Cu, length 0.2403 mm
+    @(12.7446 mm, 8.9127 mm): Via [CA3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2297 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.9769 mm, 9.2131 mm): Track [+1V1A] on In1.Cu, length 1.4299 mm
+    @(12.7446 mm, 8.9127 mm): Via [CA3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(69.1981 mm, 14.7814 mm): Track [+1V1B] on F.Cu, length 0.5343 mm
+    @(68.8293 mm, 15.1581 mm): Via [PA12] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(72.1221 mm, 17.5948 mm): Track [+1V1B] on F.Cu, length 1.0095 mm
+    @(72.9918 mm, 17.9319 mm): Via [SWDIOB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(65.8028 mm, 22.9511 mm): Track [+1V1B] on F.Cu, length 2.9117 mm
+    @(67.6736 mm, 22.5744 mm): Via [U6_DQ15] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2418 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.3621 mm, 15.9454 mm): Track [+1V1B] on F.Cu, length 0.0481 mm
+    @(69.9854 mm, 16.1014 mm): Via [XINB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(69.3942 mm, 14.9775 mm): Track [+1V1B] on F.Cu, length 1.3688 mm
+    @(69.9854 mm, 16.1014 mm): Via [XINB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(72.9878 mm, 18.3086 mm): Track [+1V1B] on F.Cu, length 0.8658 mm
+    @(72.8818 mm, 18.7353 mm): Via [XINB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(72.9878 mm, 18.3086 mm): Track [+1V1B] on F.Cu, length 0.8658 mm
+    @(72.9918 mm, 17.9319 mm): Via [SWDIOB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2284 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(71.9634 mm, 17.5948 mm): Track [+1V1B] on F.Cu, length 0.1587 mm
+    @(71.9274 mm, 17.9715 mm): Via [CHR_A10] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(63.6153 mm, 14.8000 mm): Track [+1V1B] on F.Cu, length 1.0680 mm
+    @(62.7041 mm, 14.4215 mm): Via [CHR_A19] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2278 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(62.8601 mm, 14.0448 mm): Track [+1V1B] on F.Cu, length 0.1278 mm
+    @(62.7041 mm, 14.4215 mm): Via [CHR_A19] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2278 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(62.7323 mm, 14.0448 mm): Track [+1V1B] on F.Cu, length 1.0007 mm
+    @(62.7041 mm, 14.4215 mm): Via [CHR_A19] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(72.8359 mm, 18.3086 mm): Track [+1V1B] on F.Cu, length 0.1519 mm
+    @(72.9918 mm, 17.9319 mm): Via [SWDIOB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2284 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.3621 mm, 15.9935 mm): Track [+1V1B] on F.Cu, length 2.2646 mm
+    @(71.9274 mm, 17.9715 mm): Via [CHR_A10] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2418 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.3621 mm, 15.9935 mm): Track [+1V1B] on F.Cu, length 2.2646 mm
+    @(69.9854 mm, 16.1014 mm): Via [XINB] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(75.2996 mm, 22.1769 mm): Track [+3V3] on F.Cu, length 0.3121 mm
+    @(74.9229 mm, 22.0209 mm): Via [RUN] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(75.0789 mm, 22.3976 mm): Track [+3V3] on F.Cu, length 1.3918 mm
+    @(74.9229 mm, 22.0209 mm): Via [RUN] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(75.2996 mm, 21.5796 mm): Track [+3V3] on F.Cu, length 0.5973 mm
+    @(74.9229 mm, 22.0209 mm): Via [RUN] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(69.4289 mm, 21.7564 mm): Track [CHR_RYBY] on In1.Cu, length 1.7873 mm
+    @(69.4109 mm, 21.2054 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(69.5669 mm, 20.8287 mm): Track [CHR_A20] on In2.Cu, length 0.6611 mm
+    @(69.4109 mm, 21.2054 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(68.0167 mm, 20.8287 mm): Track [CHR_A20] on In2.Cu, length 1.5502 mm
+    @(69.4109 mm, 21.2054 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2317 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.4495 mm, 22.7838 mm): Track [PA8] on B.Cu, length 2.3520 mm
+    @(69.4109 mm, 21.2054 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2372 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(84.1162 mm, 12.9381 mm): Track [PA7] on In2.Cu, length 4.1444 mm
+    @(85.0200 mm, 12.5509 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2319 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.2775 mm, 11.7458 mm): Track [CD0] on In2.Cu, length 5.1169 mm
+    @(34.2000 mm, 12.1277 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2305 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(33.6615 mm, 12.5082 mm): Track [U5_DQ11] on B.Cu, length 0.7302 mm
+    @(34.2000 mm, 12.1277 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2278 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(60.1806 mm, 22.4189 mm): Track [CHR_A18] on B.Cu, length 2.7225 mm
+    @(59.8028 mm, 22.9511 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2450 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(57.6050 mm, 13.4899 mm): Track [XOUTB] on In1.Cu, length 2.2224 mm
+    @(58.0000 mm, 12.1432 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2270 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.8271 mm, 9.0569 mm): Track [BOOTA_SW] on In1.Cu, length 3.7293 mm
+    @(14.4501 mm, 6.1768 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2270 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(73.6217 mm, 10.4250 mm): Track [QSPIB_SCLK] on In1.Cu, length 1.3486 mm
+    @(74.1374 mm, 9.3762 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2380 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(77.9753 mm, 9.7642 mm): Track [U6_DQ10] on In2.Cu, length 8.6207 mm
+    @(74.1374 mm, 9.3762 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2307 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(66.8368 mm, 14.4908 mm): Track [PA9] on F.Cu, length 1.0253 mm
+    @(66.7000 mm, 14.0892 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2308 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.4476 mm, 18.3149 mm): Track [CPU_A1] on In1.Cu, length 7.4767 mm
+    @(12.8284 mm, 12.6168 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2410 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(58.8269 mm, 29.4698 mm): Track [nFOURSCR] on In2.Cu, length 7.3650 mm
+    @(55.1359 mm, 29.8608 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2491 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(24.4691 mm, 14.6813 mm): Track [CD1] on In2.Cu, length 1.6488 mm
+    @(23.9412 mm, 13.5890 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(25.4136 mm, 15.5944 mm): Track [PRG_A20] on B.Cu, length 4.7276 mm
+    @(23.9412 mm, 13.5890 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2383 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(33.7420 mm, 17.8978 mm): Track [PRG_A19] on F.Cu, length 1.2865 mm
+    @(33.9604 mm, 17.1303 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2339 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(15.2000 mm, 10.6452 mm): Track [QSPIA_SS] on F.Cu, length 0.8357 mm
+    @(14.4677 mm, 10.8346 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(6.6682 mm, 9.9301 mm): Track [CA5] on B.Cu, length 0.3696 mm
+    @(6.8819 mm, 9.5534 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(7.0378 mm, 9.9301 mm): Track [CA5] on B.Cu, length 2.3760 mm
+    @(6.8819 mm, 9.5534 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(5.4750 mm, 10.4277 mm): Track [CA4] on B.Cu, length 2.2028 mm
+    @(6.8819 mm, 9.5534 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2375 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(81.2417 mm, 9.8473 mm): Track [PD2] on B.Cu, length 0.8476 mm
+    @(80.8542 mm, 9.6871 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2373 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.8390 mm, 10.2500 mm): Track [PD2] on B.Cu, length 0.5695 mm
+    @(80.8542 mm, 9.6871 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(65.8040 mm, 21.5707 mm): Track [XOUTB] on In1.Cu, length 1.9262 mm
+    @(64.9053 mm, 20.1393 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2355 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(64.5198 mm, 20.8019 mm): Track [CHR_A14] on B.Cu, length 1.6339 mm
+    @(64.9053 mm, 20.1393 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2434 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(34.5407 mm, 13.1004 mm): Track [PRG_A18] on In2.Cu, length 3.0940 mm
+    @(33.1248 mm, 12.7070 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2350 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.5941 mm, 10.8703 mm): Track [PRG_A17] on In1.Cu, length 1.4851 mm
+    @(31.9791 mm, 12.1353 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2395 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.2775 mm, 11.7458 mm): Track [CD0] on In2.Cu, length 5.1169 mm
+    @(31.9791 mm, 12.1353 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2419 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(77.3259 mm, 16.8194 mm): Track [BRIDGE_DIR] on In1.Cu, length 1.8681 mm
+    @(76.9340 mm, 15.2881 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2419 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(77.3259 mm, 11.1460 mm): Track [PA0] on B.Cu, length 5.6734 mm
+    @(76.9340 mm, 15.2881 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2282 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(2.8750 mm, 22.4403 mm): Track [CA8] on B.Cu, length 0.8788 mm
+    @(3.4077 mm, 22.4381 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2409 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(27.5078 mm, 26.4967 mm): Track [CPU_D4] on In1.Cu, length 4.4419 mm
+    @(27.7319 mm, 25.7198 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2274 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(27.9847 mm, 26.0000 mm): Track [CD3] on B.Cu, length 0.3536 mm
+    @(27.7319 mm, 25.7198 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2274 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(28.8918 mm, 26.0000 mm): Track [CD3] on B.Cu, length 0.9071 mm
+    @(27.7319 mm, 25.7198 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2377 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.4588 mm, 18.6870 mm): Track [PRG_A13] on F.Cu, length 1.4478 mm
+    @(14.8902 mm, 19.0747 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2310 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(17.6352 mm, 22.3585 mm): Track [CD5] on In1.Cu, length 5.3313 mm
+    @(14.8902 mm, 19.0747 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2352 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(67.8653 mm, 27.3295 mm): Track [CHR_RYBY] on In1.Cu, length 2.2113 mm
+    @(68.1051 mm, 26.5450 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2344 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(67.8238 mm, 27.3699 mm): Track [PA8] on B.Cu, length 4.3812 mm
+    @(68.1051 mm, 26.5450 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2278 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(30.7756 mm, 30.0983 mm): Track [AUDIO_IN] on In1.Cu, length 11.2539 mm
+    @(34.0883 mm, 33.9453 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2417 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(34.4800 mm, 33.3000 mm): Track [GND] on B.Cu, length 1.2777 mm
+    @(34.0883 mm, 33.9453 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2326 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(17.6063 mm, 23.4765 mm): Track [nDRIVE] on F.Cu, length 2.9704 mm
+    @(15.8902 mm, 21.2193 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2343 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(15.5059 mm, 21.3761 mm): Track [nDRIVE] on F.Cu, length 0.8438 mm
+    @(15.8902 mm, 21.2193 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2390 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(82.5750 mm, 12.9864 mm): Track [ISOLATE] on B.Cu, length 0.9192 mm
+    @(82.5750 mm, 12.4363 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2300 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.9530 mm, 9.0040 mm): Track [PA2] on In2.Cu, length 1.1108 mm
+    @(70.8000 mm, 9.3840 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2302 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(77.9753 mm, 9.7642 mm): Track [U6_DQ10] on In2.Cu, length 8.6207 mm
+    @(70.8000 mm, 9.3840 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2270 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(72.3190 mm, 9.1226 mm): Track [PA2] on In2.Cu, length 1.2474 mm
+    @(70.8000 mm, 9.3840 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(71.0716 mm, 9.1226 mm): Track [PA2] on In2.Cu, length 0.1677 mm
+    @(70.8000 mm, 9.3840 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2433 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(73.0868 mm, 11.1146 mm): Track [U6_DQ13] on B.Cu, length 3.0936 mm
+    @(70.8000 mm, 9.3840 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2397 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(83.4944 mm, 19.3050 mm): Track [ISOLATE] on In2.Cu, length 3.2713 mm
+    @(82.5750 mm, 19.6947 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2322 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(82.1562 mm, 19.5730 mm): Track [PPU_A13] on B.Cu, length 0.7153 mm
+    @(82.5750 mm, 19.6947 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2483 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(57.5983 mm, 18.1384 mm): Track [U6_DQ14] on B.Cu, length 2.5884 mm
+    @(57.2000 mm, 17.1344 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2324 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(77.9753 mm, 9.7642 mm): Track [U6_DQ10] on In2.Cu, length 8.6207 mm
+    @(75.6000 mm, 9.3818 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2315 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(1.4458 mm, 21.8124 mm): Track [CPU_A3] on In1.Cu, length 2.4574 mm
+    @(1.0643 mm, 21.6517 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2334 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(1.0948 mm, 22.1634 mm): Track [CPU_A3] on In1.Cu, length 0.4964 mm
+    @(1.0643 mm, 21.6517 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2420 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.8309 mm, 16.8000 mm): Via [+3V3] on F.Cu - B.Cu
+    @(13.2164 mm, 16.3842 mm): Via [CA4] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2420 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.8309 mm, 16.8000 mm): Via [+3V3] on F.Cu - B.Cu
+    @(13.2164 mm, 16.3842 mm): Via [CA4] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2333 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.4476 mm, 18.3149 mm): Track [CPU_A1] on In1.Cu, length 7.4767 mm
+    @(12.8309 mm, 16.8000 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2420 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.8309 mm, 16.8000 mm): Via [+3V3] on F.Cu - B.Cu
+    @(13.2164 mm, 16.3842 mm): Via [CA4] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2420 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(12.8309 mm, 16.8000 mm): Via [+3V3] on F.Cu - B.Cu
+    @(13.2164 mm, 16.3842 mm): Via [CA4] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2471 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(79.3000 mm, 12.0883 mm): Track [GND] on F.Cu, length 1.8942 mm
+    @(80.8075 mm, 12.4854 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2293 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.8075 mm, 12.4854 mm): Via [+3V3] on F.Cu - B.Cu
+    @(81.1942 mm, 12.0883 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2293 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.8075 mm, 12.4854 mm): Via [+3V3] on F.Cu - B.Cu
+    @(81.1942 mm, 12.0883 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2293 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.8075 mm, 12.4854 mm): Via [+3V3] on F.Cu - B.Cu
+    @(81.1942 mm, 12.0883 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.3840 mm, 12.8621 mm): Track [PA7] on In2.Cu, length 2.9756 mm
+    @(80.8075 mm, 12.4854 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2293 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.8075 mm, 12.4854 mm): Via [+3V3] on F.Cu - B.Cu
+    @(81.1942 mm, 12.0883 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.5941 mm, 10.8703 mm): Track [PRG_A17] on In1.Cu, length 1.4851 mm
+    @(31.2174 mm, 12.3385 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2271 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.5941 mm, 12.3554 mm): Track [PRG_A17] on In1.Cu, length 1.7641 mm
+    @(31.2174 mm, 12.3385 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.4467 mm, 13.1004 mm): Track [PRG_A18] on In2.Cu, length 1.1447 mm
+    @(31.2174 mm, 12.3385 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2304 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(30.9890 mm, 12.0343 mm): Track [CD0] on In2.Cu, length 0.4080 mm
+    @(31.2174 mm, 12.3385 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2304 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(26.8981 mm, 12.0343 mm): Track [CD0] on In2.Cu, length 4.0909 mm
+    @(31.2174 mm, 12.3385 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2279 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(71.5331 mm, 8.4921 mm): Track [QSPIB_SD1] on F.Cu, length 1.0028 mm
+    @(71.9110 mm, 8.7000 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2405 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(71.2818 mm, 8.7769 mm): Track [U6_DQ9] on In2.Cu, length 1.7242 mm
+    @(71.9110 mm, 8.7000 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2471 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(34.3882 mm, 17.5731 mm): Track [PRG_A25] on In1.Cu, length 1.3401 mm
+    @(34.2029 mm, 18.3200 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2410 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.9927 mm, 20.8575 mm): Track [ISOLATE] on F.Cu, length 1.0938 mm
+    @(31.8483 mm, 20.1602 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2353 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(23.8818 mm, 16.8702 mm): Track [PRG_A25] on F.Cu, length 0.1831 mm
+    @(24.0392 mm, 17.2577 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2358 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(23.7523 mm, 16.9997 mm): Track [PRG_A25] on F.Cu, length 0.8608 mm
+    @(24.0392 mm, 17.2577 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2375 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(26.0715 mm, 16.8702 mm): Track [PRG_A25] on F.Cu, length 2.1897 mm
+    @(24.0392 mm, 17.2577 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2463 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(14.9102 mm, 8.0080 mm): Track [QSPIA_SD0] on F.Cu, length 2.1069 mm
+    @(15.9107 mm, 8.4480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2268 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.2532 mm, 8.8248 mm): Track [CA0] on In2.Cu, length 3.6614 mm
+    @(15.9107 mm, 8.4480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2485 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(17.1048 mm, 9.0786 mm): Track [ISOLATE] on B.Cu, length 3.3712 mm
+    @(15.9107 mm, 8.4480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2485 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.9367 mm, 26.5268 mm): Track [RUN] on In1.Cu, length 3.5721 mm
+    @(46.3352 mm, 26.1517 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2273 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.9325 mm, 26.2826 mm): Track [nBRIDGE] on B.Cu, length 1.4019 mm
+    @(46.3352 mm, 26.1517 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2458 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(33.5578 mm, 11.3164 mm): Track [VBUSA] on F.Cu, length 0.7350 mm
+    @(33.4660 mm, 10.6648 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2294 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(33.0381 mm, 10.5561 mm): Track [VBUSA] on F.Cu, length 1.5675 mm
+    @(33.4660 mm, 10.6648 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2329 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(22.0410 mm, 11.0824 mm): Track [XOUTA] on In2.Cu, length 0.6719 mm
+    @(22.6198 mm, 11.0451 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2281 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(83.5444 mm, 29.4701 mm): Track [PD0] on In2.Cu, length 1.5986 mm
+    @(82.8426 mm, 29.0920 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2377 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(82.6101 mm, 10.3736 mm): Track [PPU_A6] on In2.Cu, length 5.1861 mm
+    @(78.1794 mm, 10.7613 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2307 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(38.1266 mm, 16.8783 mm): Track [+5V] on F.Cu, length 0.1790 mm
+    @(38.5034 mm, 16.9324 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2268 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(38.1266 mm, 17.4967 mm): Track [+5V] on F.Cu, length 0.6184 mm
+    @(38.5034 mm, 16.9324 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(34.5205 mm, 21.4480 mm): Track [CPU_D2] on In1.Cu, length 8.8963 mm
+    @(38.5034 mm, 16.9324 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(37.7653 mm, 18.2032 mm): Track [CD_nOE] on B.Cu, length 1.9229 mm
+    @(38.5034 mm, 16.9324 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2353 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(31.2775 mm, 11.7458 mm): Track [CD0] on In2.Cu, length 5.1169 mm
+    @(32.6000 mm, 12.1311 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2283 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.6017 mm, 20.5217 mm): Track [CHR_A18] on F.Cu, length 0.0800 mm
+    @(70.1684 mm, 20.6135 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(70.5451 mm, 20.5783 mm): Track [CHR_A18] on F.Cu, length 1.0237 mm
+    @(70.1684 mm, 20.6135 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2494 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(68.0986 mm, 20.2141 mm): Track [CHR_A16] on In2.Cu, length 11.0635 mm
+    @(70.1684 mm, 20.6135 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2403 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(20.7805 mm, 16.6990 mm): Track [PRG_A17] on In1.Cu, length 2.1598 mm
+    @(21.1708 mm, 15.2610 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2437 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(18.6107 mm, 22.5165 mm): Track [CnROMSEL] on In1.Cu, length 0.8883 mm
+    @(18.5797 mm, 21.9287 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2357 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.3998 mm, 22.2033 mm): Track [CA10] on B.Cu, length 5.7609 mm
+    @(18.5797 mm, 21.9287 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2275 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(46.1425 mm, 22.7489 mm): Track [RUN] on In1.Cu, length 8.0971 mm
+    @(46.5200 mm, 18.3398 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2335 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.3920 mm, 8.0359 mm): Via [+3V3] on F.Cu - B.Cu
+    @(78.4495 mm, 8.5914 mm): Via [U6_DQ8] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2335 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.3920 mm, 8.0359 mm): Via [+3V3] on F.Cu - B.Cu
+    @(78.4495 mm, 8.5914 mm): Via [U6_DQ8] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2335 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.3920 mm, 8.0359 mm): Via [+3V3] on F.Cu - B.Cu
+    @(78.4495 mm, 8.5914 mm): Via [U6_DQ8] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2339 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.0131 mm, 8.0979 mm): Track [U6_DQ8] on In2.Cu, length 1.0527 mm
+    @(78.3920 mm, 8.0359 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2339 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.0131 mm, 8.2257 mm): Track [U6_DQ8] on In2.Cu, length 0.1278 mm
+    @(78.3920 mm, 8.0359 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2335 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.3920 mm, 8.0359 mm): Via [+3V3] on F.Cu - B.Cu
+    @(78.4495 mm, 8.5914 mm): Via [U6_DQ8] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.9233 mm, 9.3764 mm): Via [+3V3] on F.Cu - B.Cu
+    @(20.4751 mm, 9.3845 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.9233 mm, 9.3764 mm): Via [+3V3] on F.Cu - B.Cu
+    @(20.4751 mm, 9.3845 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.9233 mm, 9.3764 mm): Via [+3V3] on F.Cu - B.Cu
+    @(20.4751 mm, 9.3845 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2269 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.9233 mm, 9.3764 mm): Via [+3V3] on F.Cu - B.Cu
+    @(20.4751 mm, 9.3845 mm): Via [GND] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2406 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(80.2251 mm, 24.4372 mm): Track [PPU_A3] on In1.Cu, length 1.5623 mm
+    @(79.0774 mm, 25.0325 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(82.4571 mm, 25.4092 mm): Track [PnRD] on In2.Cu, length 7.9571 mm
+    @(79.0774 mm, 25.0325 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2457 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(68.4249 mm, 12.0812 mm): Track [PA3] on In1.Cu, length 3.2432 mm
+    @(68.8206 mm, 12.8000 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2483 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(56.0017 mm, 17.5857 mm): Track [U6_DQ12] on B.Cu, length 2.0323 mm
+    @(56.4000 mm, 17.1285 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2466 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(66.0501 mm, 26.6473 mm): Track [CHR_RAM_nCE] on In2.Cu, length 7.9475 mm
+    @(64.6829 mm, 26.2507 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2370 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(42.2136 mm, 17.9712 mm): Track [CD6] on In2.Cu, length 3.7871 mm
+    @(42.3841 mm, 18.3480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2268 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(43.4763 mm, 17.9712 mm): Track [CD6] on In2.Cu, length 1.2627 mm
+    @(42.3841 mm, 18.3480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(65.9887 mm, 25.2240 mm): Track [CHR_SEL] on F.Cu, length 2.5890 mm
+    @(66.2489 mm, 24.9516 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(66.5771 mm, 25.3283 mm): Track [CHR_SEL] on F.Cu, length 0.4841 mm
+    @(66.2489 mm, 24.9516 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(66.0930 mm, 25.3283 mm): Track [CHR_SEL] on F.Cu, length 0.1475 mm
+    @(66.2489 mm, 24.9516 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2485 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(65.7245 mm, 25.3501 mm): Track [CHR_A22] on In2.Cu, length 1.3633 mm
+    @(66.2489 mm, 24.9516 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(66.3492 mm, 24.3187 mm): Track [PD5] on In2.Cu, length 0.9392 mm
+    @(66.2489 mm, 24.9516 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2300 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(41.1023 mm, 20.4267 mm): Track [CHR_SEL] on B.Cu, length 4.1312 mm
+    @(43.1862 mm, 23.0480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2447 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(40.5036 mm, 20.9236 mm): Track [nCART_ACC] on B.Cu, length 5.3351 mm
+    @(43.1862 mm, 23.0480 mm): Via [+3V3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2402 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.6736 mm, 16.1500 mm): Track [+5V] on F.Cu, length 5.5747 mm
+    @(45.3375 mm, 15.9518 mm): Via [CD7] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2277 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.0015 mm, 16.1500 mm): Track [+5V] on F.Cu, length 0.2547 mm
+    @(45.3375 mm, 15.9518 mm): Via [CD7] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2492 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(38.1266 mm, 16.8783 mm): Track [+5V] on F.Cu, length 0.1790 mm
+    @(37.7499 mm, 17.0662 mm): Via [CPU_D3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2278 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.4935 mm, 16.3301 mm): Track [+5V] on F.Cu, length 0.2547 mm
+    @(45.3375 mm, 15.9518 mm): Via [CD7] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2283 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.1816 mm, 16.3301 mm): Track [+5V] on F.Cu, length 0.3119 mm
+    @(45.3375 mm, 15.9518 mm): Via [CD7] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(38.1266 mm, 17.4967 mm): Track [+5V] on F.Cu, length 0.6184 mm
+    @(37.7499 mm, 17.0662 mm): Via [CPU_D3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2401 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(38.7517 mm, 16.1500 mm): Track [+5V] on F.Cu, length 6.2498 mm
+    @(45.3375 mm, 15.9518 mm): Via [CD7] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2485 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(81.0817 mm, 38.4626 mm): Track [PPU_D3] on In1.Cu, length 0.8325 mm
+    @(80.9430 mm, 38.0641 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2299 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(81.3198 mm, 38.2245 mm): Track [PPU_D3] on In1.Cu, length 0.3367 mm
+    @(80.9430 mm, 38.0641 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2268 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(81.3198 mm, 37.7932 mm): Track [PPU_D3] on In1.Cu, length 0.4313 mm
+    @(80.9430 mm, 38.0641 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2479 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(69.6868 mm, 29.5635 mm): Track [CHR_RYBY] on F.Cu, length 10.6989 mm
+    @(78.9328 mm, 29.9614 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.5561 mm, 30.8017 mm): Track [PPU_A12] on B.Cu, length 0.9962 mm
+    @(78.9328 mm, 29.9614 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2266 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(78.5561 mm, 29.8055 mm): Track [PPU_A12] on B.Cu, length 3.5753 mm
+    @(78.9328 mm, 29.9614 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2487 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(32.7620 mm, 23.1749 mm): Track [ISOLATE] on F.Cu, length 1.0880 mm
+    @(32.9039 mm, 22.7529 mm): Via [+5V] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2330 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(51.9061 mm, 26.8909 mm): Track [+5V] on In2.Cu, length 14.8642 mm
+    @(46.9238 mm, 27.2739 mm): Via [nBRIDGE] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2383 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(51.9061 mm, 26.8909 mm): Track [+5V] on In2.Cu, length 14.8642 mm
+    @(50.5526 mm, 26.5026 mm): Via [nCART_ACC] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(53.6125 mm, 26.8909 mm): Track [+5V] on In2.Cu, length 0.8628 mm
+    @(52.9064 mm, 26.7175 mm): Via [CHR_nWE] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2427 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(74.7689 mm, 29.9614 mm): Track [+5V] on In2.Cu, length 0.4545 mm
+    @(74.3332 mm, 30.0810 mm): Via [PD1] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2320 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(29.5923 mm, 30.0983 mm): Track [AUDIO_IN] on In1.Cu, length 1.1833 mm
+    @(30.8392 mm, 29.7216 mm): Via [CPU_D3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2320 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(30.7756 mm, 30.0983 mm): Track [AUDIO_IN] on In1.Cu, length 11.2539 mm
+    @(30.8392 mm, 29.7216 mm): Via [CPU_D3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2490 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.8003 mm, 29.9198 mm): Track [nBRIDGE] on In2.Cu, length 0.7242 mm
+    @(45.1037 mm, 30.0521 mm): Via [AUDIO_OUT] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2298 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.2882 mm, 30.4319 mm): Track [nBRIDGE] on In2.Cu, length 9.6094 mm
+    @(45.1037 mm, 30.0521 mm): Via [AUDIO_OUT] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(44.3730 mm, 29.3214 mm): Track [AUDIO_OUT] on In2.Cu, length 3.5473 mm
+    @(40.9816 mm, 29.6981 mm): Via [CPU_D0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2350 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(40.8022 mm, 29.3449 mm): Track [AUDIO_OUT] on In2.Cu, length 10.9846 mm
+    @(32.5747 mm, 28.9599 mm): Via [CRW] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(40.8022 mm, 29.3449 mm): Track [AUDIO_OUT] on In2.Cu, length 10.9846 mm
+    @(30.8392 mm, 29.7216 mm): Via [CPU_D3] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2461 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(40.8022 mm, 29.3449 mm): Track [AUDIO_OUT] on In2.Cu, length 10.9846 mm
+    @(40.9816 mm, 29.6981 mm): Via [CPU_D0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2461 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(40.8257 mm, 29.3214 mm): Track [AUDIO_OUT] on In2.Cu, length 0.0332 mm
+    @(40.9816 mm, 29.6981 mm): Via [CPU_D0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2342 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(45.3183 mm, 38.9000 mm): Track [AUDIO_OUT] on B.Cu, length 8.6333 mm
+    @(44.9341 mm, 38.0466 mm): Via [nIRQ] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2283 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(29.4850 mm, 29.0349 mm): Track [AUDIO_OUT] on B.Cu, length 2.4360 mm
+    @(29.8633 mm, 28.7653 mm): Via [CART_PRESENT] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(15.2038 mm, 5.1414 mm): Track [QSPIA_SD3] on In1.Cu, length 3.6946 mm
+    @(14.8271 mm, 5.3276 mm): Via [BOOTA_SW] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2480 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(15.0009 mm, 4.9385 mm): Track [QSPIA_SD3] on In1.Cu, length 0.2869 mm
+    @(14.8271 mm, 5.3276 mm): Via [BOOTA_SW] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2391 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(13.2345 mm, 4.9385 mm): Track [QSPIA_SD3] on In1.Cu, length 1.7664 mm
+    @(14.8271 mm, 5.3276 mm): Via [BOOTA_SW] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(18.5461 mm, 23.8165 mm): Track [CD7] on F.Cu, length 1.3965 mm
+    @(18.1252 mm, 24.1932 mm): Via [BOOTA_SW] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2283 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(19.0097 mm, 25.6127 mm): Track [CD5] on In1.Cu, length 1.9438 mm
+    @(18.1252 mm, 24.1932 mm): Via [BOOTA_SW] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2277 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(15.0051 mm, 9.7041 mm): Track [BOOTA_SW] on In1.Cu, length 0.3619 mm
+    @(15.1259 mm, 9.2907 mm): Via [CA0] on F.Cu - B.Cu
+[hole_clearance]: Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2267 mm)
+    Rule: board setup constraints hole; Severity: error
+    @(15.0051 mm, 13.3486 mm): Track [BOOTA_SW] on In1.Cu, length 3.6445 mm
+    @(14.6284 mm, 13.1926 mm): Via [XOUTA] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(74.1374 mm, 9.3762 mm): Via [+3V3] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(70.8000 mm, 9.3840 mm): Via [+3V3] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(75.6000 mm, 9.3818 mm): Via [+3V3] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(22.6198 mm, 11.0451 mm): Via [+3V3] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(82.8426 mm, 29.0920 mm): Via [+3V3] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(25.1573 mm, 25.7272 mm): Via [GND] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(80.8076 mm, 16.6199 mm): Via [GND] on F.Cu - B.Cu
+[via_dangling]: Via is not connected or connected on only one layer
+    Local override; Severity: warning
+    @(14.9800 mm, 22.0389 mm): Via [GND] on F.Cu - B.Cu
+
+** Found 119 unconnected pads **
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(70.3437 mm, 20.4382 mm): Track [+3V3] on F.Cu, length 0.2479 mm
+    @(70.0200 mm, 21.3000 mm): Track [+3V3] on F.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(33.4000 mm, 11.4000 mm): Track [+3V3] on B.Cu, length 0.6692 mm
+    @(34.2000 mm, 11.4000 mm): Track [+3V3] on B.Cu, length 0.7277 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(54.4000 mm, 28.9000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+    @(55.1125 mm, 29.8608 mm): Track [+3V3] on F.Cu, length 0.2274 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(37.4000 mm, 28.9000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+    @(37.4000 mm, 29.7000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(36.4517 mm, 15.5000 mm): Track [+3V3] on F.Cu, length 0.2493 mm
+    @(36.4517 mm, 14.1758 mm): Track [+3V3] on F.Cu, length 0.5242 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(72.4000 mm, 19.8965 mm): Pad 29 [+3V3] of U2 on F.Cu
+    @(73.2250 mm, 20.3000 mm): Track [+3V3] on B.Cu, length 1.6355 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(14.4000 mm, 19.8965 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+    @(14.0200 mm, 20.8383 mm): Track [+3V3] on F.Cu, length 0.4290 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(70.8000 mm, 10.1035 mm): Track [+3V3] on F.Cu, length 0.7195 mm
+    @(71.9110 mm, 8.7000 mm): Via [+3V3] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(63.5750 mm, 26.2500 mm): Track [+3V3] on B.Cu, length 0.9267 mm
+    @(66.2288 mm, 24.9717 mm): Track [+3V3] on F.Cu, length 2.2671 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(72.5200 mm, 8.7000 mm): Track [+3V3] on F.Cu, length 0.4317 mm
+    @(73.6000 mm, 9.5618 mm): Track [+3V3] on F.Cu, length 0.4000 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(17.7450 mm, 9.5618 mm): Track [+3V3] on F.Cu, length 0.1450 mm
+    @(16.5200 mm, 8.7000 mm): Track [+3V3] on F.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(66.0000 mm, 26.6750 mm): Track [+3V3] on F.Cu, length 0.6267 mm
+    @(64.5024 mm, 26.2507 mm): Track [+3V3] on B.Cu, length 0.1805 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(78.4382 mm, 11.2000 mm): Track [+3V3] on F.Cu, length 0.4000 mm
+    @(79.6875 mm, 12.2500 mm): Track [+3V3] on B.Cu, length 0.9392 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(77.4483 mm, 7.4050 mm): Track [+3V3] on F.Cu, length 0.4226 mm
+    @(76.3250 mm, 6.5000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(74.1374 mm, 9.3762 mm): Via [+3V3] on F.Cu - B.Cu
+    @(75.6000 mm, 9.5618 mm): Track [+3V3] on F.Cu, length 0.1800 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(66.7000 mm, 13.4800 mm): Track [+3V3] on F.Cu, length 0.6092 mm
+    @(68.1035 mm, 12.8000 mm): Track [+3V3] on F.Cu, length 0.7171 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(68.1035 mm, 16.8000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+    @(66.7000 mm, 17.4800 mm): Track [+3V3] on F.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(77.8965 mm, 18.8000 mm): Pad 41 [+3V3] of U2 on F.Cu
+    @(81.0830 mm, 19.6947 mm): Track [+3V3] on F.Cu, length 2.5215 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(9.1890 mm, 11.4343 mm): Via [+3V3] on F.Cu - B.Cu
+    @(7.7250 mm, 10.5000 mm): Track [+3V3] on F.Cu, length 0.6267 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(80.6267 mm, 12.2500 mm): Track [+3V3] on B.Cu, length 0.0546 mm
+    @(80.7250 mm, 10.5000 mm): Track [+3V3] on F.Cu, length 0.6267 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(79.8129 mm, 13.4800 mm): Track [+3V3] on F.Cu, length 1.4066 mm
+    @(82.5750 mm, 12.4363 mm): Via [+3V3] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(10.7000 mm, 13.0483 mm): Track [+3V3] on F.Cu, length 0.4317 mm
+    @(10.3125 mm, 11.2500 mm): Track [+3V3] on B.Cu, length 0.9392 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(16.5200 mm, 8.7000 mm): Track [+3V3] on F.Cu, length 0.4317 mm
+    @(14.8000 mm, 10.1035 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(78.2368 mm, 5.2500 mm): Track [+3V3] on B.Cu, length 0.3543 mm
+    @(76.3250 mm, 6.5000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(36.1306 mm, 33.1789 mm): Via [+3V3] on F.Cu - B.Cu
+    @(38.1200 mm, 33.3000 mm): Track [+3V3] on B.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(72.4000 mm, 19.8965 mm): Pad 29 [+3V3] of U2 on F.Cu
+    @(70.4000 mm, 19.8965 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.2250 mm, 20.3000 mm): Track [+3V3] on B.Cu, length 0.8113 mm
+    @(21.8965 mm, 18.8000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(15.3250 mm, 6.5000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+    @(16.0883 mm, 8.6256 mm): Track [+3V3] on F.Cu, length 0.2512 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(56.8542 mm, 32.3708 mm): Track [+3V3] on B.Cu, length 0.4726 mm
+    @(54.5267 mm, 32.2250 mm): Via [+3V3] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.3000 mm, 13.4800 mm): Track [+3V3] on F.Cu, length 0.4617 mm
+    @(22.4382 mm, 11.6000 mm): Track [+3V3] on F.Cu, length 0.4000 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(79.3000 mm, 13.4800 mm): Track [+3V3] on F.Cu, length 0.5129 mm
+    @(77.8965 mm, 15.2000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.3000 mm, 13.4800 mm): Track [+3V3] on F.Cu, length 0.4617 mm
+    @(21.8965 mm, 15.2000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(75.6000 mm, 9.5618 mm): Track [+3V3] on F.Cu, length 0.1800 mm
+    @(77.4483 mm, 7.4050 mm): Track [+3V3] on F.Cu, length 0.4226 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(12.8284 mm, 12.6168 mm): Via [+3V3] on F.Cu - B.Cu
+    @(14.6106 mm, 10.8346 mm): Track [+3V3] on F.Cu, length 0.1429 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(19.6000 mm, 10.1035 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+    @(21.8965 mm, 11.2000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(77.8965 mm, 11.2000 mm): Track [+3V3] on F.Cu, length 0.2829 mm
+    @(75.6000 mm, 10.1035 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(18.5797 mm, 21.9287 mm): Via [+3V3] on F.Cu - B.Cu
+    @(16.4000 mm, 20.5574 mm): Track [+3V3] on F.Cu, length 0.7210 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(77.8965 mm, 15.2000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+    @(79.3000 mm, 17.4800 mm): Track [+3V3] on F.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.3000 mm, 17.4800 mm): Track [+3V3] on F.Cu, length 0.4617 mm
+    @(21.8965 mm, 15.2000 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(85.0200 mm, 31.3509 mm): Via [+3V3] on F.Cu - B.Cu
+    @(82.5750 mm, 30.1625 mm): Track [+3V3] on B.Cu, length 0.8892 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(31.8483 mm, 20.1602 mm): Via [+3V3] on F.Cu - B.Cu
+    @(31.0000 mm, 22.7750 mm): Track [+3V3] on F.Cu, length 0.6267 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(37.4000 mm, 29.7000 mm): Track [+3V3] on F.Cu, length 0.5517 mm
+    @(38.9075 mm, 32.0500 mm): Track [+3V3] on F.Cu, length 0.6660 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(65.5200 mm, 20.3000 mm): Pad 1 [+3V3] of C39 on B.Cu
+    @(66.0619 mm, 17.4800 mm): Via [+3V3] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(45.7824 mm, 16.7517 mm): Track [+3V3] on B.Cu, length 0.2546 mm
+    @(42.7200 mm, 17.7000 mm): Track [+3V3] on B.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(12.8309 mm, 16.8000 mm): Via [+3V3] on F.Cu - B.Cu
+    @(14.4000 mm, 19.3548 mm): Track [+3V3] on F.Cu, length 0.2101 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(48.9375 mm, 32.0500 mm): Pad 5 [+3V3] of U16 on F.Cu
+    @(51.9200 mm, 32.7050 mm): Track [+3V3] on B.Cu, length 0.5950 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(47.3200 mm, 32.7050 mm): Track [+3V3] on B.Cu, length 0.5950 mm
+    @(44.3375 mm, 32.0500 mm): Pad 5 [+3V3] of U15 on F.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(85.0200 mm, 22.6000 mm): Track [+3V3] on B.Cu, length 0.6434 mm
+    @(82.5750 mm, 20.7625 mm): Track [+3V3] on B.Cu, length 1.0678 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(48.1500 mm, 20.9483 mm): Track [+3V3] on F.Cu, length 1.0797 mm
+    @(46.5200 mm, 18.3398 mm): Via [+3V3] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(21.1790 mm, 18.8000 mm): Via [+3V3] on F.Cu - B.Cu
+    @(19.0200 mm, 21.3000 mm): Track [+3V3] on F.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(30.3733 mm, 22.7750 mm): Track [+3V3] on F.Cu, length 0.2523 mm
+    @(28.5000 mm, 25.5200 mm): Track [+3V3] on B.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(68.1035 mm, 12.8000 mm): Track [+3V3] on F.Cu, length 0.7171 mm
+    @(70.8000 mm, 10.1035 mm): Track [+3V3] on F.Cu, length 0.7195 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(70.4000 mm, 19.8965 mm): Track [+3V3] on F.Cu, length 0.5417 mm
+    @(68.6763 mm, 16.8311 mm): Track [+3V3] on F.Cu, length 0.1466 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(59.8028 mm, 22.9511 mm): Via [+3V3] on F.Cu - B.Cu
+    @(63.9617 mm, 24.9717 mm): Track [+3V3] on F.Cu, length 0.6671 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.2250 mm, 20.3000 mm): Track [+3V3] on B.Cu, length 0.8113 mm
+    @(25.4900 mm, 24.5000 mm): Track [+3V3] on F.Cu, length 0.4717 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(58.0000 mm, 12.1432 mm): Via [+3V3] on F.Cu - B.Cu
+    @(58.0000 mm, 16.4000 mm): Track [+3V3] on B.Cu, length 0.7477 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(65.0883 mm, 20.3000 mm): Track [+3V3] on B.Cu, length 0.2273 mm
+    @(63.9617 mm, 24.9717 mm): Track [+3V3] on F.Cu, length 0.6671 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(75.2996 mm, 22.1769 mm): Track [+3V3] on F.Cu, length 0.3121 mm
+    @(78.5000 mm, 25.5200 mm): Track [+3V3] on B.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(82.5750 mm, 29.2733 mm): Track [+3V3] on B.Cu, length 0.0863 mm
+    @(78.9617 mm, 25.5200 mm): Track [+3V3] on B.Cu, length 0.3718 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(59.0000 mm, 22.7750 mm): Track [+3V3] on F.Cu, length 0.6267 mm
+    @(58.0000 mm, 17.1477 mm): Via [+3V3] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(3.5250 mm, 5.6375 mm): Pad 4 [CPU_A2] of U9 on B.Cu
+    @(33.5700 mm, 41.2500 mm): Pad 11 [CPU_A2] of J1 on F.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(4.8250 mm, 5.6375 mm): Pad 6 [CPU_A4] of U9 on B.Cu
+    @(28.4900 mm, 41.2500 mm): Pad 9 [CPU_A4] of J1 on F.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(79.3000 mm, 16.9517 mm): Track [GND] on F.Cu, length 0.3571 mm
+    @(79.6875 mm, 16.7500 mm): Track [GND] on B.Cu, length 0.9392 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(29.6875 mm, 7.2500 mm): Track [GND] on B.Cu, length 0.9392 mm
+    @(29.1000 mm, 6.8500 mm): Track [GND] on F.Cu, length 0.8517 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(24.7750 mm, 20.3000 mm): Track [GND] on B.Cu, length 0.6267 mm
+    @(25.0000 mm, 21.2250 mm): Track [GND] on F.Cu, length 0.6267 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(52.8800 mm, 33.3000 mm): Track [GND] on B.Cu, length 0.4317 mm
+    @(52.2550 mm, 34.1283 mm): Track [GND] on F.Cu, length 0.2522 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(4.9800 mm, 23.2491 mm): Track [GND] on B.Cu, length 0.6491 mm
+    @(4.8250 mm, 24.4375 mm): Track [GND] on B.Cu, length 0.8892 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(29.2750 mm, 25.4267 mm): Track [GND] on F.Cu, length 0.6147 mm
+    @(28.5000 mm, 26.4800 mm): Track [GND] on B.Cu, length 0.6217 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(73.4800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.4317 mm
+    @(74.7750 mm, 20.3000 mm): Track [GND] on B.Cu, length 0.6017 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(20.4000 mm, 9.4596 mm): Track [GND] on F.Cu, length 0.1062 mm
+    @(21.9800 mm, 8.7000 mm): Track [GND] on F.Cu, length 0.6385 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(41.0732 mm, 33.8831 mm): Track [GND] on F.Cu, length 0.1082 mm
+    @(39.7044 mm, 33.2081 mm): Via [GND] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(61.9296 mm, 5.3279 mm): Via [GND] on F.Cu - B.Cu
+    @(63.1000 mm, 6.8500 mm): Track [GND] on F.Cu, length 0.8517 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(39.0800 mm, 33.3000 mm): Track [GND] on B.Cu, length 0.4317 mm
+    @(37.4625 mm, 33.9500 mm): Track [GND] on F.Cu, length 0.8142 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(43.6800 mm, 33.3000 mm): Track [GND] on B.Cu, length 0.4317 mm
+    @(42.0625 mm, 33.9500 mm): Track [GND] on F.Cu, length 0.8142 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(14.9800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.7389 mm
+    @(16.4800 mm, 20.3000 mm): Track [GND] on B.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(40.8250 mm, 11.0000 mm): Track [GND] on F.Cu, length 0.6267 mm
+    @(41.7300 mm, 9.2217 mm): Track [GND] on F.Cu, length 0.4800 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(50.7500 mm, 19.5375 mm): Track [GND] on B.Cu, length 1.0646 mm
+    @(51.0800 mm, 17.7000 mm): Track [GND] on B.Cu, length 0.6413 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(82.2750 mm, 10.5000 mm): Track [GND] on F.Cu, length 0.6017 mm
+    @(79.3000 mm, 12.0883 mm): Track [GND] on F.Cu, length 1.8942 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(26.4250 mm, 25.7500 mm): Track [GND] on B.Cu, length 1.2449 mm
+    @(28.5000 mm, 26.4800 mm): Track [GND] on B.Cu, length 0.6217 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(76.4250 mm, 25.7500 mm): Track [GND] on B.Cu, length 1.0572 mm
+    @(78.5000 mm, 26.4800 mm): Track [GND] on B.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on In1.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(34.2700 mm, 9.2217 mm): Track [GND] on F.Cu, length 0.4800 mm
+    @(36.8250 mm, 10.1908 mm): Via [GND] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(19.9800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.4617 mm
+    @(17.4800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(73.4800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.4317 mm
+    @(70.9800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.6442 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(88.4250 mm, 24.4375 mm): Track [GND] on B.Cu, length 1.0647 mm
+    @(85.9800 mm, 23.2376 mm): Via [GND] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(73.4800 mm, 8.7000 mm): Track [GND] on F.Cu, length 0.7954 mm
+    @(76.4000 mm, 9.4982 mm): Track [GND] on F.Cu, length 0.1639 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.4758 mm, 11.9125 mm): Via [GND] on F.Cu - B.Cu
+    @(21.9800 mm, 8.7000 mm): Track [GND] on F.Cu, length 0.6385 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(17.4800 mm, 8.0483 mm): Via [GND] on F.Cu - B.Cu
+    @(14.4800 mm, 7.9383 mm): Track [GND] on F.Cu, length 0.1453 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(17.4800 mm, 8.0483 mm): Track [GND] on F.Cu, length 0.6517 mm
+    @(20.4000 mm, 9.4596 mm): Track [GND] on F.Cu, length 0.1062 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(7.4424 mm, 6.7066 mm): Via [GND] on F.Cu - B.Cu
+    @(8.7353 mm, 9.8733 mm): Track [GND] on F.Cu, length 0.3077 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(24.2484 mm, 19.6733 mm): Track [GND] on B.Cu, length 0.1739 mm
+    @(23.3000 mm, 16.5200 mm): Track [GND] on F.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(56.0000 mm, 22.1750 mm): Track [GND] on F.Cu, length 0.7312 mm
+    @(59.0000 mm, 21.2250 mm): Track [GND] on F.Cu, length 0.6267 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(23.3000 mm, 12.5200 mm): Track [GND] on F.Cu, length 0.4317 mm
+    @(22.8995 mm, 16.0883 mm): Track [GND] on F.Cu, length 0.1698 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(77.1433 mm, 9.3345 mm): Via [GND] on F.Cu - B.Cu
+    @(79.3000 mm, 12.5200 mm): Track [GND] on F.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(66.0558 mm, 16.7025 mm): Via [GND] on F.Cu - B.Cu
+    @(66.4800 mm, 20.3000 mm): Track [GND] on B.Cu, length 0.4617 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(29.2750 mm, 24.8000 mm): Track [GND] on F.Cu, length 0.6267 mm
+    @(30.3733 mm, 21.2250 mm): Track [GND] on F.Cu, length 0.2482 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(15.9719 mm, 31.2907 mm): Track [GND] on F.Cu, length 0.2495 mm
+    @(11.9682 mm, 31.0165 mm): Track [GND] on F.Cu, length 0.0668 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(66.7000 mm, 16.5200 mm): Track [GND] on F.Cu, length 0.4617 mm
+    @(66.2383 mm, 12.5200 mm): Track [GND] on F.Cu, length 0.2584 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(79.3000 mm, 12.5200 mm): Track [GND] on F.Cu, length 0.4317 mm
+    @(79.3000 mm, 16.5200 mm): Track [GND] on F.Cu, length 0.4317 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(82.8767 mm, 10.5000 mm): Track [GND] on F.Cu, length 0.2881 mm
+    @(85.9800 mm, 13.2000 mm): Track [GND] on B.Cu, length 0.6481 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(17.0000 mm, 16.1000 mm): PTH pad 81 [GND] of U1
+    @(16.9117 mm, 20.3000 mm): Track [GND] on B.Cu, length 0.1481 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(74.1000 mm, 16.1000 mm): PTH pad 81 [GND] of U2
+    @(74.7750 mm, 20.3000 mm): Track [GND] on B.Cu, length 0.6017 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(66.7286 mm, 20.9651 mm): Via [GND] on F.Cu - B.Cu
+    @(70.9800 mm, 21.3000 mm): Track [GND] on F.Cu, length 0.6442 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(29.6875 mm, 16.7500 mm): Track [GND] on B.Cu, length 0.9392 mm
+    @(30.1978 mm, 21.0495 mm): Via [GND] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(78.9617 mm, 26.4800 mm): Track [GND] on B.Cu, length 0.2569 mm
+    @(79.1500 mm, 30.9000 mm): Track [GND] on F.Cu, length 1.0017 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(66.7000 mm, 12.5200 mm): Track [GND] on F.Cu, length 0.4617 mm
+    @(68.9800 mm, 8.7000 mm): Track [GND] on F.Cu, length 0.7013 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(59.6267 mm, 21.2250 mm): Track [GND] on F.Cu, length 0.2537 mm
+    @(62.2750 mm, 24.8000 mm): Track [GND] on F.Cu, length 0.8065 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(62.2750 mm, 24.8000 mm): Track [GND] on F.Cu, length 0.8065 mm
+    @(65.0000 mm, 21.2250 mm): Track [GND] on F.Cu, length 0.6267 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(85.9800 mm, 22.6000 mm): Track [GND] on B.Cu, length 0.6376 mm
+    @(81.2134 mm, 18.5080 mm): Track [GND] on F.Cu, length 2.6602 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(21.5000 mm, 33.2750 mm): Track [GND] on F.Cu, length 0.6267 mm
+    @(17.1500 mm, 30.9000 mm): Track [GND] on F.Cu, length 1.0017 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(80.1517 mm, 30.9000 mm): Track [GND] on F.Cu, length 0.2509 mm
+    @(84.8400 mm, 33.5000 mm): PTH pad 2 [GND] of J6
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(75.3678 mm, 25.7500 mm): Track [GND] on B.Cu, length 0.0703 mm
+    @(72.8500 mm, 30.9000 mm): Track [GND] on F.Cu, length 1.0017 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(10.8500 mm, 30.9000 mm): Track [GND] on F.Cu, length 1.0017 mm
+    @(4.9800 mm, 32.0000 mm): Track [GND] on B.Cu, length 0.6475 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(6.1250 mm, 25.5036 mm): Via [GND] on F.Cu - B.Cu
+    @(4.9800 mm, 32.0000 mm): Track [GND] on B.Cu, length 0.6475 mm
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(4.9800 mm, 23.2491 mm): Track [GND] on B.Cu, length 0.6491 mm
+    @(9.1979 mm, 17.3094 mm): Via [GND] on F.Cu - B.Cu
+[unconnected_items]: Missing connection between items
+    Local override; Severity: error
+    @(5.1600 mm, 33.5000 mm): PTH pad 2 [GND] of J5
+    @(7.6700 mm, 41.7500 mm): Pad 1 [GND] of J1 on F.Cu
+
+** Found 0 Footprint errors **
+
+** End of Report **
