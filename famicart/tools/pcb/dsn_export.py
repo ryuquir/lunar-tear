@@ -17,8 +17,9 @@ def set_layers(board):
     stubs = os.environ.get('FC_STUBS', '0') == '1'
     inner = four and (os.environ.get('FC_DSN_INNER', '1') == '1') and not stubs
     LAYERS = [(pcbnew.F_Cu, 'F.Cu')] + ([(pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu')] if inner else []) + [(pcbnew.B_Cu, 'B.Cu')]
-    PLANE_NETS = ('GND', '+3V3') if (four and stubs) else ()          # stubs: plane nets are pre-wired, not routed
-    POWER_NETS = ('GND', '+3V3') if (four and inner) else ()          # router: power nets may use the inner (plane) layers, signals may not
+    PLANE_NETS = ('GND', '+3V3') if (four and stubs) else ()          # stubs: pads that already have a via stub are left out of the netlist
+    POWER_NETS = ('GND', '+3V3') if four else ()                      # router: power nets may use the inner (plane) layers, signals may not
+    if stubs: LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.In1_Cu, 'In1.Cu'), (pcbnew.In2_Cu, 'In2.Cu'), (pcbnew.B_Cu, 'B.Cu')]
 def lname_of(lid): return dict(LAYERS).get(lid, 'F.Cu')
 
 def q(s): return '"' + s.replace('"', '') + '"'
@@ -97,7 +98,17 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         images[img_name] = f'(image {q(img_name)} ' + ' '.join(pins) + ')'
     via_name = f'Via[0-1]_{U(via_dia)}:{U(via_drill)}_um'
     padstacks[via_name] = f'(padstack {q(via_name)} ' + ' '.join(f'(shape (circle {l} {U(via_dia)}))' for _, l in LAYERS) + ' (attach off))'
-    # nets
+    # nets (pads that already carry a fixed power stub are not handed to the router)
+    stubbed = set()
+    if PLANE_NETS:
+        ends = {}
+        for t in board.GetTracks():
+            if t.GetClass() == 'PCB_TRACK' and t.GetNetname() in PLANE_NETS:
+                ends.setdefault((t.GetStart().x, t.GetStart().y), t.GetNetname()); ends.setdefault((t.GetEnd().x, t.GetEnd().y), t.GetNetname())
+        for fp in board.GetFootprints():
+            for pad in fp.Pads():
+                if pad.GetNetname() in PLANE_NETS and ends.get((pad.GetPosition().x, pad.GetPosition().y)) == pad.GetNetname():
+                    stubbed.add((fp.GetReference(), pad.GetPosition().x, pad.GetPosition().y))
     nets = {}
     for fp in board.GetFootprints():
         seen_ids = {}
@@ -107,7 +118,8 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
             k = seen_ids.get(pid, 0); seen_ids[pid] = k + 1
             if k: pid = f'{pid}@{k}'
             n = pad.GetNetname()
-            if n and n not in PLANE_NETS: nets.setdefault(n, []).append(f'{fp.GetReference()}-{pid}')
+            if n in PLANE_NETS and (fp.GetReference(), pad.GetPosition().x, pad.GetPosition().y) in stubbed: continue
+            if n: nets.setdefault(n, []).append(f'{fp.GetReference()}-{pid}')
     boundary = ' '.join(f'{U(x)} {-U(y)}' for x, y in outline_mm)
     out = []
     out.append(f'(pcb {q(os.path.basename(path))}')

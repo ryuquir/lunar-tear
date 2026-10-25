@@ -109,17 +109,18 @@ def main():
     # 4-layer boards: GND / +3V3 are inner planes. Give every SMD pad of those nets a fixed via stub so the
     # autorouter never has to route them (dsn_export drops these nets); the KiCad zone fill does the rest.
     PLANE_NETS = {'GND': pcbnew.In1_Cu, '+3V3': pcbnew.In2_Cu} if (NL == 4 and os.environ.get('FC_STUBS', '0') == '1') else {}   # FC_STUBS=1: fixed via stubs; default: the router fans out power on the inner layers
+    stub_groups = []
     def add_via(x, y, net):
         v = pcbnew.PCB_VIA(board); v.SetPosition(mm(x, y)); v.SetViaType(pcbnew.VIATYPE_THROUGH)
-        v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(VDR)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(netmap[net]); board.Add(v)
+        v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(VDR)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(netmap[net]); board.Add(v); return v
     def add_track(x1, y1, x2, y2, net, layer, w=0.2):
-        t = pcbnew.PCB_TRACK(board); t.SetStart(mm(x1, y1)); t.SetEnd(mm(x2, y2)); t.SetWidth(FromMM(w)); t.SetLayer(layer); t.SetNet(netmap[net]); board.Add(t)
+        t = pcbnew.PCB_TRACK(board); t.SetStart(mm(x1, y1)); t.SetEnd(mm(x2, y2)); t.SetWidth(FromMM(w)); t.SetLayer(layer); t.SetNet(netmap[net]); board.Add(t); return t
     import math
     # obstacles for stub-via placement: every pad (any layer: vias go through the board) and every via placed so far
     obstacles = []   # (x, y, radius_mm, net)
     for fp in board.GetFootprints():
         for pad in fp.Pads():
-            r = max(ToMM(pad.GetSize().x), ToMM(pad.GetSize().y)) / 2
+            r = math.hypot(ToMM(pad.GetSize().x), ToMM(pad.GetSize().y)) / 2          # half diagonal: safe for rectangles
             if pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD: r = max(r, ToMM(pad.GetDrillSize().x) / 2 + 0.3)
             obstacles.append((ToMM(pad.GetPosition().x), ToMM(pad.GetPosition().y), r, pad.GetNetname(), pad.GetAttribute() == pcbnew.PAD_ATTRIB_SMD, pad.GetLayerSet().Contains(pcbnew.B_Cu)))
     def via_margin(x, y, net):
@@ -149,9 +150,9 @@ def main():
                 if d < worst: worst = d
         return worst
     def note_track(x1, y1, x2, y2, w, net, layer_b=False):
-        n = max(2, int(math.hypot(x2 - x1, y2 - y1) / 0.2) + 1)
+        n = max(2, int(math.hypot(x2 - x1, y2 - y1) / 0.1) + 1)
         for i in range(n + 1):
-            t = i / n; obstacles.append((x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, w / 2, 'TRK:' + net, False, layer_b))
+            t = i / n; obstacles.append((x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, w / 2 + 0.05, 'TRK:' + net, False, layer_b))
     def place_stub(fp, n, pads, pad0):
         cx, cy = ToMM(fp.GetPosition().x), ToMM(fp.GetPosition().y)
         xs = [p[0] for p in pads]; ys = [p[1] for p in pads]
@@ -182,18 +183,23 @@ def main():
             if m >= 0: best = (vx, vy); bestm = m; break
             if m > bestm: bestm = m; best = (vx, vy)
         vx, vy = best
-        if bestm < 0: print('WARN: stub via for', fp.GetReference(), n, 'at', round(gx, 2), round(gy, 2), 'placed with margin', round(bestm, 2))
+        if bestm < 0: print('stub skipped (router will do it):', fp.GetReference(), n, 'at', round(gx, 2), round(gy, 2), 'margin', round(bestm, 2)); return False
+        items = []
         for (px, py), (qx, qy) in zip(pads, p1):
-            add_track(px, py, qx, qy, n, layer, w); note_track(px, py, qx, qy, w, n, layer_b)
-            add_track(qx, qy, vx, vy, n, layer, w); note_track(qx, qy, vx, vy, w, n, layer_b)
-        add_via(vx, vy, n); obstacles.append((vx, vy, VIA / 2, 'VIA', False, layer_b)); return True
-    for fp in board.GetFootprints():
+            items.append(add_track(px, py, qx, qy, n, layer, w)); note_track(px, py, qx, qy, w, n, layer_b)
+            items.append(add_track(qx, qy, vx, vy, n, layer, w)); note_track(qx, qy, vx, vy, w, n, layer_b)
+        items.append(add_via(vx, vy, n)); obstacles.append((vx, vy, VIA / 2, 'VIA', False, layer_b))
+        stub_groups.append(items); return True
+    STUB_SKIP = set(os.environ.get('FC_STUB_SKIP', 'U1,U2').split(','))
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference() == 'J1'):
         if not PLANE_NETS: break
+        if fp.GetReference() in STUB_SKIP: continue
         if fp.GetReference() == 'J1':
             for pad in fp.Pads():
                 if pad.GetNetname() in PLANE_NETS:          # finger: short stub up into the body, then a via into the plane
                     px = ToMM(pad.GetPosition().x); layer = pcbnew.B_Cu if pad.GetLayerSet().Contains(pcbnew.B_Cu) else pcbnew.F_Cu
-                    vx = px + (1.8 if px < 10 else 0.0); vy = BODY_H - 0.9          # pin 1 sits under the SWD header
+                    cands = [(px + dx, BODY_H - dy) for dy in (0.9, 1.3, 1.7) for dx in (0.0, 0.6, -0.6, 1.2, -1.2, 1.8, -1.8, 2.4)]
+                    vx, vy = max(cands, key=lambda c: via_margin(c[0], c[1], pad.GetNetname()))
                     add_track(px, BODY_H + 3.5, px, BODY_H - 0.3, pad.GetNetname(), layer, 0.4); add_track(px, BODY_H - 0.3, vx, vy, pad.GetNetname(), layer, 0.4)
                     add_via(vx, vy, pad.GetNetname()); obstacles.append((vx, vy, VIA / 2, 'VIA', False, False))
                     note_track(px, BODY_H + 3.5, px, BODY_H - 0.3, 0.4, pad.GetNetname(), layer == pcbnew.B_Cu); note_track(px, BODY_H - 0.3, vx, vy, 0.4, pad.GetNetname(), layer == pcbnew.B_Cu)
@@ -209,6 +215,45 @@ def main():
             if not placed: groups[n].append({'x': px, 'y': py, 'pads': [(px, py)], 'pad': pad})
         for n, gl in groups.items():
             for g in gl: place_stub(fp, n, g['pads'], g['pad'])
+
+    # DRC-driven cleanup: every pre-routed stub item (track/via) involved in a clearance/hole violation is removed,
+    # together with the rest of its stub chain, so the autorouter fans out that pad instead.
+    if PLANE_NETS:
+        import re as _re, tempfile
+        pcbnew.SaveBoard(OUT, board); board = pcbnew.LoadBoard(OUT)          # netclasses only resolve on a loaded board
+        netmap = {name: board.FindNet(name) for name in names}
+        for _round in range(6):
+            rep = os.path.join(tempfile.gettempdir(), 'famicart_stub_drc.txt')
+            board.BuildConnectivity(); pcbnew.WriteDRCReport(board, rep, pcbnew.EDA_UNITS_MILLIMETRES, False)
+            txt = open(rep).read()
+            if _round == 0: open(os.path.join(HW, 'stub_drc_round0.txt'), 'w').write(txt)
+            pts = set()
+            for blk in txt.split('\n['):
+                if not blk.startswith(('clearance]', 'hole_clearance]', 'hole_near_hole]')): continue   # (no outline or zones yet: edge and dangling checks happen later)
+                for a_, b2 in _re.findall(r'@\(([0-9.]+) mm, ([0-9.]+) mm\)', blk): pts.add((round(float(a_), 2), round(float(b2), 2)))
+            if not pts: break
+            doomed = []; doomed_ids = set()
+            def uid(t): return t.m_Uuid.AsString()
+            for t in list(board.GetTracks()):
+                poss = [t.GetPosition()] if t.GetClass() == 'PCB_VIA' else [t.GetStart(), t.GetEnd()]
+                if any((round(ToMM(p_.x), 2), round(ToMM(p_.y), 2)) in pts for p_ in poss): doomed.append(t); doomed_ids.add(uid(t))
+            # follow the stub chain (same net, touching end points), but never into a pad centre
+            padpos = {(round(ToMM(pd.GetPosition().x), 2), round(ToMM(pd.GetPosition().y), 2)) for fp in board.GetFootprints() for pd in fp.Pads()}
+            grow = True
+            while grow:
+                grow = False
+                ends = set()
+                for t in doomed:
+                    for p_ in ([t.GetPosition()] if t.GetClass() == 'PCB_VIA' else [t.GetStart(), t.GetEnd()]):
+                        k = (round(ToMM(p_.x), 2), round(ToMM(p_.y), 2))
+                        if k not in padpos: ends.add((k, t.GetNetname()))
+                for t in list(board.GetTracks()):
+                    if uid(t) in doomed_ids: continue
+                    for p_ in ([t.GetPosition()] if t.GetClass() == 'PCB_VIA' else [t.GetStart(), t.GetEnd()]):
+                        if ((round(ToMM(p_.x), 2), round(ToMM(p_.y), 2)), t.GetNetname()) in ends: doomed.append(t); doomed_ids.add(uid(t)); grow = True; break
+            if not doomed: print('stub cleanup: DRC points not on stubs:', sorted(pts)[:6]); break
+            for t in doomed: board.Remove(t)
+            print('stub cleanup round', _round, ': removed', len(doomed), 'stub items for', len(pts), 'DRC points')
 
     # outline: body + card-edge tab with 1 mm chamfers at the tab tip
     W, H, T = BOARD_W, BODY_H, TOTAL_H
