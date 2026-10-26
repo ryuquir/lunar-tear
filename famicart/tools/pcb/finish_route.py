@@ -134,7 +134,7 @@ def net_islands(board, net, sig_layers):
         for it in its: by_item[it.m_Uuid.AsString()] = root
     return by_item, {r: (its, r == plane_root) for r, its in comps.items()}
 
-SOFT_COST = 60.0     # per grid cell of another net's track/via that the path runs through (that item is then ripped up)
+SOFT_COST = 150.0    # per grid cell of another net's track/via that the path runs through (that item is then ripped up)
 VIA_COST = 30.0
 
 def raster_cells(kind, prm, infl):
