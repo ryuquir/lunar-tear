@@ -59,10 +59,13 @@ GPIO_B.update({32: 'CHR_SEL', 33: 'nFOURSCR', 34: 'CIRAM_A10', 35: 'LED', 36: 'C
                42: 'BRIDGE_DIR', 43: 'CHR_RYBY'})        # bridge direction (1 = CPU->PPU data, 0 = read back), CHR flash RY/BY#
 for g in range(44, 48): GPIO_B[g] = None                 # spare
 
-def mcu(ref, s, x, y, gpio_net, mirror):
-    """RP2350B + flash + crystal + regulator passives + BOOTSEL + USB series/CC. mirror=-1 flips the support parts in x."""
-    m = mirror
-    def X(dx): return x + m * dx
+def mcu(ref, s, x, y, gpio_net, usb_r_xy):
+    """RP2350B + QSPI flash + crystal + core-regulator passives + decoupling, placed against the real pin positions
+    of the QFN-80 (identical for both MCUs; nothing is mirrored because the pins are not):
+      top edge    : VREG_AVDD/PGND/LX/VIN/FB at +3.8..+2.2, USB D-/D+ at +1.8/+1.4, QSPI at +0.2..-1.8, IOVDD at -2.2
+      bottom edge : XIN/XOUT at -0.2/+0.2, DVDD at +0.6, SWCLK/SWDIO/RUN at +1.0/+1.4/+1.8
+      left/right  : DVDD at y-0.2 on both sides, IOVDD at -2.2/+1.8 (left) and -3.8/-3.4/+0.2/+3.8 (right)
+    usb_r_xy: where the two 27R USB series resistors go (next to the USB-C connector)."""
     P(ref, 'famicart', 'RP2350B', 'RP2350B', 'famicart:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm', x, y)
     for g, net in gpio_net.items(): c(ref, GPIO_PIN[g], net)
     v11 = f'+1V1{s}'
@@ -70,33 +73,37 @@ def mcu(ref, s, x, y, gpio_net, mirror):
                   66:f'USB{s}_DM_R',67:f'USB{s}_DP_R',61:f'VREG{s}_AVDD',62:'GND',63:f'VREG{s}_LX',64:'+3V3',65:v11,69:'+3V3',68:'+3V3',59:'+3V3',81:'GND'}.items(): c(ref, p, nn)
     for p in (10, 32, 51): c(ref, p, v11)
     for p in (5, 15, 24, 29, 41, 50, 60, 76): c(ref, p, '+3V3')
-    # QSPI flash (W25Q16, same pinout as W25Q128) + BOOTSEL
+    # ---- QSPI flash straight above the QSPI pins (right pad column = SD0/SCLK/SD3/VCC sits over pins 70-72) ----
     fl = 'U3' if s == 'A' else 'U4'
-    P(fl, 'Memory_Flash', 'W25Q128JVS', 'W25Q16JVSSIQ', 'Package_SO:SOIC-8_5.23x5.23mm_P1.27mm', X(-9), y - 9.5, 0 if m > 0 else 180)
+    P(fl, 'Memory_Flash', 'W25Q128JVS', 'W25Q16JVSSIQ', 'Package_SO:SOIC-8_5.23x5.23mm_P1.27mm', x - 4.6, y - 10.6, 0)
     c(fl, 1, f'QSPI{s}_SS'); c(fl, 2, f'QSPI{s}_SD1'); c(fl, 3, f'QSPI{s}_SD2'); c(fl, 4, 'GND'); c(fl, 5, f'QSPI{s}_SD0'); c(fl, 6, f'QSPI{s}_SCLK'); c(fl, 7, f'QSPI{s}_SD3'); c(fl, 8, '+3V3')
-    cap('100n', C0603, X(-8.5), y - 4.5, 0, 'F', '+3V3')
-    res('10k', R0603, X(-2.5), y - 8.5, 0, 'F', f'QSPI{s}_SS', '+3V3')
-    res('1k', R0603, X(-2.5), y - 11, 0, 'F', f'QSPI{s}_SS', f'BOOT{s}_SW')
-    # crystal 12 MHz
+    cap('100n', C0603, x - 10.3, y - 10.6, 90, 'F', '+3V3')                                 # flash VCC (left of the package)
+    res('10k', R0603, x - 8.6, y - 6.9, 0, 'F', f'QSPI{s}_SS', '+3V3')                       # SS pull-up
+    res('1k', R0603, x - 8.6, y - 5.4, 0, 'F', f'QSPI{s}_SS', f'BOOT{s}_SW')                 # BOOTSEL series
+    # ---- crystal straight below XIN/XOUT ----
     yref = 'Y1' if s == 'A' else 'Y2'
-    P(yref, 'Device', 'Crystal_GND24', '12MHz ABM8-272-T3', 'Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm', X(11), y - 9)
+    P(yref, 'Device', 'Crystal_GND24', '12MHz ABM8-272-T3', 'Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm', x - 0.6, y + 10.0)
     c(yref, 1, f'XIN{s}'); c(yref, 3, f'XOUT{s}_R'); c(yref, 2, 'GND'); c(yref, 4, 'GND')
-    res('1k', R0402, X(14.5), y - 9, 90, 'F', f'XOUT{s}', f'XOUT{s}_R')
-    cap('15p', C0402, X(7), y - 9, 90, 'F', f'XIN{s}'); cap('15p', C0402, X(13), y - 6.5, 0, 'F', f'XOUT{s}_R')
-    # core regulator
+    res('1k', R0402, x + 0.3, y + 7.0, 90, 'F', f'XOUT{s}', f'XOUT{s}_R')
+    cap('15p', C0402, x - 3.5, y + 10.0, 90, 'F', f'XIN{s}'); cap('15p', C0402, x + 2.6, y + 11.0, 0, 'F', f'XOUT{s}_R')
+    # ---- core regulator: inductor right above VREG_LX (pin 63), VIN / VOUT / AVDD parts beside it ----
     lref = 'L1' if s == 'A' else 'L2'
-    P(lref, 'Device', 'L', '3.3uH AOTA-B201610S3R3', 'famicart:L_0806_2016Metric', X(11), y + 7)
+    P(lref, 'Device', 'L', '3.3uH AOTA-B201610S3R3', 'famicart:L_0806_2016Metric', x + 3.0, y - 7.7, 90)
     c(lref, 1, f'VREG{s}_LX'); c(lref, 2, v11)
-    cap('4.7u', C0603, X(14), y + 7, 90, 'F', '+3V3'); cap('4.7u', C0603, X(8), y + 7, 90, 'F', v11)
-    res('33', R0402, X(9), y + 9.5, 0, 'F', '+3V3', f'VREG{s}_AVDD'); cap('4.7u', C0603, X(11.5), y + 9.8, 0, 'F', f'VREG{s}_AVDD')
-    # USB series resistors
-    res('27', R0603, X(11), y - 4, 0, 'F', f'USB{s}_DM', f'USB{s}_DM_R'); res('27', R0603, X(11), y - 2, 0, 'F', f'USB{s}_DP', f'USB{s}_DP_R')
-    # decoupling ring (front, outside the QFN pad ring)
-    for dx, dy in ((-3.0, -7.1), (0, 6.9), (4.5, -6.9)): cap('100n', C0402, X(dx), y + dy, 0, 'F', v11)          # ring at ~6.9 mm: leaves an escape lane for the pin rows
-    for dx, dy in ((-6.9, -2), (-6.9, 2), (6.9, -2), (6.9, 2), (-2.8, 6.9), (2.8, 6.9), (0, -6.9)): cap('100n', C0402, X(dx), y + dy, 0 if abs(dx) < 6 else 90, 'F', '+3V3')
+    cap('4.7u', C0603, x + 5.6, y - 10.6, 0, 'F', v11)                                       # VREG output (1V1)
+    cap('4.7u', C0603, x + 5.6, y - 7.9, 90, 'F', '+3V3')                                    # VREG_VIN
+    res('33', R0402, x + 7.0, y - 7.6, 90, 'F', '+3V3', f'VREG{s}_AVDD')                     # AVDD RC filter
+    cap('4.7u', C0603, x + 8.3, y - 7.9, 90, 'F', f'VREG{s}_AVDD')
+    # ---- USB series resistors next to the connector ----
+    ux, uy = usb_r_xy
+    res('27', R0603, ux, uy, 0, 'F', f'USB{s}_DM', f'USB{s}_DM_R'); res('27', R0603, ux, uy + 1.6, 0, 'F', f'USB{s}_DP', f'USB{s}_DP_R')
+    # ---- decoupling at the supply pins ----
+    for dx, dy, r in ((-6.9, -0.4, 90), (6.9, -0.4, 90), (3.0, 6.9, 0)): cap('100n', C0402, x + dx, y + dy, r, 'F', v11)          # DVDD 10 / 51 / 32
+    for dx, dy, r in ((-6.9, -2.4, 90), (-6.9, 2.0, 90), (-3.4, 6.9, 0), (6.9, 1.8, 90), (6.9, 4.0, 90), (6.9, -3.6, 90), (-3.0, -6.6, 0)):
+        cap('100n', C0402, x + dx, y + dy, r, 'F', '+3V3')                                    # IOVDD 5 / 15 / 24+29 / 50 / 41 / 59+60 / 76
 
-mcu('U1', 'A', 17.0, 15.0, GPIO_A, +1)
-mcu('U2', 'B', 73.0, 15.0, GPIO_B, -1)
+mcu('U1', 'A', 17.0, 15.0, GPIO_A, (30.5, 7.6))
+mcu('U2', 'B', 73.0, 15.0, GPIO_B, (59.5, 7.6))
 
 # USB-C x2 (J3 -> U1, J4 -> U2), VBUS of either -> Schottky -> +5V rail
 for J, s, x in (('J3', 'A', 38.0), ('J4', 'B', 52.0)):
@@ -113,8 +120,8 @@ P('D2', 'Device', 'D_Schottky', 'B5819W (VBUS B->+5V)', 'Diode_SMD:D_SOD-123', 5
 
 # reset / BOOTSEL / debug
 P('SW1', 'Switch', 'SW_Push', 'RESET', 'Button_Switch_SMD:SW_SPST_TL3342', 45.0, 15.0); c('SW1', 1, 'RUN'); c('SW1', 2, 'GND')
-P('SW2', 'Switch', 'SW_Push', 'BOOTSEL A', 'Button_Switch_SMD:SW_SPST_TL3342', 14.0, 29.0); c('SW2', 1, 'BOOTA_SW'); c('SW2', 2, 'GND')
-P('SW3', 'Switch', 'SW_Push', 'BOOTSEL B', 'Button_Switch_SMD:SW_SPST_TL3342', 76.0, 29.0); c('SW3', 1, 'BOOTB_SW'); c('SW3', 2, 'GND')
+P('SW2', 'Switch', 'SW_Push', 'BOOTSEL A', 'Button_Switch_SMD:SW_SPST_TL3342', 14.0, 30.2); c('SW2', 1, 'BOOTA_SW'); c('SW2', 2, 'GND')
+P('SW3', 'Switch', 'SW_Push', 'BOOTSEL B', 'Button_Switch_SMD:SW_SPST_TL3342', 76.0, 30.2); c('SW3', 1, 'BOOTB_SW'); c('SW3', 2, 'GND')
 P('J2', 'Connector_Generic', 'Conn_01x02', 'RUN/GND', 'Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical', 67.0, 33.5, 90); c('J2', 1, 'RUN'); c('J2', 2, 'GND')
 P('J5', 'Connector_Generic', 'Conn_01x03', 'SWD A (SWCLK GND SWDIO)', 'Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical', 7.7, 33.5, 270); c('J5', 1, 'SWCLKA'); c('J5', 2, 'GND'); c('J5', 3, 'SWDIOA')
 P('J6', 'Connector_Generic', 'Conn_01x03', 'SWD B (SWCLK GND SWDIO)', 'Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical', 82.3, 33.5, 90); c('J6', 1, 'SWCLKB'); c('J6', 2, 'GND'); c('J6', 3, 'SWDIOB')
