@@ -141,14 +141,15 @@ def raster_cells(kind, prm, infl):
     tmp = np.zeros((NY, NX), bool); raster(tmp, kind, prm, infl)
     return np.flatnonzero(tmp)
 
-def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_rip=True):
+def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_rip=True, history=None):
     """A* from src island to dst island (or to any plane-reaching via spot). Pads and the board edge are hard
     obstacles; other nets' tracks/vias are soft (cost SOFT_COST per cell) when allow_rip. Returns
     (path, plane_via, rip_items) or None."""
     LID = {lid: k for k, lid in enumerate(sig_layers)}
     nl = len(sig_layers)
     hard = np.zeros((nl, NY, NX), bool); hard_via = np.zeros((NY, NX), bool)
-    soft = np.zeros((nl, NY, NX), np.int32); soft_via = np.zeros((NY, NX), np.int32)
+    soft = np.zeros((nl, NY, NX), np.float32); soft_via = np.zeros((NY, NX), np.float32)
+    history = history or {}
     soft_items = []          # (item, [(k, flat cells)], via_cells)
     holes = []
     for fp in board.GetFootprints():
@@ -170,10 +171,13 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
             for k in ls: cells.append((k, fl))
             vfl = raster_cells(kind, prm, C + VR + 0.01)
             if is_via: vfl = np.union1d(vfl, raster_cells('circ', (prm[0], prm[1], ToMM(t.GetDrillValue()) / 2), 0.25 + DR + 0.01))
+        n_rip = history.get(t.GetNetname(), 0)
+        rippable = allow_rip and n_rip < 6                     # PathFinder-style history: nets ripped often get expensive, then fixed
+        cost = SOFT_COST * (1 + 2 * n_rip)
         for k, fl in cells:
-            if allow_rip: soft[k].flat[fl] += 1
+            if rippable: soft[k].flat[fl] = np.maximum(soft[k].flat[fl], cost)
             else: hard[k].flat[fl] = True
-        if allow_rip: soft_via.flat[vfl] += 1
+        if rippable: soft_via.flat[vfl] = np.maximum(soft_via.flat[vfl], cost)
         else: hard_via.flat[vfl] = True
         soft_items.append((t, cells, vfl))
     edge = np.zeros((NY, NX), bool); m = int(math.ceil((0.3 + W / 2) / G))
@@ -225,14 +229,14 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
             nj, ni = j + dj, i + di
             if not (0 <= nj < NY and 0 <= ni < NX) or hard[k, nj, ni]: continue
             if dj and di and (hard[k, j, ni] or hard[k, nj, i]): continue
-            ng = g + c + (SOFT_COST if soft[k, nj, ni] else 0.0)
+            ng = g + c + float(soft[k, nj, ni])
             nxt = (k, nj, ni)
             if ng < gbest.get(nxt, 1e18): gbest[nxt] = ng; parent[nxt] = cur; heapq.heappush(openq, (ng + h(nj, ni), ng, nxt))
         if not hard_via[j, i]:
-            vc = VIA_COST + (SOFT_COST * 4 if soft_via[j, i] else 0.0)
+            vc = VIA_COST + 4.0 * float(soft_via[j, i])
             for k2 in range(nl):
                 if k2 == k or hard[k2, j, i]: continue
-                nxt = (k2, j, i); ng = g + vc + (SOFT_COST if soft[k2, j, i] else 0.0)
+                nxt = (k2, j, i); ng = g + vc + float(soft[k2, j, i])
                 if ng < gbest.get(nxt, 1e18): gbest[nxt] = ng; parent[nxt] = cur; heapq.heappush(openq, (ng + h(j, i), ng, nxt))
     if goal is None: return None
     path = [goal]
@@ -278,6 +282,9 @@ def main():
     ncu = board.GetCopperLayerCount()
     sig_layers = {6: [pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.B_Cu], 4: [pcbnew.F_Cu, pcbnew.B_Cu]}.get(ncu, [pcbnew.F_Cu, pcbnew.B_Cu])
     plane_nets = {'GND', '+3V3'} if ncu >= 4 else set()
+    import json
+    hist_path = args.pcb + '.riphistory.json'
+    history = json.load(open(hist_path)) if os.path.exists(hist_path) else {}
     for rnd in range(args.rounds):
         txt = drc(board); pairs = unconnected_pairs(txt)
         print(f'round {rnd}: {len(pairs)} unconnected')
@@ -298,12 +305,14 @@ def main():
                 if not jobs: jobs.append((ia, ib))
             else: jobs.append((ia, ib))
             for src, dst in jobs:
-                res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets))
+                res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets), history=history)
                 if res is None: print(f'  {net}: no path'); continue
                 path, pv, rip = res
                 if rip:
                     nets_hit = sorted({t.GetNetname() for t in rip})
                     for t in rip: board.Remove(t)
+                    for n_ in nets_hit: history[n_] = history.get(n_, 0) + 1
+                    json.dump(history, open(hist_path, 'w'))
                     print(f'  {net}: ripping up {len(rip)} items of {nets_hit}')
                 nt, nv = emit(board, path, pv, net, sig_layers); done += 1
                 print(f'  {net}: routed {len(path)} cells -> {nt} tracks, {nv} vias' + (' (to plane)' if pv else ''))
