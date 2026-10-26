@@ -79,6 +79,12 @@ def main():
     unconnected = board.GetConnectivity().GetUnconnectedCount(True)
     print('unconnected after routing:', unconnected)
     pcbnew.SaveBoard(PCB, board)
+    report_and_export(board)
+
+def report_and_export(board=None, inner=True):
+    """DRC report + fab outputs (gerbers, drill, PDFs/PNGs) for the board at PCB. Also used after finish_route.py."""
+    if board is None:
+        board = pcbnew.LoadBoard(PCB); pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
     drc = os.path.join(HW, 'drc_report.txt')
     pcbnew.WriteDRCReport(board, drc, pcbnew.EDA_UNITS_MILLIMETRES, True)
     txt = open(drc).read()
@@ -87,16 +93,19 @@ def main():
     print('DRC:', m if m else txt[:300], '| errors:', errors, 'warnings (library checks etc.):', warnings)
     # fab exports
     fab = os.path.join(HW, 'fab'); shutil.rmtree(fab, ignore_errors=True); os.makedirs(fab)
-    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', {6: 'F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu', 4: 'F.Cu,In1.Cu,In2.Cu,B.Cu'}.get(board.GetCopperLayerCount(), 'F.Cu,B.Cu') + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts,F.Fab,B.Fab', '-o', fab + '/', PCB], check=True, capture_output=True)
+    cu = {6: 'F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu', 4: 'F.Cu,In1.Cu,In2.Cu,B.Cu'}.get(board.GetCopperLayerCount(), 'F.Cu,B.Cu')
+    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', cu + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts,F.Fab,B.Fab', '-o', fab + '/', PCB], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', fab + '/', PCB], check=True, capture_output=True)
-    subprocess.run(['kicad-cli', 'pcb', 'export', 'pdf', '--layers', 'F.Cu,F.SilkS,F.Fab,Edge.Cuts', '-o', os.path.join(HW, 'famicart_front.pdf'), PCB], check=True, capture_output=True)
-    subprocess.run(['kicad-cli', 'pcb', 'export', 'pdf', '--layers', 'B.Cu,B.SilkS,Edge.Cuts', '--mirror', '-o', os.path.join(HW, 'famicart_back.pdf'), PCB], check=True, capture_output=True)
-    for name in ('front', 'back'):
-        pdf = os.path.join(HW, f'famicart_{name}.pdf')
-        png = os.path.join(HW, f'famicart_{name}.png')
+    views = [('front', 'F.Cu,F.SilkS,F.Fab,Edge.Cuts', []), ('back', 'B.Cu,B.SilkS,Edge.Cuts', ['--mirror'])]
+    if inner and board.GetCopperLayerCount() == 6: views += [('in2', 'In2.Cu,Edge.Cuts', []), ('in3', 'In3.Cu,Edge.Cuts', [])]
+    for name, layers, extra in views:
+        pdf = os.path.join(HW, f'famicart_{name}.pdf'); png = os.path.join(HW, f'famicart_{name}.png')
+        subprocess.run(['kicad-cli', 'pcb', 'export', 'pdf', '--layers', layers] + extra + ['-o', pdf, PCB], check=True, capture_output=True)
         subprocess.run(['pdftoppm', '-r', '250', '-png', '-singlefile', pdf, os.path.join(HW, f'famicart_{name}')], capture_output=True)
         subprocess.run(['convert', png, '-trim', '+repage', '-bordercolor', 'white', '-border', '20', png], capture_output=True)
     print('fab files in', fab)
+    return errors
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == 'export': report_and_export()
+    else: main()
