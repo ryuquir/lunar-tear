@@ -134,10 +134,22 @@ def net_islands(board, net, sig_layers):
         for it in its: by_item[it.m_Uuid.AsString()] = root
     return by_item, {r: (its, r == plane_root) for r, its in comps.items()}
 
-def route_job(board, sig_layers, src_items, dst_items, net, plane_goal):
+SOFT_COST = 60.0     # per grid cell of another net's track/via that the path runs through (that item is then ripped up)
+VIA_COST = 30.0
+
+def raster_cells(kind, prm, infl):
+    tmp = np.zeros((NY, NX), bool); raster(tmp, kind, prm, infl)
+    return np.flatnonzero(tmp)
+
+def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_rip=True):
+    """A* from src island to dst island (or to any plane-reaching via spot). Pads and the board edge are hard
+    obstacles; other nets' tracks/vias are soft (cost SOFT_COST per cell) when allow_rip. Returns
+    (path, plane_via, rip_items) or None."""
     LID = {lid: k for k, lid in enumerate(sig_layers)}
     nl = len(sig_layers)
-    blk = np.zeros((nl, NY, NX), bool); viab = np.zeros((NY, NX), bool)
+    hard = np.zeros((nl, NY, NX), bool); hard_via = np.zeros((NY, NX), bool)
+    soft = np.zeros((nl, NY, NX), np.int32); soft_via = np.zeros((NY, NX), np.int32)
+    soft_items = []          # (item, [(k, flat cells)], via_cells)
     holes = []
     for fp in board.GetFootprints():
         for p in fp.Pads():
@@ -145,61 +157,61 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal):
             if p.GetNetname() == net: continue
             for kind, prm, lay in shapes_of(p):
                 ls = range(nl) if lay == 'ALL' else ([LID[lay]] if lay in LID else [])
-                for k in ls: raster(blk[k], kind, prm, C + W / 2 + 0.01)
-                if lay == 'ALL' or lay in LID: raster(viab, kind, prm, C + VR + 0.01)
+                for k in ls: raster(hard[k], kind, prm, C + W / 2 + 0.01)
+                if lay == 'ALL' or lay in LID: raster(hard_via, kind, prm, C + VR + 0.01)
+    for (hx, hy, hr) in holes: raster(hard_via, 'circ', (hx, hy, hr), 0.25 + DR + 0.01)
     for t in board.GetTracks():
-        if t.GetClass() == 'PCB_VIA': holes.append((ToMM(t.GetPosition().x), ToMM(t.GetPosition().y), ToMM(t.GetDrillValue()) / 2))
         if t.GetNetname() == net: continue
+        is_via = t.GetClass() == 'PCB_VIA'
+        cells = []
         for kind, prm, lay in shapes_of(t):
             ls = range(nl) if lay == 'ALL' else ([LID[lay]] if lay in LID else [])
-            for k in ls: raster(blk[k], kind, prm, C + W / 2 + 0.01)
-            raster(viab, kind, prm, C + VR + 0.01)
-    for (hx, hy, hr) in holes: raster(viab, 'circ', (hx, hy, hr), 0.25 + DR + 0.01)    # hole-to-hole
-    # board edge / tab: keep 0.35 mm from the body outline, never below the body
+            fl = raster_cells(kind, prm, C + W / 2 + 0.01)
+            for k in ls: cells.append((k, fl))
+            vfl = raster_cells(kind, prm, C + VR + 0.01)
+            if is_via: vfl = np.union1d(vfl, raster_cells('circ', (prm[0], prm[1], ToMM(t.GetDrillValue()) / 2), 0.25 + DR + 0.01))
+        for k, fl in cells:
+            if allow_rip: soft[k].flat[fl] += 1
+            else: hard[k].flat[fl] = True
+        if allow_rip: soft_via.flat[vfl] += 1
+        else: hard_via.flat[vfl] = True
+        soft_items.append((t, cells, vfl))
     edge = np.zeros((NY, NX), bool); m = int(math.ceil((0.3 + W / 2) / G))
     edge[:m, :] = True; edge[:, :m] = True; edge[:, -m:] = True; edge[int((BH - 0.3 - W / 2) / G):, :] = True
-    blk |= edge[None]; viab |= np.zeros_like(viab) | edge
-    vm = int(math.ceil((0.3 + VR) / G)); viab[:vm, :] = True; viab[:, :vm] = True; viab[:, -vm:] = True; viab[int((BH - 0.3 - VR) / G):, :] = True
-    # sources / targets
+    hard |= edge[None]
+    vm = int(math.ceil((0.3 + VR) / G)); hard_via[:vm, :] = True; hard_via[:, :vm] = True; hard_via[:, -vm:] = True; hard_via[int((BH - 0.3 - VR) / G):, :] = True
     def cells_of(items, shrink):
         out = set()
         for it in items:
             if it.GetClass() == 'ZONE': continue
             for kind, prm, lay in shapes_of(it):
-                if it.GetClass() in ('PCB_TRACK', 'PCB_ARC'):        # only track end points (T-junctions are not connections)
-                    x1, y1, x2, y2, hw = prm
+                if it.GetClass() in ('PCB_TRACK', 'PCB_ARC'):
+                    x1, y1, x2, y2, hw = prm; k = LID.get(lay)
+                    if k is None: continue
                     for (ex, ey) in ((x1, y1), (x2, y2)):
-                        k = LID.get(lay)
-                        if k is None: continue
-                        out.add((k, int(round(ey / G)), int(round(ex / G))))
+                        j, i = int(round(ey / G)), int(round(ex / G))
+                        if 0 <= j < NY and 0 <= i < NX: out.add((k, j, i))
                     continue
-                tmp = np.zeros((NY, NX), bool)
                 if kind == 'box': prm = (prm[0] + shrink, prm[1] + shrink, prm[2] - shrink, prm[3] - shrink)
                 if kind == 'circ': prm = (prm[0], prm[1], max(prm[2] - shrink, 0.0))
-                raster(tmp, kind, prm, 0.0)
-                js, is_ = np.nonzero(tmp)
+                fl = raster_cells(kind, prm, 0.0)
                 ls = range(nl) if lay == 'ALL' else ([LID[lay]] if lay in LID else [])
                 for k in ls:
-                    for j, i in zip(js, is_): out.add((k, int(j), int(i)))
+                    for f in fl.tolist(): out.add((k, f // NX, f % NX))
         return out
     src = cells_of(src_items, 0.04); dst = cells_of(dst_items, 0.04) if dst_items else set()
-    for (k, j, i) in src | dst: blk[k, j, i] = False                     # own copper is always enterable
+    for (k, j, i) in src | dst: hard[k, j, i] = False; soft[k, j, i] = 0
     if not src: return None
-    # plane goal: any via-able cell well inside the plane outline
     PM = 1.3
     def is_goal(k, j, i):
         if (k, j, i) in dst: return True
-        if plane_goal and not viab[j, i] and PM / G <= i <= (BW - PM) / G and PM / G <= j <= (BH - 0.5 - PM) / G: return True
-        return False
-    # A* (heuristic: distance to the nearest destination cell; 0 for plane goals)
-    dl = list(dst)
+        return plane_goal and not hard_via[j, i] and soft_via[j, i] == 0 and PM / G <= i <= (BW - PM) / G and PM / G <= j <= (BH - 0.5 - PM) / G
+    dl = list(dst)[:: max(1, len(dst) // 64)] if dst else []
     def h(j, i):
         if plane_goal or not dl: return 0.0
-        return min(math.hypot(j - dj, i - di) for (_, dj, di) in dl[:: max(1, len(dl) // 64)])
-    VIA_COST = 30.0
+        return min(math.hypot(j - dj, i - di) for (_, dj, di) in dl)
     openq = []; gbest = {}; parent = {}
-    for s in src:
-        gbest[s] = 0.0; heapq.heappush(openq, (h(s[1], s[2]), 0.0, s))
+    for s0 in src: gbest[s0] = 0.0; heapq.heappush(openq, (h(s0[1], s0[2]), 0.0, s0))
     steps = [(0, 1, 1.0), (1, 0, 1.0), (0, -1, 1.0), (-1, 0, 1.0), (1, 1, 1.4142), (1, -1, 1.4142), (-1, 1, 1.4142), (-1, -1, 1.4142)]
     goal = None; it = 0
     while openq:
@@ -211,35 +223,32 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal):
         if it > 8_000_000: break
         for dj, di, c in steps:
             nj, ni = j + dj, i + di
-            if not (0 <= nj < NY and 0 <= ni < NX) or blk[k, nj, ni]: continue
-            if dj and di and (blk[k, j, ni] or blk[k, nj, i]): continue
-            nxt = (k, nj, ni); ng = g + c
+            if not (0 <= nj < NY and 0 <= ni < NX) or hard[k, nj, ni]: continue
+            if dj and di and (hard[k, j, ni] or hard[k, nj, i]): continue
+            ng = g + c + (SOFT_COST if soft[k, nj, ni] else 0.0)
+            nxt = (k, nj, ni)
             if ng < gbest.get(nxt, 1e18): gbest[nxt] = ng; parent[nxt] = cur; heapq.heappush(openq, (ng + h(nj, ni), ng, nxt))
-        if not viab[j, i]:
+        if not hard_via[j, i]:
+            vc = VIA_COST + (SOFT_COST * 4 if soft_via[j, i] else 0.0)
             for k2 in range(nl):
-                if k2 == k or blk[k2, j, i]: continue
-                nxt = (k2, j, i); ng = g + VIA_COST
+                if k2 == k or hard[k2, j, i]: continue
+                nxt = (k2, j, i); ng = g + vc + (SOFT_COST if soft[k2, j, i] else 0.0)
                 if ng < gbest.get(nxt, 1e18): gbest[nxt] = ng; parent[nxt] = cur; heapq.heappush(openq, (ng + h(j, i), ng, nxt))
-    if goal is None:
-        # report how boxed-in each end is (reachable cells), so the caller can rip up around the trapped end
-        def reach(cells, cap=6000):
-            seen = set(cells); q = list(cells)
-            while q and len(seen) < cap:
-                k, j, i = q.pop()
-                for dj, di, _ in steps[:4]:
-                    n = (k, j + dj, i + di)
-                    if 0 <= n[1] < NY and 0 <= n[2] < NX and n not in seen and not blk[n]: seen.add(n); q.append(n)
-                if not viab[j, i]:
-                    for k2 in range(nl):
-                        n = (k2, j, i)
-                        if n not in seen and not blk[n]: seen.add(n); q.append(n)
-            return len(seen)
-        return ('fail', reach(src), reach(dst) if dst else 99999)
+    if goal is None: return None
     path = [goal]
     while path[-1] in parent: path.append(parent[path[-1]])
     path.reverse()
     plane_via = plane_goal and goal not in dst
-    return path, plane_via
+    # which soft items does the path (tracks on each layer, vias at layer changes / plane via) run through?
+    lay_mask = np.zeros((nl, NY * NX), bool); via_mask = np.zeros(NY * NX, bool)
+    for (k, j, i) in path: lay_mask[k, j * NX + i] = True
+    for a, b in zip(path, path[1:]):
+        if a[0] != b[0]: via_mask[a[1] * NX + a[2]] = True
+    if plane_via: via_mask[path[-1][1] * NX + path[-1][2]] = True
+    rip = []
+    for (t, cells, vfl) in soft_items:
+        if any(lay_mask[k, fl].any() for k, fl in cells) or (len(vfl) and via_mask[vfl].any()): rip.append(t)
+    return path, plane_via, rip
 
 def emit(board, path, plane_via, net, sig_layers):
     ni = board.FindNet(net); n_t = n_v = 0
@@ -290,31 +299,15 @@ def main():
             else: jobs.append((ia, ib))
             for src, dst in jobs:
                 res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets))
-                for attempt, radius in enumerate((1.0, 1.6)):
-                    if not (isinstance(res, tuple) and res and res[0] == 'fail'): break
-                    _, rs, rd = res
-                    trapped = [isl for isl, r in ((src, rs), (dst or [], rd)) if r < 6000]
-                    if not trapped: break
-                    centres = []
-                    for isl in trapped:
-                        for i in isl:
-                            if i.GetClass() in ('PAD', 'PCB_VIA'): centres.append((ToMM(i.GetPosition().x), ToMM(i.GetPosition().y)))
-                            elif i.GetClass() in ('PCB_TRACK', 'PCB_ARC'): centres += [(ToMM(q.x), ToMM(q.y)) for q in (i.GetStart(), i.GetEnd())]
-                    doomed = []
-                    for t in board.GetTracks():
-                        if t.GetNetname() == net: continue
-                        pts = [t.GetPosition()] if t.GetClass() == 'PCB_VIA' else [t.GetStart(), t.GetEnd()]
-                        if t.GetClass() != 'PCB_VIA':   # also catch long segments passing close to the pad
-                            s_, e_ = t.GetStart(), t.GetEnd(); pts = [VECTOR2I(int(s_.x + (e_.x - s_.x) * f), int(s_.y + (e_.y - s_.y) * f)) for f in (0, .25, .5, .75, 1)]
-                        if any(math.hypot(ToMM(p.x) - x, ToMM(p.y) - y) < radius for p in pts for (x, y) in centres): doomed.append(t)
-                    nets_hit = sorted({t.GetNetname() for t in doomed})
-                    for t in doomed: board.Remove(t)
-                    print(f'  {net}: trapped end(s) {[round(r) for r in (rs, rd)]} -> ripped up {len(doomed)} items of {nets_hit} within {radius} mm')
-                    res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets))
-                if res is None or res[0] == 'fail': print(f'  {net}: no path'); continue
-                path, pv = res
+                if res is None: print(f'  {net}: no path'); continue
+                path, pv, rip = res
+                if rip:
+                    nets_hit = sorted({t.GetNetname() for t in rip})
+                    for t in rip: board.Remove(t)
+                    print(f'  {net}: ripping up {len(rip)} items of {nets_hit}')
                 nt, nv = emit(board, path, pv, net, sig_layers); done += 1
                 print(f'  {net}: routed {len(path)} cells -> {nt} tracks, {nv} vias' + (' (to plane)' if pv else ''))
+                break      # islands changed: refresh from the saved board before the next job
             pcbnew.SaveBoard(args.pcb, board); board = pcbnew.LoadBoard(args.pcb)
         if not done: break
     txt = drc(board)
