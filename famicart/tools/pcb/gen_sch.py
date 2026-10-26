@@ -101,13 +101,16 @@ def main():
   "board": { "design_settings": { "defaults": {}, "rules": {} } },
   "libraries": { "pinned_footprint_libs": [], "pinned_symbol_libs": [] },
   "meta": { "filename": "famicart.kicad_pro", "version": 1 },
-  "net_settings": { "classes": [ { "bus_width": 12, "clearance": 0.2, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "diff_pair_width": 0.2, "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1, "name": "Default", "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "track_width": 0.25, "via_diameter": 0.6, "via_drill": 0.3, "wire_width": 6 } ], "meta": { "version": 3 } },
+  "net_settings": { "classes": [ { "bus_width": 12, "clearance": %(clr)s, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "diff_pair_width": 0.2, "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1, "name": "Default", "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "track_width": %(trk)s, "via_diameter": %(via)s, "via_drill": %(vdr)s, "wire_width": 6 } ], "meta": { "version": 3 } },
   "schematic": { "legacy_lib_dir": "", "legacy_lib_list": [] },
-  "sheets": [ [ "%s", "" ] ],
+  "sheets": [ [ "%(root)s", "" ] ],
   "text_variables": {}
 }
-''' % ROOT_UUID
-    with open(os.path.join(HW, 'famicart.kicad_pro'), 'w') as f: f.write(pro)
+''' % dict(root=ROOT_UUID, clr=os.environ.get('FC_CLEAR', '0.15'), trk=os.environ.get('FC_TRACK', '0.15'), via=os.environ.get('FC_VIA', '0.5'), vdr=os.environ.get('FC_VIA_DRILL', '0.25'))
+    pro_path = os.path.join(HW, 'famicart.kicad_pro')
+    # keep a project file that pcbnew has already filled with the board's design rules (min drill, edge clearance, ...)
+    if not os.path.exists(pro_path) or '"design_settings": { "defaults": {}' in open(pro_path).read() or os.environ.get('FC_WRITE_PRO') == '1':
+        with open(pro_path, 'w') as f: f.write(pro)
     # project-local library tables so the custom lib resolves
     rel = os.path.relpath(HW_LIB, HW).replace(os.sep, '/')
     rel = '' if rel == '.' else rel + '/'

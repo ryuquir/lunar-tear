@@ -16,7 +16,7 @@ from pcbnew import ToMM, FromMM, VECTOR2I
 ap = argparse.ArgumentParser()
 ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=0.1); ap.add_argument('--clear', type=float, default=0.1)
 ap.add_argument('--via', type=float, default=0.5); ap.add_argument('--drill', type=float, default=0.2)
-ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10)
+ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10); ap.add_argument('--cleanup-only', action='store_true')
 args = ap.parse_args()
 G = args.grid; W = args.track; C = args.clear; VR = args.via / 2; DR = args.drill / 2
 BW, BH = 90.0, 35.4             # routable body; the grid also covers the card-edge tab (46.1 mm) so finger tracks are representable
@@ -277,8 +277,40 @@ def emit(board, path, plane_via, net, sig_layers):
     if plane_via: add_via(path[-1][1], path[-1][2]); n_v += 1
     return n_t, n_v
 
+def cleanup_pass(path):
+    """Cleanup in a fresh process: drop duplicate vias (same net within 10 um) and tracks/vias the DRC reports as
+    dangling -- but only when removing the item does not increase the unconnected count (an item whose end merely
+    touches another track mid-segment is reported as dangling, yet it can still carry a connection)."""
+    board = pcbnew.LoadBoard(path)
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
+    base = board.GetConnectivity().GetUnconnectedCount(True)
+    vias = [t for t in board.GetTracks() if t.GetClass() == 'PCB_VIA']
+    cand = []
+    for i, v in enumerate(vias):
+        for w in vias[:i]:
+            if w.GetNetname() == v.GetNetname() and (v.GetPosition() - w.GetPosition()).EuclideanNorm() < 10000: cand.append(v); break
+    rep = os.path.join(tempfile.gettempdir(), 'finish_route_drc.txt')
+    pcbnew.WriteDRCReport(board, rep, pcbnew.EDA_UNITS_MILLIMETRES, False); txt = open(rep).read(); pts = []
+    for blk in txt.split('\n['):
+        if blk.startswith(('track_dangling]', 'via_dangling]')):
+            for a_, b2, d in re.findall(r'@\(([0-9.]+) mm, ([0-9.]+) mm\): ([^\n]*)', blk): pts.append((float(a_), float(b2), d))
+    for t in board.GetTracks():
+        if t.GetClass() == 'PCB_VIA':
+            if any(d.startswith('Via') and abs(x - ToMM(t.GetPosition().x)) < 0.002 and abs(y - ToMM(t.GetPosition().y)) < 0.002 for x, y, d in pts): cand.append(t)
+        elif any(d.startswith('Track') and abs(x - ToMM(q.x)) < 0.002 and abs(y - ToMM(q.y)) < 0.002 for x, y, d in pts for q in (t.GetStart(), t.GetEnd())): cand.append(t)
+    removed = 0; kept = 0
+    for t in cand:
+        board.Remove(t); board.BuildConnectivity()
+        if board.GetConnectivity().GetUnconnectedCount(True) > base: board.Add(t); board.BuildConnectivity(); kept += 1
+        else: removed += 1
+    pcbnew.SaveBoard(path, board)
+    print(f'cleanup: {len(cand)} candidates, removed {removed}, kept {kept} (needed for connectivity); unconnected {base}')
+    return removed
+
 def main():
     board = pcbnew.LoadBoard(args.pcb)
+    if args.cleanup_only:
+        print('cleanup removed', cleanup_pass(args.pcb)); return
     ncu = board.GetCopperLayerCount()
     sig_layers = {6: [pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.B_Cu], 4: [pcbnew.F_Cu, pcbnew.B_Cu]}.get(ncu, [pcbnew.F_Cu, pcbnew.B_Cu])
     plane_nets = {'GND', '+3V3'} if ncu >= 4 else set()

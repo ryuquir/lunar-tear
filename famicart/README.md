@@ -18,7 +18,7 @@
 | 2 MCU 間 UART リンク（3 Mbaud、音源レジスタのストリーム） | 実装済み・**実機未検証** |
 | 回路図・基板 rev B（Pico 2、KiCad 7、90×46.1 mm ファミコン実寸、USB-C・リセット付き、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/](hardware/)、[hardware/jlcpcb/](hardware/jlcpcb/) |
 | 回路図・基板 rev C（RP2350B + XIAO RP2040、USB 3 口、リセット端子 J2、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/revc/](hardware/revc/) |
-| 回路図・基板 rev D（**実機動作の本命**: 実カセット型分離構成、RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + F-RAM 128 KB + CHR SRAM 512 KB、4 層、起動バンク付き） | [hardware/revd/](hardware/revd/)、docs/04_hardware.md の rev D 節 |
+| 回路図・基板 rev D（**実機動作の本命**: 実カセット型分離構成、RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + F-RAM 128 KB + CHR SRAM 512 KB、**6 層、未接続 0・DRC エラー 0**、起動バンク付き）・ガーバー・JLCPCB 実装パッケージ | [hardware/revd/](hardware/revd/)、[hardware/revd/jlcpcb/](hardware/revd/jlcpcb/)、docs/04_hardware.md の rev D 節 |
 | rev D ファームウェア（バンク線出力、2 MCU リンク、外部フラッシュ書き込み、ROM ライブラリ、ブートスタブ） | 実装済み・ビルド通過（U1 text 130 KB / U2 37 KB）、ホストテスト通過、**実機未検証** |
 
 ## ビルド
@@ -82,7 +82,8 @@ python3 tools/gen_romdb.py   # data/MesenNesDB.txt -> src/core/romdb_gen.h, docs
 cd famicart/tools/pcb
 python3 gen_sch.py && python3 route_pcb.py && python3 gen_bom.py && python3 gen_jlc.py            # rev B -> hardware/
 FC_DESIGN=design_revc FC_HW_DIR=../../hardware/revc python3 gen_sch.py   # rev C -> hardware/revc/（route_pcb / gen_bom / gen_jlc も同じ環境変数で）
-FC_DESIGN=design_revd FC_HW_DIR=../../hardware/revd python3 gen_sch.py   # rev D（4 層）-> hardware/revd/
+FC_DESIGN=design_revd FC_HW_DIR=../../hardware/revd FC_LAYERS=6 FC_STUBS=1 FC_TRACK=0.1 FC_CLEAR=0.1 FC_VIA=0.5 FC_VIA_DRILL=0.2 python3 route_pcb.py   # rev D（6 層）
+python3 finish_route.py ../../hardware/revd/famicart.kicad_pcb   # Freerouting が残した接続を仕上げる（その後 route_pcb.py export）
 ```
 
 ## ロードマップ
