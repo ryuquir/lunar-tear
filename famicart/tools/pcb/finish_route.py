@@ -208,7 +208,7 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal):
         k, j, i = cur
         if g > 0 and is_goal(k, j, i): goal = cur; break
         it += 1
-        if it > 3_000_000: break
+        if it > 8_000_000: break
         for dj, di, c in steps:
             nj, ni = j + dj, i + di
             if not (0 <= nj < NY and 0 <= ni < NX) or blk[k, nj, ni]: continue
@@ -295,7 +295,11 @@ def main():
                     _, rs, rd = res
                     trapped = [isl for isl, r in ((src, rs), (dst or [], rd)) if r < 6000]
                     if not trapped: break
-                    centres = [(ToMM(i.GetPosition().x), ToMM(i.GetPosition().y)) for isl in trapped for i in isl if i.GetClass() == 'PAD']
+                    centres = []
+                    for isl in trapped:
+                        for i in isl:
+                            if i.GetClass() in ('PAD', 'PCB_VIA'): centres.append((ToMM(i.GetPosition().x), ToMM(i.GetPosition().y)))
+                            elif i.GetClass() in ('PCB_TRACK', 'PCB_ARC'): centres += [(ToMM(q.x), ToMM(q.y)) for q in (i.GetStart(), i.GetEnd())]
                     doomed = []
                     for t in board.GetTracks():
                         if t.GetNetname() == net: continue
