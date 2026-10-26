@@ -14,7 +14,7 @@ import pcbnew
 from pcbnew import ToMM, FromMM, VECTOR2I
 
 ap = argparse.ArgumentParser()
-ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=0.12); ap.add_argument('--clear', type=float, default=0.1)
+ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=0.1); ap.add_argument('--clear', type=float, default=0.1)
 ap.add_argument('--via', type=float, default=0.5); ap.add_argument('--drill', type=float, default=0.2)
 ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10)
 args = ap.parse_args()
