@@ -29,6 +29,7 @@ const mapper_desc_t *mapper_at(unsigned i);
 
 /* Attach + initialise a mapper on a loaded cartridge. Returns false when unsupported. */
 bool mapper_attach(cart_t *c, uint16_t id, uint8_t submapper);
+bool mapper_attach_desc(cart_t *c, const mapper_desc_t *m, uint8_t submapper);   /* same, with an explicit descriptor */
 
 /* MMC3-style A12 rising-edge filter shared by several mappers. Returns true on a
  * qualified rising edge (A12 was low for >= min_low PPU-address observations). */

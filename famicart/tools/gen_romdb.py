@@ -17,12 +17,9 @@ SRC  = os.path.join(ROOT, 'data', 'MesenNesDB.txt')
 OUT_H = os.path.join(ROOT, 'src', 'core', 'romdb_gen.h')
 OUT_MD = os.path.join(ROOT, 'docs', '03_mapper_coverage.md')
 
-# Mapper ids implemented by the firmware (kept in sync with src/core/mapper.c)
-IMPLEMENTED = {
-    0,1,2,3,4,5,7,9,10,11,13,16,18,19,21,22,23,24,25,26,32,33,34,48,64,65,66,67,68,69,
-    70,71,72,73,75,76,78,79,80,82,85,86,87,88,89,92,93,94,95,97,118,119,140,152,
-    153,154,159,180,184,185,206,207,210,
-}
+# Mapper ids implemented by the firmware: read from the registry in src/core/mapper.c
+import re as _re
+IMPLEMENTED = {int(x) for x in _re.findall(r'M\((\d+)\)', open(os.path.join(ROOT, 'src', 'core', 'mapper.c')).read())}
 
 def I(x):
     x = x.strip()

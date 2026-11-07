@@ -1,7 +1,8 @@
 /* MMC1 (mapper 1) incl. SUROM/SOROM/SXROM 512K and 16K/32K WRAM variants, submapper 5 (fixed 32K). */
 #include "../mapper.h"
+#include "mmc1.h"
 
-static void mmc1_sync(cart_t *c) {
+void mmc1_sync(cart_t *c) {
     mmc1_state_t *s = &c->s.mmc1;
     bool big = c->prg_size > 256 * 1024;            /* SUROM/SOROM/SXROM: CHR bit4 selects 256K PRG half */
     uint8_t chr_sel = (s->ctrl & 0x10) ? s->chr0 : s->chr0; /* in 8K mode only chr0 matters */
@@ -19,19 +20,19 @@ static void mmc1_sync(cart_t *c) {
     uint32_t wbank = 0;
     if (c->wram_size >= 32768) wbank = (chr_sel >> 2) & 3;
     else if (c->wram_size >= 16384) wbank = (chr_sel >> 3) & 1;
-    bool wram_en = !(s->prg & 0x10) || c->wram_size == 0;
+    bool wram_en = !(s->prg & 0x10) || c->wram_size == 0 || s->no_wram_disable;
     if (c->wram_size) cart_set_wram_6000(c, wbank, wram_en); 
     if (!wram_en) cart_unmap_6000(c);
     static const mirroring_t mm[4] = { MIRROR_1A, MIRROR_1B, MIRROR_V, MIRROR_H };
     cart_set_mirroring(c, mm[s->ctrl & 3]);
 }
-static void mmc1_init(cart_t *c) {
+void mmc1_init(cart_t *c) {
     mmc1_state_t *s = &c->s.mmc1;
     s->shift = 0; s->count = 0; s->ctrl = 0x0C; s->chr0 = s->chr1 = 0; s->prg = 0;
     s->last_write_cycle = 0xFFFFFFFFu;
     mmc1_sync(c);
 }
-static void mmc1_write(cart_t *c, uint16_t a, uint8_t v) {
+void mmc1_write(cart_t *c, uint16_t a, uint8_t v) {
     mmc1_state_t *s = &c->s.mmc1;
     if (a < 0x8000) return;
     /* Writes on consecutive CPU cycles are ignored (RMW instructions). */
@@ -51,3 +52,6 @@ static void mmc1_write(cart_t *c, uint16_t a, uint8_t v) {
     }
 }
 const mapper_desc_t mapper_001 = { 1, "MMC1", 0, mmc1_init, mmc1_write, NULL, NULL, NULL, NULL };
+/* 155: MMC1A -- PRG bit 4 does not disable WRAM (Tatakae!! Ramen Man, Kyuukyoku Harikiri Koushien) */
+static void mmc1a_init(cart_t *c) { c->s.mmc1.no_wram_disable = 1; mmc1_init(c); }
+const mapper_desc_t mapper_155 = { 155, "MMC1A", 0, mmc1a_init, mmc1_write, NULL, NULL, NULL, NULL };

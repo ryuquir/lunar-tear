@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct { uint8_t shift, count, ctrl, chr0, chr1, prg; uint8_t last_cycle_write; uint32_t last_write_cycle; } mmc1_state_t;
+typedef struct { uint8_t shift, count, ctrl, chr0, chr1, prg; uint8_t last_cycle_write; uint32_t last_write_cycle; uint8_t no_wram_disable; uint8_t ext[15]; } mmc1_state_t;
 
 typedef struct {
     uint8_t bank_select, regs[8], prg_mode, chr_mode;
@@ -11,6 +11,8 @@ typedef struct {
     uint8_t wram_ctrl, mirroring;
     uint32_t last_a12_cycle; uint8_t a12_state;
     uint8_t variant;   /* 0 MMC3, 1 MMC6, 2 TxSROM(118), 3 TQROM(119), 4 MC-ACC, 5 Namcot108 family */
+    uint16_t prg_and, prg_or, chr_and, chr_or;  /* multicart outer bank: final 8K/1K bank = (b & and) | or; and = 0: off */
+    uint8_t  ext[24];                           /* free for MMC3-based boards (outer-bank registers, extra latches) */
 } mmc3_state_t;
 
 typedef struct {

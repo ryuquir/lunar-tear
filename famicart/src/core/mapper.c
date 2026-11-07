@@ -26,6 +26,10 @@ const mapper_desc_t *mapper_find(uint16_t id) {
 bool mapper_attach(cart_t *c, uint16_t id, uint8_t submapper) {
     const mapper_desc_t *m = mapper_find(id);
     if (!m) return false;
+    return mapper_attach_desc(c, m, submapper);
+}
+bool mapper_attach_desc(cart_t *c, const mapper_desc_t *m, uint8_t submapper) {
+    uint16_t id = m->id;
     c->mapper = m; c->mapper_id = id; c->submapper = submapper;
     memset(&c->s, 0, sizeof c->s);
     for (unsigned i = 0; i < 8; i++) { c->prg_map[i] = NULL; c->prg_wmap[i] = NULL; }

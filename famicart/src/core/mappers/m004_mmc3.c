@@ -1,22 +1,26 @@
 /* MMC3 family: 4 (MMC3/MMC6), 118 (TxSROM), 119 (TQROM), 206/88/95/154/76 (Namcot 108/109/118/119),
  * 37/47 are not included (multicarts). Variant is chosen from mapper id + submapper. */
 #include "../mapper.h"
+#include "mmc3.h"
 
 enum { V_MMC3 = 0, V_MMC6, V_TXSROM, V_TQROM, V_MCACC, V_N108, V_N88, V_N95, V_N154, V_N3446 };
 
+static inline int32_t prg_outer(const mmc3_state_t *s, int32_t b) { return s->prg_and ? (int32_t)(((uint32_t)b & s->prg_and) | s->prg_or) : b; }
+static void set_prg(cart_t *c, unsigned slot, int32_t b) { cart_set_prg8k(c, slot, prg_outer(&c->s.mmc3, b)); }
 static void mmc3_sync_prg(cart_t *c) {
     mmc3_state_t *s = &c->s.mmc3;
     if (s->variant >= V_N108) {
-        cart_set_prg8k(c, 0, s->regs[6] & 0x0F); cart_set_prg8k(c, 1, s->regs[7] & 0x0F);
-        cart_set_prg8k(c, 2, -2); cart_set_prg8k(c, 3, -1);
+        set_prg(c, 0, s->regs[6] & 0x0F); set_prg(c, 1, s->regs[7] & 0x0F);
+        set_prg(c, 2, -2); set_prg(c, 3, -1);
         return;
     }
-    if (s->prg_mode) { cart_set_prg8k(c, 0, -2); cart_set_prg8k(c, 1, s->regs[7]); cart_set_prg8k(c, 2, s->regs[6]); }
-    else             { cart_set_prg8k(c, 0, s->regs[6]); cart_set_prg8k(c, 1, s->regs[7]); cart_set_prg8k(c, 2, -2); }
-    cart_set_prg8k(c, 3, -1);
+    if (s->prg_mode) { set_prg(c, 0, -2); set_prg(c, 1, s->regs[7]); set_prg(c, 2, s->regs[6]); }
+    else             { set_prg(c, 0, s->regs[6]); set_prg(c, 1, s->regs[7]); set_prg(c, 2, -2); }
+    set_prg(c, 3, -1);
 }
 static void mmc3_set_chr(cart_t *c, unsigned slot, int32_t bank) {
     mmc3_state_t *s = &c->s.mmc3;
+    if (s->chr_and) bank = (int32_t)(((uint32_t)bank & s->chr_and) | s->chr_or);
     if (s->variant == V_TQROM) {
         if (bank & 0x40) { /* CHR-RAM 8K */
             uint8_t *ram = c->exram ? c->exram : NULL;
@@ -55,6 +59,7 @@ static void mmc3_sync_chr(cart_t *c) {
         cart_set_nt_ciram(c, 2, (s->regs[1] >> 5) & 1); cart_set_nt_ciram(c, 3, (s->regs[1] >> 5) & 1);
     }
 }
+void mmc3_sync(cart_t *c);
 static void mmc3_sync_wram(cart_t *c) {
     mmc3_state_t *s = &c->s.mmc3;
     if (s->variant >= V_N108) return;
@@ -69,7 +74,8 @@ static void mmc3_sync_wram(cart_t *c) {
     if (c->mapper_id == 4 && c->submapper == 0 && c->wram_size && !en && !wp) en = true; /* MMC3A/early boards: no enable logic */
     if (en) cart_set_wram_6000(c, 0, !wp); else cart_unmap_6000(c);
 }
-static void mmc3_init(cart_t *c) {
+void mmc3_sync(cart_t *c) { mmc3_sync_prg(c); mmc3_sync_chr(c); mmc3_sync_wram(c); }
+void mmc3_init(cart_t *c) {
     mmc3_state_t *s = &c->s.mmc3;
     for (int i = 0; i < 8; i++) s->regs[i] = 0;
     s->regs[0] = 0; s->regs[1] = 2; s->regs[2] = 4; s->regs[3] = 5; s->regs[4] = 6; s->regs[5] = 7; s->regs[6] = 0; s->regs[7] = 1;
@@ -89,7 +95,7 @@ static void mmc3_init(cart_t *c) {
     if (s->variant == V_TXSROM || s->variant == V_N95) { /* nametables from regs */ }
     else if (c->mirroring != MIRROR_4) cart_set_mirroring(c, c->mirroring);
 }
-static void mmc3_write(cart_t *c, uint16_t a, uint8_t v) {
+void mmc3_write(cart_t *c, uint16_t a, uint8_t v) {
     mmc3_state_t *s = &c->s.mmc3;
     if (a < 0x8000) return;
     bool namcot = s->variant >= V_N108;
@@ -110,7 +116,7 @@ static void mmc3_write(cart_t *c, uint16_t a, uint8_t v) {
     case 0xE001: s->irq_enable = 1; break;
     }
 }
-static void FC_FASTCODE(mmc3_clock_irq)(cart_t *c) {
+void FC_FASTCODE(mmc3_clock_irq)(cart_t *c) {
     mmc3_state_t *s = &c->s.mmc3;
     uint8_t before = s->irq_counter;
     if (s->irq_counter == 0 || s->irq_reload) { s->irq_counter = s->irq_latch; s->irq_reload = 0; }
@@ -120,7 +126,7 @@ static void FC_FASTCODE(mmc3_clock_irq)(cart_t *c) {
     else fire = s->irq_counter == 0;
     if (fire && s->irq_enable) cart_irq(c, true);
 }
-static void FC_FASTCODE(mmc3_ppu_addr)(cart_t *c, uint16_t a) {
+void FC_FASTCODE(mmc3_ppu_addr)(cart_t *c, uint16_t a) {
     mmc3_state_t *s = &c->s.mmc3;
     if (s->variant >= V_N108) return;
     uint16_t aa = (s->variant == V_MCACC) ? (uint16_t)(a ^ 0x1000) : a;

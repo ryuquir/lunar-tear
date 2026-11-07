@@ -43,9 +43,9 @@ volatile uint32_t st_reads, st_writes, st_evq_drop, st_link_drop, st_polls, st_p
 
 /* ---------------- core1 -> core0 event queue ---------------- */
 #define EVQ 1024
-static uint32_t evq[EVQ]; static volatile uint32_t evq_w, evq_r;
+static uint32_t evq[EVQ], evq_t[EVQ]; static volatile uint32_t evq_w, evq_r;
 #define EV_READ 0x80000000u
-FC_INLINE void evq_push(uint32_t e) { uint32_t n = (evq_w + 1) & (EVQ - 1); if (n == evq_r) { st_evq_drop++; return; } evq[evq_w] = e; __dmb(); evq_w = n; }
+FC_INLINE void evq_push(uint32_t e) { uint32_t n = (evq_w + 1) & (EVQ - 1); if (n == evq_r) { st_evq_drop++; return; } evq[evq_w] = e; evq_t[evq_w] = m33_hw->dwt_cyccnt; __dmb(); evq_w = n; }
 
 /* ---------------- core 1: bus loop ---------------- */
 #define DMASK (0xFFu << PIN_CPU_D_BASE)
@@ -154,6 +154,7 @@ int reve_link_poll(uint8_t node, uint32_t timeout_us) {
 /* ---------------- core 0: event handling ---------------- */
 static uint16_t last_fwd_addr = 0xFFFF; static uint16_t remote_vaddr = 0xFFFF; static uint8_t remote_inc = 0xFF;
 static bool fwd_ppu; static uint32_t mmc5_ack_until;
+static bool cycles_from_time; static uint32_t rmw_gap, last_wt;   /* synthetic cpu_cycles for MMC1's RMW rule */
 static void forward_write(uint16_t a, uint8_t v) {
     uint16_t s[3]; unsigned n = (a == (uint16_t)(last_fwd_addr + 1)) ? rl_enc_seq(s, v) : rl_enc_write(s, a, v);
     sq_put(s, n); last_fwd_addr = a;
@@ -249,7 +250,7 @@ bool reve_boot(unsigned slot) {
     ld.prg_size = g_info.prg_size; ld.chr_size = g_info.chr_size; ld.chr_ram_size = g_info.chr_ram_size; ld.wram_size = g_info.wram_size; ld.sram_size = g_info.sram_size;
     ld.chr_crc = e->chr_size ? fc_crc32(0, chr, e->chr_size) : 0;
     if (prof) { ld.has_profile = 1; memcpy(ld.profile, prof, sizeof *prof < sizeof ld.profile ? sizeof *prof : sizeof ld.profile); }
-    fwd_ppu = g_cart.chr_is_ram || g_cart.extvram || g_cart.exram || g_cart.mapper_id == 5;
+    fwd_ppu = true;                                               /* always: CHR-RAM, cart nametables and U2's CIRAM shadow (some boards switch to RAM later) */
     ld.flags = (g_cart.chr_is_ram ? 1 : 0) | (fwd_ppu ? 2 : 0);
     reve_link_cmd(RL_C_RESET, 0);
     uint16_t s[RL_LOAD_MAX + 4]; unsigned n = rl_enc_load_head(s, sizeof ld);
@@ -273,6 +274,8 @@ bool reve_boot(unsigned slot) {
     if (!ok2) printf("WARN: U2 (PPU) did not report ready\n");
     if (!ok3) printf("WARN: U3 (XIAO) did not report ready\n");
     ppu_track_reset(&trk); remote_vaddr = 0xFFFF; remote_inc = 0xFF; last_fwd_addr = 0xFFFF;
+    rmw_gap = clock_get_hz(clk_sys) / 1000000u * 840u / 1000u; last_wt = 0;
+    cycles_from_time = !(g_cart.has_cpu_cycle_hook && g_cart.mapper->peek);   /* else cycle_catchup() owns cpu_cycles */
     evq_r = evq_w;
     reve_link_cmd(RL_C_LIVE, 1);
     g_running = true;
@@ -297,7 +300,16 @@ int main(void) {
     absolute_time_t info_t = make_timeout_time_ms(3000);
     for (;;) {
         unsigned budget = 64;
-        while (evq_r != evq_w && budget--) { uint32_t e = evq[evq_r]; evq_r = (evq_r + 1) & (EVQ - 1); handle_event(e); }
+        while (evq_r != evq_w && budget--) {
+            uint32_t e = evq[evq_r], t = evq_t[evq_r]; evq_r = (evq_r + 1) & (EVQ - 1);
+            /* U1 has no M2: give cycle-sensitive mappers (MMC1's "ignore the second write of a RMW") the CPU cycle of
+             * the write, derived from the core-1 timestamp. */
+            if (cycles_from_time && !(e & EV_READ)) {
+                /* writes on back-to-back CPU cycles are ~559 ns apart, the next possible gap is ~1118 ns */
+                g_cart.cpu_cycles += ((uint32_t)(t - last_wt) < rmw_gap) ? 1u : 3u; last_wt = t;
+            }
+            handle_event(e);
+        }
         sq_pump();
         if (g_running && g_cart.mapper_id == 5) mmc5_poll();
         if (romcache_service(&prc, (uint8_t *const *)&g_cart.prg_map[3], 5)) { g_cart.tables_dirty = 1; fix_tables(); }
