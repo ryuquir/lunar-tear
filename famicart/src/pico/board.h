@@ -10,6 +10,12 @@
 #include "board_revd_prg.h"         /* rev D U1: PRG mapper / expansion chip */
 #elif defined(FC_BOARD_revd_chr)
 #include "board_revd_chr.h"         /* rev D U2: CHR mapper */
+#elif defined(FC_BOARD_reve_cpu)
+#include "board_reve_cpu.h"         /* rev E U1: Pico 2 on the CPU bus */
+#elif defined(FC_BOARD_reve_ppu)
+#include "board_reve_ppu.h"         /* rev E U2: Pico 2 on the PPU bus */
+#elif defined(FC_BOARD_reve_x)
+#include "board_reve_x.h"           /* rev E U3: XIAO RP2350, IRQ + audio */
 #else
 #include "board_pico.h"             /* rev A/B: Pico / Pico 2 module, buffered buses */
 #endif
@@ -27,4 +33,7 @@
 #endif
 #ifndef FC_VIRTUAL_ROM
 #define FC_VIRTUAL_ROM 0
+#endif
+#ifndef FC_REVE
+#define FC_REVE 0
 #endif

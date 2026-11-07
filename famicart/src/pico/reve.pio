@@ -1,0 +1,113 @@
+; famicart rev E PIO programs (Pico 2 x2 + XIAO RP2350, console buses wired directly through 1 k resistors).
+
+; ---------- U1: CPU write capture ----------
+; /WS (GPIO27) = NOT(M2 AND NOT R/W): low only during the M2-high half of a write cycle. After it falls, wait the
+; delay loaded from the TX FIFO (data is valid late in M2-high), then sample GPIO0..26 = A0-14, D0-7, -, -, -, /ROMSEL.
+.program reve_wcap
+    pull block
+    mov y, osr
+.wrap_target
+    wait 1 gpio 27
+    wait 0 gpio 27
+    mov x, y
+dly:
+    jmp x-- dly
+    in pins, 27
+    push noblock
+.wrap
+
+; ---------- U2: PPU data output ----------
+; The PPU drives its multiplexed AD bus (our PD0-7) with the address low byte while /RD is high, so PD0-7 are
+; driven only while /RD (jmp pin, GPIO22) is low. Core 1 pushes {oe_mask << 8 | data} for every new PPU address;
+; the newest word is kept in X and re-applied while /RD stays low, so a late value still lands before /RD rises.
+.program reve_ppu_data
+.wrap_target
+idle:
+    pull noblock
+    mov x, osr
+    jmp pin idle
+drive:
+    mov osr, x
+    out pins, 8
+    out pindirs, 8
+    pull noblock
+    mov x, osr
+    jmp pin release
+    jmp drive
+release:
+    mov osr, null
+    out pindirs, 8
+.wrap
+
+; ---------- U2: CIRAM /CE + CIRAM A10 ----------
+; Must load at offset 0. Entries 0..15 are rewritten at run time (one per PPU A13..A10 value) as
+; "jmp top side (a10<<1 | /ce)"; the loop reads A10-A13 (in_base GPIO10) and jumps through the table, so both
+; outputs follow the address within ~4 PIO cycles. Side-set base GPIO26 (/CE), GPIO27 (A10).
+.program reve_ciram
+.side_set 2 opt
+.origin 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+    jmp top side 0
+public top:
+    mov isr, null
+    in pins, 4
+    mov pc, isr
+
+; ---------- all: shared half-duplex link, 12-bit symbols (start, 10 data LSB first, stop), 8 cycles per bit ----------
+; The pin is driven only while a symbol is sent (side-set on the pin direction); everybody else listens.
+.program reve_link_tx
+.side_set 1 opt pindirs
+.wrap_target
+    pull block              side 0
+    set pins, 0             side 1 [6]
+    set x, 9
+bitloop:
+    out pins, 1             [6]
+    jmp x-- bitloop
+    set pins, 1             [7]
+.wrap
+
+.program reve_link_rx
+start:
+    wait 0 pin 0
+    set x, 9                [10]
+bitloop:
+    in pins, 1
+    jmp x-- bitloop         [6]
+    jmp pin good
+    wait 1 pin 0
+    jmp start
+good:
+    push noblock            ; never stall: a full FIFO drops symbols instead of desynchronising
+
+; ---------- U3: M2 cycles and PPU reads ----------
+.program reve_m2
+.wrap_target
+    wait 1 gpio 5
+    wait 0 gpio 5
+    in null, 1
+    push noblock
+.wrap
+
+; one word per PPU /RD fall (GPIO0): bit 30 = A12, bit 31 = A13 (in_base GPIO6, shift right)
+.program reve_rd
+.wrap_target
+    wait 1 gpio 0
+    wait 0 gpio 0
+    in pins, 2
+    push noblock
+.wrap

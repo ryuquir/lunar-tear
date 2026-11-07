@@ -13,7 +13,7 @@ static void vrc_irq_write(cart_t *c, vrc_irq_t *q, unsigned reg, uint8_t v) {
     case 4: cart_irq(c, false); q->ctrl = (uint8_t)((q->ctrl & ~2) | ((q->ctrl & 1) << 1)); break;
     }
 }
-static void vrc_irq_cycle(cart_t *c, vrc_irq_t *q) {
+static void FC_FASTCODE(vrc_irq_cycle)(cart_t *c, vrc_irq_t *q) {
     if (!(q->ctrl & 2)) return;
     bool clock = false;
     if (q->ctrl & 4) clock = true;
@@ -67,12 +67,12 @@ static void vrc4_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     vrc4_sync(c);
 }
-static uint8_t vrc2_read(cart_t *c, uint16_t a, uint8_t open) { if (a >= 0x6000 && a < 0x7000) return (uint8_t)((open & 0xFE) | (c->s.vrc4.wram_en & 1)); return open; }
-static void vrc4_cycle(cart_t *c) { vrc4_state_t *s = &c->s.vrc4; vrc_irq_t q = { s->irq_latch, s->irq_ctrl, s->irq_counter, s->prescaler }; vrc_irq_cycle(c, &q); s->irq_counter = q.counter; s->prescaler = q.prescaler; }
-const mapper_desc_t mapper_021 = { 21, "VRC4a/c", MF_CPU_CYCLE, vrc4_init, vrc4_write, NULL, NULL, vrc4_cycle };
-const mapper_desc_t mapper_022 = { 22, "VRC2a", MF_READ_LOW | MF_WRITE_6000, vrc4_init, vrc4_write, vrc2_read, NULL, NULL };
-const mapper_desc_t mapper_023 = { 23, "VRC2b/4e/4f", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, vrc4_init, vrc4_write, vrc2_read, NULL, vrc4_cycle };
-const mapper_desc_t mapper_025 = { 25, "VRC2c/4b/4d", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, vrc4_init, vrc4_write, vrc2_read, NULL, vrc4_cycle };
+static uint8_t FC_FASTCODE(vrc2_read)(cart_t *c, uint16_t a, uint8_t open) { if (a >= 0x6000 && a < 0x7000) return (uint8_t)((open & 0xFE) | (c->s.vrc4.wram_en & 1)); return open; }
+static void FC_FASTCODE(vrc4_cycle)(cart_t *c) { vrc4_state_t *s = &c->s.vrc4; vrc_irq_t q = { s->irq_latch, s->irq_ctrl, s->irq_counter, s->prescaler }; vrc_irq_cycle(c, &q); s->irq_counter = q.counter; s->prescaler = q.prescaler; }
+const mapper_desc_t mapper_021 = { 21, "VRC4a/c", MF_CPU_CYCLE, vrc4_init, vrc4_write, NULL, NULL, vrc4_cycle, NULL };
+const mapper_desc_t mapper_022 = { 22, "VRC2a", MF_READ_LOW | MF_WRITE_6000, vrc4_init, vrc4_write, vrc2_read, NULL, NULL, NULL };
+const mapper_desc_t mapper_023 = { 23, "VRC2b/4e/4f", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, vrc4_init, vrc4_write, vrc2_read, NULL, vrc4_cycle, NULL };
+const mapper_desc_t mapper_025 = { 25, "VRC2c/4b/4d", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, vrc4_init, vrc4_write, vrc2_read, NULL, vrc4_cycle, NULL };
 
 /* ---------- VRC1 (75) ---------- */
 static void vrc1_sync(cart_t *c) { generic_state_t *g = &c->s.g; cart_set_prg8k(c, 0, g->regs[0]); cart_set_prg8k(c, 1, g->regs[1]); cart_set_prg8k(c, 2, g->regs[2]); cart_set_prg8k(c, 3, -1);
@@ -81,7 +81,7 @@ static void vrc1_init(cart_t *c) { generic_state_t *g = &c->s.g; g->regs[0] = 0;
 static void vrc1_write(cart_t *c, uint16_t a, uint8_t v) { generic_state_t *g = &c->s.g;
     switch (a & 0xF000) { case 0x8000: g->regs[0] = v & 0x0F; break; case 0xA000: g->regs[1] = v & 0x0F; break; case 0xC000: g->regs[2] = v & 0x0F; break;
     case 0x9000: g->regs[3] = v & 7; break; case 0xE000: g->regs[4] = v & 0x0F; break; case 0xF000: g->regs[5] = v & 0x0F; break; default: return; } vrc1_sync(c); }
-const mapper_desc_t mapper_075 = { 75, "VRC1", 0, vrc1_init, vrc1_write, NULL, NULL, NULL };
+const mapper_desc_t mapper_075 = { 75, "VRC1", 0, vrc1_init, vrc1_write, NULL, NULL, NULL, NULL };
 
 /* ---------- VRC3 (73, Salamander) ---------- */
 static void vrc3_init(cart_t *c) { cart_set_prg16k(c, 0, 0); cart_set_prg16k(c, 1, -1); cart_set_chr8k(c, 0); cart_set_wram_6000(c, 0, true); c->s.g.r16[0] = 0; c->s.g.regs[0] = 0; }
@@ -95,10 +95,10 @@ static void vrc3_write(cart_t *c, uint16_t a, uint8_t v) { generic_state_t *g = 
     case 0xD000: cart_irq(c, false); g->regs[0] = (uint8_t)((g->regs[0] & ~2) | ((g->regs[0] & 1) << 1)); break;
     case 0xF000: cart_set_prg16k(c, 0, v & 7); break;
     } }
-static void vrc3_cycle(cart_t *c) { generic_state_t *g = &c->s.g; if (!(g->regs[0] & 2)) return;
+static void FC_FASTCODE(vrc3_cycle)(cart_t *c) { generic_state_t *g = &c->s.g; if (!(g->regs[0] & 2)) return;
     if (g->regs[0] & 4) { if ((g->r16[0] & 0xFF) == 0xFF) { g->r16[0] = (uint16_t)((g->r16[0] & 0xFF00) | (g->r16[1] & 0xFF)); cart_irq(c, true); } else g->r16[0]++; }
     else { if (g->r16[0] == 0xFFFF) { g->r16[0] = g->r16[1]; cart_irq(c, true); } else g->r16[0]++; } }
-const mapper_desc_t mapper_073 = { 73, "VRC3", MF_CPU_CYCLE, vrc3_init, vrc3_write, NULL, NULL, vrc3_cycle };
+const mapper_desc_t mapper_073 = { 73, "VRC3", MF_CPU_CYCLE, vrc3_init, vrc3_write, NULL, NULL, vrc3_cycle, NULL };
 
 /* ---------- VRC6 (24 / 26) ---------- */
 static void vrc6_sync(cart_t *c) {
@@ -130,9 +130,9 @@ static void vrc6_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     vrc6_sync(c);
 }
-static void vrc6_cycle(cart_t *c) { vrc6_state_t *s = &c->s.vrc6; vrc_irq_t q = { s->irq_latch, s->irq_ctrl, s->irq_counter, s->prescaler }; vrc_irq_cycle(c, &q); s->irq_counter = q.counter; s->prescaler = q.prescaler; }
-const mapper_desc_t mapper_024 = { 24, "VRC6a", MF_CPU_CYCLE, vrc6_init, vrc6_write, NULL, NULL, vrc6_cycle };
-const mapper_desc_t mapper_026 = { 26, "VRC6b", MF_CPU_CYCLE, vrc6_init, vrc6_write, NULL, NULL, vrc6_cycle };
+static void FC_FASTCODE(vrc6_cycle)(cart_t *c) { vrc6_state_t *s = &c->s.vrc6; vrc_irq_t q = { s->irq_latch, s->irq_ctrl, s->irq_counter, s->prescaler }; vrc_irq_cycle(c, &q); s->irq_counter = q.counter; s->prescaler = q.prescaler; }
+const mapper_desc_t mapper_024 = { 24, "VRC6a", MF_CPU_CYCLE, vrc6_init, vrc6_write, NULL, NULL, vrc6_cycle, NULL };
+const mapper_desc_t mapper_026 = { 26, "VRC6b", MF_CPU_CYCLE, vrc6_init, vrc6_write, NULL, NULL, vrc6_cycle, NULL };
 
 /* ---------- VRC7 (85) ---------- */
 static void vrc7_sync(cart_t *c) {
@@ -161,5 +161,5 @@ static void vrc7_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     vrc7_sync(c);
 }
-static void vrc7_cycle(cart_t *c) { vrc7_state_t *s = &c->s.vrc7; vrc_irq_t q = { s->irq_latch, s->irq_ctrl, s->irq_counter, s->prescaler }; vrc_irq_cycle(c, &q); s->irq_counter = q.counter; s->prescaler = q.prescaler; }
-const mapper_desc_t mapper_085 = { 85, "VRC7", MF_CPU_CYCLE, vrc7_init, vrc7_write, NULL, NULL, vrc7_cycle };
+static void FC_FASTCODE(vrc7_cycle)(cart_t *c) { vrc7_state_t *s = &c->s.vrc7; vrc_irq_t q = { s->irq_latch, s->irq_ctrl, s->irq_counter, s->prescaler }; vrc_irq_cycle(c, &q); s->irq_counter = q.counter; s->prescaler = q.prescaler; }
+const mapper_desc_t mapper_085 = { 85, "VRC7", MF_CPU_CYCLE, vrc7_init, vrc7_write, NULL, NULL, vrc7_cycle, NULL };

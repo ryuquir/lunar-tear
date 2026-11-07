@@ -16,6 +16,8 @@ typedef enum { LOAD_OK = 0, LOAD_ERR_INSPECT, LOAD_ERR_TOO_BIG, LOAD_ERR_MAPPER,
 /* `img` may live in flash (XIP); PRG/CHR are copied into SRAM. `profile` may be NULL. */
 load_result_t cart_load(cart_t *c, const uint8_t *img, uint32_t len, const cart_profile_t *profile, rom_info_t *info_out);
 load_result_t cart_load_from_info(cart_t *c, const uint8_t *img, const rom_info_t *info, const cart_profile_t *profile);
+/* rev E: PRG/CHR are not copied (see cartload.c); RAMs still come from the pool. */
+load_result_t cart_load_ext(cart_t *c, const uint8_t *prg, uint8_t *chr, const rom_info_t *info, const cart_profile_t *profile);
 
 /* FC_VIRTUAL_ROM (rev D): table pointers are virtual addresses into external memories. */
 #ifndef FC_VIRTUAL_ROM

@@ -19,7 +19,8 @@
 | 回路図・基板 rev B（Pico 2、KiCad 7、90×46.1 mm ファミコン実寸、USB-C・リセット付き、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/](hardware/)、[hardware/jlcpcb/](hardware/jlcpcb/) |
 | 回路図・基板 rev C（RP2350B + XIAO RP2040、USB 3 口、リセット端子 J2、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/revc/](hardware/revc/) |
 | 回路図・基板 rev D（**実機動作の本命**: 実カセット型分離構成、RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + F-RAM 128 KB + CHR SRAM 512 KB、**6 層、未接続 0・DRC エラー 0**、起動バンク付き）・ガーバー・JLCPCB 実装パッケージ | [hardware/revd/](hardware/revd/)、[hardware/revd/jlcpcb/](hardware/revd/jlcpcb/)、docs/04_hardware.md の rev D 節 |
-| 回路図・基板 rev E（**実際に作れる安価な版**: Pico 2 ×2 + XIAO RP2350、JLCPCB Basic 部品のみ 10 種・46 点、2 層、未接続 0・DRC エラー 0、MMC5 完全対応の配線）・ガーバー・JLCPCB 実装パッケージ | [hardware/reve/](hardware/reve/)、[docs/06_rev_e_plan.md](docs/06_rev_e_plan.md)。**rev E 用ファームは次のフェーズ** |
+| 回路図・基板 rev E（**実際に作れる安価な版**: Pico 2 ×2 + XIAO RP2350、JLCPCB Basic 部品のみ 10 種・45 点、2 層、未接続 0・DRC エラー 0、MMC5 完全対応の配線）・ガーバー・JLCPCB 実装パッケージ | [hardware/reve/](hardware/reve/)、[docs/06_rev_e_plan.md](docs/06_rev_e_plan.md) |
+| rev E ファームウェア（U1 CPU バス応答・書き込み取り込み・CHR-RAM 再現・起動手順・ROM ライブラリ、U2 CHR/CIRAM /CE・MMC5 PPU 処理、U3 IRQ・拡張音源、3 台リンク） | 実装済み・3 本ともビルド通過、ホストテスト通過（rev E 分 49 項目）、**実機未検証**。[docs/07_rev_e_firmware.md](docs/07_rev_e_firmware.md) |
 | rev D ファームウェア（バンク線出力、2 MCU リンク、外部フラッシュ書き込み、ROM ライブラリ、ブートスタブ） | 実装済み・ビルド通過（U1 text 130 KB / U2 37 KB）、ホストテスト通過、**実機未検証** |
 
 ## ビルド

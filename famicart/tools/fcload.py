@@ -14,6 +14,11 @@ rev D (U1 "PRG mapper" port; do these with the cartridge OUT of the console, USB
   fcload.py /dev/ttyACM0 bootbank              # (once per board) program the boot stub into the top PRG bank
   fcload.py /dev/ttyACM0 flashid | wramdump
 
+rev E (USB port of U1, the CPU-side Pico 2 at the left board edge; the cart may stay in the console --
+the CPU is parked while the flash is written and the new game starts by itself):
+  fcload.py /dev/ttyACM0 libadd game.nes [name]   # store in U1's flash (about 3.4 MB for games), boot it
+  fcload.py /dev/ttyACM0 lib | libsel n | libdel n | libclr
+
 Requires pyserial (pip install pyserial). After `load`, press RESET on the Famicom: the cartridge
 bus is released during the flash write, so the running game is interrupted.
 """
@@ -36,7 +41,7 @@ def main():
             if l: print('<', l)
             if l.startswith(prefix) or l.startswith('ERR'): return l
         return ''
-    if cmd in ('lib', 'bootbank', 'flashid', 'wramdump'):
+    if cmd in ('lib', 'libclr', 'bootbank', 'flashid', 'wramdump'):
         say(cmd.upper()); t0 = time.time()
         while time.time() - t0 < (120 if cmd == 'bootbank' else 10):
             l = s.readline().decode(errors='replace').rstrip()

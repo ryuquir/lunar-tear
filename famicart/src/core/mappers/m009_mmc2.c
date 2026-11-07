@@ -22,7 +22,7 @@ static void mmc2_write(cart_t *c, uint16_t a, uint8_t v) {
     case 0xF000: cart_set_mirroring(c, (v & 1) ? MIRROR_H : MIRROR_V); break;
     }
 }
-static void mmc2_ppu_addr(cart_t *c, uint16_t a) {
+static void FC_FASTCODE(mmc2_ppu_addr)(cart_t *c, uint16_t a) {
     mmc2_state_t *s = &c->s.mmc2;
     uint8_t *pend = &c->s.raw[200]; /* pending latch change applied after the fetch */
     if (*pend) { if (*pend & 1) s->latch0 = (*pend >> 1) & 1; if (*pend & 4) s->latch1 = (*pend >> 3) & 1; *pend = 0; mmc2_sync(c); }
@@ -35,5 +35,5 @@ static void mmc2_ppu_addr(cart_t *c, uint16_t a) {
         if ((a & 0x1FF8) == 0x1FD8) *pend = 4; else if ((a & 0x1FF8) == 0x1FE8) *pend = 4 | 8;
     }
 }
-const mapper_desc_t mapper_009 = { 9,  "MMC2", MF_PPU_HOOK, mmc2_init, mmc2_write, NULL, mmc2_ppu_addr, NULL };
-const mapper_desc_t mapper_010 = { 10, "MMC4", MF_PPU_HOOK, mmc2_init, mmc2_write, NULL, mmc2_ppu_addr, NULL };
+const mapper_desc_t mapper_009 = { 9,  "MMC2", MF_PPU_HOOK, mmc2_init, mmc2_write, NULL, mmc2_ppu_addr, NULL, NULL };
+const mapper_desc_t mapper_010 = { 10, "MMC4", MF_PPU_HOOK, mmc2_init, mmc2_write, NULL, mmc2_ppu_addr, NULL, NULL };

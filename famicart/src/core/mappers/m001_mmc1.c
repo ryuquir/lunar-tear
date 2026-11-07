@@ -50,4 +50,4 @@ static void mmc1_write(cart_t *c, uint16_t a, uint8_t v) {
         mmc1_sync(c);
     }
 }
-const mapper_desc_t mapper_001 = { 1, "MMC1", 0, mmc1_init, mmc1_write, NULL, NULL, NULL };
+const mapper_desc_t mapper_001 = { 1, "MMC1", 0, mmc1_init, mmc1_write, NULL, NULL, NULL, NULL };

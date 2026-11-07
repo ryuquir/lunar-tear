@@ -25,14 +25,14 @@ static void rb_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     rb_sync(c);
 }
-static void rb_clock(cart_t *c) {
+static void FC_FASTCODE(rb_clock)(cart_t *c) {
     rambo1_state_t *s = &c->s.rambo1;
     if (s->irq_reload) { s->irq_counter = s->irq_latch ? (uint8_t)(s->irq_latch | 1) : 0; s->irq_reload = 0; }
     else if (s->irq_counter == 0) s->irq_counter = s->irq_latch; else s->irq_counter--;
     if (s->irq_counter == 0 && s->irq_enable) s->irq_delay = 3;   /* RAMBO-1 asserts a few cycles late */
 }
-static void rb_ppu_addr(cart_t *c, uint16_t a) { rambo1_state_t *s = &c->s.rambo1; if (s->irq_mode) return; if (mapper_a12_edge(&s->a12_state, a)) rb_clock(c); }
-static void rb_cycle(cart_t *c) { rambo1_state_t *s = &c->s.rambo1;
+static void FC_FASTCODE(rb_ppu_addr)(cart_t *c, uint16_t a) { rambo1_state_t *s = &c->s.rambo1; if (s->irq_mode) return; if (mapper_a12_edge(&s->a12_state, a)) rb_clock(c); }
+static void FC_FASTCODE(rb_cycle)(cart_t *c) { rambo1_state_t *s = &c->s.rambo1;
     if (s->irq_delay) { if (--s->irq_delay == 0) cart_irq(c, true); }
     if (s->irq_mode) { if (++s->prg_mode >= 4) { s->prg_mode = 0; rb_clock(c); } } }   /* prg_mode doubles as the /4 prescaler */
-const mapper_desc_t mapper_064 = { 64, "Tengen-RAMBO-1", MF_PPU_HOOK | MF_CPU_CYCLE, rb_init, rb_write, NULL, rb_ppu_addr, rb_cycle };
+const mapper_desc_t mapper_064 = { 64, "Tengen-RAMBO-1", MF_PPU_HOOK | MF_CPU_CYCLE, rb_init, rb_write, NULL, rb_ppu_addr, rb_cycle, NULL };

@@ -49,7 +49,7 @@ static void n163_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     n163_sync(c);
 }
-static uint8_t n163_read(cart_t *c, uint16_t a, uint8_t open) {
+static uint8_t FC_FASTCODE(n163_read)(cart_t *c, uint16_t a, uint8_t open) {
     n163_state_t *s = &c->s.n163;
     if (c->mapper_id != 19) return open;
     if ((a & 0xF800) == 0x4800) { uint8_t v = c->exram ? c->exram[s->ram_addr & 0x7F] : 0; if (s->ram_inc) s->ram_addr = (s->ram_addr + 1) & 0x7F; return v; }
@@ -57,10 +57,15 @@ static uint8_t n163_read(cart_t *c, uint16_t a, uint8_t open) {
     if ((a & 0xF800) == 0x5800) return (uint8_t)((s->irq_counter >> 8) | (s->irq_enable << 7));
     return open;
 }
-static void n163_cycle(cart_t *c) {
+static uint8_t FC_FASTCODE(n163_peek)(cart_t *c, uint16_t a, uint8_t open) {
+    n163_state_t *s = &c->s.n163;
+    if (c->mapper_id == 19 && (a & 0xF800) == 0x4800) return c->exram ? c->exram[s->ram_addr & 0x7F] : 0;
+    return n163_read(c, a, open);                  /* $5000/$5800 have no side effects */
+}
+static void FC_FASTCODE(n163_cycle)(cart_t *c) {
     n163_state_t *s = &c->s.n163;
     if (!s->irq_enable || s->irq_counter >= 0x7FFF) return;
     if (++s->irq_counter == 0x7FFF) cart_irq(c, true);
 }
-const mapper_desc_t mapper_019 = { 19,  "Namco-163", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, n163_init, n163_write, n163_read, NULL, n163_cycle };
-const mapper_desc_t mapper_210 = { 210, "Namco-175/340", 0, n163_init, n163_write, NULL, NULL, NULL };
+const mapper_desc_t mapper_019 = { 19,  "Namco-163", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, n163_init, n163_write, n163_read, NULL, n163_cycle, n163_peek };
+const mapper_desc_t mapper_210 = { 210, "Namco-175/340", 0, n163_init, n163_write, NULL, NULL, NULL, NULL };

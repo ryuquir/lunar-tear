@@ -13,8 +13,8 @@ static void s3_write(cart_t *c, uint16_t a, uint8_t v) {
     case 0xF800: cart_set_prg16k(c, 0, v); break;
     }
 }
-static void s3_cycle(cart_t *c) { generic_state_t *g = &c->s.g; if (!g->b[0]) return; if (g->r16[0] == 0) { g->b[0] = false; cart_irq(c, true); g->r16[0] = 0xFFFF; } else g->r16[0]--; }
-const mapper_desc_t mapper_067 = { 67, "Sunsoft-3", MF_CPU_CYCLE, s3_init, s3_write, NULL, NULL, s3_cycle };
+static void FC_FASTCODE(s3_cycle)(cart_t *c) { generic_state_t *g = &c->s.g; if (!g->b[0]) return; if (g->r16[0] == 0) { g->b[0] = false; cart_irq(c, true); g->r16[0] = 0xFFFF; } else g->r16[0]--; }
+const mapper_desc_t mapper_067 = { 67, "Sunsoft-3", MF_CPU_CYCLE, s3_init, s3_write, NULL, NULL, s3_cycle, NULL };
 
 static void s4_sync(cart_t *c) {
     generic_state_t *g = &c->s.g;
@@ -29,7 +29,7 @@ static void s4_sync(cart_t *c) {
 }
 static void s4_init(cart_t *c) { generic_state_t *g = &c->s.g; for (int i = 0; i < 4; i++) g->regs[i] = (uint8_t)i; g->regs[4] = g->regs[5] = 0; g->regs[6] = 0; g->regs[7] = 0x10; s4_sync(c); }
 static void s4_write(cart_t *c, uint16_t a, uint8_t v) { generic_state_t *g = &c->s.g; if (a < 0x8000) return; g->regs[(a >> 12) - 8] = v; s4_sync(c); }
-const mapper_desc_t mapper_068 = { 68, "Sunsoft-4", 0, s4_init, s4_write, NULL, NULL, NULL };
+const mapper_desc_t mapper_068 = { 68, "Sunsoft-4", 0, s4_init, s4_write, NULL, NULL, NULL, NULL };
 
 static void fme7_sync(cart_t *c) {
     fme7_state_t *s = &c->s.fme7;
@@ -59,5 +59,5 @@ static void fme7_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     fme7_sync(c);
 }
-static void fme7_cycle(cart_t *c) { fme7_state_t *s = &c->s.fme7; if (!(s->irq_enable & 0x80)) return; if (s->irq_counter == 0 && (s->irq_enable & 1)) cart_irq(c, true); s->irq_counter--; }
-const mapper_desc_t mapper_069 = { 69, "Sunsoft-FME-7/5B", MF_CPU_CYCLE, fme7_init, fme7_write, NULL, NULL, fme7_cycle };
+static void FC_FASTCODE(fme7_cycle)(cart_t *c) { fme7_state_t *s = &c->s.fme7; if (!(s->irq_enable & 0x80)) return; if (s->irq_counter == 0 && (s->irq_enable & 1)) cart_irq(c, true); s->irq_counter--; }
+const mapper_desc_t mapper_069 = { 69, "Sunsoft-FME-7/5B", MF_CPU_CYCLE, fme7_init, fme7_write, NULL, NULL, fme7_cycle, NULL };

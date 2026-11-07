@@ -23,6 +23,8 @@ typedef struct {
     uint8_t scanline, spr8x16;
     uint8_t split_ctrl, split_scroll, split_bank;
     uint32_t last_ppu_cycle; uint16_t last_ppu_addr; uint8_t match_count, ppu_idle;
+    uint8_t ex_byte, split_tile, split_attr, attr_byte, a13_run, split_on;
+    uint8_t *chr_set[2][8];   /* [0] = set A ($5120-$5127), [1] = set B ($5128-$512B), precomputed per write */
     /* audio: regs $5000-$5015 are forwarded to audio/mmc5_audio via the register router */
 } mmc5_state_t;
 

@@ -26,7 +26,7 @@ static void tc_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     tc_sync(c);
 }
-static void tc_ppu_addr(cart_t *c, uint16_t a) {
+static void FC_FASTCODE(tc_ppu_addr)(cart_t *c, uint16_t a) {
     taito_state_t *s = &c->s.taito;
     if (c->mapper_id != 48) return;
     if (mapper_a12_edge(&s->wram_en /* reused as a12 state */, a)) {
@@ -34,8 +34,8 @@ static void tc_ppu_addr(cart_t *c, uint16_t a) {
         if (s->irq_counter == 0 && s->irq_enable) cart_irq(c, true);
     }
 }
-const mapper_desc_t mapper_033 = { 33, "Taito-TC0190", 0, tc_init, tc_write, NULL, NULL, NULL };
-const mapper_desc_t mapper_048 = { 48, "Taito-TC0690", MF_PPU_HOOK, tc_init, tc_write, NULL, tc_ppu_addr, NULL };
+const mapper_desc_t mapper_033 = { 33, "Taito-TC0190", 0, tc_init, tc_write, NULL, NULL, NULL, NULL };
+const mapper_desc_t mapper_048 = { 48, "Taito-TC0690", MF_PPU_HOOK, tc_init, tc_write, NULL, tc_ppu_addr, NULL, NULL };
 
 /* ---- X1-005 (80 / 207): registers at $7EF0-$7EFF, 128B RAM at $7F00 ---- */
 static void x1005_sync(cart_t *c) {
@@ -58,14 +58,14 @@ static void x1005_write(cart_t *c, uint16_t a, uint8_t v) {
     else g->regs[r] = v;
     x1005_sync(c);
 }
-static uint8_t x1005_read(cart_t *c, uint16_t a, uint8_t open) {
+static uint8_t FC_FASTCODE(x1005_read)(cart_t *c, uint16_t a, uint8_t open) {
     generic_state_t *g = &c->s.g;
     if (a >= 0x7F00 && a < 0x8000 && g->regs[8] == 0xA3 && c->wram) return c->wram[a & 0x7F];
     if (a >= 0x7EF8 && a <= 0x7EF9) return g->regs[8];
     return open;
 }
-const mapper_desc_t mapper_080 = { 80,  "Taito-X1-005", MF_READ_LOW | MF_WRITE_6000, x1005_init, x1005_write, x1005_read, NULL, NULL };
-const mapper_desc_t mapper_207 = { 207, "Taito-X1-005(NT)", MF_READ_LOW | MF_WRITE_6000, x1005_init, x1005_write, x1005_read, NULL, NULL };
+const mapper_desc_t mapper_080 = { 80,  "Taito-X1-005", MF_READ_LOW | MF_WRITE_6000, x1005_init, x1005_write, x1005_read, NULL, NULL, NULL };
+const mapper_desc_t mapper_207 = { 207, "Taito-X1-005(NT)", MF_READ_LOW | MF_WRITE_6000, x1005_init, x1005_write, x1005_read, NULL, NULL, NULL };
 
 /* ---- X1-017 (82) ---- */
 static void x1017_sync(cart_t *c) {
@@ -86,10 +86,10 @@ static void x1017_write(cart_t *c, uint16_t a, uint8_t v) {
     if (a < 0x7EF0 || a > 0x7EFC) return;
     g->regs[a & 0x0F] = v; x1017_sync(c);
 }
-static uint8_t x1017_read(cart_t *c, uint16_t a, uint8_t open) {
+static uint8_t FC_FASTCODE(x1017_read)(cart_t *c, uint16_t a, uint8_t open) {
     generic_state_t *g = &c->s.g;
     if (a >= 0x6000 && a < 0x7EF0) { unsigned blk = (a - 0x6000) >> 11; bool en = (blk == 0 && g->regs[7] == 0xCA) || (blk == 1 && g->regs[8] == 0x69) || (blk == 2 && g->regs[9] == 0x84);
         return (en && c->wram) ? c->wram[a - 0x6000] : open; }
     return open;
 }
-const mapper_desc_t mapper_082 = { 82, "Taito-X1-017", MF_READ_LOW | MF_WRITE_6000, x1017_init, x1017_write, x1017_read, NULL, NULL };
+const mapper_desc_t mapper_082 = { 82, "Taito-X1-017", MF_READ_LOW | MF_WRITE_6000, x1017_init, x1017_write, x1017_read, NULL, NULL, NULL };

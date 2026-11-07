@@ -18,6 +18,9 @@ typedef struct mapper_desc {
     uint8_t (*read)     (cart_t *c, uint16_t addr, uint8_t open_bus); /* CPU read  $4020-$7FFF (slow path) */
     void    (*ppu_addr) (cart_t *c, uint16_t addr);                   /* PPU address observed */
     void    (*cpu_cycle)(cart_t *c);                                  /* one M2 cycle elapsed */
+    uint8_t (*peek)     (cart_t *c, uint16_t addr, uint8_t open_bus); /* like read() but without side effects (NULL: read() has none).
+                                                                          rev E serves the byte with peek() and calls read() only once the
+                                                                          read is confirmed (U1 cannot see M2, see reve/rcommit.h). */
 } mapper_desc_t;
 
 const mapper_desc_t *mapper_find(uint16_t id);

@@ -81,15 +81,15 @@ static void bandai_write(cart_t *c, uint16_t a, uint8_t v) {
         break;
     }
 }
-static uint8_t bandai_read(cart_t *c, uint16_t a, uint8_t open) {
+static uint8_t FC_FASTCODE(bandai_read)(cart_t *c, uint16_t a, uint8_t open) {
     if (a >= 0x6000 && a < 0x8000 && bandai_has_eeprom(c)) return (uint8_t)((open & 0xEF) | (c->s.bandai.eeprom_out << 4));
     return open;
 }
-static void bandai_cycle(cart_t *c) {
+static void FC_FASTCODE(bandai_cycle)(cart_t *c) {
     bandai_state_t *s = &c->s.bandai;
     if (!s->irq_enable) return;
     if (s->irq_counter == 0) { cart_irq(c, true); s->irq_counter = 0xFFFF; } else s->irq_counter--;
 }
-const mapper_desc_t mapper_016 = { 16,  "Bandai-FCG/LZ93D50", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, bandai_init, bandai_write, bandai_read, NULL, bandai_cycle };
-const mapper_desc_t mapper_159 = { 159, "Bandai-LZ93D50+24C01", MF_CPU_CYCLE | MF_READ_LOW, bandai_init, bandai_write, bandai_read, NULL, bandai_cycle };
-const mapper_desc_t mapper_153 = { 153, "Bandai-LZ93D50+SRAM", MF_CPU_CYCLE, bandai_init, bandai_write, NULL, NULL, bandai_cycle };
+const mapper_desc_t mapper_016 = { 16,  "Bandai-FCG/LZ93D50", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, bandai_init, bandai_write, bandai_read, NULL, bandai_cycle, NULL };
+const mapper_desc_t mapper_159 = { 159, "Bandai-LZ93D50+24C01", MF_CPU_CYCLE | MF_READ_LOW, bandai_init, bandai_write, bandai_read, NULL, bandai_cycle, NULL };
+const mapper_desc_t mapper_153 = { 153, "Bandai-LZ93D50+SRAM", MF_CPU_CYCLE, bandai_init, bandai_write, NULL, NULL, bandai_cycle, NULL };

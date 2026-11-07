@@ -110,7 +110,7 @@ static void mmc3_write(cart_t *c, uint16_t a, uint8_t v) {
     case 0xE001: s->irq_enable = 1; break;
     }
 }
-static void mmc3_clock_irq(cart_t *c) {
+static void FC_FASTCODE(mmc3_clock_irq)(cart_t *c) {
     mmc3_state_t *s = &c->s.mmc3;
     uint8_t before = s->irq_counter;
     if (s->irq_counter == 0 || s->irq_reload) { s->irq_counter = s->irq_latch; s->irq_reload = 0; }
@@ -120,17 +120,17 @@ static void mmc3_clock_irq(cart_t *c) {
     else fire = s->irq_counter == 0;
     if (fire && s->irq_enable) cart_irq(c, true);
 }
-static void mmc3_ppu_addr(cart_t *c, uint16_t a) {
+static void FC_FASTCODE(mmc3_ppu_addr)(cart_t *c, uint16_t a) {
     mmc3_state_t *s = &c->s.mmc3;
     if (s->variant >= V_N108) return;
     uint16_t aa = (s->variant == V_MCACC) ? (uint16_t)(a ^ 0x1000) : a;
     if (mapper_a12_edge(&s->a12_state, aa)) mmc3_clock_irq(c);
 }
-const mapper_desc_t mapper_004 = { 4,   "MMC3",       MF_PPU_HOOK, mmc3_init, mmc3_write, NULL, mmc3_ppu_addr, NULL };
-const mapper_desc_t mapper_118 = { 118, "TxSROM",     MF_PPU_HOOK, mmc3_init, mmc3_write, NULL, mmc3_ppu_addr, NULL };
-const mapper_desc_t mapper_119 = { 119, "TQROM",      MF_PPU_HOOK, mmc3_init, mmc3_write, NULL, mmc3_ppu_addr, NULL };
-const mapper_desc_t mapper_206 = { 206, "Namcot-108", 0, mmc3_init, mmc3_write, NULL, NULL, NULL };
-const mapper_desc_t mapper_088 = { 88,  "Namcot-3433", 0, mmc3_init, mmc3_write, NULL, NULL, NULL };
-const mapper_desc_t mapper_095 = { 95,  "Namcot-3425", 0, mmc3_init, mmc3_write, NULL, NULL, NULL };
-const mapper_desc_t mapper_154 = { 154, "Namcot-3453", 0, mmc3_init, mmc3_write, NULL, NULL, NULL };
-const mapper_desc_t mapper_076 = { 76,  "Namcot-3446", 0, mmc3_init, mmc3_write, NULL, NULL, NULL };
+const mapper_desc_t mapper_004 = { 4,   "MMC3",       MF_PPU_HOOK, mmc3_init, mmc3_write, NULL, mmc3_ppu_addr, NULL, NULL };
+const mapper_desc_t mapper_118 = { 118, "TxSROM",     MF_PPU_HOOK, mmc3_init, mmc3_write, NULL, mmc3_ppu_addr, NULL, NULL };
+const mapper_desc_t mapper_119 = { 119, "TQROM",      MF_PPU_HOOK, mmc3_init, mmc3_write, NULL, mmc3_ppu_addr, NULL, NULL };
+const mapper_desc_t mapper_206 = { 206, "Namcot-108", 0, mmc3_init, mmc3_write, NULL, NULL, NULL, NULL };
+const mapper_desc_t mapper_088 = { 88,  "Namcot-3433", 0, mmc3_init, mmc3_write, NULL, NULL, NULL, NULL };
+const mapper_desc_t mapper_095 = { 95,  "Namcot-3425", 0, mmc3_init, mmc3_write, NULL, NULL, NULL, NULL };
+const mapper_desc_t mapper_154 = { 154, "Namcot-3453", 0, mmc3_init, mmc3_write, NULL, NULL, NULL, NULL };
+const mapper_desc_t mapper_076 = { 76,  "Namcot-3446", 0, mmc3_init, mmc3_write, NULL, NULL, NULL, NULL };

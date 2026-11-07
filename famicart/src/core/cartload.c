@@ -33,7 +33,17 @@ load_result_t cart_load(cart_t *c, const uint8_t *img, uint32_t len, const cart_
 }
 
 /* Build the cart from an already-inspected rom_info. `img` may be NULL under FC_VIRTUAL_ROM (external memories). */
+static load_result_t load_common(cart_t *c, const uint8_t *img, const rom_info_t *info_in, const cart_profile_t *profile, bool ext, const uint8_t *ext_prg, uint8_t *ext_chr);
 load_result_t cart_load_from_info(cart_t *c, const uint8_t *img, const rom_info_t *info_in, const cart_profile_t *profile) {
+    return load_common(c, img, info_in, profile, false, NULL, NULL);
+}
+/* rev E: PRG and CHR stay where the caller keeps them (QSPI flash behind romcache, or a pool it filled itself);
+ * NULL = this MCU does not serve that bus, a zero page stands in (only pointer arithmetic is ever done on it). */
+static uint8_t ext_dummy[1024];
+load_result_t cart_load_ext(cart_t *c, const uint8_t *prg, uint8_t *chr, const rom_info_t *info, const cart_profile_t *profile) {
+    return load_common(c, NULL, info, profile, true, prg ? prg : ext_dummy, chr ? chr : ext_dummy);
+}
+static load_result_t load_common(cart_t *c, const uint8_t *img, const rom_info_t *info_in, const cart_profile_t *profile, bool ext, const uint8_t *ext_prg, uint8_t *ext_chr) {
     rom_info_t info = *info_in;
     /* profile overrides */
     uint16_t mapper = info.mapper; uint8_t sub = info.submapper, mirror = info.mirroring;
@@ -46,7 +56,7 @@ load_result_t cart_load_from_info(cart_t *c, const uint8_t *img, const rom_info_
         if (profile->chr_ram_kb != 0xFF) chrram = (uint32_t)profile->chr_ram_kb * 1024u;
     }
 #if !FC_VIRTUAL_ROM
-    if (info.prg_size + info.chr_size > FC_ROM_POOL_SIZE) return LOAD_ERR_TOO_BIG;
+    if (!ext && info.prg_size + info.chr_size > FC_ROM_POOL_SIZE) return LOAD_ERR_TOO_BIG;
 #endif
 
     memset(c, 0, sizeof *c);
@@ -57,11 +67,16 @@ load_result_t cart_load_from_info(cart_t *c, const uint8_t *img, const rom_info_
     c->prg_rom = (const uint8_t *)FC_VROM_PRG; c->prg_size = info.prg_size; c->prg_pages = info.prg_size >> PRG_PAGE_SHIFT;
     if (info.chr_size) { c->chr = (uint8_t *)FC_VROM_CHR; c->chr_size = info.chr_size; c->chr_is_ram = false; }
 #else
+    if (ext) {
+        c->prg_rom = ext_prg; c->prg_size = info.prg_size; c->prg_pages = info.prg_size >> PRG_PAGE_SHIFT;
+        if (info.chr_size) { c->chr = ext_chr; c->chr_size = info.chr_size; c->chr_is_ram = false; }
+    } else {
     memcpy(rom_pool, img + info.data_offset, info.prg_size);
     c->prg_rom = rom_pool; c->prg_size = info.prg_size; c->prg_pages = info.prg_size >> PRG_PAGE_SHIFT;
     if (info.chr_size) {
         memcpy(rom_pool + info.prg_size, img + info.data_offset + info.prg_size, info.chr_size);
         c->chr = rom_pool + info.prg_size; c->chr_size = info.chr_size; c->chr_is_ram = false;
+    }
     }
 #endif
     /* RAM pool carve-up */

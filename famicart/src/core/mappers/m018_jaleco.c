@@ -34,7 +34,7 @@ static void ss_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     ss_sync(c);
 }
-static void ss_cycle(cart_t *c) {
+static void FC_FASTCODE(ss_cycle)(cart_t *c) {
     jaleco_state_t *s = &c->s.jaleco;
     if (!s->irq_enable) return;
     uint16_t mask = (s->irq_mode & 4) ? 0x000F : (s->irq_mode & 2) ? 0x00FF : (s->irq_mode & 1) ? 0x0FFF : 0xFFFF;
@@ -42,4 +42,4 @@ static void ss_cycle(cart_t *c) {
     if (cnt == 0) { cart_irq(c, true); }
     s->irq_counter = (uint16_t)((s->irq_counter & ~mask) | ((cnt - 1) & mask));
 }
-const mapper_desc_t mapper_018 = { 18, "Jaleco-SS88006", MF_CPU_CYCLE, ss_init, ss_write, NULL, NULL, ss_cycle };
+const mapper_desc_t mapper_018 = { 18, "Jaleco-SS88006", MF_CPU_CYCLE, ss_init, ss_write, NULL, NULL, ss_cycle, NULL };

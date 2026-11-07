@@ -14,7 +14,7 @@ static void g101_write(cart_t *c, uint16_t a, uint8_t v) {
     switch (a & 0xF000) { case 0x8000: g->regs[0] = v & 0x1F; break; case 0x9000: g->regs[2] = v & 3; break; case 0xA000: g->regs[1] = v & 0x1F; break; case 0xB000: g->regs[8 + (a & 7)] = v; break; default: return; }
     g101_sync(c);
 }
-const mapper_desc_t mapper_032 = { 32, "Irem-G101", 0, g101_init, g101_write, NULL, NULL, NULL };
+const mapper_desc_t mapper_032 = { 32, "Irem-G101", 0, g101_init, g101_write, NULL, NULL, NULL, NULL };
 
 static void h3001_sync(cart_t *c) { generic_state_t *g = &c->s.g; cart_set_prg8k(c, 0, g->regs[0]); cart_set_prg8k(c, 1, g->regs[1]); cart_set_prg8k(c, 2, g->regs[2]); cart_set_prg8k(c, 3, -1);
     for (unsigned i = 0; i < 8; i++) cart_set_chr1k(c, i, g->regs[8 + i]);
@@ -33,5 +33,5 @@ static void h3001_write(cart_t *c, uint16_t a, uint8_t v) {
     }
     h3001_sync(c);
 }
-static void h3001_cycle(cart_t *c) { generic_state_t *g = &c->s.g; if (g->b[0] && g->r16[0]) { if (--g->r16[0] == 0) cart_irq(c, true); } }
-const mapper_desc_t mapper_065 = { 65, "Irem-H3001", MF_CPU_CYCLE, h3001_init, h3001_write, NULL, NULL, h3001_cycle };
+static void FC_FASTCODE(h3001_cycle)(cart_t *c) { generic_state_t *g = &c->s.g; if (g->b[0] && g->r16[0]) { if (--g->r16[0] == 0) cart_irq(c, true); } }
+const mapper_desc_t mapper_065 = { 65, "Irem-H3001", MF_CPU_CYCLE, h3001_init, h3001_write, NULL, NULL, h3001_cycle, NULL };
