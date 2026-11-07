@@ -50,8 +50,8 @@ rev D（RP2350B 直付け ×2、1 Gbit パラレル NOR ×2、F-RAM、SRAM、74L
               本体 CPU バス (5V)                                本体 PPU バス (5V)
  CPU_A0-14 ─1k─> U1 GP0-14                          PPU_A0-13 ─1k─> U2 GP0-13
  CPU_D0-7 <─1k─> U1 GP15-22 (FT)                    PPU_D0-7 <─1k─> U2 GP14-21 (FT)
- /ROMSEL ─1k/2.2k 分圧─> U1 GP26                    PPU /RD ─1k/2.2k 分圧─> U2 GP26
- M2 ─2N7002 反転─┐                                  U2 GP22 ──> CIRAM /CE（PIO で A10/A11/A13 から即時生成）
+ /ROMSEL ─1k/2.2k 分圧─> U1 GP26                    PPU /RD ─1k─> U2 GP22 (FT)     
+ M2 ─2N7002 反転─┐                                  U2 GP26 ──> CIRAM /CE（PIO で A10/A11/A13 から即時生成）
  R/W ────────────┴─ダイオード OR─分圧─> U1 GP27     U2 GP27 ──> CIRAM A10
    (/WS = 書き込みストローブ)                         PPU /A13 ─100k─> CIRAM /CE（U2 起動前の既定値）
  CPU_D0-7 に 100k プル（$4C）: 起動・ソフトリセット時に本体 CPU を JMP $4C4C で待機させる
@@ -73,8 +73,10 @@ rev D（RP2350B 直付け ×2、1 Gbit パラレル NOR ×2、F-RAM、SRAM、74L
 
 ### 基板（hardware/reve/）
 
+- 2026-11-07 改訂: U2 のピンを入れ替え（GP22 = PPU /RD、GP26 = CIRAM /CE、GP27 = CIRAM A10）。/CE と A10 が隣り合うので PIO の side-set で同時に出せる。/RD は 5 V トレラントの GP22 に直結し、分圧抵抗が 1 個減った。
+
 - **2 層**、90 × 46.1 mm、トラック/クリアランス 0.15 mm、ビア 0.5/0.25 mm（JLC 標準仕様内）。
-- **配線結果: 未接続 0、DRC エラー 0**（トラック 1475 本、ビア 175 個。警告 47 件は KiCad 標準ライブラリ照合とシルク文字のみ）。
+- **配線結果: 未接続 0、DRC エラー 0**（トラック 1490 本、ビア 147 個。警告 46 件は KiCad 標準ライブラリ照合とシルク文字のみ）。
 - PCBA 部品はすべて表面（Economic 片面実装）。U1 と U3 は表面、U2 は裏面に手はんだ。USB 端子は U1 が基板左端、U2 が右端、XIAO（USB-C）が上端に出る。
 
 ### 部品表（`hardware/reve/jlcpcb/`、JLCPCB API で Basic・在庫を自動確認済み）
@@ -83,7 +85,7 @@ rev D（RP2350B 直付け ×2、1 Gbit パラレル NOR ×2、F-RAM、SRAM、74L
 |---|---|---|---|
 | 抵抗アレイ 1kΩ×4 0603 | C20197 | Basic | 12 |
 | 抵抗 100kΩ 0603 | C25803 | Basic | 10 |
-| 抵抗 2.2kΩ 0603 | C4190 | Basic | 7 |
+| 抵抗 2.2kΩ 0603 | C4190 | Basic | 6 |
 | 抵抗 1kΩ 0603 | C21190 | Basic | 6 |
 | B5819W | C8598 | Basic | 3 |
 | 2N7002 | C8545 | Basic | 2 |
@@ -94,7 +96,7 @@ rev D（RP2350B 直付け ×2、1 Gbit パラレル NOR ×2、F-RAM、SRAM、74L
 | Raspberry Pi Pico 2 | 秋月 129604（¥990） | 手はんだ | 2 |
 | Seeed XIAO RP2350 | 秋月 129619（¥1,100） | 手はんだ | 1 |
 
-PCBA は **10 種・46 点**、手はんだはモジュール 3 個だけ。
+PCBA は **10 種・45 点**、手はんだはモジュール 3 個だけ。
 
 ### 残るリスク
 
