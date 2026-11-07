@@ -124,11 +124,65 @@ README_D = '''# JLCPCB 注文パッケージ（famicart rev D: PRG ROM / CHR ROM
 - 実装（両面、約 135 点/枚）: セットアップ約 US$ 25（両面）+ 部品代（S29GL01GS 約 US$ 9 x2、FM28V100 約 US$ 11、IS62WV5128 約 US$ 8、RP2350B 約 US$ 1.5 x2、他 US$ 6–8/枚 → 約 US$ 43/枚）＋実装費 → 5 枚で約 US$ 260–320
 '''
 
+README_E = '''# JLCPCB 注文パッケージ（famicart rev E: JLCPCB Basic 部品のみ + 秋月の手はんだモジュール）
+
+## PCB（Instant Quote → Add gerber file → gerbers.zip）
+- **Layers 2** / Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm** / Surface Finish **ENIG**
+- **Gold Fingers: Yes** → **Bevelling: 30°**（カードエッジ）/ Copper 1 oz / Via Covering: Tented
+- Min Track/Spacing 0.15 mm、Via 0.5/0.25 mm（JLC 標準仕様内、追加料金なし）
+
+## SMT Assembly（PCB Assembly → **Economic / Top side のみ**）
+- BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`。**全部品が JLCPCB Basic Parts**（`parts_check.csv` に API での確認結果）。Extended 部品の追加料金はかからない。
+- 実装しない部品（DNP）: @DNP@
+- 部品プレビューで向きを確認するもの: 2N7002（Q1/Q2）、1N4148WS・B5819W（カソード帯）、抵抗アレイ。
+
+## 手はんだ（秋月電子で購入）
+| 部品 | 秋月 通販コード | 価格 | 位置 |
+|---|---|---|---|
+| Raspberry Pi Pico 2 | 129604 | ¥990 | U1（表面、CPU 側）・U2（**裏面**、PPU 側） |
+| Seeed XIAO RP2350 | 129619 | ¥1,100 | U3（表面、特殊チップ） |
+
+- Pico 2 はキャステレーション（端面スルーホール）を基板のパッドに直接はんだ付けする。U2 は裏面に載せる。
+- XIAO は縁の 14 ピンだけをはんだ付けする（裏面パッドは使わない。基板側にも銅箔を置いていない）。
+- 先にファームを書き込んでからはんだ付けすると、BOOTSEL 操作が楽。
+
+## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
+- PCB 5 枚（2 層・金フィンガー・ENIG・1.2 mm）: 約 US$ 30–45
+- 実装（Economic 片面、Basic のみ、約 47 点/枚）: セットアップ約 US$ 8 + 部品代 約 US$ 0.5/枚 + 実装費 → 5 枚で約 US$ 20–30
+- モジュール（秋月）: 1 枚あたり ¥3,080（Pico 2 ×2 + XIAO RP2350）
+'''
+
+def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
+    """Every LCSC part must be a JLCPCB *Basic* part with plenty of stock (rev E rule). Writes parts_check.csv; exits 1 on failure."""
+    import urllib.request
+    url = 'https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList'
+    rows, bad = [], []
+    for code in sorted(set(codes)):
+        req = urllib.request.Request(url, data=json.dumps({'currentPage': 1, 'pageSize': 5, 'keyword': code}).encode(), headers={'Content-Type': 'application/json'})
+        try:
+            items = ((json.load(urllib.request.urlopen(req, timeout=30)).get('data') or {}).get('componentPageInfo') or {}).get('list') or []
+        except Exception as e:
+            rows.append((code, '?', '?', '?', f'lookup failed: {e}')); bad.append(code); continue
+        it = next((i for i in items if i.get('componentCode') == code), None)
+        if not it: rows.append((code, '?', '?', '?', 'not found')); bad.append(code); continue
+        lib, stock = it.get('componentLibraryType'), int(it.get('stockCount') or 0)
+        ok = lib == 'base' and stock >= min_stock
+        rows.append((code, it.get('componentModelEn'), 'Basic' if lib == 'base' else 'Extended', stock, 'OK' if ok else 'NG'))
+        if not ok: bad.append(code)
+    with open(os.path.join(OUT, 'parts_check.csv'), 'w', newline='') as f:
+        w = csv.writer(f); w.writerow(['LCSC', 'Part', 'Library', 'Stock', 'Result']); w.writerows(rows)
+    for r in rows: print('  %-9s %-28s %-8s %9s %s' % tuple(str(x) for x in r))
+    if bad: raise SystemExit(f'parts check FAILED for {bad} (must be JLCPCB Basic with stock >= {min_stock})')
+    print(f'parts check: all {len(rows)} LCSC parts are JLCPCB Basic with stock >= {min_stock}')
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     if not os.path.exists(PARTS_JSON):
         json.dump(DEFAULT_PARTS, open(PARTS_JSON, 'w'), indent=1, ensure_ascii=False)
     parts = json.load(open(PARTS_JSON))
+    if hasattr(D, 'LCSC'):           # designs that carry their own (Basic-only) part map: it is authoritative
+        parts = {k: (v[0], v[1], 'JLCPCB Basic') for k, v in D.LCSC.items()}
+        for k, v in getattr(D, 'HAND', {}).items(): parts[k] = ('', k, 'hand-solder: ' + ', '.join(v))
     # ---- BOM ----
     groups = {}
     for ref, (lib, sym, val, fp, _) in D.PARTS.items():
@@ -162,8 +216,9 @@ def main():
     fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')
     if os.path.exists(z): os.remove(z)
     shutil.make_archive(z[:-4], 'zip', fab)
+    if hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
     with open(os.path.join(OUT, 'README.md'), 'w') as f:
-        f.write({'rev B': README_B, 'rev C': README_C}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp)))
+        f.write({'rev B': README_B, 'rev C': README_C, 'rev E': README_E}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp)))
     print('written:', OUT, 'DNP:', dnp)
 
 if __name__ == '__main__':
