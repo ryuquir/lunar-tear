@@ -3,9 +3,9 @@
   U1  Raspberry Pi Pico 2 (front)  CPU bus: A0-14, D0-7 straight onto 5 V-tolerant GPIO0-22 (1k series arrays),
                                    /ROMSEL and a write strobe /WS = NOT(M2 AND NOT R/W) (2N7002 + diode OR) via dividers.
                                    Serves PRG (SRAM cache + 4 MB flash), mapper registers, WRAM, MMC5 $5xxx registers.
-  U2  Raspberry Pi Pico 2 (back)   PPU bus: PA0-13, PD0-7 onto GPIO0-21, /RD via divider. Serves CHR, cart nametables
+  U2  Raspberry Pi Pico 2 (back)   PPU bus: PA0-13, PD0-7, /RD onto GPIO0-22 (one 23-bit PIO capture). Serves CHR, cart nametables
                                    (MMC5 ExRAM / fill mode / 4-screen) and drives CIRAM /CE + CIRAM A10 itself (PIO
-                                   lookup on A10/A11/A13), so every nametable arrangement of every licensed game works.
+                                   lookup on A10/A11/A13, CIRAM /CE = GPIO26, CIRAM A10 = GPIO27), so every nametable arrangement of every licensed game works.
   U3  Seeed XIAO RP2350 (front)    "special chip": expansion audio synthesis (PWM), /IRQ (2N7002 open drain) with exact
                                    timing from M2 / PA12 / PA13 / /RD, MMC5 scanline + in-frame detection.
   LINK  one shared 3.3 V half-duplex line U1 <-> U2 <-> U3 (U1 is the master).
@@ -63,7 +63,7 @@ pico('U1', 26.5, 12.4, 90, 'F', GP_A, 'VSYS_A')            # USB at the left boa
 
 GP_B = {i: f'PA{i}' for i in range(14)}
 GP_B.update({14 + i: f'PD{i}' for i in range(8)})
-GP_B.update({22: 'CIRAM_nCE', 26: 'RD_D', 27: 'CIRAM_A10', 28: 'LINK_B'})
+GP_B.update({22: 'RD_D', 26: 'CIRAM_nCE', 27: 'CIRAM_A10', 28: 'LINK_B'})   # /CE + A10 adjacent: one PIO side-set drives both
 pico('U2', 63.5, 12.4, 270, 'B', GP_B, 'VSYS_B')           # USB at the right board edge
 
 P('U3', 'famicart', 'XIAO-RP2350', 'Seeed XIAO RP2350', 'famicart:XIAO-RP2350-Edge', 72.0, 11.0, 0, 'F')
@@ -97,7 +97,6 @@ for b, x in zip(range(8), (27.5, 29.5, 31.5, 33.5, 35.5, 37.5, 39.5, 41.5)):
     res('100k', x, YG + 0.4, 90, f'CPU_D{b}', '+5V' if (0x4C >> b) & 1 else 'GND')
 
 # ------------------------------------------------------------------ PPU-side glue, IRQ, audio, power, reset (front, right)
-res('2.2k', 47.0, YG, 90, 'RD_D', 'GND')                # /RD divider bottom (top = RN10 ch3)
 res('100k', 49.5, YG, 90, 'PPU_nA13', 'CIRAM_nCE')     # CIRAM follows /A13 until U2 drives /CE
 nfet(53.0, YG, 0, 'IRQ_G', 'nIRQ')                      # open-drain /IRQ from U3
 res('100k', 56.5, YG, 90, 'IRQ_G', 'GND')
