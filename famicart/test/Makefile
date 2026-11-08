@@ -3,19 +3,21 @@ CFLAGS ?= -std=c11 -O1 -g -Wall -Wextra -Wno-unused-parameter -fsanitize=address
 LDLIBS = -lm
 CORE := $(wildcard ../src/core/*.c) $(wildcard ../src/core/mappers/*.c) $(wildcard ../src/core/audio/*.c)
 REVE := $(wildcard ../src/core/reve/*.c)
+HDR := $(wildcard ../src/core/*.h ../src/core/*/*.h) tm_util.h
 all: test_core test_virtual test_reve test_mappers
 	./test_core
 	./test_virtual
 	./test_reve
 	./test_mappers
-test_core: test_core.c $(CORE)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
-test_virtual: test_virtual.c $(CORE)
+test_core: test_core.c $(CORE) $(HDR)
+	$(CC) $(CFLAGS) -o $@ $(filter %.c,$^) $(LDLIBS)
+test_virtual: test_virtual.c $(CORE) $(HDR)
 	$(CC) $(CFLAGS) -DFC_VIRTUAL_ROM=1 -o $@ $^ $(LDLIBS)
-test_reve: test_reve.c $(CORE) $(REVE)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
-test_mappers: test_mappers.c $(wildcard tm_*.c) $(CORE) $(REVE)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+test_reve: test_reve.c $(CORE) $(REVE) $(HDR)
+	$(CC) $(CFLAGS) -o $@ $(filter %.c,$^) $(LDLIBS)
+TM := tm_unl.c tm_multi.c tm_mmc3x.c
+test_mappers: test_mappers.c $(TM) $(CORE) $(REVE) $(HDR)
+	$(CC) $(CFLAGS) -o $@ $(filter %.c,$^) $(LDLIBS)
 clean:
 	rm -f test_core test_virtual test_reve test_mappers
 .PHONY: all clean

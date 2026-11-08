@@ -199,8 +199,25 @@ static void test_mmc5(void) {
     cart_cpu_write(&d, 0x5200, 0); CHECK(d.nt_full == 0, "split off");
 }
 
+/* Regression: back-to-back A12-high fetches (8 sprites at $1xxx) must clock an MMC3 counter once per line. */
+static void test_a12_once(void) {
+    static cart_t m; uint8_t hdr[16] = { 'N', 'E', 'S', 0x1A, 8, 16, 0x40, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    rom_info_t info; CHECK(rom_inspect_header(hdr, 262144, 0x55AA55AA, &info), "mmc3 header");
+    static uint8_t prg[131072], chr[131072];
+    CHECK(cart_load_ext(&m, prg, chr, &info, NULL) == LOAD_OK, "mmc3 load");
+    cart_cpu_write(&m, 0xC000, 5); cart_cpu_write(&m, 0xC001, 0); cart_cpu_write(&m, 0xE001, 0);
+    bool seq_ok = true;
+    for (int line = 0; line < 6; line++) {
+        for (int i = 0; i < 64; i++) m.mapper->ppu_addr(&m, (uint16_t)(i & 1 ? 0x2000 : 0x0000));   /* BG at $0000 */
+        for (int i = 0; i < 16; i++) m.mapper->ppu_addr(&m, 0x1000);                             /* sprites at $1000 */
+        if (m.s.mmc3.irq_counter != 5 - line) seq_ok = false;                                     /* one clock per line */
+        if (line < 5 && m.irq_line) seq_ok = false;
+    }
+    CHECK(seq_ok && m.irq_line, "one A12 clock per scanline (counter %u irq %u)", m.s.mmc3.irq_counter, m.irq_line);
+}
+
 int main(void) {
-    test_link(); test_ppu_track(); test_rcommit(); test_bootpark(); test_romcache(); test_mmc5();
+    test_a12_once(); test_link(); test_ppu_track(); test_rcommit(); test_bootpark(); test_romcache(); test_mmc5();
     printf("%d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;
 }

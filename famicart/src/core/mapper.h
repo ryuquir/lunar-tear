@@ -37,7 +37,7 @@ FC_INLINE bool mapper_a12_edge(uint8_t *state, uint16_t addr) {
     uint8_t now = (addr >> 12) & 1;
     bool rise = false;
     if (now) {
-        if (*state >= 3) rise = true;   /* low for >= 3 fetches (~ 2 dots*3) */
+        if (!(*state & 0x80) && *state >= 3) rise = true;   /* low for >= 3 fetches (~ 2 dots*3); not while already high */
         *state = 0x80;                  /* high */
     } else {
         if (*state & 0x80) *state = 1; else if (*state < 0x7F) (*state)++;

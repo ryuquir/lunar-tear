@@ -59,6 +59,9 @@ FC_INLINE bool low_window(const cart_t *c, uint16_t a) {
     case 19: return a >= 0x4800 && a < 0x6000;
     case 36: return (a & 0xE100) == 0x4100;                            /* TXC 01-22000-400 readback */
     case 228: return a < 0x6000;                                       /* Action 52 4-bit RAM */
+    case 238: return true;                                             /* 603-5052 protection latch $4020-$7FFF */
+    case 262: return (a & 0xC100) == 0x4100 || a >= 0x6000;            /* Sachen SHERO jumper read */
+    case 176: return a >= 0x5000;                                      /* FK23C sub 2: WRAM window at $5000 */
     default: return a >= 0x6000;
     }
 }

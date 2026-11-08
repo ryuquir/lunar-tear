@@ -1,6 +1,6 @@
 /* Runner for the per-group mapper tests (test/tm_*.c). */
 #include <stdio.h>
-#define GROUPS X(unl) X(multi)
+#define GROUPS X(unl) X(multi) X(mmc3x)
 #define X(g) void tm_##g(int *, int *);
 GROUPS
 #undef X
