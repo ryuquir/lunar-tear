@@ -11,11 +11,17 @@ typedef struct { uint16_t addr; uint32_t t0; uint8_t saw_romsel, saw_ws, valid; 
 
 static inline void rcommit_init(rcommit_t *r) { r->addr = 0xFFFF; r->t0 = 0; r->saw_romsel = r->saw_ws = 0; r->valid = 0; }
 /* Call on every sample. a15 = A0-A14, now = free running time in the caller's units, min_dwell in the same units.
- * Returns true when the previous address is confirmed as a completed read; *out = that address (A15 = 0). */
-static inline bool rcommit_sample(rcommit_t *r, uint16_t a15, bool romsel_low, bool ws_low, uint32_t now, uint32_t min_dwell, uint16_t *out) {
-    bool done = false;
+ * Returns RC_LOW when the previous address is confirmed as a completed read with A15 = 0 (*out = A0-A14), RC_ROM for a
+ * completed read of $8000-$FFFF (/ROMSEL went low, so M2 was high: always a real cycle; *out has A15 set), else 0. */
+#define RC_LOW 1
+#define RC_ROM 2
+static inline int rcommit_sample(rcommit_t *r, uint16_t a15, bool romsel_low, bool ws_low, uint32_t now, uint32_t min_dwell, uint16_t *out) {
+    int done = 0;
     if (a15 != r->addr) {
-        if (r->valid && !r->saw_romsel && !r->saw_ws && (uint32_t)(now - r->t0) >= min_dwell) { *out = r->addr; done = true; }
+        if (r->valid && !r->saw_ws && (uint32_t)(now - r->t0) >= min_dwell) {
+            if (!r->saw_romsel) { *out = r->addr; done = RC_LOW; }
+            else { *out = (uint16_t)(r->addr | 0x8000); done = RC_ROM; }
+        }
         r->addr = a15; r->t0 = now; r->saw_romsel = 0; r->saw_ws = 0; r->valid = 1;
     }
     if (romsel_low) r->saw_romsel = 1;

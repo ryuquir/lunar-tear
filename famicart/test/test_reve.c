@@ -83,7 +83,7 @@ static void test_rcommit(void) {
     };
     for (unsigned i = 0; i < sizeof seq / sizeof seq[0]; i++) {
         for (uint32_t k = 0; k < seq[i].dt; k += 10, t += 10)
-            if (rcommit_sample(&r, seq[i].a, seq[i].romsel && k > 150, seq[i].ws && k > 150, t, 300, &a) && n < 8) got[n++] = a;
+            if (rcommit_sample(&r, seq[i].a, seq[i].romsel && k > 150, seq[i].ws && k > 150, t, 300, &a) == RC_LOW && n < 8) got[n++] = a;
     }
     CHECK(n == 4 && got[0] == 0x2002 && got[1] == 0x4C4C && got[2] == 0x4C4D && got[3] == 0x4C4E, "confirmed reads n=%d %04X %04X", n, got[0], n > 1 ? got[1] : 0);
     CHECK(rcommit_wanted(0x2002, false) && rcommit_wanted(0x3FFF, false) && !rcommit_wanted(0x2006, false) && rcommit_wanted(0x5204, true) && !rcommit_wanted(0x5204, false), "wanted filter");

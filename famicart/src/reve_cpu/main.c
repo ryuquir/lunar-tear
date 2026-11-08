@@ -50,6 +50,7 @@ FC_INLINE void evq_push(uint32_t e) { uint32_t n = (evq_w + 1) & (EVQ - 1); if (
 /* ---------------- core 1: bus loop ---------------- */
 #define DMASK (0xFFu << PIN_CPU_D_BASE)
 static volatile bool serve_enable;                         /* false while the flash is being written */
+static volatile bool rom_read_regs;                        /* mapper latches registers on ROM reads (234) */
 
 /* $4020-$7FFF addresses at which a mapper read hook really drives the bus (otherwise: open bus, no drive). */
 FC_INLINE bool low_window(const cart_t *c, uint16_t a) {
@@ -57,6 +58,7 @@ FC_INLINE bool low_window(const cart_t *c, uint16_t a) {
     case 5:  return a == 0x5204 || a == 0x5205 || a == 0x5206 || a == 0x5015 || (a >= 0x5C00 && c->s.mmc5.exram_mode >= 2);
     case 19: return a >= 0x4800 && a < 0x6000;
     case 36: return (a & 0xE100) == 0x4100;                            /* TXC 01-22000-400 readback */
+    case 228: return a < 0x6000;                                       /* Action 52 4-bit RAM */
     default: return a >= 0x6000;
     }
 }
@@ -72,9 +74,12 @@ static void __not_in_flash_func(bus_core1)(void) {
         uint32_t a = in & 0x7FFFu;
         bool romsel_low = !(in & (1u << PIN_ROMSEL)), ws_low = !(in & (1u << PIN_WS));
         uint16_t ca;
-        if (rcommit_sample(&rc, (uint16_t)a, romsel_low, ws_low, m33_hw->dwt_cyccnt, dwell, &ca) && rcommit_wanted(ca, c->mapper && c->mapper->peek)) {
+        int rk = rcommit_sample(&rc, (uint16_t)a, romsel_low, ws_low, m33_hw->dwt_cyccnt, dwell, &ca);
+        if (rk == RC_LOW && rcommit_wanted(ca, c->mapper && c->mapper->peek)) {
             if (bp->state != BP_RUN) bootpark_commit(bp, ca);
             evq_push(EV_READ | ((uint32_t)ca << 8));
+        } else if (rk == RC_ROM && rom_read_regs && ca >= 0xFF80 && (ca < 0xFFA0 || (ca >= 0xFFE8 && ca < 0xFFF8))) {
+            evq_push(EV_READ | ((uint32_t)ca << 8));                  /* Maxi 15 (234): registers latched by ROM reads */
         }
         if (a != last) {
             last = a;
@@ -174,6 +179,7 @@ static void handle_event(uint32_t e) {
         if (a >= 0x4C4C && a <= 0x4C4E && g_bp.state != BP_RUN) return;
         if (g_running && c->mapper->peek && a >= 0x4020) {
             c->mapper->read(c, a, c->open_bus);
+            fix_tables();
             uint16_t s[3]; sq_put(s, rl_enc_read(s, a));
             if (c->mapper_id == 5 && a == 0x5204) mmc5_ack_until = time_us_32() + 40;
         }
@@ -251,6 +257,7 @@ bool reve_boot(unsigned slot) {
     ld.prg_size = g_info.prg_size; ld.chr_size = g_info.chr_size; ld.chr_ram_size = g_info.chr_ram_size; ld.wram_size = g_info.wram_size; ld.sram_size = g_info.sram_size;
     ld.chr_crc = e->chr_size ? fc_crc32(0, chr, e->chr_size) : 0;
     if (prof) { ld.has_profile = 1; memcpy(ld.profile, prof, sizeof *prof < sizeof ld.profile ? sizeof *prof : sizeof ld.profile); }
+    rom_read_regs = g_cart.mapper_id == 234;
     fwd_ppu = true;                                               /* always: CHR-RAM, cart nametables and U2's CIRAM shadow (some boards switch to RAM later) */
     ld.flags = (g_cart.chr_is_ram ? 1 : 0) | (fwd_ppu ? 2 : 0);
     reve_link_cmd(RL_C_RESET, 0);
