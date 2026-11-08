@@ -4,3 +4,4 @@ test/test_core
 *.elf
 *.bin
 test/test_reve
+test/test_mappers

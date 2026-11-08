@@ -1,15 +1,20 @@
-/* Tengen RAMBO-1 (64). */
+/* Tengen RAMBO-1 (64) and Tengen 800037 (158, RAMBO-1 with TxSROM-style nametable select;
+ * https://www.nesdev.org/wiki/INES_Mapper_158). */
 #include "../mapper.h"
 static void rb_sync(cart_t *c) {
     rambo1_state_t *s = &c->s.rambo1;
-    uint8_t m = (s->bank & 0x80) ? 4 : 0;
-    if (s->bank & 0x20) { for (unsigned i = 0; i < 2; i++) { cart_set_chr1k(c, (m + i * 2) & 7, s->chr[i]); cart_set_chr1k(c, (m + i * 2 + 1) & 7, s->chr[6 + i]); } }
-    else for (unsigned i = 0; i < 2; i++) { cart_set_chr1k(c, (m + i * 2) & 7, s->chr[i] & ~1); cart_set_chr1k(c, (m + i * 2 + 1) & 7, s->chr[i] | 1); }
-    for (unsigned i = 0; i < 4; i++) cart_set_chr1k(c, ((m ^ 4) + i) & 7, s->chr[2 + i]);
+    uint8_t m = (s->bank & 0x80) ? 4 : 0, b[8];
+    if (s->bank & 0x20) { for (unsigned i = 0; i < 2; i++) { b[(m + i * 2) & 7] = s->chr[i]; b[(m + i * 2 + 1) & 7] = s->chr[6 + i]; } }
+    else for (unsigned i = 0; i < 2; i++) { b[(m + i * 2) & 7] = (uint8_t)(s->chr[i] & ~1); b[(m + i * 2 + 1) & 7] = (uint8_t)(s->chr[i] | 1); }
+    for (unsigned i = 0; i < 4; i++) b[((m ^ 4) + i) & 7] = s->chr[2 + i];
+    for (unsigned i = 0; i < 8; i++) cart_set_chr1k(c, i, b[i]);
     if (s->bank & 0x40) { cart_set_prg8k(c, 0, s->prg[2]); cart_set_prg8k(c, 1, s->prg[0]); cart_set_prg8k(c, 2, s->prg[1]); }
     else { cart_set_prg8k(c, 0, s->prg[0]); cart_set_prg8k(c, 1, s->prg[1]); cart_set_prg8k(c, 2, s->prg[2]); }
     cart_set_prg8k(c, 3, -1);
-    cart_set_mirroring(c, s->mirroring ? MIRROR_H : MIRROR_V);
+    /* 158 (Tengen 800037): CHR A17 drives CIRAM A10 like TxSROM; a nametable fetch (PPU A12 = 0) uses the
+     * bank that the current CHR mode maps at PPU $0000 + n*$400. $A000 mirroring is not connected. */
+    if (c->mapper_id == 158) for (unsigned i = 0; i < 4; i++) cart_set_nt_ciram(c, i, b[i] >> 7);
+    else cart_set_mirroring(c, s->mirroring ? MIRROR_H : MIRROR_V);
 }
 static void rb_init(cart_t *c) { rambo1_state_t *s = &c->s.rambo1; s->bank = 0; for (int i = 0; i < 8; i++) s->chr[i] = (uint8_t)i; s->prg[0] = 0; s->prg[1] = 1; s->prg[2] = 2; s->mirroring = 0; s->irq_enable = 0; rb_sync(c); }
 static void rb_write(cart_t *c, uint16_t a, uint8_t v) {
@@ -36,3 +41,4 @@ static void FC_FASTCODE(rb_cycle)(cart_t *c) { rambo1_state_t *s = &c->s.rambo1;
     if (s->irq_delay) { if (--s->irq_delay == 0) cart_irq(c, true); }
     if (s->irq_mode) { if (++s->prg_mode >= 4) { s->prg_mode = 0; rb_clock(c); } } }   /* prg_mode doubles as the /4 prescaler */
 const mapper_desc_t mapper_064 = { 64, "Tengen-RAMBO-1", MF_PPU_HOOK | MF_CPU_CYCLE, rb_init, rb_write, NULL, rb_ppu_addr, rb_cycle, NULL };
+const mapper_desc_t mapper_158 = { 158, "Tengen-800037", MF_PPU_HOOK | MF_CPU_CYCLE, rb_init, rb_write, NULL, rb_ppu_addr, rb_cycle, NULL };
