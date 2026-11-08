@@ -19,8 +19,10 @@ ap.add_argument('--via', type=float, default=0.5); ap.add_argument('--drill', ty
 ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10); ap.add_argument('--cleanup-only', action='store_true')
 args = ap.parse_args()
 G = args.grid; W = args.track; C = args.clear; VR = args.via / 2; DR = args.drill / 2
-BW, BH = 90.0, 35.4             # routable body; the grid also covers the card-edge tab (46.1 mm) so finger tracks are representable
-NX, NY = int(round(BW / G)) + 1, int(round(46.2 / G)) + 1
+import importlib as _il
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+BW, BH = 90.0, float(getattr(_il.import_module(os.environ.get('FC_DESIGN', 'design')), 'BODY_H', 35.4))   # routable body
+NX, NY = int(round(BW / G)) + 1, int(round((BH + 10.8) / G)) + 1   # the grid also covers the card-edge tab so finger tracks are representable
 PLANES = {'GND': 'In1.Cu', '+3V3': None}   # +3V3 layer filled in from the board
 
 def drc(board):

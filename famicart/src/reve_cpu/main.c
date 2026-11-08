@@ -27,6 +27,8 @@ void reve_clock_init(void);
 #include "../core/reve/rcommit.h"
 #include "../core/reve/bootpark.h"
 #include "../core/reve/romcache.h"
+#include "../core/coproc/cop_abi.h"
+#include "../core/profile.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -51,6 +53,8 @@ FC_INLINE void evq_push(uint32_t e) { uint32_t n = (evq_w + 1) & (EVQ - 1); if (
 #define DMASK (0xFFu << PIN_CPU_D_BASE)
 static volatile bool serve_enable;                         /* false while the flash is being written */
 static volatile bool rom_read_regs;                        /* mapper latches registers on ROM reads (234) */
+static volatile uint16_t cop_base = 0xFFFF;                 /* rev F coprocessor window (U4 answers it), 0xFFFF = none */
+static volatile bool cop_ppu_on; static volatile uint8_t cop_ppu_st;   /* U5 status, served at window + $3FF */
 
 /* $4020-$7FFF addresses at which a mapper read hook really drives the bus (otherwise: open bus, no drive). */
 FC_INLINE bool low_window(const cart_t *c, uint16_t a) {
@@ -98,6 +102,8 @@ static void __not_in_flash_func(bus_core1)(void) {
                         vlow = c->mapper->peek ? c->mapper->peek(c, (uint16_t)a, c->open_bus) : c->mapper->read(c, (uint16_t)a, c->open_bus);
                         low_ok = true;
                     }
+                    uint32_t co = a - cop_base;
+                    if (co < COP_WIN_SIZE) { low_ok = cop_ppu_on && co == COP_R_PPU_STATUS; vlow = cop_ppu_st; }   /* U4 owns the rest */
                 }
             } else {
                 /* park / handshake: constants only, no flash access (the flash may be being written) */
@@ -205,6 +211,7 @@ static void handle_event(uint32_t e) {
     cart_cpu_write(c, a, v);
     forward_write(a, v);
     fix_tables();
+    if (cop_ppu_on && (uint16_t)(a - cop_base) == COP_R_PPU_CMD) cop_ppu_st = COP_ST_BUSY;   /* until U5 says otherwise */
 }
 
 /* MMC5 status ($5204) lives on U3, which sees the PPU: poll it every few microseconds while idle. */
@@ -262,6 +269,8 @@ bool reve_boot(unsigned slot) {
     ld.chr_crc = e->chr_size ? fc_crc32(0, chr, e->chr_size) : 0;
     if (prof) { ld.has_profile = 1; memcpy(ld.profile, prof, sizeof *prof < sizeof ld.profile ? sizeof *prof : sizeof ld.profile); }
     rom_read_regs = g_cart.mapper_id == 234;
+    cop_base = 0xFFFF; cop_ppu_on = false; cop_ppu_st = 0;
+    if (prof && profile_validate(prof) && prof->coproc) { cop_base = prof->coproc_base ? prof->coproc_base : COP_BASE_DEFAULT; cop_ppu_on = (prof->coproc & COP_EN_PPU) != 0; }
     fwd_ppu = true;                                               /* always: CHR-RAM, cart nametables and U2's CIRAM shadow (some boards switch to RAM later) */
     ld.flags = (g_cart.chr_is_ram ? 1 : 0) | (fwd_ppu ? 2 : 0);
     reve_link_cmd(RL_C_RESET, 0);
@@ -324,6 +333,7 @@ int main(void) {
         }
         sq_pump();
         if (g_running && g_cart.mapper_id == 5) mmc5_poll();
+        if (g_running && cop_ppu_on && cop_ppu_st && sq_r == sq_w) { int st = reve_link_poll(RL_NODE_COP_PPU, 6); if (st >= 0) cop_ppu_st = (uint8_t)st; }
         if (romcache_service(&prc, (uint8_t *const *)&g_cart.prg_map[3], 5)) { g_cart.tables_dirty = 1; fix_tables(); }
         cycle_catchup();
         if (evq_r == evq_w) usb_cmd_poll();

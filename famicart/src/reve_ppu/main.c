@@ -27,6 +27,7 @@ void reve_clock_init(void);
 #include "../core/mappers/mmc5.h"
 #include "../core/reve/reve_link.h"
 #include "../core/reve/romcache.h"
+#include "../core/profile.h"
 #include <string.h>
 
 _Static_assert(PIN_PPU_RD == 22 && PIN_CIRAM_CE == 26 && PIN_CIRAM_A10 == PIN_CIRAM_CE + 1, "pins assumed by the PIO setup");
@@ -41,6 +42,7 @@ static uint8_t ciram[2][1024];                                /* shadow of the c
 static romcache_t crc_cache; static uint16_t chr_page_slot[1024];
 static bool chr_in_flash; static uint32_t chr_have_crc;       /* CRC of the CHR currently held (SRAM or flash) */
 static uint8_t status = RL_ST_READY;
+static volatile uint8_t cop_mask;                           /* rev F: CHR slots answered by U5 */
 static PIO pio_d = pio0, pio_ce = pio1; static uint sm_d, sm_ce;
 
 /* ---------------- CIRAM /CE table ---------------- */
@@ -84,6 +86,7 @@ static void __not_in_flash_func(ppu_core1)(void) {
                 else if (c->nt_full) w = 0xFF00u | ciram[c->nt_ciram_a10[nt]][a & 0x3FF];
                 else w = 0;                                   /* console CIRAM answers */
             }
+            if (a < 0x2000 && ((cop_mask >> (a >> 10)) & 1)) w = 0;   /* rev F: U5 answers this CHR slot */
             pio_sm_put(pio_d, sm_d, w);
         } else if (newread) hooked = false;
     }
@@ -179,6 +182,8 @@ int main(void) {
                 break;
             case RL_EV_LOAD:
                 live = false; memcpy(&ld, dec.load, sizeof ld); loaded = false; status = RL_ST_BUSY;
+                { const cart_profile_t *pf = (const cart_profile_t *)ld.profile;
+                  cop_mask = (ld.has_profile && profile_validate(pf) && (pf->coproc & COP_EN_PPU)) ? pf->coproc_chr_mask : 0; }
                 chr_in_flash = ld.chr_size > sizeof chr_pool;
                 if (!ld.chr_size) build_cart();
                 else status = RL_ST_READY;                    /* waiting for CHR (or CHR_COMMIT when cached) */

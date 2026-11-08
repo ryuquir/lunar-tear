@@ -16,9 +16,9 @@ OUT = os.path.join(HW, 'famicart.kicad_pcb')
 SYS_FP = '/usr/share/kicad/footprints'
 
 # Board outline (mm): HVC-TGROM-01 measurements from nesdev "Famicom cartridge dimensions"
-BOARD_W, BODY_H, TAB_W, TAB_H = 90.0, 35.4, 78.4, 10.7
+BOARD_W, BODY_H, TAB_W, TAB_H = 90.0, float(getattr(D, 'BODY_H', 35.4)), 78.4, 10.7   # rev F: taller body
 TAB_X0 = (BOARD_W - TAB_W) / 2          # 5.8
-TOTAL_H = BODY_H + TAB_H                 # 46.1
+TOTAL_H = BODY_H + TAB_H                 # 46.1 (rev A-E)
 CHAMFER = 1.0
 
 def mm(x, y): return VECTOR2I(FromMM(x), FromMM(y))

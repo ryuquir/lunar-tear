@@ -24,7 +24,7 @@ def crc32(b): return zlib.crc32(b) & 0xFFFFFFFF
 def build_profile(args):
     # struct cart_profile_t (little endian):
     # u32 magic; u8 version; u8 flags; u16 mapper; u8 submapper; u8 mirroring; u8 wram_kb; u8 chr_ram_kb;
-    # profile_audio_t audio[4] {u8 chip; u8 exclusive; u16 base}; u8 audio_volume[4]; u8 reserved[12]; u32 crc
+    # profile_audio_t audio[4] {u8 chip; u8 exclusive; u16 base}; u8 audio_volume[4]; u8 coproc; u8 coproc_chr_mask; u16 coproc_base; u8 reserved[8]; u32 crc
     flags = 0
     if args.mapper is not None: flags |= 0x01
     if args.no_audio: flags |= 0x02
@@ -47,7 +47,8 @@ def build_profile(args):
     for chip, ex, base in slots: body += struct.pack('<BBH', chip, ex, base)
     vols = (args.volume or [128] * 4) + [128] * 4
     body += bytes(min(255, max(0, v)) for v in vols[:4])
-    body += bytes(12)
+    cop = (1 if args.coproc in ('cpu', 'both') else 0) | (2 if args.coproc in ('ppu', 'both') else 0)
+    body += struct.pack('<BBH', cop, int(args.coproc_chr, 0) if cop & 2 else 0, int(args.coproc_base, 0) if cop else 0) + bytes(8)
     body += struct.pack('<I', crc32(body))
     assert len(body) == 48, len(body)
     return body + bytes(256 - len(body))
@@ -73,6 +74,9 @@ def main():
     ap.add_argument('--audio', action='append', help='chip[@base][:exclusive], e.g. vrc7:exclusive, vrc6@0xC000, mmc5')
     ap.add_argument('--volume', type=int, action='append', help='per-audio-slot volume 0..255 (128 nominal)')
     ap.add_argument('--no-audio', action='store_true'); ap.add_argument('--pal', action='store_true')
+    ap.add_argument('--coproc', choices=('none', 'cpu', 'ppu', 'both'), default='none', help='rev F coprocessors (docs/09_coproc_abi.md)')
+    ap.add_argument('--coproc-chr', default='0xF0', help='CHR 1K slots owned by the PPU coprocessor (bit n = $0000+n*$400), default 0xF0 = $1000-$1FFF')
+    ap.add_argument('--coproc-base', default='0x5800', help='CPU window base')
     a = ap.parse_args()
     img = open(a.rom, 'rb').read()
     if img[:4] == b'NES\x1a':

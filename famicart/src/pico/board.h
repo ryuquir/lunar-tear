@@ -14,6 +14,10 @@
 #include "board_reve_cpu.h"         /* rev E U1: Pico 2 on the CPU bus */
 #elif defined(FC_BOARD_reve_ppu)
 #include "board_reve_ppu.h"         /* rev E U2: Pico 2 on the PPU bus */
+#elif defined(FC_BOARD_reve_cop_cpu)
+#include "board_reve_cop_cpu.h"     /* rev F U4: CPU-side coprocessor */
+#elif defined(FC_BOARD_reve_cop_ppu)
+#include "board_reve_cop_ppu.h"     /* rev F U5: PPU-side coprocessor */
 #elif defined(FC_BOARD_reve_x)
 #include "board_reve_x.h"           /* rev E U3: XIAO RP2350, IRQ + audio */
 #else

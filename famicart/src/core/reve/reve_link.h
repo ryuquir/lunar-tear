@@ -40,6 +40,8 @@
 
 #define RL_NODE_PPU       2u
 #define RL_NODE_X         3u
+#define RL_NODE_COP_CPU   4u    /* rev F U4 */
+#define RL_NODE_COP_PPU   5u    /* rev F U5: status byte bit7 = busy */
 
 /* Status bytes returned to a POLL */
 #define RL_ST_BUSY        0x00u

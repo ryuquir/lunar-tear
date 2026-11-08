@@ -39,13 +39,19 @@ typedef struct {
     uint8_t  chr_ram_kb;         /* 0xFF  = keep */
     profile_audio_t audio[PROFILE_MAX_AUDIO];
     uint8_t  audio_volume[PROFILE_MAX_AUDIO]; /* 0..255, 128 = nominal */
-    uint8_t  reserved[12];
+    uint8_t  coproc;             /* rev F: COP_EN_CPU (U4 window) | COP_EN_PPU (U5 drawing), 0 = none */
+    uint8_t  coproc_chr_mask;    /* CHR 1 KB slots ($0000 + n*$400) owned by the PPU coprocessor */
+    uint16_t coproc_base;        /* CPU window base, 0 = $5800 */
+    uint8_t  reserved[8];
     uint32_t crc;                /* CRC32 of everything above */
 } cart_profile_t;
 
 #define PF_FORCE_MAPPER   0x01
 #define PF_DISABLE_AUDIO  0x02   /* ignore the mapper's own expansion audio */
 #define PF_PAL            0x04
+
+#define COP_EN_CPU        0x01
+#define COP_EN_PPU        0x02
 
 void profile_default(cart_profile_t *p);
 bool profile_validate(const cart_profile_t *p);
