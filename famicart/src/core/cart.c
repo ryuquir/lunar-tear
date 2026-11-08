@@ -3,6 +3,9 @@
 #include "audio/expaudio.h"
 #include <string.h>
 
+static uint8_t aux_ram[CART_AUX_RAM_SIZE] __attribute__((aligned(4)));
+uint8_t *cart_aux_ram(void) { return aux_ram; }
+
 /* ---------------- PRG ---------------- */
 static inline uint32_t wrap_prg(const cart_t *c, int32_t bank, uint32_t pages) {
     if (pages == 0) return 0;

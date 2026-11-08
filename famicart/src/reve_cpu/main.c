@@ -62,6 +62,7 @@ FC_INLINE bool low_window(const cart_t *c, uint16_t a) {
     case 238: return true;                                             /* 603-5052 protection latch $4020-$7FFF */
     case 262: return (a & 0xC100) == 0x4100 || a >= 0x6000;            /* Sachen SHERO jumper read */
     case 176: return a >= 0x5000;                                      /* FK23C sub 2: WRAM window at $5000 */
+    case 186: return a >= 0x4200;                                      /* Study Box ports / RAM-A */
     default: return a >= 0x6000;
     }
 }
@@ -92,7 +93,7 @@ static void __not_in_flash_func(bus_core1)(void) {
                 low_ok = false;
                 if (a >= 0x4020) {
                     const uint8_t *q = c->prg_map[a >> 13];
-                    if (q && a >= 0x6000) { vlow = q[a & 0x1FFF]; low_ok = true; }
+                    if (q) { vlow = q[a & 0x1FFF]; low_ok = true; }                   /* WRAM / PRG at $6000, board RAM at $4020-$5FFF */
                     else if (c->has_read_hook && low_window(c, (uint16_t)a)) {
                         vlow = c->mapper->peek ? c->mapper->peek(c, (uint16_t)a, c->open_bus) : c->mapper->read(c, (uint16_t)a, c->open_bus);
                         low_ok = true;
@@ -117,9 +118,9 @@ static void __not_in_flash_func(bus_core1)(void) {
             uint16_t wa = (uint16_t)((w & 0x7FFFu) | ((w >> PIN_ROMSEL) & 1u ? 0 : 0x8000u));
             uint8_t wd = (uint8_t)(w >> PIN_CPU_D_BASE);
             uint8_t *wm = c->prg_wmap[wa >> 13];
-            if (wm && wa >= 0x6000 && wa < 0x8000 && !(c->mapper->flags & MF_WRITE_6000)) wm[wa & 0x1FFF] = wd;   /* WRAM: here and now */
+            if (wm && wa >= 0x4020 && wa < 0x8000 && !(c->mapper->flags & MF_WRITE_6000)) wm[wa & 0x1FFF] = wd;   /* WRAM / board RAM: here and now */
             else if (wa >= 0x2000 && (wa < 0x4000 || wa >= 0x4020)) evq_push(((uint32_t)wa << 8) | wd);
-            if (wa >= 0x6000 && wa < 0x8000) last = 0xFFFFFFFFu;                                              /* re-read the byte we serve */
+            if (wa >= 0x4020 && wa < 0x8000) last = 0xFFFFFFFFu;                                              /* re-read the byte we serve */
         }
     }
 }

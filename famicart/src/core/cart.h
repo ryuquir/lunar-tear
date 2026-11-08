@@ -68,6 +68,11 @@ typedef struct cart {
     mapper_state_t s;
 } cart_t;
 
+/* One 8 KB RAM shared by boards that carry extra RAM the loader does not allocate (Irem 77 CHR/NT RAM, FK23C
+ * CHR-RAM, Racermate open-bus page ...). Only one mapper is attached at a time. */
+#define CART_AUX_RAM_SIZE 8192u
+uint8_t *cart_aux_ram(void);
+
 /* ---- helpers for mappers (bank numbers wrap modulo ROM size) ---- */
 void cart_set_prg8k (cart_t *c, unsigned slot /*0..3 => $8000,$A000,$C000,$E000*/, int32_t bank);
 void cart_set_prg16k(cart_t *c, unsigned slot /*0..1 => $8000,$C000*/, int32_t bank);

@@ -13,7 +13,7 @@
 
 /* 8 KiB of board CHR-RAM for boards that carry it next to CHR-ROM (FK23CA / SFC-12B / Waixing FS005,
  * Sachen SHERO). Only one mapper is active at a time, so the buffer is shared. */
-static uint8_t mx_chrram[8192];
+#define mx_chrram (cart_aux_ram())                    /* 8 KB CHR-RAM next to CHR-ROM (shared board RAM) */
 
 static void mx_init_core(cart_t *c) {
     mmc3_init(c);

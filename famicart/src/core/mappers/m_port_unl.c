@@ -135,7 +135,7 @@ const mapper_desc_t mapper_036 = { 36, "TXC-01-22000-400", MF_READ_LOW, m36_init
  * (served here as $FF) and ignores writes; U1 (banks 0-7) is treated as the factory default (no
  * battery, always accessible). Power-on: counter running, protection set.
  * State: regs[0] bank reg, regs[1] Z, regs[2] protect, r16[0] counter. */
-static uint8_t m168_openbus[1024];
+#define m168_openbus (cart_aux_ram())                 /* 1 KB page that reads $FF (shared board RAM) */
 static void m168_sync(cart_t *c) {
     uint8_t *r = c->s.g.regs;
     cart_set_prg16k(c, 0, r[0] >> 6); cart_set_prg16k(c, 1, -1);
@@ -145,7 +145,7 @@ static void m168_sync(cart_t *c) {
     else cart_set_chr4k(c, 1, (int32_t)b);
 }
 static void m168_init(cart_t *c) {
-    for (unsigned i = 0; i < sizeof m168_openbus; i++) m168_openbus[i] = 0xFF;
+    for (unsigned i = 0; i < 1024; i++) m168_openbus[i] = 0xFF;
     c->s.g.regs[2] = 1; m168_sync(c);
 }
 static void m168_write(cart_t *c, uint16_t a, uint8_t v) {

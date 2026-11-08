@@ -1,6 +1,6 @@
 # famicart — RP2040/RP2350 ファミコン・マルチマッパー・カートリッジ ファームウェア＋基板
 
-ファミコン（NES）の公式・ライセンス品 2,233 タイトルで使われた 92 種のマッパーを調査し、そのうち 63 種（タイトル数ベース **96.0%**（2,143 本））をソフトウェアで再現する 1 チップ・カートリッジのファームウェアです。フラッシュに書き込んだ ROM 画像からマッパーを自動判別し、プロファイル指定で「MMC5 のバンク機能 + VRC7 音源」のような拡張 IC の組み合わせも可能にします。
+ファミコン（NES）の公式・ライセンス品 2,233 タイトルで使われた 92 種のマッパーを調査し、その全種（タイトル数ベース **99.0%**（2,211 本）。残り 22 本はデータベース上の不良ダンプ）に加え、基板名の記録がない市販 FC ソフト用のマッパーも含めて計 98 種をソフトウェアで再現する 1 チップ・カートリッジのファームウェアです。フラッシュに書き込んだ ROM 画像からマッパーを自動判別し、プロファイル指定で「MMC5 のバンク機能 + VRC7 音源」のような拡張 IC の組み合わせも可能にします。
 
 > **重要な前提**: Seeed Studio XIAO RP2040 は GPIO が 11 本しかなく、単体ではカートリッジバス（最低 26 本）を駆動できません。理由と数値は [docs/01_feasibility.md](docs/01_feasibility.md) を参照。そのため **rev C 基板では基板直付けの RP2350B（GPIO 48 本）がバスを担当し、XIAO RP2040 は拡張音源コプロセッサ**として同居します（[docs/04_hardware.md](docs/04_hardware.md) の rev C 節）。rev A/B は Pico / Pico 2 モジュール 1 個の構成です。
 
@@ -9,7 +9,7 @@
 | 項目 | 状態 |
 |---|---|
 | マッパー調査・集計（Mesen DB 由来） | 完了 → [docs/03_mapper_coverage.md](docs/03_mapper_coverage.md) |
-| コア（バンク表・マッパー 63 種・ROM 判別・DB 2,840 件・プロファイル） | 実装済み、ホストテスト 864 チェック通過 |
+| コア（バンク表・マッパー 98 種・ROM 判別・DB 2,840 件・プロファイル） | 実装済み、ホストテスト 1,911 チェック通過 |
 | 拡張音源レジスタ・ルーター（組み合わせ機構） | 実装済み |
 | 拡張音源の合成（VRC6/VRC7/MMC5/N163/5B/FDS、`src/core/audio/synth.c`） | 実装済み（6 音源とも発音をホストテストで確認、VRC7 は OPLL 近似）。rev C では XIAO 側で動作 |
 | PIO バス・フロントエンド、2 コア処理、PWM 音声出力 | 実装済み・**実機未検証** |
@@ -20,7 +20,7 @@
 | 回路図・基板 rev C（RP2350B + XIAO RP2040、USB 3 口、リセット端子 J2、未接続 0・DRC 0）・ガーバー・JLCPCB 実装パッケージ | [hardware/revc/](hardware/revc/) |
 | 回路図・基板 rev D（**実機動作の本命**: 実カセット型分離構成、RP2350B×2 マッパーチップ + PRG/CHR パラレル NOR 64 MB×2 + F-RAM 128 KB + CHR SRAM 512 KB、**6 層、未接続 0・DRC エラー 0**、起動バンク付き）・ガーバー・JLCPCB 実装パッケージ | [hardware/revd/](hardware/revd/)、[hardware/revd/jlcpcb/](hardware/revd/jlcpcb/)、docs/04_hardware.md の rev D 節 |
 | 回路図・基板 rev E（**実際に作れる安価な版**: Pico 2 ×2 + XIAO RP2350、JLCPCB Basic 部品のみ 10 種・45 点、2 層、未接続 0・DRC エラー 0、MMC5 完全対応の配線）・ガーバー・JLCPCB 実装パッケージ | [hardware/reve/](hardware/reve/)、[docs/06_rev_e_plan.md](docs/06_rev_e_plan.md) |
-| rev E ファームウェア（U1 CPU バス応答・書き込み取り込み・CHR-RAM 再現・起動手順・ROM ライブラリ、U2 CHR/CIRAM /CE・MMC5 PPU 処理、U3 IRQ・拡張音源、3 台リンク） | 実装済み・3 本ともビルド通過、ホストテスト通過（rev E 分 49 項目）、**実機未検証**。[docs/07_rev_e_firmware.md](docs/07_rev_e_firmware.md) |
+| rev E ファームウェア（U1 CPU バス応答・書き込み取り込み・CHR-RAM 再現・起動手順・ROM ライブラリ、U2 CHR/CIRAM /CE・MMC5 PPU 処理、U3 IRQ・拡張音源、3 台リンク） | 実装済み・3 本ともビルド通過、ホストテスト通過（rev E 分 52 項目、追加マッパー 524 項目）、**実機未検証**。[docs/07_rev_e_firmware.md](docs/07_rev_e_firmware.md) |
 | rev D ファームウェア（バンク線出力、2 MCU リンク、外部フラッシュ書き込み、ROM ライブラリ、ブートスタブ） | 実装済み・ビルド通過（U1 text 130 KB / U2 37 KB）、ホストテスト通過、**実機未検証** |
 
 ## ビルド
