@@ -56,6 +56,7 @@ FC_INLINE bool low_window(const cart_t *c, uint16_t a) {
     switch (c->mapper_id) {
     case 5:  return a == 0x5204 || a == 0x5205 || a == 0x5206 || a == 0x5015 || (a >= 0x5C00 && c->s.mmc5.exram_mode >= 2);
     case 19: return a >= 0x4800 && a < 0x6000;
+    case 36: return (a & 0xE100) == 0x4100;                            /* TXC 01-22000-400 readback */
     default: return a >= 0x6000;
     }
 }
