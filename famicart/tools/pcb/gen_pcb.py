@@ -259,7 +259,20 @@ def main():
     W, H, T = BOARD_W, BODY_H, TOTAL_H
     x0, x1 = TAB_X0, TAB_X0 + TAB_W
     pts = [(0, 0), (W, 0), (W, H), (x1, H), (x1, T - CHAMFER), (x1 - CHAMFER, T), (x0 + CHAMFER, T), (x0, T - CHAMFER), (x0, H), (0, H), (0, 0)]
+    if getattr(D, 'OUTLINE_BODY', None):
+        # shell-specific body outline (notches / cut corners): points from the right tab corner (W, H) over the top to
+        # the left tab corner (0, H); the card-edge tab is always the standard one
+        pts = [(W, H), (x1, H), (x1, T - CHAMFER), (x1 - CHAMFER, T), (x0 + CHAMFER, T), (x0, T - CHAMFER), (x0, H), (0, H)] + list(D.OUTLINE_BODY)[::-1]
+        if pts[-1] != pts[0]: pts.append(pts[0])
     for (ax, ay), (bx, by) in zip(pts, pts[1:]): add_seg(board, ax, ay, bx, by)
+    # shell screw / boss holes (NPTH): D.HOLES = [(x, y, diameter_mm), ...]
+    for i, (hx, hy, hd) in enumerate(getattr(D, 'HOLES', [])):
+        fp = pcbnew.FOOTPRINT(board); fp.SetReference('H%d' % (i + 1)); fp.SetValue('shell hole'); fp.SetPosition(mm(hx, hy))
+        fp.SetAttributes(pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_EXCLUDE_FROM_POS_FILES)
+        pad = pcbnew.PAD(fp); pad.SetAttribute(pcbnew.PAD_ATTRIB_NPTH); pad.SetShape(pcbnew.PAD_SHAPE_CIRCLE)
+        pad.SetSize(VECTOR2I(FromMM(hd), FromMM(hd))); pad.SetDrillSize(VECTOR2I(FromMM(hd), FromMM(hd))); pad.SetPosition(mm(hx, hy))
+        pad.SetLayerSet(pcbnew.LSET.AllCuMask()); pad.SetNumber('')
+        fp.Add(pad); board.Add(fp)
     # soldermask keepout line (fab note): 4 mm below the tab base nothing but fingers
     add_seg(board, x0, H + 4.0, x1, H + 4.0, layer=pcbnew.F_Fab, w=0.1)
     add_text(board, 'FAB: 1.2 mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented', 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
