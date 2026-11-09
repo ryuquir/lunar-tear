@@ -1,0 +1,179 @@
+** Drc report for /home/user/lunar-tear/famicart/hardware/revf2/famicart.kicad_pcb **
+** Created on 2026-11-09 21:20:44 **
+
+** Found 56 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(45.0000 mm, 2.0000 mm): PCB Text 'famicart rev F2  (back)' on B.Silkscreen
+[lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(79.6000 mm, 58.7000 mm): Footprint C4
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(71.4000 mm, 70.0000 mm): Footprint RN11
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(76.5000 mm, 64.2000 mm): Footprint C2
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(82.2000 mm, 70.0000 mm): Footprint RN16
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(37.0000 mm, 44.0000 mm): Footprint R24
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(25.0000 mm, 70.0000 mm): Footprint RN6
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(82.5000 mm, 64.2000 mm): Footprint R19
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(61.6000 mm, 58.7000 mm): Footprint D4
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(7.0000 mm, 58.7000 mm): Footprint R6
+[lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(76.0000 mm, 58.7000 mm): Footprint C3
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(65.2000 mm, 58.7000 mm): Footprint D5
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(28.0000 mm, 44.0000 mm): Footprint R21
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(22.0000 mm, 58.7000 mm): Footprint R11
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(25.0000 mm, 44.0000 mm): Footprint R20
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(60.6000 mm, 70.0000 mm): Footprint RN8
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(64.5000 mm, 64.2000 mm): Footprint R15
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(64.2000 mm, 70.0000 mm): Footprint RN9
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(31.0000 mm, 44.0000 mm): Footprint R22
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(68.8000 mm, 58.7000 mm): Footprint D6
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(14.2000 mm, 70.0000 mm): Footprint RN3
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(29.5000 mm, 64.2000 mm): Footprint R5
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(11.5000 mm, 64.2000 mm): Footprint R1
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(78.6000 mm, 70.0000 mm): Footprint RN15
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(26.5000 mm, 64.2000 mm): Footprint R4
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(23.5000 mm, 64.2000 mm): Footprint R3
+[lib_footprint_issues]: Footprint 'D_SOD-323' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(14.5000 mm, 64.2000 mm): Footprint D1
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(20.5000 mm, 64.2000 mm): Footprint R2
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(28.6000 mm, 70.0000 mm): Footprint RN13
+[lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(61.5000 mm, 64.2000 mm): Footprint Q2
+[lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
+    Local override; Severity: warning
+    @(70.5000 mm, 64.2000 mm): Footprint C1
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(72.4000 mm, 58.7000 mm): Footprint D7
+[lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
+    Local override; Severity: warning
+    @(7.0000 mm, 64.2000 mm): Footprint Q1
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(67.5000 mm, 64.2000 mm): Footprint R16
+[lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(58.0000 mm, 58.7000 mm): Footprint D3
+[lib_footprint_issues]: Footprint 'D_SOD-323' not found in library 'Diode_SMD'.
+    Local override; Severity: warning
+    @(17.5000 mm, 64.2000 mm): Footprint D2
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(19.0000 mm, 58.7000 mm): Footprint R10
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(10.6000 mm, 70.0000 mm): Footprint RN2
+[lib_footprint_issues]: Footprint 'SW_Push_1P1T_XKB_TS-1187A' not found in library 'Button_Switch_SMD'.
+    Local override; Severity: warning
+    @(7.0000 mm, 37.0000 mm): Footprint SW1
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(28.0000 mm, 58.7000 mm): Footprint R13
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(34.0000 mm, 44.0000 mm): Footprint R23
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(7.0000 mm, 70.0000 mm): Footprint RN1
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(67.8000 mm, 70.0000 mm): Footprint RN10
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(13.0000 mm, 58.7000 mm): Footprint R8
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(21.4000 mm, 70.0000 mm): Footprint RN5
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(10.0000 mm, 58.7000 mm): Footprint R7
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(57.0000 mm, 64.2000 mm): Footprint R14
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(75.0000 mm, 70.0000 mm): Footprint RN12
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(16.0000 mm, 58.7000 mm): Footprint R9
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(57.0000 mm, 70.0000 mm): Footprint RN7
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(73.5000 mm, 64.2000 mm): Footprint R17
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(32.2000 mm, 70.0000 mm): Footprint RN14
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(79.5000 mm, 64.2000 mm): Footprint R18
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(25.0000 mm, 58.7000 mm): Footprint R12
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(17.8000 mm, 70.0000 mm): Footprint RN4
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(90.0000 mm, 49.8000 mm): Line on Edge.Cuts
+    @(87.6300 mm, 49.9000 mm): Circle on B.Silkscreen
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **

@@ -1,0 +1,337 @@
+{
+ "Raspberry Pi Pico 2": [
+  "C41407547",
+  "Raspberry Pi Pico 2",
+  "extended part, stock ~450; JLCPCB can place the module on the castellated pads"
+ ],
+ "74LVC541": [
+  "C113281",
+  "SN74LVC541APWR",
+  "TI; alt Nexperia 74LVC541APW,118 = C6093"
+ ],
+ "74LVC245": [
+  "C6082",
+  "74LVC245APW,118",
+  "Nexperia; alt TI SN74LVC245APWR = C7848"
+ ],
+ "74LVC139": [
+  "C7662",
+  "SN74LVC139APWR",
+  "TI; alt Nexperia 74LVC139PW,118 = C672267"
+ ],
+ "74LVC1G17": [
+  "C7836",
+  "SN74LVC1G17DBVR",
+  "TI"
+ ],
+ "74LVC1G08": [
+  "C7666",
+  "SN74LVC1G08DBVR",
+  "TI"
+ ],
+ "74LVC1G07": [
+  "C7829",
+  "SN74LVC1G07DBVR",
+  "TI"
+ ],
+ "74LVC1G04": [
+  "C7827",
+  "SN74LVC1G04DBVR",
+  "TI"
+ ],
+ "2.2k": [
+  "C4190",
+  "2.2kΩ 0603 1%",
+  "basic"
+ ],
+ "4.7k": [
+  "C23162",
+  "4.7kΩ 0603 1%",
+  "basic"
+ ],
+ "1k": [
+  "C21190",
+  "1kΩ 0603 1%",
+  "basic"
+ ],
+ "10k": [
+  "C25804",
+  "10kΩ 0603 1%",
+  "basic"
+ ],
+ "5.1k": [
+  "C23186",
+  "5.1kΩ 0603 1%",
+  "basic"
+ ],
+ "27": [
+  "C25190",
+  "27Ω 0603 1%",
+  "basic"
+ ],
+ "33@0402": [
+  "C25105",
+  "33Ω 0402 1%",
+  "basic"
+ ],
+ "1k@0402": [
+  "C11702",
+  "1kΩ 0402 1%",
+  "basic"
+ ],
+ "100n": [
+  "C14663",
+  "100nF 50V X7R 0603",
+  "basic"
+ ],
+ "100n@0402": [
+  "C1525",
+  "100nF 16V X7R 0402",
+  "basic"
+ ],
+ "10n": [
+  "C100042",
+  "10nF 50V X7R 0603",
+  "extended"
+ ],
+ "10u": [
+  "C380332",
+  "10uF 16V X5R 0805",
+  "extended"
+ ],
+ "1u": [
+  "C1592",
+  "1uF 16V X7R 0603",
+  "extended"
+ ],
+ "4.7u": [
+  "C1705",
+  "4.7uF 10V X5R 0603",
+  "extended"
+ ],
+ "15p@0402": [
+  "C1644",
+  "15pF 50V C0G 0402",
+  "basic"
+ ],
+ "USB-C": [
+  "C165948",
+  "TYPE-C-31-M-12",
+  "Korean Hroparts, matches the KiCad footprint"
+ ],
+ "USB-C DATA": [
+  "C165948",
+  "TYPE-C-31-M-12",
+  "Korean Hroparts, matches the KiCad footprint"
+ ],
+ "USB-C RP2350": [
+  "",
+  "TYPE-C-31-M-12 (C165948)",
+  "DNP by default: optional second connector for the RP2350B (parallel to J3; fit only one of J3/J4 wired to the RP2350B)"
+ ],
+ "RESET": [
+  "C2886898",
+  "TL3342F160QG",
+  "E-Switch"
+ ],
+ "BOOTSEL": [
+  "C2886898",
+  "TL3342F160QG",
+  "E-Switch"
+ ],
+ "RUN/GND": [
+  "",
+  "2.54 mm 1x2 header",
+  "DNP: solder by hand if you want an external reset switch"
+ ],
+ "SWD": [
+  "",
+  "2.54 mm 1x3 header",
+  "DNP: through-hole debug header"
+ ],
+ "Famicom 60-pin edge": [
+  "",
+  "",
+  "PCB feature"
+ ],
+ "AUDIO bypass": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "CART_PRESENT": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "USB D+ -> TP_A | TP_B": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "USB D- -> TP_B | TP_A": [
+  "",
+  "",
+  "solder jumper"
+ ],
+ "TP wire pads": [
+  "",
+  "",
+  "pads only"
+ ],
+ "RP2350B": [
+  "C42415655",
+  "RP2350B",
+  "Raspberry Pi, QFN-80; extended part"
+ ],
+ "W25Q128JVSIQ": [
+  "C97521",
+  "W25Q128JVSIQ",
+  "Winbond 16 MB QSPI flash, SOIC-8 208 mil"
+ ],
+ "AP2112K-3.3": [
+  "C51118",
+  "AP2112K-3.3TRG1",
+  "Diodes Inc 600 mA LDO, SOT-23-5"
+ ],
+ "Seeed XIAO RP2040": [
+  "",
+  "Seeed Studio XIAO RP2040",
+  "DNP: not stocked at JLCPCB; buy from Seeed and solder the 14 castellated pads yourself"
+ ],
+ "12MHz ABM8-272-T3": [
+  "C20625731",
+  "ABM8-272-T3",
+  "Abracon 12 MHz 3225 (the crystal Raspberry Pi uses on Pico 2); alt X322512MSB4SI = C9002"
+ ],
+ "3.3uH AOTA-B201610S3R3": [
+  "C42411119",
+  "AOTA-B201610S3R3-101-T",
+  "3.3 uH 0806 (2016) power inductor for the RP2350 core regulator; alt CKCSA201610-3.3uH = C5125966"
+ ],
+ "B5819W": [
+  "C64885",
+  "B5819W",
+  "MDD 1 A 40 V Schottky, SOD-123"
+ ],
+ "S29GL01GS 1Gbit NOR": [
+  "C2684783",
+  "S29GL01GS10TFI010",
+  "Infineon 1 Gbit (64M x 16) parallel NOR, TSOP-56, 100 ns; used as 64M x 8. Alt: S29GL512S10TFI010 = C393876 (64 MB), S29GL128S10TFI010 = C914940 (16 MB) -- same pinout"
+ ],
+ "FM28V100 128Kx8 F-RAM": [
+  "C66026",
+  "FM28V100-TGTR",
+  "Infineon/Cypress 1 Mbit parallel F-RAM, 32-pin TSOP-I (8 x 13.4 mm); non-volatile save RAM, no battery"
+ ],
+ "IS62WV5128 512Kx8 SRAM": [
+  "C1348955",
+  "IS62WV5128EBLL-45HLI",
+  "ISSI 512K x 8 SRAM 3.3 V 45 ns, 32-pin sTSOP (package H)"
+ ],
+ "AMS1117-3.3": [
+  "C6186",
+  "AMS1117-3.3",
+  "basic part, SOT-223, 1 A LDO"
+ ],
+ "W25Q16JVSSIQ": [
+  "C131025",
+  "W25Q16JVSSIQ",
+  "Winbond 2 MB QSPI flash for the RP2350B firmware (same footprint/pinout as W25Q128)"
+ ],
+ "74LVC00 PPU access / CIRAM glue": [
+  "C7803",
+  "SN74LVC00APWR",
+  "TI quad NAND, TSSOP-14"
+ ],
+ "74LVC139 CHR ROM/RAM select": [
+  "C7662",
+  "SN74LVC139APWR",
+  "TI"
+ ],
+ "74LVC1G11 AND3: CPU data enable": [
+  "C460526",
+  "74LVC1G11W6-7",
+  "Diodes Inc, SOT-26 (= SOT-23-6)"
+ ],
+ "74LVC1G32 OR: CPU 245 /OE": [
+  "C10096",
+  "SN74LVC1G32DBVR",
+  "TI"
+ ],
+ "74LVC1G32 OR: PPU 245 /OE": [
+  "C10096",
+  "SN74LVC1G32DBVR",
+  "TI"
+ ],
+ "74LVC1G04 INV: R/W": [
+  "C7827",
+  "SN74LVC1G04DBVR",
+  "TI"
+ ],
+ "74LVC1G00 NAND: WRAM /WE": [
+  "C7826",
+  "SN74LVC1G00DBVR",
+  "TI"
+ ],
+ "74LVC1G07 OD: /IRQ A": [
+  "C7829",
+  "SN74LVC1G07DBVR",
+  "TI"
+ ],
+ "74LVC1G07 OD: /IRQ B": [
+  "C7829",
+  "SN74LVC1G07DBVR",
+  "TI"
+ ],
+ "10k x4": [
+  "C29718",
+  "4D03WGJ0103T5E 10k x4 0603",
+  "basic"
+ ],
+ "green 0603": [
+  "C84267",
+  "NCD0603G1 0603 green LED",
+  "extended, large stock"
+ ],
+ "BOOTSEL A": [
+  "C2886898",
+  "TL3342F160QG",
+  "E-Switch"
+ ],
+ "BOOTSEL B": [
+  "C2886898",
+  "TL3342F160QG",
+  "E-Switch"
+ ],
+ "B5819W (VBUS A->+5V)": [
+  "C64885",
+  "B5819W",
+  "MDD"
+ ],
+ "B5819W (VBUS B->+5V)": [
+  "C64885",
+  "B5819W",
+  "MDD"
+ ],
+ "USB-C PRG/mapper": [
+  "C165948",
+  "TYPE-C-31-M-12",
+  "Korean Hroparts"
+ ],
+ "USB-C CHR": [
+  "C165948",
+  "TYPE-C-31-M-12",
+  "Korean Hroparts"
+ ],
+ "SWD A (SWCLK GND SWDIO)": [
+  "",
+  "2.54 mm 1x3 header",
+  "DNP"
+ ],
+ "SWD B (SWCLK GND SWDIO)": [
+  "",
+  "2.54 mm 1x3 header",
+  "DNP"
+ ]
+}
