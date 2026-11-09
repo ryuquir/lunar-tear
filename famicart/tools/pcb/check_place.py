@@ -16,7 +16,7 @@ D = importlib.import_module(os.environ.get('FC_DESIGN', 'design'))
 HW = os.path.abspath(os.environ['FC_HW_DIR'])
 SH = getattr(D, 'SHELL', None)
 G = 0.05; MARGIN = float(os.environ.get('FC_EDGE_MARGIN', '0.3'))
-BODY = {'RPi_Pico_SMD': 1.6, 'XIAO-RP2350-Edge': 1.0}      # modules: USB connector overhang past the marked end (mm)
+BODY = {'RPi_Pico_SMD': 1.6, 'RPi_Pico_SMD_Short': 1.6, 'XIAO-RP2350-Edge': 1.0}      # modules: USB connector overhang past the marked end (mm)
 
 def pip(px, py, poly):
     """vectorised point-in-polygon (even-odd)"""

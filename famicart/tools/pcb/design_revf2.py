@@ -32,7 +32,11 @@ P('J1', 'famicart', 'Famicom_CardEdge_60', 'Famicom 60-pin edge', 'famicart:Fami
 lib, sym, val, fp, _ = PARTS['J1']; PARTS['J1'] = (lib, sym, val, fp, (45.0, H, 0, 'F'))
 
 # ---- modules (hand-soldered) ----
-mv('U2', 0.0, 10.8, 270, 'B')        # body h 0.3-21.3, pads to 22.3 (slot keep-out starts 22.4), clear of the posts at x' +-31.75
+# all four Picos use the short-pad footprint (pads 0.4 mm outside the module): the lowest one must keep every pad above
+# the card-edge shoulder and below the slot keep-out (tools/pcb fit search: 1 front + 3 back fit the large shell)
+for _r in ('U1', 'U2', 'U4', 'U5'):
+    _l, _s, _v, _f, _p = PARTS[_r]; PARTS[_r] = (_l, _s, _v, 'famicart:RPi_Pico_SMD_Short', _p)
+mv('U2', 0.0, 11.0, 270, 'B')        # body h 0.5-21.5, pads 0.1-21.9 (slot keep-out from 22.4), clear of the posts at x' +-31.75
 mv('U5', 18.5, 37.3, 270, 'B')       # body h 26.8-47.8, x' -7.0..44.0, USB past the right edge
 mv('U1', -18.3, 62.0, 90, 'B')       # body h 51.5-72.5, x' -43.8..7.2, USB past the left edge
 mv('U4', -18.3, 63.0, 90, 'F')       # body h 52.5-73.5 (pads to 74.5), USB past the left edge

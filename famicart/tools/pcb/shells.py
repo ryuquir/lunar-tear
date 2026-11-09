@@ -29,8 +29,8 @@ def _common_keepouts(body_h, notch_lo, notch_hi):
     for x0, x1 in ((45 - 42.2, 45 - 40.3), (45 + 40.3, 45 + 42.2), (45 + 3.8, 45 + 6.2)):
         ko.append(('F', _rect(x0, y(27.25), x1, y(21.15))))
     ko.append(('F', _rect(45 - 1.2, y(39.45 + 1.2), 45 + 1.2, y(39.45 - 1.2))))          # O2 post at (0, 39.45)
-    # back: two O2 posts at (+-31.75, 21.45); no module may bridge the slot hole (+0.5 mm) in case a shell feature
-    # comes through it (the reference marks nothing there on the back)
+    # back: two O2 posts at (+-31.75, 21.45). (The slot is a board cut-out, so check_place.py already keeps every
+    # module body off it; nothing else is marked on the back.)
     for xc in (45 - 31.75, 45 + 31.75):
         ko.append(('B', _rect(xc - 1.2, y(21.45 + 1.2), xc + 1.2, y(21.45 - 1.2))))
     return ko
@@ -46,7 +46,7 @@ def hvc_small():
     slot = _rect(45 + 2.3, y(hi), 45 + 7.7, y(lo))
     route_ko = [_rect(-1, y(hi) - 0.4, nx + 0.4, y(lo) + 0.4), _rect(W - nx - 0.4, y(hi) - 0.4, W + 1, y(lo) + 0.4),
                 _rect(45 + 2.3 - 0.4, y(hi) - 0.4, 45 + 7.7 + 0.4, y(lo) + 0.4)]
-    ko = _common_keepouts(H, 23.2, 25.2) + [('B', _rect(45 + 2.3 - 0.5, y(hi + 0.5), 45 + 7.7 + 0.5, y(lo - 0.5)))]
+    ko = _common_keepouts(H, 23.2, 25.2)
     return dict(name='HVC small (TGROM-01)', body_h=H, outline_body=body, cutouts=[slot],
                 route_keepouts=route_ko, comp_keepouts=ko)
 
@@ -64,7 +64,7 @@ def hvc_large(H=75.0):
                 _rect(-1, y(22.8), 0.6, y(18.7)), _rect(W - 0.6, y(22.8), W + 1, y(18.7)),
                 _rect(-1, y(6.7) - 0.4, 45 - 43.4 + 0.4, H + 1), _rect(45 + 43.4 - 0.4, y(6.7) - 0.4, W + 1, H + 1),
                 _rect(45 + 2.35 - 0.4, y(25.2) - 0.4, 45 + 7.75 + 0.4, y(22.8) + 0.4)]
-    ko = _common_keepouts(H, 22.8, 25.2) + [('B', _rect(45 + 2.35 - 0.5, y(25.2 + 0.5), 45 + 7.75 + 0.5, y(22.8 - 0.5)))]
+    ko = _common_keepouts(H, 22.8, 25.2)
     for x0, x1 in ((45 - 45.5, 45 - 41.3), (45 + 41.3, 45 + 45.5)):                     # front ribs near the lower bosses
         ko.append(('F', _rect(x0, y(3.55), x1, y(1.65))))
     return dict(name='HVC large (ExROM)', body_h=H, outline_body=body, cutouts=[slot],
