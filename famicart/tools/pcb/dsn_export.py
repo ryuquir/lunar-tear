@@ -152,6 +152,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
     # rule areas -> Specctra keepouts (all signal layers)
     for z in board.Zones():
         if not z.GetIsRuleArea(): continue
+        if not z.GetDoNotAllowTracks() and not z.GetDoNotAllowVias(): continue      # component-only keep-out (shell rib)
         ol = z.Outline().Outline(0)
         pts = ' '.join(f'{U(ToMM(ol.CPoint(i).x))} {-U(ToMM(ol.CPoint(i).y))}' for i in range(ol.PointCount()))
         kind = 'keepout' if z.GetDoNotAllowTracks() else 'via_keepout'

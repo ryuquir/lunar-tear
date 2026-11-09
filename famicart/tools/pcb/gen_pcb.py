@@ -16,7 +16,8 @@ OUT = os.path.join(HW, 'famicart.kicad_pcb')
 SYS_FP = '/usr/share/kicad/footprints'
 
 # Board outline (mm): HVC-TGROM-01 measurements from nesdev "Famicom cartridge dimensions"
-BOARD_W, BODY_H, TAB_W, TAB_H = 90.0, float(getattr(D, 'BODY_H', 35.4)), 78.4, 10.7   # rev F: taller body
+SHELL = getattr(D, 'SHELL', None)       # shells.hvc_small() / hvc_large(): real HVC outline, slot, rib keep-outs (rev E2/F2 on)
+BOARD_W, BODY_H, TAB_W, TAB_H = 90.0, float(SHELL['body_h'] if SHELL else getattr(D, 'BODY_H', 35.4)), 78.4, 10.7
 TAB_X0 = (BOARD_W - TAB_W) / 2          # 5.8
 TOTAL_H = BODY_H + TAB_H                 # 46.1 (rev A-E)
 CHAMFER = 1.0
@@ -31,12 +32,12 @@ def add_text(board, text, x, y, layer, size=1.0, thick=0.15, mirror=False):
     t = pcbnew.PCB_TEXT(board); t.SetText(text); t.SetPosition(mm(x, y)); t.SetLayer(layer)
     t.SetTextSize(VECTOR2I(FromMM(size), FromMM(size))); t.SetTextThickness(FromMM(thick)); t.SetMirrored(mirror); board.Add(t)
 
-def add_rule_area(board, name, pts, layers, tracks=True, vias=True, pour=True):
+def add_rule_area(board, name, pts, layers, tracks=True, vias=True, pour=True, footprints=False):
     z = pcbnew.ZONE(board); z.SetIsRuleArea(True); z.SetZoneName(name)
     ls = pcbnew.LSET()
     for l in layers: ls.AddLayer(l)
     z.SetLayerSet(ls)
-    z.SetDoNotAllowTracks(tracks); z.SetDoNotAllowVias(vias); z.SetDoNotAllowCopperPour(pour); z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+    z.SetDoNotAllowTracks(tracks); z.SetDoNotAllowVias(vias); z.SetDoNotAllowCopperPour(pour); z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(footprints)
     ol = z.Outline(); ol.NewOutline()
     for x, y in pts: ol.Append(FromMM(x), FromMM(y))
     board.Add(z); return z
@@ -259,12 +260,17 @@ def main():
     W, H, T = BOARD_W, BODY_H, TOTAL_H
     x0, x1 = TAB_X0, TAB_X0 + TAB_W
     pts = [(0, 0), (W, 0), (W, H), (x1, H), (x1, T - CHAMFER), (x1 - CHAMFER, T), (x0 + CHAMFER, T), (x0, T - CHAMFER), (x0, H), (0, H), (0, 0)]
-    if getattr(D, 'OUTLINE_BODY', None):
-        # shell-specific body outline (notches / cut corners): points from the right tab corner (W, H) over the top to
-        # the left tab corner (0, H); the card-edge tab is always the standard one
-        pts = [(W, H), (x1, H), (x1, T - CHAMFER), (x1 - CHAMFER, T), (x0 + CHAMFER, T), (x0, T - CHAMFER), (x0, H), (0, H)] + list(D.OUTLINE_BODY)[::-1]
-        if pts[-1] != pts[0]: pts.append(pts[0])
+    body_pts = SHELL['outline_body'] if SHELL else getattr(D, 'OUTLINE_BODY', None)
+    if body_pts:
+        # shell-specific body: points from the left tab corner (x0, H) up, over the top and down to the right tab corner
+        # (x1, H); the card-edge tab is always the standard one
+        close = lambda a, b: abs(a[0] - b[0]) < 1e-6 and abs(a[1] - b[1]) < 1e-6
+        assert close(body_pts[0], (x0, H)) and close(body_pts[-1], (x1, H)), 'outline_body must run from (x0, H) to (x1, H)'
+        pts = [(x1, H), (x1, T - CHAMFER), (x1 - CHAMFER, T), (x0 + CHAMFER, T), (x0, T - CHAMFER), (x0, H)] + [tuple(p) for p in body_pts[1:-1]] + [(x1, H)]
     for (ax, ay), (bx, by) in zip(pts, pts[1:]): add_seg(board, ax, ay, bx, by)
+    for cut in (SHELL['cutouts'] if SHELL else getattr(D, 'CUTOUTS', [])):          # internal cut-outs (shell slot)
+        cp = list(cut) + [cut[0]]
+        for (ax, ay), (bx, by) in zip(cp, cp[1:]): add_seg(board, ax, ay, bx, by)
     # shell screw / boss holes (NPTH): D.HOLES = [(x, y, diameter_mm), ...]
     for i, (hx, hy, hd) in enumerate(getattr(D, 'HOLES', [])):
         fp = pcbnew.FOOTPRINT(board); fp.SetReference('H%d' % (i + 1)); fp.SetValue('shell hole'); fp.SetPosition(mm(hx, hy))
@@ -283,6 +289,12 @@ def main():
     KEEP_Y = H + 4.0            # = solder-mask boundary: fingers only below this line
     CU = [pcbnew.F_Cu, pcbnew.B_Cu] + [pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu][:NL - 2]
     add_rule_area(board, 'card_edge_keepout', [(x0 - 0.5, KEEP_Y), (x1 + 0.5, KEEP_Y), (x1 + 0.5, T + 0.5), (x0 - 0.5, T + 0.5)], CU)
+    if SHELL:
+        for i, poly in enumerate(SHELL['route_keepouts']):      # notches, corner cuts, slot (+ edge clearance): no copper
+            add_rule_area(board, 'shell_cut_%d' % i, poly, CU)
+        for i, (side, poly) in enumerate(SHELL['comp_keepouts']):   # shell ribs / posts: no components on that side
+            add_rule_area(board, 'shell_rib_%s%d' % (side, i), poly, [pcbnew.F_Cu if side == 'F' else pcbnew.B_Cu],
+                          tracks=False, vias=False, pour=False, footprints=True)
     ux, uy, _, _ = D.PARTS['U1'][4]
     # (vias under the Pico are allowed: they are tented by the solder mask; the Pico's own test points sit on our TP pads)
     # GND pours on both layers over the body (not the tab)
