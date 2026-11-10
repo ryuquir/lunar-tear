@@ -9,6 +9,7 @@ A position is used when, on BOTH layers, the via's copper stays inside the fille
 (the pour itself keeps its clearance to every other net), and it is at least
   0.45 mm (copper to copper) from every pad of any net or of no net (module pads, guard pads, gold fingers),
   1.0 mm (centre to centre) from every other via, and outside every rule area that forbids vias.
+A piece of pour that this leaves without any via gets one on a finer search, where both layers allow it.
 Afterwards the zones are filled again and the design rules checked; a via that takes part in a violation is removed.
     FC_DESIGN=design_revg python3 stitch_gnd.py board.kicad_pcb [--grid 2.0]"""
 import os, sys, re, math, argparse, tempfile, importlib
@@ -52,7 +53,7 @@ def main():
     noviaz = [z.GetBoundingBox() for z in list(board.Zones()) + [z for fp in board.GetFootprints() for z in fp.Zones()] if z.GetIsRuleArea() and z.GetDoNotAllowVias()]
     noviaz = [(ToMM(b.GetX()), ToMM(b.GetY()), ToMM(b.GetRight()), ToMM(b.GetBottom())) for b in noviaz]
     bb = board.GetBoardEdgesBoundingBox(); r = VIA / 2
-    added = []
+    added = []; mine_xy = []
     y = ToMM(bb.GetY()) + 1.0
     while y < ToMM(bb.GetBottom()) - 1.0:
         x = ToMM(bb.GetX()) + 1.0
@@ -65,15 +66,48 @@ def main():
             if ok:
                 v = pcbnew.PCB_VIA(board); v.SetPosition(pt); v.SetViaType(pcbnew.VIATYPE_THROUGH)
                 v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(DRILL)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(net)
-                board.Add(v); added.append(v); vias.append((x, y))
+                board.Add(v); added.append(v); vias.append((x, y)); mine_xy.append((x, y))
             x += args.grid
         y += args.grid
+    # second pass: a piece of pour that the grid gave no via at all (a narrow island between tracks) gets one, searched
+    # on a 0.25 mm grid inside that piece. Without it such a piece hangs on one pad or track, or on nothing.
+    pcbnew.SaveBoard(args.pcb, board); board = pcbnew.LoadBoard(args.pcb)
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
+    net = board.FindNet(args.net); regions = [pour(board, pcbnew.F_Cu, args.net), pour(board, pcbnew.B_Cu, args.net)]
+    vias = [(ToMM(t.GetPosition().x), ToMM(t.GetPosition().y)) for t in board.GetTracks() if t.GetClass() == 'PCB_VIA']
+    gvias = [t.GetPosition() for t in board.GetTracks() if t.GetClass() == 'PCB_VIA' and t.GetNetname() == args.net]
+    extra = 0
+    for z in board.Zones():
+        if z.GetIsRuleArea() or z.GetNetname() != args.net: continue
+        for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+            if not z.IsOnLayer(layer): continue
+            polys = z.GetFilledPolysList(layer)
+            for i in range(polys.OutlineCount()):
+                piece = pcbnew.SHAPE_POLY_SET(); piece.AddOutline(polys.Outline(i))
+                for h in range(polys.HoleCount(i)): piece.AddHole(polys.Hole(i, h))
+                if any(piece.Contains(p) for p in gvias): continue
+                pb = piece.BBox(); done = False; y = ToMM(pb.GetY()) + 0.3
+                while y < ToMM(pb.GetBottom()) and not done:
+                    x = ToMM(pb.GetX()) + 0.3
+                    while x < ToMM(pb.GetRight()) and not done:
+                        pt = VECTOR2I(FromMM(x), FromMM(y))
+                        ok = piece.Contains(pt) and all(reg.Contains(pt) for reg in regions)
+                        ok = ok and all(not (a - r <= x <= c + r and b - r <= y <= d + r) for (a, b, c, d) in noviaz)
+                        ok = ok and all(math.hypot(max(a - x, 0.0, x - c), max(b - y, 0.0, y - d)) >= r + PAD_GAP for (a, b, c, d) in pads)
+                        ok = ok and all(math.hypot(x - vx, y - vy) >= VIA_PITCH for (vx, vy) in vias)
+                        if ok:
+                            v = pcbnew.PCB_VIA(board); v.SetPosition(pt); v.SetViaType(pcbnew.VIATYPE_THROUGH)
+                            v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(DRILL)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(net)
+                            board.Add(v); added.append(v); vias.append((x, y)); mine_xy.append((x, y)); gvias.append(pt); extra += 1; done = True
+                        x += 0.25
+                    y += 0.25
+    print('pieces of pour without a via that got one:', extra)
     pcbnew.SaveBoard(args.pcb, board); board = pcbnew.LoadBoard(args.pcb)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
     errors, pts = drc_points(board)
     removed = 0
     if errors:                 # take out stitching vias that sit at a violation, then check again
-        mine = {(round(ToMM(v.GetPosition().x), 3), round(ToMM(v.GetPosition().y), 3)) for v in added}
+        mine = {(round(x, 3), round(y, 3)) for (x, y) in mine_xy}
         for t in list(board.GetTracks()):
             if t.GetClass() != 'PCB_VIA': continue
             k = (round(ToMM(t.GetPosition().x), 3), round(ToMM(t.GetPosition().y), 3))

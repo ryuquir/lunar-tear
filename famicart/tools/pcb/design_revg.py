@@ -89,8 +89,8 @@ def rarr(xp, h, pairs):
     return r
 def nfet(xp, h, g, d):
     q = nxt('Q'); P(q, 'Transistor_FET', '2N7002', '2N7002', SOT23, xp, h, 0); c(q, 1, g); c(q, 2, 'GND'); c(q, 3, d); return q
-def schottky(xp, h, a, k):
-    d = nxt('D'); P(d, 'Device', 'D_Schottky', 'B5819W', SOD123, xp, h, 90); c(d, 1, k); c(d, 2, a); return d
+def schottky(xp, h, a, k, rot=90):
+    d = nxt('D'); P(d, 'Device', 'D_Schottky', 'B5819W', SOD123, xp, h, rot); c(d, 1, k); c(d, 2, a); return d
 def clamp(xp, h, net):
     """BAV99 (two diodes in series: pin 1 anode, pin 3 common, pin 2 cathode) as a clamp of `net` to GND and +5V.
     The 2N7002 of JLCPCB's Basic list has no gate protection, and these nets end on card-edge fingers that people
@@ -169,10 +169,13 @@ rarr(ppu_x[0], HA, [('CIRAM_nCE', 'NCE_D'), ('CIRAM_nCE', 'NCE_D'), ('PPU_A6', '
 rarr(ppu_x[1], HA, [('PPU_A7', 'PA7'), ('PPU_A4', 'PA4'), ('PPU_A8', 'PA8'), ('PPU_A3', 'PA3')])              # RN8
 rarr(ppu_x[2], HA, [('PPU_A9', 'PA9'), ('PPU_A2', 'PA2'), ('PPU_A10', 'PA10'), ('PPU_A1', 'PA1')])            # RN9
 rarr(ppu_x[3], HA, [('PPU_A11', 'PA11'), ('PPU_A0', 'PA0'), ('PPU_A12', 'PA12'), ('PPU_A13', 'PA13')])        # RN10
-for i in range(2): rarr(ppu_x[4 + i], HA, [(f'PPU_D{4 * i + k}', f'PD{4 * i + k}') for k in range(4)])     # RN11, RN12: U2 data
+def two(a, b, mod):      # one array for two PPU data bits of one module: two elements in parallel for each bit (500 ohm)
+    return [(f'PPU_D{a}', f'{mod}{a}')] * 2 + [(f'PPU_D{b}', f'{mod}{b}')] * 2
+PPU_PAIRS = ((0, 1), (2, 3), (6, 7), (4, 5))     # the bits of the four array columns, in the order of the fingers (26-29 front, 58-57 and 60-59 back)
+for i in range(2): rarr(ppu_x[4 + i], HA, two(*PPU_PAIRS[i], 'PD'))                                     # RN11, RN12: U2 data, bits 0-3
 rarr(XA[13], HA, [(f'CPU_D{b}', f'XD{b}') for b in (3, 2, 1, 0)])                                      # RN13: U4 data
 rarr(XA[14], HA, [(f'CPU_D{b}', f'XD{b}') for b in (7, 6, 5, 4)])                                      # RN14
-for i in range(2): rarr(ppu_x[6 + i], HA, [(f'PPU_D{4 * i + k}', f'YD{4 * i + k}') for k in range(4)])     # RN15, RN16: U5 data
+for i in range(2): rarr(ppu_x[6 + i], HA, two(*PPU_PAIRS[2 + i], 'PD'))                                 # RN15, RN16: U2 data, bits 4-7
 rarr(8.4, HA, [('PPU_nRD', 'RD_D'), ('PPU_nWE', 'PWE_G'), ('CIRAM_A10', 'NA10_D'), ('CIRAM_A10', 'NA10_D')])   # RN17: /RD, /WE to the gate of Q6,
                                                                                                         # CIRAM A10 through 500 ohm, from U3
 
@@ -205,9 +208,18 @@ clamp(-5.8, 15.6, 'nIRQ')                                                       
 # ------------------------------------------------------------------ PPU-side glue and power (front, right)
 nfet(15.6, HB, 'PWE_G', 'PWS_D'); res('2.2k', 18.6, HB, 'PWS_D', '3V3_B'); res('2.2k', 20.2, HB, 'PWS_D', '3V3_B')   # Q6: PWS_D = NOT PPU /WE,
                                                                                         # 1.1k pull-up: the /WE pulse is only 186 ns long
-clamp(23.6, HB, 'PWE_G')                                                                # gate of Q6 (behind the 1k of RN17)
-for i, k in enumerate(('VSYS_A', 'VSYS_B', 'V5_C', 'VSYS_D', 'VSYS_E', 'V5_F')): schottky(12.0 + 2.8 * i, HC, '+5V', k)
-cap('10u', C0805, 28.8, HC, '+5V'); cap('10u', C0805, 31.4, HC, '+5V')
+clamp(23.3, HB, 'PWE_G')                                                                # gate of Q6 (behind the 1k of RN17)
+# Supply row on the right margin, beside the +5V finger (pin 30, front, right end): all module current enters there.
+# The six diodes lie one above the other with their anodes on one 0.8 mm bus along the edge, the two 10u sit on the same
+# trunk between the finger and the diodes. So the heavy track is 30 mm long and crosses no signal; what crosses the
+# PPU lines on their way north are the six feeds behind the diodes, one module's current each. (In a row in the middle
+# of the board, as before, the trunk had to cross every PPU line: a 0.15 mm track did it with 70-150 mV of drop, a
+# pre-routed wide one left the autorouter with a dozen connections it could not close.)
+SUPPLY_Y = {'V5_C': 20.0, 'V5_F': 17.8, 'VSYS_E': 15.6, 'VSYS_B': 13.4, 'VSYS_D': 11.2, 'VSYS_A': 9.0}       # height above the body's lower edge
+for k in ('VSYS_A', 'VSYS_B', 'V5_C', 'VSYS_D', 'VSYS_E', 'V5_F'): schottky(42.0, SUPPLY_Y[k], '+5V', k, rot=0)   # D10-D15: cathode left, anode on the bus
+cap('10u', C0805, 41.15, 6.7, '+5V', rot=180); cap('10u', C0805, 41.15, 4.6, '+5V', rot=180)  # C3, C4: +5V pad on the trunk (right), GND pad left
+# The diodes stand 2.2 mm apart, closer than the 2.35 mm of the library courtyard: pads 1.0 mm apart, bodies at least 0.4 mm.
+COURTYARD = {'B5819W': (4.4, 2.0)}
 
 # ------------------------------------------------------------------ LINK / PLINK resistors at the modules (front)
 def link(xp, h, node): rarr(xp, h, [(node, 'LINK')] * 4)                                # 250 ohm between a module and the LINK wire
@@ -216,20 +228,24 @@ link(-27.2, 48.6, 'LINK_A'); link(-23.4, 48.6, 'LINK_D')                        
 # cannot drag the idle wire below the input-high level of the modules that are running
 res('2.2k', -32.6, 48.6, 'LINK', 'LINK_PU'); res('2.2k', -30.9, 48.6, 'LINK_PU', '3V3_A')
 link(9.0, 18.6, 'LINK_B')                                                              # over U2 pin 34
-link(26.9, 49.9, 'LINK_E'); link(31.0, 49.7, 'LINK_C'); link(10.6, 50.4, 'LINK_F')
+link(26.9, 50.5, 'LINK_E'); link(31.0, 50.3, 'LINK_C'); link(10.6, 50.4, 'LINK_F')        # 1.3 mm clear of U3's pad ends (soldering iron)
 rarr(14.0, 50.4, [('PLINK_F', 'PLINK_B'), ('PLINK_F', 'PLINK_B'), ('PLINK_F', 'PLINK_E'), ('PLINK_F', 'PLINK_E')])   # 500 ohm per receiver
 
-# ------------------------------------------------------------------ PPU data lines: a second array in parallel (500 ohm)
+# ------------------------------------------------------------------ PPU data lines: 500 ohm, U5's arrays
 # Each PPU data line also feeds an input of the console's 74LS373 address latch, and an LS input sources up to 0.4 mA
 # when it is held low. Through 1 k that lifts the low level to 0.45 V and slows the falling edge: worst case 240 ns from
 # /RD falling to settled data, against a /RD window of 186 ns (typical 85 ns). With two elements in parallel the worst
-# case is 158 ns and the low level 0.25 V. RN27-RN30 sit above RN11, RN12, RN15, RN16; their elements are listed in
-# reverse so that the pads that face each other carry the same net.
-for i in range(2): rarr(27.2 + 3.6 * i, HB, [(f'PPU_D{4 * i + k}', f'PD{4 * i + k}') for k in (3, 2, 1, 0)])      # RN27, RN28: U2
-for i in range(2): rarr(34.4 + 3.6 * i, HB, [(f'PPU_D{4 * i + k}', f'YD{4 * i + k}') for k in (3, 2, 1, 0)])      # RN29, RN30: U5
+# case is 158 ns and the low level 0.25 V.
+# The two elements of a bit are neighbours in ONE array (RN11, RN12, RN15, RN16 for U2 in the lower row, RN27-RN30 for
+# U5 above them): their pads lie next to each other and need no wire between arrays. (Before, the second element of each
+# bit sat in another array; those links ran nested around the arrays, and every routing attempt ended with one or two
+# of them open.)
+# U5's copy sits above U2's, 0.5 mm to the right (the clamp D9 stands beside the first one), with the two bits of each
+# array in the other order: the upper pair of the lower array and the lower pair of the upper array face each other.
+for i in range(4): rarr(ppu_x[4 + i] + 0.5, HB, two(PPU_PAIRS[i][1], PPU_PAIRS[i][0], 'YD'))                 # RN27-RN30: U5 data
 
 # ------------------------------------------------------------------ storage on U6 (front, top right)
-P('U7', 'Memory_Flash', 'W25Q128JVS', 'W25Q128JVSIQ', 'Package_SO:SOIC-8_5.23x5.23mm_P1.27mm', 38.5, 53.5, 0)
+P('U7', 'Memory_Flash', 'W25Q128JVS', 'W25Q128JVSIQ', 'Package_SO:SOIC-8_5.23x5.23mm_P1.27mm', 38.5, 53.5, 180)   # turned: pin 8 (supply) beside the 10u
 for p, nn in {1: 'F_CS', 2: 'SPI_MISO', 3: 'F_IO2', 4: 'GND', 5: 'SPI_MOSI', 6: 'SPI_SCK', 7: 'F_IO3', 8: '3V3_F'}.items(): c('U7', p, nn)
 P('J3', 'Connector', 'Micro_SD_Card_Det_Hirose_DM3AT', 'microSD DM3AT-SF-PEJM5', 'Connector_Card:microSD_HC_Hirose_DM3AT-SF-PEJM5', 36.5, 65.7, 180)
 for p, nn in {1: 'SD_DAT2', 2: 'SD_CS', 3: 'SPI_MOSI', 4: '3V3_F', 5: 'SPI_SCK', 6: 'GND', 7: 'SPI_MISO', 8: 'SD_DAT1', 9: None, 10: None, 11: 'GND'}.items(): c('J3', p, nn)
@@ -257,22 +273,21 @@ cap('10u', C0805, -41.2, 5.7, '+5V')
 
 POWER_NETS = {'+5V', 'GND'}
 # Tracks laid before the autorouter runs and kept by it (board mm, front layer): [(net, width, [(x, y), ...]), ...].
-# Empty in this version. A pre-routed 0.8 mm +5V trunk from finger 30 up the right margin and along the diode row was
-# tried: every PPU line on its way north has to cross it, and both ways of routing the rest (a full Freerouting run,
-# 33 minutes; the proven routing kept and only the crossings routed again) ended with 12 to 20 connections that neither
-# Freerouting nor finish_route.py could close. The board therefore keeps the routing that closed, and the supply tracks
-# are widened afterwards where the rule check allows (widen_tracks.py); power_drop.py prints what that leaves. The next
-# layout step is to move the six supply diodes and the two 10u to the right margin, beside finger 30, so that the
-# heavy track crosses nothing (docs/12_rev_g_plan.md).
-PREROUTE = []
+#  * +5V trunk: all module current enters through finger 30. 0.8 mm from the finger up the right margin, through the
+#    +5V pads of the two 10u, then along the anodes of the six supply diodes (see the supply row above). As a 0.15 mm
+#    track that the autorouter laid across the board, this path dropped 70-150 mV; power_drop.py prints what it is now.
+#  * GND: a strap as wide as the finger from each of the two ground fingers up into the pour.
+PREROUTE = [('+5V', 0.8, [(82.33, 78.4), (82.33, 75.6), (87.2, 70.73), (87.2, 67.0), (88.65, 65.55), (88.65, 55.0)])]
+PREROUTE += [('GND', 1.6, [(7.67, 78.1), (7.67, 73.6)]), ('GND', 1.2, [(46.27, 78.3), (46.27, 73.4)])]
 # Wider tracks for the supply nets behind the diodes (two pads each) and for the 3.3 V of flash and card: the width the
-# autorouter is given for these nets, and the width widen_tracks.py tries for them (it also takes +5V, on its command line).
+# autorouter is given for these nets, and the width widen_tracks.py tries for them (it also takes +5V and GND, on its
+# command line).
 NET_WIDTH = {n: 0.3 for n in ('VSYS_A', 'VSYS_B', 'VSYS_D', 'VSYS_E', 'V5_C', 'V5_F', '3V3_F')}
 # Pads of the module footprints that lie under the modules' own exposed pads (test points, USB shell, XIAO underside):
-# no net and no solder mask opening. The value is what gen_pcb.py adds to the pad per side; 0 here, because five vias
-# of the present routing stand 0.20-0.26 mm from such pads and larger pads would need them moved (a module that sits
-# 0.2 mm off can touch the mask over such a via, not its copper).
-GUARD_PADS = dict({n: 0.0 for n in ('44', '45', '46', 'TP4', 'TP5', 'TP6', 'TP7')}, **{n: 0.0 for n in 'ABCD'}, **{'B%d' % i: 0.0 for i in range(15, 31)})
+# no net, no solder mask opening, and larger than the module's pad (by the value given, per side) so that vias keep a
+# distance even when the module sits a little off. The USB shell pads A-D keep their size (they sit 0.4 mm from the
+# test-point pads).
+GUARD_PADS = dict({n: 0.1 for n in ('44', '45', '46', 'TP4', 'TP5', 'TP6', 'TP7')}, **{n: 0.0 for n in 'ABCD'}, **{'B%d' % i: 0.15 for i in range(15, 31)})
 # Hand-soldered pads get thermal reliefs into the GND pour (gen_pcb.py). The four shell tabs of the card socket are
 # joined solidly instead: they hold the socket, and beside the socket's keep-out areas one of them has room for a
 # single spoke only (KiCad asks for two).

@@ -68,7 +68,7 @@ class Svg:
         if side == 'left': self.text(x - 8, (y1 + y2) / 2 + size * 0.35, label, size, DIM, anchor='end')
         else: self.text(x + 8, (y1 + y2) / 2 + size * 0.35, label, size, DIM, anchor='start')
     def save(self, name):
-        p = os.path.join(HW, name)
+        p = os.path.join(os.environ.get('FC_DRAW_DIR', HW), name); os.makedirs(os.path.dirname(p), exist_ok=True)      # FC_DRAW_DIR: write somewhere else (check_jlc.py compares)
         open(p, 'w').write('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" font-family="%s">\n<rect width="100%%" height="100%%" fill="#ffffff"/>\n%s\n</svg>\n'
                            % (self.w, self.h, self.w, self.h, FONT, '\n'.join(self.e)))
         print('written', p)

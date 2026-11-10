@@ -429,8 +429,8 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
   JLCPCB はライブラリを書き換えることがある（2026 年に 2 点が更新された）ので、**注文する日に `check_cpl.py` をもう一度実行する**。
 - **部品プレビューで見る点**（上から見て、端子を下にした向き。下の向きはこのデータの基板から読み取ったもの）:
 @ORIENT@
-  **U7 か B5819W（@SCHOTTKY@）が 180° 回って見えたら承認しない**（回転の向きが取り違えられると、向きのある部品のうちこの 2 種類が
-  逆になる。SOT-23 は 180° 回るとパッドに合わなくなるので、画面で分かる）。
+  **U7 か B5819W（@SCHOTTKY@）が 180° 回って見えたら承認しない。** @SENSE@
+  SOT-23 は 180° 回るとパッドに合わなくなるので、画面で分かる。
 
 ## 4. 費用（JLCPCB の料金表 @PRICEDATE@ 更新分から計算。部品代・送料・税は別）
 | | 2 枚実装 | 5 枚実装 |
@@ -476,8 +476,9 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 
 ## 6. 受け取ってから
 1. 板厚をノギスで測る（1.08〜1.32 mm の範囲で届く）。
-2. 捨て基板を外す。A 案はタブの穴の列で折り、端面に残った突起（高さ @RIDGE@ mm 以下）を、基板の端の線までやすりで落とす
-   （左右 @NTABS@ か所ずつ）。B 案は V カットなら折り、端面をやすりで平らにする。
+2. 捨て基板を外す。A 案はタブの穴と穴の間を**ニッパーで切る**（基板を折り曲げない。右側の下のタブのすぐ内側には電源の
+   ダイオードが並んでいて、基板を曲げるとはんだ付けに力が掛かる）。端面に残った突起（高さ @RIDGE@ mm 以下）を、基板の端の
+   線までやすりで落とす（左右 @NTABS@ か所ずつ）。B 案は V カットなら折り、端面をやすりで平らにする。
    面取り無しで届いた場合は、端子の辺の角を表裏とも 30〜45° の角度で 0.3〜0.5 mm ほど、目の細かいやすりで落とす
    （端子の銅は端から 1.2 mm 以上手前で終わっているので、金には触れない）。角が立ったままだと本体のコネクタの接点を傷める。
 3. **基板だけ**をシェルに入れて、左右の切り欠き・スリット・端子タブの位置を確かめる。タブの付け根など、内側の角に残る丸みが
@@ -645,6 +646,18 @@ def bridge_note(b, D, limit=1.0):
     if not near: return 'モジュールのパッドから %.1f mm 以内に、ほかの部品のパッドは無い。' % limit
     return '、'.join('%s の %s 番パッドと %s（%.2f mm）' % (m, '・'.join(str(n) for n in sorted(v)), o, min(v.values())) for (m, o), v in sorted(near.items())) + '。'
 
+def sense_note(dnp):
+    """Which parts with a direction would come out reversed if the sense of the CPL angle (counter-clockwise) were taken
+    the other way round: the ones whose CPL angle is 90 or 270 degrees."""
+    rot = {r[0]: float(r[4]) for r in cpl_table(dnp)[1:]}
+    polar = [r for r, q in D.PARTS.items() if r in rot and (q[2].split(' (')[0] == 'B5819W' or r == 'U7')]
+    turned = [r for r in polar if abs(rot[r] % 180 - 90) < 1]; same = [r for r in polar if r not in turned]
+    if not polar: return ''
+    txt = '回転の向き（時計回りと反時計回り）が取り違えられた場合に逆向きになるのは、CPL の角度が 90° か 270° の部品で、向きのある部品では'
+    txt += (' %s がそれに当たる' % _refs(turned)) if turned else 'それに当たるものは無い'
+    if same: txt += '（%s は %s なので変わらない）' % (_refs(same), '・'.join(sorted({'%.0f°' % rot[r] for r in same})))
+    return txt + '。'
+
 def routed_or_exit():
     """An order package made from an unrouted board looks complete (the notes, the BOM and the CPL do not depend on the
     routing), so refuse to write one: the board must have tracks and no open connection."""
@@ -654,63 +667,51 @@ def routed_or_exit():
     if not ntr or nopen:
         raise SystemExit(f'not packaging: the board has {ntr} tracks and {nopen} open connections (route it first; FC_ALLOW_UNROUTED=1 for a rehearsal)')
 
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    if getattr(D, 'JLC_RULES', False) and os.environ.get('FC_ALLOW_UNROUTED') != '1': routed_or_exit()
+def part_map():
     if hasattr(D, 'LCSC'):           # designs that carry their own (Basic-only) part map: it is the only source
         parts = {k: (v[0], v[1], 'JLCPCB Basic') for k, v in D.LCSC.items()}
         for k, v in getattr(D, 'HAND', {}).items(): parts[k] = ('', k, 'hand-solder: ' + ', '.join(v))
-    else:
-        if not os.path.exists(PARTS_JSON):
-            json.dump(DEFAULT_PARTS, open(PARTS_JSON, 'w'), indent=1, ensure_ascii=False)
-        parts = json.load(open(PARTS_JSON))
-    # ---- BOM ----
-    groups = {}
+        return parts
+    if not os.path.exists(PARTS_JSON):
+        json.dump(DEFAULT_PARTS, open(PARTS_JSON, 'w'), indent=1, ensure_ascii=False)
+    return json.load(open(PARTS_JSON))
+
+def bom_table(warn=True):
+    """(rows of bom_jlc.csv with the header, parts that JLCPCB does not place, parts that it places, number of part
+    types): a function of the design file alone."""
+    parts = part_map(); groups = {}
     for ref, (lib, sym, val, fp, _) in D.PARTS.items():
-        key = val.split(' (')[0]
-        groups.setdefault((key, fp), []).append(ref)
-    dnp = []; placed = set(); ntypes = 0
-    with open(os.path.join(OUT, 'bom_jlc.csv'), 'w', newline='') as f:
-        w = csv.writer(f); w.writerow(['Comment', 'Designator', 'Footprint', 'LCSC Part #'])
-        for (key, fp), refs in groups.items():
-            pkg = next((t for t in ('0402', '0603', '0805', '1206') if t in fp), '')
-            lcsc, comment, note = parts.get(f'{key}@{pkg}', parts.get(key, ('', key, 'NOT FOUND')))
-            if note == 'NOT FOUND':
-                for k2 in ('74LVC541', '74LVC245', '74LVC139', '74LVC1G07', '74LVC1G32', '74LVC1G04', '74LVC1G00', '74LVC1G11', '74LVC00'):
-                    if key.startswith(k2) and k2 in parts: lcsc, comment, note = parts[k2]; break
-            if note == 'NOT FOUND': print('WARNING: no LCSC part for', key, fp)
-            refs.sort(key=lambda r: (r.rstrip('0123456789'), int(''.join(ch for ch in r if ch.isdigit()) or 0)))
-            if not lcsc: dnp += refs; continue
-            w.writerow([comment or key, ','.join(refs), fp.split(':')[1], lcsc]); placed.update(refs); ntypes += 1
-    # ---- CPL via kicad-cli pos export ----
-    pos = os.path.join(OUT, 'pos.csv')
+        groups.setdefault((val.split(' (')[0], fp), []).append(ref)
+    rows = [['Comment', 'Designator', 'Footprint', 'LCSC Part #']]; dnp = []; placed = set(); ntypes = 0
+    for (key, fp), refs in groups.items():
+        pkg = next((t for t in ('0402', '0603', '0805', '1206') if t in fp), '')
+        lcsc, comment, note = parts.get(f'{key}@{pkg}', parts.get(key, ('', key, 'NOT FOUND')))
+        if note == 'NOT FOUND':
+            for k2 in ('74LVC541', '74LVC245', '74LVC139', '74LVC1G07', '74LVC1G32', '74LVC1G04', '74LVC1G00', '74LVC1G11', '74LVC00'):
+                if key.startswith(k2) and k2 in parts: lcsc, comment, note = parts[k2]; break
+        if note == 'NOT FOUND' and warn: print('WARNING: no LCSC part for', key, fp)
+        refs.sort(key=lambda r: (r.rstrip('0123456789'), int(''.join(ch for ch in r if ch.isdigit()) or 0)))
+        if not lcsc: dnp += refs; continue
+        rows.append([comment or key, ','.join(refs), fp.split(':')[1], lcsc]); placed.update(refs); ntypes += 1
+    return rows, dnp, placed, ntypes
+
+def cpl_table(dnp):
+    """Rows of cpl_jlc.csv with the header: the positions of the board file (kicad-cli), the angle turned by the offset
+    between KiCad's footprint and the footprint of JLCPCB's part library (CPL_ROT)."""
+    import tempfile
+    pos = os.path.join(tempfile.mkdtemp(prefix='gen_jlc_'), 'pos.csv')
     subprocess.run(['kicad-cli', 'pcb', 'export', 'pos', '--format', 'csv', '--units', 'mm', '--side', 'both', '-o', pos, PCB], check=True, capture_output=True)
-    rows = list(csv.DictReader(open(pos)))
-    with open(os.path.join(OUT, 'cpl_jlc.csv'), 'w', newline='') as f:
-        w = csv.writer(f); w.writerow(['Designator', 'Mid X', 'Mid Y', 'Layer', 'Rotation'])
-        for r in rows:
-            ref = r['Ref']
-            if ref in dnp or ref == 'J1': continue
-            rot = float(r['Rot'])
-            if r['Side'] == 'top':
-                rot = (rot + CPL_ROT.get(D.PARTS[ref][3].split(':')[1], 0)) % 360
-            w.writerow([ref, f"{float(r['PosX']):.4f}mm", f"{float(r['PosY']):.4f}mm", 'Top' if r['Side'] == 'top' else 'Bottom', f"{rot:.1f}"])
-    os.remove(pos)
-    # ---- Gerbers ----
-    fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')
-    if os.path.exists(z): os.remove(z)
-    if getattr(D, 'JLC_RULES', False):
-        import zipfile
-        names = sorted(n for n in os.listdir(fab) if n.endswith(FAB_SUFFIX))
-        need = ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'F_Silkscreen.gto', 'B_Silkscreen.gbo', 'Edge_Cuts.gm1', 'PTH.drl')
-        missing = [k for k in need if not any(n.endswith(k) for n in names)]
-        if missing: raise SystemExit(f'fab files missing for the JLCPCB zip: {missing} (run route_pcb.py first)')
-        with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for n in names: zf.write(os.path.join(fab, n), n)
-        print('gerbers.zip:', ', '.join(names))
-    else:
-        shutil.make_archive(z[:-4], 'zip', fab)
-    if hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
+    rows = [['Designator', 'Mid X', 'Mid Y', 'Layer', 'Rotation']]
+    for r in csv.DictReader(open(pos)):
+        ref = r['Ref']
+        if ref in dnp or ref == 'J1': continue
+        rot = float(r['Rot'])
+        if r['Side'] == 'top': rot = (rot + CPL_ROT.get(D.PARTS[ref][3].split(':')[1], 0)) % 360
+        rows.append([ref, f"{float(r['PosX']):.4f}mm", f"{float(r['PosY']):.4f}mm", 'Top' if r['Side'] == 'top' else 'Bottom', f"{rot:.1f}"])
+    return rows
+
+def order_notes(dnp, placed, ntypes):
+    """Text of jlcpcb/README.md for the design and the board file as they are now (no network needed)."""
     txt = {'rev B': README_B, 'rev C': README_C, 'rev E': README_E, 'rev F': README_F, 'rev F2': README_F2, 'rev G': README_G}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp))
     if '@TYPES@' in txt:
         import pcbnew, gen_pcb
@@ -725,7 +726,7 @@ def main():
         num = lambda v: ('%.2f' % v).rstrip('0').rstrip('.') if abs(v * 10 - round(v * 10)) > 1e-9 else '%.1f' % v
         rep = [('@FIX2@', '%.0f' % (assembly_estimate(ntypes, joints, 2) + fix)), ('@FIX5@', '%.0f' % (assembly_estimate(ntypes, joints, 5) + fix)),
                ('@NTRACKS@', str(ntr)), ('@NVIAS@', str(nvi)), ('@NOPEN@', str(nopen)), ('@SCHOTTKY@', byval('B5819W')),
-               ('@ORIENT@', orientation_notes(b, D)), ('@MASKWEB@', mask_web_note(b)), ('@BRIDGES@', bridge_note(b, D))]
+               ('@ORIENT@', orientation_notes(b, D)), ('@MASKWEB@', mask_web_note(b)), ('@BRIDGES@', bridge_note(b, D)), ('@SENSE@', sense_note(dnp))]
         if RA:                                 # every number of the rails in the notes comes from the design; check_jlc.py measures the railed board against JLCPCB's limits
             pw = bw + 2 * (RA['gap'] + RA['width']); small_first = (bw, bh + 10.0) if bh <= bw else (bw + 10.0, bh)
             rep += [('@PANEL@', '%.1f × %.1f' % (pw, bh)), ('@PANEL_X@', '%.1f x %.1f' % (pw, bh)), ('@SIZE_X@', '%.1f x %.1f' % (bw, bh)),
@@ -745,7 +746,31 @@ def main():
             txt = txt.replace(k, v)
         left = sorted(set(re.findall(r'@[A-Z0-9_]+@', txt)))
         if left: raise SystemExit('order notes: placeholders without a value: %s' % left)
-    with open(os.path.join(OUT, 'README.md'), 'w') as f: f.write(txt)
+    return txt
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    if getattr(D, 'JLC_RULES', False) and os.environ.get('FC_ALLOW_UNROUTED') != '1': routed_or_exit()
+    # ---- BOM, CPL ----
+    bom, dnp, placed, ntypes = bom_table()
+    with open(os.path.join(OUT, 'bom_jlc.csv'), 'w', newline='') as f: csv.writer(f).writerows(bom)
+    with open(os.path.join(OUT, 'cpl_jlc.csv'), 'w', newline='') as f: csv.writer(f).writerows(cpl_table(dnp))
+    # ---- Gerbers ----
+    fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')
+    if os.path.exists(z): os.remove(z)
+    if getattr(D, 'JLC_RULES', False):
+        import zipfile
+        names = sorted(n for n in os.listdir(fab) if n.endswith(FAB_SUFFIX))
+        need = ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'F_Silkscreen.gto', 'B_Silkscreen.gbo', 'Edge_Cuts.gm1', 'PTH.drl')
+        missing = [k for k in need if not any(n.endswith(k) for n in names)]
+        if missing: raise SystemExit(f'fab files missing for the JLCPCB zip: {missing} (run route_pcb.py first)')
+        with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for n in names: zf.write(os.path.join(fab, n), n)
+        print('gerbers.zip:', ', '.join(names))
+    else:
+        shutil.make_archive(z[:-4], 'zip', fab)
+    if hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
+    with open(os.path.join(OUT, 'README.md'), 'w') as f: f.write(order_notes(dnp, placed, ntypes))
     print('written:', OUT, 'DNP:', dnp)
 
 if __name__ == '__main__':

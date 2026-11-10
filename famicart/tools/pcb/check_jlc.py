@@ -18,13 +18,17 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
   paste             only on pads of parts that JLCPCB places
   gerbers.zip       fabrication layers and drill files only; every file is compared with a fresh plot of the board
                     (so an archive that was made from another state of the board is refused)
-  routed            a board without tracks, with open connections or with DRC errors is refused
+  routed            a board without tracks, with open connections or with DRC errors is refused; every pad must carry
+                    the net that the design file gives it
   edge rails        (designs with RAILS) the railed board is measured, not the numbers of the design: the board inside
                     the rails is the routed board object for object, rails >= 5 mm, break-off tabs >= 5 mm with holes
                     of 0.5-0.8 mm that are 0.2-0.3 mm apart, 1 mm fiducials centred >= 3.85 mm from the panel edges,
                     2 mm tooling holes, rails that end above the gold-finger edge; its design rule check is run
                     here, and gerbers_rails.zip is compared with a fresh plot
-  order notes       the track / via / open-connection counts printed in jlcpcb/README.md are those of the board
+  generated files   bom_jlc.csv, cpl_jlc.csv and jlcpcb/README.md are compared with what gen_jlc.py writes now for the
+                    design and the board file, the three drawings with what draw_outline.py draws now (a package put
+                    together from another state of the board or edited by hand is refused); the railed board is also
+                    compared in silkscreen, solder mask, texts, pad details and rule areas
 Exit status 1 when anything fails.   FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 check_jlc.py"""
 import os, sys, re, math, csv, zipfile, importlib, subprocess, tempfile
 import pcbnew
@@ -80,6 +84,37 @@ def copper_objects(b, skip=()):
             out.append(('pour', z.GetNetname(), layer, poly.OutlineCount(), sum(poly.Outline(i).PointCount() for i in range(poly.OutlineCount())), round(poly.Area() / 1e9)))
     return sorted(out, key=repr)
 
+def other_objects(b, skip=(), xlim=None):
+    """What copper_objects() leaves out, as comparable tuples: graphics and texts of the footprints (solder mask
+    windows, silkscreen), their attributes, pad shapes and margins, the board's own drawings and texts outside
+    Edge.Cuts, and the rule areas. With xlim = (lo, hi), board drawings and texts that lie completely outside that x
+    range are left out (the texts on the edge rails)."""
+    out = []
+    def shape(g): return (g.GetShape(), g.GetStart().x, g.GetStart().y, g.GetEnd().x, g.GetEnd().y, g.GetWidth(), g.IsFilled(), g.GetLayer())
+    def text(t): return (t.GetText(), t.GetPosition().x, t.GetPosition().y, t.GetTextSize().x, t.GetTextSize().y, t.GetTextThickness(), round(t.GetTextAngleDegrees(), 2), t.IsMirrored(), t.IsVisible(), t.GetLayer())
+    for fp in b.GetFootprints():
+        ref = fp.GetReference()
+        if ref.startswith(skip): continue
+        out.append(('fp', ref, fp.GetAttributes(), fp.GetLayer()))
+        for t in (fp.Reference(), fp.Value()): out.append(('fptext', ref) + text(t))
+        for g in fp.GraphicalItems(): out.append(('fpgraphic', ref) + (text(g) if 'TEXT' in g.GetClass() else shape(g)))
+        for p in fp.Pads():
+            out.append(('padshape', ref, p.GetNumber(), p.GetShape(), p.GetAttribute(), round(p.GetOrientationDegrees(), 2), p.GetLocalSolderMaskMargin(), p.GetLocalSolderPasteMargin(),
+                        p.GetSolderMaskExpansion(), p.GetZoneConnection(), round(p.GetRoundRectRadiusRatio(), 4)))
+        for z in fp.Zones(): out.append(('fpzone', ref, z.GetZoneName(), z.GetLayerSet().FmtHex(), z.GetIsRuleArea(), z.GetBoundingBox().GetX(), z.GetBoundingBox().GetY(), z.GetBoundingBox().GetRight(), z.GetBoundingBox().GetBottom()))
+    for d in b.GetDrawings():
+        if d.GetLayer() == pcbnew.Edge_Cuts: continue
+        bb = d.GetBoundingBox()
+        if xlim and (bb.GetRight() < FromMM(xlim[0]) or bb.GetX() > FromMM(xlim[1])): continue
+        out.append(('drawing',) + (text(d) if 'TEXT' in d.GetClass() else shape(d)))
+    for z in b.Zones():
+        bb = z.GetBoundingBox()
+        out.append(('zone', z.GetZoneName(), z.GetNetname(), z.GetLayerSet().FmtHex(), z.GetIsRuleArea(), z.GetDoNotAllowTracks() if z.GetIsRuleArea() else None,
+                    z.GetDoNotAllowVias() if z.GetIsRuleArea() else None, bb.GetX(), bb.GetY(), bb.GetRight(), bb.GetBottom()))
+    return sorted(out, key=repr)
+
+def read_csv(path): return [row for row in csv.reader(open(path, newline=''))]
+
 def edge_items(b):
     """Edge.Cuts drawings as direction-independent tuples in micrometres."""
     out = []
@@ -119,6 +154,16 @@ def main():
     info.append('board %.1f x %.1f mm' % (bw, bh))
     need(bw >= 70 and bh >= 70, 'Standard PCBA needs a board of at least 70 x 70 mm (%.1f x %.1f)' % (bw, bh))
 
+    # ---- netlist: every pad of the board carries the net the design gives it (and none where the design gives none)
+    nets = getattr(D, 'NETS', None)
+    if nets is not None:
+        want_net = lambda ref, num: nets.get(ref, {}).get(num) or ''          # the design writes None for a pad that stays open
+        wrong = [(fp.GetReference(), p.GetNumber(), p.GetNetname(), want_net(fp.GetReference(), p.GetNumber()))
+                 for fp in b.GetFootprints() for p in fp.Pads() if p.GetNumber() and p.GetNetname() != want_net(fp.GetReference(), p.GetNumber())]
+        npads = sum(1 for fp in b.GetFootprints() for p in fp.Pads() if p.GetNumber())
+        need(not wrong, '%d pads carry another net than the design says, e.g. %s (reference, pad, board, design)' % (len(wrong), wrong[:3]))
+        need({fp.GetReference() for fp in b.GetFootprints()} == set(D.PARTS), 'the parts of the board are not the parts of the design: %s' % sorted({fp.GetReference() for fp in b.GetFootprints()} ^ set(D.PARTS))[:8])
+        info.append('netlist: %d pads of %d parts carry the nets of the design' % (npads, len(D.PARTS)))
     # ---- tracks and vias
     tracks = [t for t in b.GetTracks() if t.GetClass() == 'PCB_TRACK']; vias = [t for t in b.GetTracks() if t.GetClass() == 'PCB_VIA']
     if tracks:
@@ -271,6 +316,27 @@ def main():
         cpl = list(csv.DictReader(open(os.path.join(HW, 'jlcpcb', 'cpl_jlc.csv'))))
         need({r['Designator'] for r in cpl} == placed, 'CPL designators differ from the parts JLCPCB places: %s' % sorted({r['Designator'] for r in cpl} ^ placed)[:8])
         need(all(r['Layer'] == 'Top' for r in cpl), 'CPL has bottom-side placements')
+        if getattr(D, 'JLC_RULES', False):      # BOM, CPL and notes must be what gen_jlc.py writes now for this design and this board file
+            import gen_jlc
+            bom_now, dnp_now, placed_now, ntypes_now = gen_jlc.bom_table(warn=False)
+            need(read_csv(os.path.join(HW, 'jlcpcb', 'bom_jlc.csv')) == bom_now, 'bom_jlc.csv is not what gen_jlc.py writes for this design (part numbers, designators or footprints differ; run gen_jlc.py)')
+            need(read_csv(os.path.join(HW, 'jlcpcb', 'cpl_jlc.csv')) == gen_jlc.cpl_table(dnp_now), 'cpl_jlc.csv is not what gen_jlc.py writes for this board file (positions or rotations differ; run gen_jlc.py)')
+            notes_file = os.path.join(HW, 'jlcpcb', 'README.md')
+            if os.path.exists(notes_file):
+                now = gen_jlc.order_notes(dnp_now, placed_now, ntypes_now); old = open(notes_file).read()
+                if old != now:
+                    la, lb = old.splitlines(), now.splitlines(); k = next((i for i, (x, y) in enumerate(zip(la, lb)) if x != y), min(len(la), len(lb)))
+                    bad.append('jlcpcb/README.md is not what gen_jlc.py writes for this design and board (first difference in line %d: %r); run gen_jlc.py' % (k + 1, (la[k] if k < len(la) else '')[:70]))
+            info.append('BOM, CPL and order notes are what gen_jlc.py writes now (rotations against JLCPCB\'s part library: check_cpl.py)')
+            # the drawings: what draw_outline.py draws now; the PNG copies must not be older than their SVG
+            dd = tempfile.mkdtemp(prefix='check_jlc_'); env = dict(os.environ, FC_DRAW_DIR=dd)
+            subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'draw_outline.py')], check=True, capture_output=True, env=env)
+            for name in ('outline.svg', 'placement.svg', os.path.join('jlcpcb', 'rails.svg')):
+                have, want = os.path.join(HW, name), os.path.join(dd, name)
+                if not os.path.exists(want): continue
+                need(os.path.exists(have) and open(have).read() == open(want).read(), '%s is not what draw_outline.py draws now (run draw_outline.py and render the PNG again)' % name)
+                png = have[:-4] + '.png'
+                need(os.path.exists(png) and os.path.exists(have) and os.path.getmtime(png) >= os.path.getmtime(have) - 2, '%s is missing or older than %s (render it again)' % (os.path.basename(png), os.path.basename(have)))
         pc = os.path.join(HW, 'jlcpcb', 'parts_check.csv')
         if os.path.exists(pc):
             rows = list(csv.DictReader(open(pc)))
@@ -297,6 +363,16 @@ def main():
             ca, cb = Counter(copper_objects(b)), Counter(copper_objects(br, skip=('FID', 'MB', 'TH')))
             diff = list((ca - cb).elements()) + list((cb - ca).elements())
             need(not diff, 'the board inside the rails differs from the routed board in %d objects, e.g. %s (run make_rails.py)' % (len(diff), diff[:2]))
+            oa, ob = Counter(other_objects(b, xlim=(lo, hi))), Counter(other_objects(br, skip=('FID', 'MB', 'TH'), xlim=(lo, hi)))
+            odiff = list((oa - ob).elements()) + list((ob - oa).elements())
+            need(not odiff, 'silkscreen, solder mask, texts, pad details or rule areas of the board inside the rails differ from the routed board in %d objects, e.g. %s (run make_rails.py)' % (len(odiff), odiff[:2]))
+            rl, rt = 9.0, 9.0
+            for g in list(br.GetDrawings()) + [g for fp in br.GetFootprints() for g in fp.GraphicalItems()]:
+                if g.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS): continue
+                if 'TEXT' in g.GetClass():
+                    if g.IsVisible(): rt = min(rt, ToMM(g.GetTextSize().y)); rl = min(rl, ToMM(g.GetTextThickness()))
+                else: rl = min(rl, ToMM(g.GetWidth()))
+            need(rl >= SILK_LINE - TOL and rt >= SILK_TEXT - TOL, 'silkscreen of the railed board: line %.3f mm, text %.2f mm (minimum %.2f / %.1f)' % (rl, rt, SILK_LINE, SILK_TEXT))
             # 2. its contour: an outline item of the board may be missing in the panel only on the left / right edge lines
             #    (where the routed gaps and the tabs are), and the panel has no other outline item inside the board
             pe, qe = Counter(edge_items(b)), Counter(edge_items(br))
@@ -380,9 +456,9 @@ def main():
             # 5. the archive is what the railed board plots today
             diff, nplot = archive_differences(zr, rb)
             need(not diff, 'gerbers_rails.zip is not what famicart_rails.kicad_pcb plots today: %s (run make_rails.py)' % diff)
-            info.append('with edge rails: panel %.1f x %.1f mm; the board inside is the routed board (%d objects compared); %d tabs of %.2f..%.2f mm, material between break-off holes %.2f..%.2f mm; '
+            info.append('with edge rails: panel %.1f x %.1f mm; the board inside is the routed board (%d copper and %d other objects compared); %d tabs of %.2f..%.2f mm, material between break-off holes %.2f..%.2f mm; '
                         '%d fiducials, nearest %.2f mm from a panel edge; %d tooling holes; rails end %.2f mm above the finger edge; DRC errors %d; gerbers_rails.zip %s'
-                        % (pw, ph, sum(ca.values()), ntab, min(tabw, default=0), max(tabw, default=0), min(webs, default=0), max(webs, default=0), len(fids), fmin, nth,
+                        % (pw, ph, sum(ca.values()), sum(oa.values()), ntab, min(tabw, default=0), max(tabw, default=0), min(webs, default=0), max(webs, default=0), len(fids), fmin, nth,
                            min((py1 - r[1] for r in rail_y.values()), default=0), nerr2, 'identical to a fresh plot' if not diff else 'DIFFERS'))
 
     print('JLCPCB check:', 'OK' if not bad else '%d problems' % len(bad))

@@ -13826,7 +13826,7 @@
       )
     )
   )
-  (global_label "PPU_D1"
+  (global_label "PPU_D0"
     (shape bidirectional)
     (at 138.89 258.38 270)
     (fields_autoplaced)
@@ -13847,7 +13847,7 @@
       )
     )
   )
-  (global_label "PPU_D2"
+  (global_label "PPU_D1"
     (shape bidirectional)
     (at 141.43 258.38 270)
     (fields_autoplaced)
@@ -13868,7 +13868,7 @@
       )
     )
   )
-  (global_label "PPU_D3"
+  (global_label "PPU_D1"
     (shape bidirectional)
     (at 143.97 258.38 270)
     (fields_autoplaced)
@@ -13889,7 +13889,7 @@
       )
     )
   )
-  (global_label "PD3"
+  (global_label "PD1"
     (shape bidirectional)
     (at 143.97 248.22 90)
     (fields_autoplaced)
@@ -13910,7 +13910,7 @@
       )
     )
   )
-  (global_label "PD2"
+  (global_label "PD1"
     (shape bidirectional)
     (at 141.43 248.22 90)
     (fields_autoplaced)
@@ -13931,7 +13931,7 @@
       )
     )
   )
-  (global_label "PD1"
+  (global_label "PD0"
     (shape bidirectional)
     (at 138.89 248.22 90)
     (fields_autoplaced)
@@ -14050,7 +14050,7 @@
       )
     )
   )
-  (global_label "PPU_D4"
+  (global_label "PPU_D2"
     (shape bidirectional)
     (at 203.97 258.38 270)
     (fields_autoplaced)
@@ -14071,7 +14071,7 @@
       )
     )
   )
-  (global_label "PPU_D5"
+  (global_label "PPU_D2"
     (shape bidirectional)
     (at 206.51 258.38 270)
     (fields_autoplaced)
@@ -14092,7 +14092,7 @@
       )
     )
   )
-  (global_label "PPU_D6"
+  (global_label "PPU_D3"
     (shape bidirectional)
     (at 209.05 258.38 270)
     (fields_autoplaced)
@@ -14113,7 +14113,7 @@
       )
     )
   )
-  (global_label "PPU_D7"
+  (global_label "PPU_D3"
     (shape bidirectional)
     (at 211.59 258.38 270)
     (fields_autoplaced)
@@ -14134,7 +14134,7 @@
       )
     )
   )
-  (global_label "PD7"
+  (global_label "PD3"
     (shape bidirectional)
     (at 211.59 248.22 90)
     (fields_autoplaced)
@@ -14155,7 +14155,7 @@
       )
     )
   )
-  (global_label "PD6"
+  (global_label "PD3"
     (shape bidirectional)
     (at 209.05 248.22 90)
     (fields_autoplaced)
@@ -14176,7 +14176,7 @@
       )
     )
   )
-  (global_label "PD5"
+  (global_label "PD2"
     (shape bidirectional)
     (at 206.51 248.22 90)
     (fields_autoplaced)
@@ -14197,7 +14197,7 @@
       )
     )
   )
-  (global_label "PD4"
+  (global_label "PD2"
     (shape bidirectional)
     (at 203.97 248.22 90)
     (fields_autoplaced)
@@ -14785,7 +14785,7 @@
       )
     )
   )
-  (global_label "PPU_D0"
+  (global_label "PPU_D6"
     (shape bidirectional)
     (at 406.83 258.38 270)
     (fields_autoplaced)
@@ -14806,7 +14806,7 @@
       )
     )
   )
-  (global_label "PPU_D1"
+  (global_label "PPU_D6"
     (shape bidirectional)
     (at 409.37 258.38 270)
     (fields_autoplaced)
@@ -14827,7 +14827,7 @@
       )
     )
   )
-  (global_label "PPU_D2"
+  (global_label "PPU_D7"
     (shape bidirectional)
     (at 411.91 258.38 270)
     (fields_autoplaced)
@@ -14848,7 +14848,7 @@
       )
     )
   )
-  (global_label "PPU_D3"
+  (global_label "PPU_D7"
     (shape bidirectional)
     (at 414.45 258.38 270)
     (fields_autoplaced)
@@ -14869,7 +14869,7 @@
       )
     )
   )
-  (global_label "YD3"
+  (global_label "PD7"
     (shape bidirectional)
     (at 414.45 248.22 90)
     (fields_autoplaced)
@@ -14890,7 +14890,7 @@
       )
     )
   )
-  (global_label "YD2"
+  (global_label "PD7"
     (shape bidirectional)
     (at 411.91 248.22 90)
     (fields_autoplaced)
@@ -14911,7 +14911,7 @@
       )
     )
   )
-  (global_label "YD1"
+  (global_label "PD6"
     (shape bidirectional)
     (at 409.37 248.22 90)
     (fields_autoplaced)
@@ -14932,7 +14932,7 @@
       )
     )
   )
-  (global_label "YD0"
+  (global_label "PD6"
     (shape bidirectional)
     (at 406.83 248.22 90)
     (fields_autoplaced)
@@ -15051,7 +15051,7 @@
       )
     )
   )
-  (global_label "PPU_D5"
+  (global_label "PPU_D4"
     (shape bidirectional)
     (at 476.99 258.38 270)
     (fields_autoplaced)
@@ -15072,7 +15072,7 @@
       )
     )
   )
-  (global_label "PPU_D6"
+  (global_label "PPU_D5"
     (shape bidirectional)
     (at 479.53 258.38 270)
     (fields_autoplaced)
@@ -15093,7 +15093,7 @@
       )
     )
   )
-  (global_label "PPU_D7"
+  (global_label "PPU_D5"
     (shape bidirectional)
     (at 482.07 258.38 270)
     (fields_autoplaced)
@@ -15114,7 +15114,7 @@
       )
     )
   )
-  (global_label "YD7"
+  (global_label "PD5"
     (shape bidirectional)
     (at 482.07 248.22 90)
     (fields_autoplaced)
@@ -15135,7 +15135,7 @@
       )
     )
   )
-  (global_label "YD6"
+  (global_label "PD5"
     (shape bidirectional)
     (at 479.53 248.22 90)
     (fields_autoplaced)
@@ -15156,7 +15156,7 @@
       )
     )
   )
-  (global_label "YD5"
+  (global_label "PD4"
     (shape bidirectional)
     (at 476.99 248.22 90)
     (fields_autoplaced)
@@ -15177,7 +15177,7 @@
       )
     )
   )
-  (global_label "YD4"
+  (global_label "PD4"
     (shape bidirectional)
     (at 474.45 248.22 90)
     (fields_autoplaced)
@@ -18441,7 +18441,7 @@
       )
     )
   )
-  (global_label "PPU_D3"
+  (global_label "PPU_D1"
     (shape bidirectional)
     (at 203.97 360.86 270)
     (fields_autoplaced)
@@ -18462,7 +18462,7 @@
       )
     )
   )
-  (global_label "PPU_D2"
+  (global_label "PPU_D1"
     (shape bidirectional)
     (at 206.51 360.86 270)
     (fields_autoplaced)
@@ -18483,7 +18483,7 @@
       )
     )
   )
-  (global_label "PPU_D1"
+  (global_label "PPU_D0"
     (shape bidirectional)
     (at 209.05 360.86 270)
     (fields_autoplaced)
@@ -18525,7 +18525,7 @@
       )
     )
   )
-  (global_label "PD0"
+  (global_label "YD0"
     (shape bidirectional)
     (at 211.59 350.7 90)
     (fields_autoplaced)
@@ -18546,7 +18546,7 @@
       )
     )
   )
-  (global_label "PD1"
+  (global_label "YD0"
     (shape bidirectional)
     (at 209.05 350.7 90)
     (fields_autoplaced)
@@ -18567,7 +18567,7 @@
       )
     )
   )
-  (global_label "PD2"
+  (global_label "YD1"
     (shape bidirectional)
     (at 206.51 350.7 90)
     (fields_autoplaced)
@@ -18588,7 +18588,7 @@
       )
     )
   )
-  (global_label "PD3"
+  (global_label "YD1"
     (shape bidirectional)
     (at 203.97 350.7 90)
     (fields_autoplaced)
@@ -18686,7 +18686,7 @@
       )
     )
   )
-  (global_label "PPU_D7"
+  (global_label "PPU_D3"
     (shape bidirectional)
     (at 271.59 360.86 270)
     (fields_autoplaced)
@@ -18707,7 +18707,7 @@
       )
     )
   )
-  (global_label "PPU_D6"
+  (global_label "PPU_D3"
     (shape bidirectional)
     (at 274.13 360.86 270)
     (fields_autoplaced)
@@ -18728,7 +18728,7 @@
       )
     )
   )
-  (global_label "PPU_D5"
+  (global_label "PPU_D2"
     (shape bidirectional)
     (at 276.67 360.86 270)
     (fields_autoplaced)
@@ -18749,7 +18749,7 @@
       )
     )
   )
-  (global_label "PPU_D4"
+  (global_label "PPU_D2"
     (shape bidirectional)
     (at 279.21 360.86 270)
     (fields_autoplaced)
@@ -18770,7 +18770,7 @@
       )
     )
   )
-  (global_label "PD4"
+  (global_label "YD2"
     (shape bidirectional)
     (at 279.21 350.7 90)
     (fields_autoplaced)
@@ -18791,7 +18791,7 @@
       )
     )
   )
-  (global_label "PD5"
+  (global_label "YD2"
     (shape bidirectional)
     (at 276.67 350.7 90)
     (fields_autoplaced)
@@ -18812,7 +18812,7 @@
       )
     )
   )
-  (global_label "PD6"
+  (global_label "YD3"
     (shape bidirectional)
     (at 274.13 350.7 90)
     (fields_autoplaced)
@@ -18833,7 +18833,7 @@
       )
     )
   )
-  (global_label "PD7"
+  (global_label "YD3"
     (shape bidirectional)
     (at 271.59 350.7 90)
     (fields_autoplaced)
@@ -18931,7 +18931,7 @@
       )
     )
   )
-  (global_label "PPU_D3"
+  (global_label "PPU_D7"
     (shape bidirectional)
     (at 339.21 360.86 270)
     (fields_autoplaced)
@@ -18952,7 +18952,7 @@
       )
     )
   )
-  (global_label "PPU_D2"
+  (global_label "PPU_D7"
     (shape bidirectional)
     (at 341.75 360.86 270)
     (fields_autoplaced)
@@ -18973,7 +18973,7 @@
       )
     )
   )
-  (global_label "PPU_D1"
+  (global_label "PPU_D6"
     (shape bidirectional)
     (at 344.29 360.86 270)
     (fields_autoplaced)
@@ -18994,7 +18994,7 @@
       )
     )
   )
-  (global_label "PPU_D0"
+  (global_label "PPU_D6"
     (shape bidirectional)
     (at 346.83 360.86 270)
     (fields_autoplaced)
@@ -19015,7 +19015,7 @@
       )
     )
   )
-  (global_label "YD0"
+  (global_label "YD6"
     (shape bidirectional)
     (at 346.83 350.7 90)
     (fields_autoplaced)
@@ -19036,7 +19036,7 @@
       )
     )
   )
-  (global_label "YD1"
+  (global_label "YD6"
     (shape bidirectional)
     (at 344.29 350.7 90)
     (fields_autoplaced)
@@ -19057,7 +19057,7 @@
       )
     )
   )
-  (global_label "YD2"
+  (global_label "YD7"
     (shape bidirectional)
     (at 341.75 350.7 90)
     (fields_autoplaced)
@@ -19078,7 +19078,7 @@
       )
     )
   )
-  (global_label "YD3"
+  (global_label "YD7"
     (shape bidirectional)
     (at 339.21 350.7 90)
     (fields_autoplaced)
@@ -19176,7 +19176,7 @@
       )
     )
   )
-  (global_label "PPU_D7"
+  (global_label "PPU_D5"
     (shape bidirectional)
     (at 406.83 360.86 270)
     (fields_autoplaced)
@@ -19197,7 +19197,7 @@
       )
     )
   )
-  (global_label "PPU_D6"
+  (global_label "PPU_D5"
     (shape bidirectional)
     (at 409.37 360.86 270)
     (fields_autoplaced)
@@ -19218,7 +19218,7 @@
       )
     )
   )
-  (global_label "PPU_D5"
+  (global_label "PPU_D4"
     (shape bidirectional)
     (at 411.91 360.86 270)
     (fields_autoplaced)
@@ -19281,7 +19281,7 @@
       )
     )
   )
-  (global_label "YD5"
+  (global_label "YD4"
     (shape bidirectional)
     (at 411.91 350.7 90)
     (fields_autoplaced)
@@ -19302,7 +19302,7 @@
       )
     )
   )
-  (global_label "YD6"
+  (global_label "YD5"
     (shape bidirectional)
     (at 409.37 350.7 90)
     (fields_autoplaced)
@@ -19323,7 +19323,7 @@
       )
     )
   )
-  (global_label "YD7"
+  (global_label "YD5"
     (shape bidirectional)
     (at 406.83 350.7 90)
     (fields_autoplaced)
