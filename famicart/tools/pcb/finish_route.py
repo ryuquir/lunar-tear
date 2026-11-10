@@ -8,6 +8,12 @@ the plane reliably covers. Re-runs zone fill + DRC after each round.
 
   python3 finish_route.py board.kicad_pcb [--track 0.12] [--clear 0.1] [--via 0.5 --drill 0.2]
 Without options the track width, clearance and via size come from the design file (FC_DESIGN) when it defines them.
+  --no-rip             only use free room (no track of another net is removed)
+  --only NET           work on the open connections of one net
+  --protect NET,NET    tracks of these nets are never removed
+On a crowded board the plain mode can run away: every route it forces through removes tracks of other nets, which
+then need a route themselves. close_open.py drives this tool one connection at a time and keeps a step only when
+the number of open connections went down.
 """
 import sys, re, math, heapq, os, argparse, tempfile
 import numpy as np
@@ -18,6 +24,9 @@ ap = argparse.ArgumentParser()
 ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=None); ap.add_argument('--clear', type=float, default=None)
 ap.add_argument('--via', type=float, default=None); ap.add_argument('--drill', type=float, default=None)
 ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10); ap.add_argument('--cleanup-only', action='store_true')
+ap.add_argument('--no-rip', action='store_true', help='never remove a track of another net: route only where there is room')
+ap.add_argument('--only', default=None, help='work on the open connections of this net only')
+ap.add_argument('--protect', default='', help='comma-separated nets whose tracks may not be removed')
 args = ap.parse_args()
 import importlib as _il
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -338,6 +347,7 @@ def main():
     import json
     hist_path = args.pcb + '.riphistory.json'
     history = json.load(open(hist_path)) if os.path.exists(hist_path) else {}
+    for n_ in [x for x in args.protect.split(',') if x]: history[n_] = 99          # never ripped (route_job: n_rip >= 6)
     for rnd in range(args.rounds):
         txt = drc(board); pairs = unconnected_pairs(txt)
         print(f'round {rnd}: {len(pairs)} unconnected')
@@ -347,6 +357,7 @@ def main():
             a = item_at(board, ax, ay, ad); b = item_at(board, bx, by, bd)
             if a is None or b is None: print('  cannot resolve items:', ad, '|', bd); continue
             net = a.GetNetname()
+            if args.only and net != args.only: continue
             by_item, comps = net_islands(board, net, sig_layers)
             ca, cb = by_item[a.m_Uuid.AsString()], by_item[b.m_Uuid.AsString()]
             if ca == cb: print(f'  {net}: already joined'); continue
@@ -358,7 +369,7 @@ def main():
                 if not jobs: jobs.append((ia, ib))
             else: jobs.append((ia, ib))
             for src, dst in jobs:
-                res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets), history=history)
+                res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets), allow_rip=not args.no_rip, history=history)
                 if res is None: print(f'  {net}: no path'); continue
                 path, pv, rip = res
                 if rip:
