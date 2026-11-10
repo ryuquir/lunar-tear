@@ -74,8 +74,10 @@ def hvc_large(H=75.0):
     ko = _common_keepouts(H, 22.8, 25.2)
     for x0, x1 in ((45 - 45.5, 45 - 41.3), (45 + 41.3, 45 + 45.5)):                     # front ribs near the lower bosses
         ko.append(('F', _rect(x0, y(3.55), x1, y(1.65))))
+    # A module's USB connector may also stick out past the TOP edge between these x: the reference boards reach h 80.8 or
+    # more there (docs/04), so the shell is empty above our straight top at 75.0; the upper corners (bosses) are left out.
     return dict(name='HVC large (ExROM)', body_h=H, outline_body=body, cutouts=[slot],
-                route_keepouts=route_ko, comp_keepouts=ko)
+                route_keepouts=route_ko, comp_keepouts=ko, usb_top=(45 - 36.0, 45 + 36.0))
 
 def rect_body(body_h):
     """Plain rectangle (rev A-F, kept for regenerating old revisions)."""

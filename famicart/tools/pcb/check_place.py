@@ -81,9 +81,11 @@ def main():
                 else: usb = (mx0, ry0 - over, mx1, ry0) if dy < 0 else (mx0, ry1, mx1, ry1 + over)
             if tab_y is not None and ry1 > tab_y: bad.append(f'{ref} ({side}) module body reaches below the card-edge shoulder band: y {ry1:.2f} > {tab_y:.2f}')
             rx0 -= 0.5; ry0 -= 0.5; rx1 += 0.5; ry1 += 0.5
-            if usb:   # the connector may stick out past the LEFT/RIGHT board edge (shell side clearance), nowhere else
+            if usb:   # the connector may stick out past the LEFT/RIGHT board edge (shell side clearance), and past the top
+                      # edge where the shell says so (shells.py usb_top), nowhere else
                 u = (PX >= usb[0]) & (PX <= usb[2]) & (PY >= usb[1]) & (PY <= usb[3])
                 side_out = (PX < MARGIN + G) | (PX > 90 - MARGIN - G)
+                if SH and SH.get('usb_top'): side_out |= (PY < MARGIN + G) & (PX >= SH['usb_top'][0]) & (PX <= SH['usb_top'][1])
                 if (u & ~ok & ~side_out).any(): bad.append(f'{ref} ({side}) USB connector leaves the board other than past a side edge')
                 if (u & ko[side]).any(): bad.append(f'{ref} ({side}) USB connector on a shell keep-out')
                 if tab_y is not None and usb[3] > tab_y: bad.append(f'{ref} ({side}) USB connector reaches below the card-edge shoulder band')
