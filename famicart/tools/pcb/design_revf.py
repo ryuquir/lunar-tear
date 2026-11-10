@@ -138,6 +138,10 @@ cap('10u', C0805, 73.5, 37.5, 90, '+5V')
 
 POWER_NETS = {'+5V', 'GND'}
 
+# firmware of each hand-soldered module (CMake target directory build-<name>): printed on the silk under the module,
+# because the four Pico 2 boards look the same
+ROLE = {'U1': 'reve_cpu', 'U2': 'reve_ppu', 'U3': 'reve_x', 'U4': 'reve_cop_cpu', 'U5': 'reve_cop_ppu'}
+
 # LCSC part numbers -- all JLCPCB Basic parts (checked by gen_jlc.py against the parts API); modules are hand-soldered
 LCSC = {
     '1k x4': ('C20197', '4D03WGJ0102T5E 1k x4 0603'), '1k': ('C21190', '0603WAF1001T5E 1k 0603'), '2.2k': ('C4190', '0603WAF2201T5E 2.2k 0603'),

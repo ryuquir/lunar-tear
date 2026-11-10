@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Produce the JLCPCB order package (PCB + SMT assembly) in hardware/jlcpcb/:
    gerbers.zip, bom_jlc.csv (Comment, Designator, Footprint, LCSC Part #), cpl_jlc.csv (Designator, Mid X, Mid Y, Layer, Rotation).
-LCSC part numbers come from hardware/jlc_parts.json (edit to substitute parts)."""
+LCSC part numbers: designs with their own LCSC map (rev E on: Basic parts only) use that map and nothing else;
+older designs read <hw dir>/jlc_parts.json (created from DEFAULT_PARTS on first run; edit it to substitute parts)."""
 import os, sys, csv, json, subprocess, shutil
 sys.path.insert(0, os.path.dirname(__file__))
 import os as _os, importlib as _il
@@ -11,6 +12,14 @@ HW_LIB = _os.path.abspath(_os.path.join(_os.path.dirname(_os.path.abspath(__file
 HW = _os.path.abspath(_os.environ.get('FC_HW_DIR', HW_LIB))                                                        # outputs
 OUT = os.path.join(HW, 'jlcpcb'); PCB = os.path.join(HW, 'famicart.kicad_pcb')
 PARTS_JSON = os.path.join(HW, 'jlc_parts.json')
+
+# KiCad -> JLCPCB placement angle: JLCPCB's part library draws some packages turned relative to the KiCad footprint.
+# Correction in degrees (added to the KiCad angle) by exact footprint name, top side only; checked pad by pad against
+# JLCPCB's own footprints for the parts used here (C20197 RES-ARRAY-SMD_0603-8P-...-BL, C8545 SOT-23-3_..._BR).
+# The 1k x4 array is four identical isolated resistors, so 90 and 270 are the same placement.
+# Do not take SOT-23 from the common "cpl_rotations_db.csv" (-90): that entry does not fit this part.
+# The order preview remains the final check.
+CPL_ROT = {'R_Array_Convex_4x0603': 270, 'SOT-23': 180}
 
 DEFAULT_PARTS = {   # value-key [or "value@pkg"] -> (LCSC, comment, note)   (looked up via the JLCPCB parts API, 2026-10)
  # ---- rev B (Pico 2 module) ----
@@ -108,7 +117,7 @@ README_C = '''# JLCPCB 注文パッケージ（famicart rev C: RP2350B + XIAO RP
 README_D = '''# JLCPCB 注文パッケージ（famicart rev D: PRG ROM / CHR ROM / マッパーチップ分離構成）
 
 ## PCB（Instant Quote → Add gerber file → gerbers.zip）
-- **Layers 6**（F.Cu 信号 / In1 GND プレーン / In2・In3 信号 / In4 +3V3 プレーン / B.Cu 信号）/ Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm**（6 層で 1.2 mm を選択。無い場合は 1.6 mm でもシェルには入るが端子の嵌合がきつくなる）
+- **Layers 6**（F.Cu 信号 / In1 GND プレーン / In2・In3 信号 / In4 +3V3 プレーン / B.Cu 信号）/ Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm**（6 層で 1.2 mm を選択。1.6 mm で使えるかは未確認）
 - Surface Finish **ENIG** / **Gold Fingers: Yes** → **Bevelling: 30°** / Copper 1 oz（外層・内層とも）/ Via Covering: Tented / Impedance Control: No
 - 層構成は JLC の標準 6 層スタックで可。**Min Track/Spacing 0.1/0.1 mm（4 mil）、Via 0.5/0.2 mm** — JLC の 6 層仕様（3.5 mil / 0.2 mm 穴）内。
 
@@ -185,6 +194,9 @@ README_F2 = '''# JLCPCB 注文パッケージ（famicart rev F2: 任天堂の大
 回路は rev F と同じ（Pico 2 ×4 + XIAO RP2350）。外形・切り欠き・スリットを任天堂の大型シェル（HVC-ExROM 系。光栄・エニックス・
 スクウェアの大型カセット、市販の互換「でかカセットケース」）に合わせ、シェルのリブとボスを避けて部品を置いた版。
 
+**シェルへの収まりは実物では未確認**。外形と部品禁止域は 4 つの資料（互換基板と作図）から作ったもので、シェル内の厚み方向の余裕は
+どの資料にもない。最初の注文は少数にして、モジュールをはんだ付けする前に基板だけをシェルに入れて確かめること。
+
 ## PCB（Instant Quote → Add gerber file → gerbers.zip）
 - **Layers 2** / Dimensions **90 x 85.7 mm**（本体 75.0 mm + 端子タブ 10.7 mm）/ **PCB Thickness 1.2 mm** / Surface Finish **ENIG**
 - **Gold Fingers: Yes** → **Bevelling: 30°**（カードエッジ）/ Copper 1 oz / Via Covering: Tented
@@ -194,14 +206,19 @@ README_F2 = '''# JLCPCB 注文パッケージ（famicart rev F2: 任天堂の大
 ## SMT Assembly（PCB Assembly → **Economic / Top side のみ**）
 - BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`。**全部品が JLCPCB Basic Parts**（`parts_check.csv` に API での確認結果）。
 - 実装しない部品（DNP）: @DNP@
-- 部品プレビューで向きを確認するもの: 2N7002（Q1/Q2）、1N4148WS・B5819W（カソード帯）、抵抗アレイ。
+- CPL の角度は JLCPCB の部品ライブラリの向きに合わせて補正済み: **抵抗アレイ RN1〜RN16 = 270°、2N7002 Q1/Q2 = 180°**（KiCad 上は 0°）。
+  それでも注文画面の部品プレビューで、Q1/Q2、1N4148WS・B5819W（カソード帯）、抵抗アレイ、SW1 がパッドに重なっているかを確認する。
 
 ## 手はんだ（秋月電子で購入）
-| 部品 | 秋月 通販コード | 価格 | 位置 |
-|---|---|---|---|
-| Raspberry Pi Pico 2 | 129604 | ¥990 ×4 | **裏**: U2（下、PPU 側）・U5（中、PPU 側コプロセッサ）・U1（上、CPU 側）／**表**: U4（上、CPU 側コプロセッサ） |
-| Seeed XIAO RP2350 | 129619 | ¥1,100 | 表・中央右（U3、IRQ と拡張音源） |
+| 部品 | 秋月 通販コード | 価格 | 位置 | 書き込むファーム |
+|---|---|---|---|---|
+| Raspberry Pi Pico 2 | 129604 | ¥990 ×4 | **裏**: U2（下、PPU 側）・U5（中、PPU 側コプロセッサ）・U1（上、CPU 側）／**表**: U4（上、CPU 側コプロセッサ） | U1 `reve_cpu`、U2 `reve_ppu`、U4 `reve_cop_cpu`、U5 `reve_cop_ppu` |
+| Seeed XIAO RP2350 | 129619 | ¥1,100 | 表・中央右（U3、IRQ と拡張音源） | U3 `reve_x` |
 
+- 4 枚の Pico 2 は見た目が同じでファームが違う。基板のシルクに `U1 reve_cpu` のように書いてあるので、**書き込んでから**その場所に載せる。
+  シルクの `USB` の字がある側にモジュールの USB 端子を向ける。
+- Pico 2 はキャステレーション（端面）40 か所だけをはんだ付けする。モジュール裏のテストパッドと USB シェルの足の下にある基板側のパッド
+  （配線よけ。はんだペーストなし）は、はんだ付けしない。
 - 裏の 3 枚を先に、表の U4・XIAO を後にはんだ付けすると楽。U4・U5 は載せなくても rev E と同じに動く。
 
 ## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
@@ -236,12 +253,13 @@ def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    if not os.path.exists(PARTS_JSON):
-        json.dump(DEFAULT_PARTS, open(PARTS_JSON, 'w'), indent=1, ensure_ascii=False)
-    parts = json.load(open(PARTS_JSON))
-    if hasattr(D, 'LCSC'):           # designs that carry their own (Basic-only) part map: it is authoritative
+    if hasattr(D, 'LCSC'):           # designs that carry their own (Basic-only) part map: it is the only source
         parts = {k: (v[0], v[1], 'JLCPCB Basic') for k, v in D.LCSC.items()}
         for k, v in getattr(D, 'HAND', {}).items(): parts[k] = ('', k, 'hand-solder: ' + ', '.join(v))
+    else:
+        if not os.path.exists(PARTS_JSON):
+            json.dump(DEFAULT_PARTS, open(PARTS_JSON, 'w'), indent=1, ensure_ascii=False)
+        parts = json.load(open(PARTS_JSON))
     # ---- BOM ----
     groups = {}
     for ref, (lib, sym, val, fp, _) in D.PARTS.items():
@@ -269,7 +287,10 @@ def main():
         for r in rows:
             ref = r['Ref']
             if ref in dnp or ref == 'J1': continue
-            w.writerow([ref, f"{float(r['PosX']):.4f}mm", f"{float(r['PosY']):.4f}mm", 'Top' if r['Side'] == 'top' else 'Bottom', f"{float(r['Rot']):.1f}"])
+            rot = float(r['Rot'])
+            if r['Side'] == 'top':
+                rot = (rot + CPL_ROT.get(D.PARTS[ref][3].split(':')[1], 0)) % 360
+            w.writerow([ref, f"{float(r['PosX']):.4f}mm", f"{float(r['PosY']):.4f}mm", 'Top' if r['Side'] == 'top' else 'Bottom', f"{rot:.1f}"])
     os.remove(pos)
     # ---- Gerbers ----
     fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')

@@ -90,7 +90,10 @@ def report_and_export(board=None, inner=True):
     txt = open(drc).read()
     m = re.findall(r'\*\* Found (\d+) ([A-Za-z ]+?) \*\*', txt)
     errors = txt.count('Severity: error'); warnings = txt.count('Severity: warning')
-    print('DRC:', m if m else txt[:300], '| errors:', errors, 'warnings (library checks etc.):', warnings)
+    kinds = {}
+    for k in re.findall(r'^\[(\w+)\]', txt, re.M): kinds[k] = kinds.get(k, 0) + 1
+    print('DRC:', m if m else txt[:300], '| errors:', errors, 'warnings:', warnings, kinds)
+    gen_pcb.write_stackup(PCB, board.GetCopperLayerCount())      # thickness / ENIG / bevelled edge for the Gerber job file (no-op when present)
     # fab exports
     fab = os.path.join(HW, 'fab'); shutil.rmtree(fab, ignore_errors=True); os.makedirs(fab)
     cu = {6: 'F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu', 4: 'F.Cu,In1.Cu,In2.Cu,B.Cu'}.get(board.GetCopperLayerCount(), 'F.Cu,B.Cu')

@@ -163,6 +163,15 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
                 for k in ls: raster(hard[k], kind, prm, C + W / 2 + 0.01)
                 if lay == 'ALL' or lay in LID: raster(hard_via, kind, prm, C + VR + 0.01)
     for (hx, hy, hr) in holes: raster(hard_via, 'circ', (hx, hy, hr), 0.25 + DR + 0.01)
+    # rule areas that forbid tracks / vias (card-edge tab, shell notches and slot): hard obstacles. All of them are
+    # axis-aligned rectangles in this project, so the bounding box is the area itself.
+    for z in board.Zones():
+        if not z.GetIsRuleArea(): continue
+        zb = z.GetBoundingBox(); zbox = (ToMM(zb.GetX()), ToMM(zb.GetY()), ToMM(zb.GetRight()), ToMM(zb.GetBottom()))
+        if z.GetDoNotAllowTracks():
+            for k, lid in enumerate(sig_layers):
+                if z.IsOnLayer(lid): raster(hard[k], 'box', zbox, W / 2 + 0.01)
+        if z.GetDoNotAllowVias(): raster(hard_via, 'box', zbox, VR + 0.01)
     for t in board.GetTracks():
         if t.GetNetname() == net: continue
         is_via = t.GetClass() == 'PCB_VIA'

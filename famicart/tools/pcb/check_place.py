@@ -5,13 +5,17 @@ For every footprint it takes the PHYSICAL body (modules: the module board + 0.5 
 its USB overhang; other parts: courtyard, else pads/graphics bounding box) and checks, on a 0.05 mm raster:
   - inside the board outline minus cut-outs, with FC_EDGE_MARGIN (0.3 mm) to every edge,
   - not on a shell rib / post keep-out of its own side (shells.py comp_keepouts),
-  - not overlapping another part on the same side.
+  - not overlapping another part on the same side,
+and for every pad (also the part of a module's pads that lies outside its body): same edge margin, off the keep-outs
+of its side. Nothing but the card edge J1 may reach lower than shells.TAB_BAND above the shoulder (the shell closes
+around the tab base): module bodies, USB connectors, courtyards and pads are all held to that line.
 Exit status 1 when anything fails.   FC_DESIGN=design_reve2 FC_HW_DIR=... python3 check_place.py"""
 import os, sys, importlib
 import numpy as np
 import pcbnew
 from pcbnew import ToMM
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import shells
 D = importlib.import_module(os.environ.get('FC_DESIGN', 'design'))
 HW = os.path.abspath(os.environ['FC_HW_DIR'])
 SH = getattr(D, 'SHELL', None)
@@ -49,6 +53,12 @@ def main():
     occ = {'F': np.zeros(board.shape, int), 'B': np.zeros(board.shape, int)}
     owner = {'F': {}, 'B': {}}
     bad = []
+    tab_y = (SH['body_h'] - shells.TAB_BAND) if SH else None        # lowest y anything but J1 may reach
+    def box(x0, y0, x1, y1):
+        """index slices of the raster cells whose centres lie in the rectangle"""
+        i0 = max(0, int(np.ceil((x0 - X0) / G - 1e-9))); i1 = min(len(xs), int(np.floor((x1 - X0) / G + 1e-9)) + 1)
+        j0 = max(0, int(np.ceil((y0 - Y0) / G - 1e-9))); j1 = min(len(ys), int(np.floor((y1 - Y0) / G + 1e-9)) + 1)
+        return (slice(j0, max(j0, j1)), slice(i0, max(i0, i1)))
     fps = list(b.GetFootprints())
     for idx, fp in enumerate(fps):
         ref = fp.GetReference(); name = str(fp.GetFPIDAsString()).split(':')[-1]
@@ -69,12 +79,14 @@ def main():
                 dx, dy = (mx0 + mx1 - rx0 - rx1) / 2, (my0 + my1 - ry0 - ry1) / 2
                 if abs(dx) > abs(dy): usb = (rx0 - over, my0, rx0, my1) if dx < 0 else (rx1, my0, rx1 + over, my1)
                 else: usb = (mx0, ry0 - over, mx1, ry0) if dy < 0 else (mx0, ry1, mx1, ry1 + over)
+            if tab_y is not None and ry1 > tab_y: bad.append(f'{ref} ({side}) module body reaches below the card-edge shoulder band: y {ry1:.2f} > {tab_y:.2f}')
             rx0 -= 0.5; ry0 -= 0.5; rx1 += 0.5; ry1 += 0.5
             if usb:   # the connector may stick out past the LEFT/RIGHT board edge (shell side clearance), nowhere else
                 u = (PX >= usb[0]) & (PX <= usb[2]) & (PY >= usb[1]) & (PY <= usb[3])
                 side_out = (PX < MARGIN + G) | (PX > 90 - MARGIN - G)
                 if (u & ~ok & ~side_out).any(): bad.append(f'{ref} ({side}) USB connector leaves the board other than past a side edge')
                 if (u & ko[side]).any(): bad.append(f'{ref} ({side}) USB connector on a shell keep-out')
+                if tab_y is not None and usb[3] > tab_y: bad.append(f'{ref} ({side}) USB connector reaches below the card-edge shoulder band')
                 usb_m = u
             else: usb_m = None
         else:
@@ -88,6 +100,19 @@ def main():
                 for pad in fp.Pads():
                     pb = pad.GetBoundingBox(); bx.append((ToMM(pb.GetX()), ToMM(pb.GetY()), ToMM(pb.GetRight()), ToMM(pb.GetBottom())))
             rx0, ry0 = min(v[0] for v in bx), min(v[1] for v in bx); rx1, ry1 = max(v[2] for v in bx), max(v[3] for v in bx)
+            if tab_y is not None and ry1 > tab_y: bad.append(f'{ref} ({side}) reaches below the card-edge shoulder band: y {ry1:.2f} > {tab_y:.2f}')
+        # pads: copper and solder, wherever they are (a module's pads stick out of its body)
+        p_edge, p_ko, p_tab = [], [], []
+        for pad in fp.Pads():
+            pb = pad.GetBoundingBox(); pr = (ToMM(pb.GetX()), ToMM(pb.GetY()), ToMM(pb.GetRight()), ToMM(pb.GetBottom()))
+            sl = box(*pr)
+            sides = 'FB' if pad.GetDrillSize().x > 0 else side
+            if (~ok[sl]).any(): p_edge.append(pad.GetNumber())
+            if any(ko[s][sl].any() for s in sides): p_ko.append(pad.GetNumber())
+            if tab_y is not None and pr[3] > tab_y: p_tab.append(pad.GetNumber())
+        if p_edge: bad.append(f'{ref} ({side}) pads off the board / too close to an edge or cut-out: {",".join(p_edge)}')
+        if p_ko: bad.append(f'{ref} ({side}) pads on a shell rib/post keep-out: {",".join(p_ko)}')
+        if p_tab: bad.append(f'{ref} ({side}) pads reach below the card-edge shoulder band: {",".join(p_tab)}')
         m = (PX >= rx0) & (PX <= rx1) & (PY >= ry0) & (PY <= ry1)
         if (m & ~ok).any(): bad.append(f'{ref} ({side}) leaves the board / hits a cut-out or the edge margin: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
         if (m & ko[side]).any(): bad.append(f'{ref} ({side}) sits on a shell rib/post keep-out: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')

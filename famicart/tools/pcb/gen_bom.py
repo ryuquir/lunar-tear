@@ -15,8 +15,16 @@ MPN = {  # suggested orderable parts (any equivalent works)
  'Famicom 60-pin edge': 'PCB card edge (gold fingers), no part',
  'USB-C': 'HRO TYPE-C-31-M-12 (16-pin USB 2.0 receptacle) or GCT USB4105-GF-A', '5.1k': '0603 1% (USB-C CC pull-down)',
  'RESET': 'E-Switch TL3342 / any 4.7x3.5 mm low-profile tactile', 'RUN/GND': '2-pin 2.54 mm header (optional, wire to the console reset switch)',
+ 'RUN/GND/LINK pads': 'no part (wire pads)',
  'TP wire pads': 'no part (solder wires from Pico TP2/TP3/TP1 if hand-assembling)', 'USB D+ -> TP_A | TP_B': 'solder jumper, bridge after checking TP2/TP3', 'USB D- -> TP_B | TP_A': 'solder jumper, bridge after checking TP2/TP3',
 }
+LCSC, HAND = getattr(D, 'LCSC', {}), getattr(D, 'HAND', {})
+def suggest(val):
+    """Designs with their own part map (rev E on) name the exact part: the generic MPN table above describes the parts
+    of the earlier boards (e.g. a different reset switch, and an RP2040 Pico must not be fitted where 5 V reaches the pins)."""
+    if val in LCSC: return '%s (LCSC %s, JLCPCB Basic)' % (LCSC[val][1], LCSC[val][0])
+    if val in HAND: return 'hand-soldered: ' + ', '.join(HAND[val])
+    return MPN.get(val, '')
 groups = collections.OrderedDict()
 for ref, (lib, sym, val, fp, _) in D.PARTS.items():
     key = (val.split(' (')[0], fp)
@@ -25,5 +33,5 @@ with open(os.path.join(HW, 'bom.csv'), 'w', newline='') as f:
     w = csv.writer(f); w.writerow(['Qty', 'Value', 'Footprint', 'References', 'Suggested part'])
     for (val, fp), refs in groups.items():
         refs.sort(key=lambda r: (r.rstrip('0123456789'), int(''.join(ch for ch in r if ch.isdigit()) or 0)))
-        w.writerow([len(refs), val, fp.split(':')[1], ' '.join(refs), MPN.get(val, '')])
+        w.writerow([len(refs), val, fp.split(':')[1], ' '.join(refs), suggest(val)])
 print('bom written:', os.path.join(HW, 'bom.csv'), len(groups), 'lines')

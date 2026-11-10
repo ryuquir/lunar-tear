@@ -18,8 +18,18 @@ HW = _os.path.abspath(_os.environ.get('FC_HW_DIR', HW_LIB))                     
 HERE = os.path.dirname(os.path.abspath(__file__))
 CUSTOM_LIB = os.path.join(HW_LIB, 'famicart.kicad_sym')
 ROOT_UUID = '8e7c1580-4b4b-59e1-9722-29cf444c0001'
+_NS = uuid.UUID(ROOT_UUID)
+_seq = [0]
 
-def U(): return str(uuid.uuid4())
+def symbol_uuid(ref, unit=1):
+    """Stable UUID of a schematic symbol. gen_pcb.py stores '/<this>' as the footprint's sheet path, so KiCad's
+    "Update PCB from Schematic" pairs each footprint with its symbol (and regenerating gives the same files)."""
+    return str(uuid.uuid5(_NS, 'symbol:' + ref if unit == 1 else 'symbol:%s:%d' % (ref, unit)))
+
+def U():
+    """Stable UUID for every other schematic item (pins, labels, no-connect flags), numbered in output order."""
+    _seq[0] += 1
+    return str(uuid.uuid5(_NS, 'item:%d' % _seq[0]))
 
 def lib_path(lib):
     return CUSTOM_LIB if lib == 'famicart' else lib
@@ -42,6 +52,7 @@ def prop(name, value, x, y, hide=False, justify=None):
     return ['property', name, value, ['at', x, y, 0], eff]
 
 def main():
+    _seq[0] = 0
     out = ['kicad_sch', ['version', 20221206], ['generator', Sym('famicart')], ['uuid', Sym(ROOT_UUID)], ['paper', 'A1']]
     libsyms = ['lib_symbols']
     seen = set()
@@ -56,7 +67,7 @@ def main():
         sym = KL.get_symbol(lib_path(lib), name)
         pins = [p for p in KL.pins(sym) if p['unit'] in (0, unit)]
         inst = ['symbol', ['lib_id', f'{lib}:{name}'], ['at', x, y, 0], ['unit', unit], ['in_bom', Sym('yes')], ['on_board', Sym('yes')], ['dnp', Sym('no')],
-                ['uuid', Sym(U())],
+                ['uuid', Sym(symbol_uuid(ref, unit))],
                 prop('Reference', ref, x, y - 2, justify='left'),
                 prop('Value', value, x, y + 2, justify='left'),
                 prop('Footprint', fp, x, y, hide=True),

@@ -8,12 +8,43 @@ from pcbnew import VECTOR2I, FromMM, ToMM
 import os as _os, importlib as _il
 _DESIGN = _os.environ.get('FC_DESIGN', 'design')
 D = _il.import_module(_DESIGN)
+from gen_sch import symbol_uuid          # footprint <-> schematic symbol link (stable UUIDs)
 HW_LIB = _os.path.abspath(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', '..', 'hardware'))   # custom symbols/footprints
 HW = _os.path.abspath(_os.environ.get('FC_HW_DIR', HW_LIB))                                                        # outputs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HW, 'famicart.kicad_pcb')
 SYS_FP = '/usr/share/kicad/footprints'
+THICKNESS = float(getattr(D, 'THICKNESS', 1.2))      # Famicom card edge: 1.2 mm board (docs/04_hardware.md)
+
+# 2-layer stack-up written into the board file after saving (the KiCad 7 Python API cannot set the finish or the
+# edge-connector flags): the Gerber job file then carries the thickness, ENIG and the bevelled edge connector.
+STACKUP_2L = '''    (stackup
+      (layer "F.SilkS" (type "Top Silk Screen"))
+      (layer "F.Paste" (type "Top Solder Paste"))
+      (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
+      (layer "F.Cu" (type "copper") (thickness 0.035))
+      (layer "dielectric 1" (type "core") (thickness %(core).3f) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+      (layer "B.Cu" (type "copper") (thickness 0.035))
+      (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
+      (layer "B.Paste" (type "Bottom Solder Paste"))
+      (layer "B.SilkS" (type "Bottom Silk Screen"))
+      (copper_finish "ENIG")
+      (dielectric_constraints no)
+      (edge_connector bevelled)
+    )
+'''
+
+def write_stackup(path, layers):
+    """Insert the stack-up block at the start of (setup ...). Only for 2-layer boards; idempotent."""
+    if layers != 2: return False
+    s = open(path).read()
+    if '(stackup' in s: return False
+    i = s.find('(setup')
+    if i < 0: raise SystemExit('no (setup ...) section in ' + path)
+    j = s.find('\n', i) + 1
+    open(path, 'w').write(s[:j] + STACKUP_2L % dict(core=THICKNESS - 0.09) + s[j:])
+    return True
 
 # Board outline (mm): HVC-TGROM-01 measurements from nesdev "Famicom cartridge dimensions"
 SHELL = getattr(D, 'SHELL', None)       # shells.hvc_small() / hvc_large(): real HVC outline, slot, rib keep-outs (rev E2/F2 on)
@@ -56,6 +87,7 @@ def main():
     ds = board.GetDesignSettings()
     NL = int(os.environ.get('FC_LAYERS', getattr(D, 'LAYERS', 2)))     # 2, 4 or 6 copper layers
     ds.SetCopperLayerCount(NL)
+    ds.SetBoardThickness(FromMM(THICKNESS))
     TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
     VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
     ds.m_TrackMinWidth = FromMM(TRK); ds.m_ViasMinSize = FromMM(VIA); ds.m_MinThroughDrill = FromMM(VDR)
@@ -77,9 +109,20 @@ def main():
         fp = pcbnew.FootprintLoad(libdir, fpname)
         if fp is None: raise SystemExit(f'footprint not found: {fpid}')
         fp.SetReference(ref); fp.SetValue(val); fp.SetFPIDAsString(fpid)
+        role = getattr(D, 'ROLE', {}).get(ref)
+        if role:
+            # hand-soldered modules look alike but carry different firmware: print "U1 reve_cpu" on the silk under each
+            # one (footprint-owned text, along the module's long axis; KiCad moves / flips it with the footprint)
+            t = pcbnew.FP_TEXT(fp); t.SetText('%s %s' % (ref, role)); t.SetLayer(pcbnew.F_SilkS)
+            ts = 1.5 if 'Pico' in fpname else 1.1
+            t.SetTextSize(VECTOR2I(FromMM(ts), FromMM(ts))); t.SetTextThickness(FromMM(ts * 0.14))
+            t.SetPosition(mm(0, 6.0 if 'Pico' in fpname else 2.0)); t.SetLocalCoord()
+            t.SetTextAngleDegrees(90); t.SetKeepUpright(True)
+            fp.Add(t)
         board.Add(fp)
         fp.SetPosition(mm(x, y)); fp.SetOrientationDegrees(rot)
         if side == 'B': fp.Flip(fp.GetPosition(), False)
+        fp.SetPath(pcbnew.KIID_PATH('/' + symbol_uuid(ref)))
         for pad in fp.Pads():
             net = D.NETS.get(ref, {}).get(pad.GetNumber())
             if net: pad.SetNet(netmap[net])
@@ -281,11 +324,15 @@ def main():
         fp.Add(pad); board.Add(fp)
     # soldermask keepout line (fab note): 4 mm below the tab base nothing but fingers
     add_seg(board, x0, H + 4.0, x1, H + 4.0, layer=pcbnew.F_Fab, w=0.1)
-    add_text(board, 'FAB: 1.2 mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented', 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
-    add_text(board, 'famicart %s  (back)' % getattr(D, 'REV', 'rev B'), 45, 2.0, pcbnew.B_SilkS, 1.2, 0.2, mirror=True)
+    add_text(board, 'FAB: %.1f mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented' % THICKNESS, 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
+    # board-level silk text: D.SILK_TEXT = [(text, x, y, 'F'|'B', size_mm), ...] (must sit clear of pads: check the DRC
+    # report for silk_over_copper); default = the revision on the back, top centre
+    for (stxt, sx, sy, sside, ssize) in getattr(D, 'SILK_TEXT', [('famicart %s  (back)' % getattr(D, 'REV', 'rev B'), 45, 2.0, 'B', 1.2)]):
+        add_text(board, stxt, sx, sy, pcbnew.B_SilkS if sside == 'B' else pcbnew.F_SilkS, ssize, ssize / 6.0, mirror=(sside == 'B'))
 
-    # rule areas: no tracks/vias/pour on the card-edge tab (fingers only; traces may enter the top 1.1 mm of a pad),
-    # and no vias under the Pico module (its underside carries exposed test pads)
+    # rule areas: no tracks/vias/pour on the card-edge tab (fingers only; traces may enter the top 1.1 mm of a pad).
+    # Under the modules nothing is needed here: the Pico footprints carry no-net pads under the module's exposed test
+    # points (TP1-TP7) and USB shell legs, which keep tracks and vias of other nets away; all other vias are tented.
     KEEP_Y = H + 4.0            # = solder-mask boundary: fingers only below this line
     CU = [pcbnew.F_Cu, pcbnew.B_Cu] + [pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu][:NL - 2]
     add_rule_area(board, 'card_edge_keepout', [(x0 - 0.5, KEEP_Y), (x1 + 0.5, KEEP_Y), (x1 + 0.5, T + 0.5), (x0 - 0.5, T + 0.5)], CU)
@@ -295,8 +342,6 @@ def main():
         for i, (side, poly) in enumerate(SHELL['comp_keepouts']):   # shell ribs / posts: no components on that side
             add_rule_area(board, 'shell_rib_%s%d' % (side, i), poly, [pcbnew.F_Cu if side == 'F' else pcbnew.B_Cu],
                           tracks=False, vias=False, pour=False, footprints=True)
-    ux, uy, _, _ = D.PARTS['U1'][4]
-    # (vias under the Pico are allowed: they are tented by the solder mask; the Pico's own test points sit on our TP pads)
     # GND pours on both layers over the body (not the tab)
     body = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
     if NL >= 4:   # inner planes: In1 = GND, last inner = +3V3 (6 layers: In2/In3 are extra signal layers)
@@ -307,7 +352,8 @@ def main():
         add_zone(board, netmap['GND'], pcbnew.B_Cu, body)
 
     pcbnew.SaveBoard(OUT, board)
-    print('board written:', OUT, 'footprints', len(board.GetFootprints()), 'nets', board.GetNetCount())
+    write_stackup(OUT, NL)
+    print('board written:', OUT, 'footprints', len(board.GetFootprints()), 'nets', board.GetNetCount(), 'thickness', THICKNESS)
 
 if __name__ == '__main__':
     main()
