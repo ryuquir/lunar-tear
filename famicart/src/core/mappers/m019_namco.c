@@ -20,7 +20,9 @@ static void n163_sync(cart_t *c) {
         static const mirroring_t mm[4] = { MIRROR_1A, MIRROR_V, MIRROR_H, MIRROR_1B };
         cart_set_mirroring(c, mm[s->prg[0] >> 6]);
     }
-    if (c->wram_size) cart_set_wram_6000(c, 0, c->mapper_id == 19 ? true : (s->ram_wren & 1)); else cart_unmap_6000(c);
+    /* 163: $F800 = KKKK DCBA, writes need K = 0100; A..D protect the four 2 KB windows. With nothing protected the page
+     * is plainly writable; otherwise prg_wmap stays empty and n163_write() checks the window of each write. */
+    if (c->wram_size) cart_set_wram_6000(c, 0, c->mapper_id == 19 ? ((s->ram_wren & 0xFF) == 0x40) : (s->ram_wren & 1)); else cart_unmap_6000(c);
 }
 static void n163_init(cart_t *c) {
     n163_state_t *s = &c->s.n163; s->prg[0] = 0; s->prg[1] = 1; s->prg[2] = 2; for (int i = 0; i < 8; i++) s->chr[i] = (uint8_t)i;
@@ -34,7 +36,9 @@ static void n163_write(cart_t *c, uint16_t a, uint8_t v) {
         if ((a & 0xF800) == 0x4800) { if (c->exram) c->exram[s->ram_addr & 0x7F] = v; if (s->ram_inc) s->ram_addr = (s->ram_addr + 1) & 0x7F; return; }
         if ((a & 0xF800) == 0x5000) { s->irq_counter = (uint16_t)((s->irq_counter & 0x7F00) | v); cart_irq(c, false); return; }
         if ((a & 0xF800) == 0x5800) { s->irq_counter = (uint16_t)((s->irq_counter & 0x00FF) | ((v & 0x7F) << 8)); s->irq_enable = v >> 7; cart_irq(c, false); return; }
-        if (a >= 0x6000 && a < 0x8000) { if (c->wram && !(s->ram_wren & 0x40) /* write protect bits */) c->wram[a & 0x1FFF] = v; return; }
+        if (a >= 0x6000 && a < 0x8000) {             /* reached only while the page is not fully writable */
+            if (c->wram && (s->ram_wren & 0xF0) == 0x40 && !(s->ram_wren & (1u << ((a - 0x6000) >> 11)))) c->wram[a & 0x1FFF] = v;
+            return; }
     }
     if (a < 0x8000) { if (c->mapper_id == 210 && (a & 0xF800) == 0xC000) s->ram_wren = v; return; }
     switch (a & 0xF800) {
@@ -45,7 +49,7 @@ static void n163_write(cart_t *c, uint16_t a, uint8_t v) {
     case 0xE000: s->prg[0] = v; break;              /* bit6: sound disable (router), bits6-7: 340 mirroring */
     case 0xE800: s->prg[1] = v; s->chr_ram_lo = (v >> 6) & 1; s->chr_ram_hi = (v >> 7) & 1; break;
     case 0xF000: s->prg[2] = v; break;
-    case 0xF800: if (c->mapper_id == 19) { s->ram_addr = v & 0x7F; s->ram_inc = v >> 7; s->ram_wren = (uint8_t)(v & 0x40 ? 0x40 : 0); return; } break;
+    case 0xF800: if (c->mapper_id == 19) { s->ram_addr = v & 0x7F; s->ram_inc = v >> 7; s->ram_wren = v; } break;   /* one write, two registers: chip-RAM address and RAM write protect */
     }
     n163_sync(c);
 }
@@ -67,5 +71,5 @@ static void FC_FASTCODE(n163_cycle)(cart_t *c) {
     if (!s->irq_enable || s->irq_counter >= 0x7FFF) return;
     if (++s->irq_counter == 0x7FFF) cart_irq(c, true);
 }
-const mapper_desc_t mapper_019 = { 19,  "Namco-163", MF_CPU_CYCLE | MF_READ_LOW | MF_WRITE_6000, n163_init, n163_write, n163_read, NULL, n163_cycle, n163_peek };
+const mapper_desc_t mapper_019 = { 19,  "Namco-163", MF_CPU_CYCLE | MF_READ_LOW, n163_init, n163_write, n163_read, NULL, n163_cycle, n163_peek };
 const mapper_desc_t mapper_210 = { 210, "Namco-175/340", 0, n163_init, n163_write, NULL, NULL, NULL, NULL };

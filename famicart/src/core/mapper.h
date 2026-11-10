@@ -2,7 +2,8 @@
 #pragma once
 #include "cart.h"
 
-#define MF_WRITE_6000   0x01   /* route $6000-$7FFF writes to mapper->write even when WRAM is mapped */
+#define MF_WRITE_6000   0x01   /* route $6000-$7FFF writes to mapper->write even when WRAM is mapped: the handler must then
+                                  store the byte itself. Copied to cart_t.w6000_hook at attach. */
 #define MF_READ_LOW     0x02   /* mapper->read handles reads in $4020-$7FFF where prg_map[] is NULL */
 #define MF_PPU_HOOK     0x04   /* needs ppu_addr() on every PPU access (A12 clocking, MMC2 latch, ...) */
 #define MF_CPU_CYCLE    0x08   /* needs cpu_cycle() every M2 (cycle-based IRQ counters) */

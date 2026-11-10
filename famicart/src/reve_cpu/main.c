@@ -124,7 +124,7 @@ static void __not_in_flash_func(bus_core1)(void) {
             uint16_t wa = (uint16_t)((w & 0x7FFFu) | ((w >> PIN_ROMSEL) & 1u ? 0 : 0x8000u));
             uint8_t wd = (uint8_t)(w >> PIN_CPU_D_BASE);
             uint8_t *wm = c->prg_wmap[wa >> 13];
-            if (wm && wa >= 0x4020 && wa < 0x8000 && !(c->mapper->flags & MF_WRITE_6000)) wm[wa & 0x1FFF] = wd;   /* WRAM / board RAM: here and now */
+            if (wm && wa >= 0x4020 && wa < 0x8000 && !c->w6000_hook) wm[wa & 0x1FFF] = wd;   /* WRAM / board RAM: here and now */
             else if (wa >= 0x2000 && (wa < 0x4000 || wa >= 0x4020)) evq_push(((uint32_t)wa << 8) | wd);
             if (wa >= 0x4020 && wa < 0x8000) last = 0xFFFFFFFFu;                                              /* re-read the byte we serve */
         }
@@ -229,11 +229,16 @@ static void mmc5_poll(void) {
 }
 
 /* U1 does not see M2: cycle-counter registers that games read back (N163 $5000/$5800) are advanced from the clock. */
+/* Mappers whose cycle-driven state changes what U1 itself answers: counters that games read back (peek hook), and the
+ * Sunsoft-4 sub-cartridge watchdog (submapper 1), which unmaps $8000. MMC5 is polled from U3 instead. */
+static bool u1_counts_cycles(const cart_t *c) {
+    return c->has_cpu_cycle_hook && c->mapper_id != 5 && (c->mapper->peek || (c->mapper_id == 68 && c->submapper == 1));
+}
 static void cycle_catchup(void) {
     static uint32_t last_us; static uint32_t frac;
     cart_t *c = &g_cart;
     uint32_t now = time_us_32(), d = now - last_us; last_us = now;
-    if (!g_running || !c->has_cpu_cycle_hook || !c->mapper->peek || c->mapper_id == 5) return;
+    if (!g_running || !u1_counts_cycles(c)) return;
     if (d > 2000) d = 2000;
     frac += d * 1790u; uint32_t n = frac / 1000u; frac %= 1000u;
     while (n--) { c->cpu_cycles++; c->mapper->cpu_cycle(c); }
@@ -298,7 +303,7 @@ bool reve_boot(unsigned slot) {
     if (!ok3) printf("WARN: U3 (XIAO) did not report ready\n");
     ppu_track_reset(&trk); remote_vaddr = 0xFFFF; remote_inc = 0xFF; last_fwd_addr = 0xFFFF;
     rmw_gap = clock_get_hz(clk_sys) / 1000000u * 840u / 1000u; last_wt = 0;
-    cycles_from_time = !(g_cart.has_cpu_cycle_hook && g_cart.mapper->peek);   /* else cycle_catchup() owns cpu_cycles */
+    cycles_from_time = !(g_cart.has_cpu_cycle_hook && (g_cart.mapper->peek || (g_cart.mapper_id == 68 && g_cart.submapper == 1)));   /* else cycle_catchup() owns cpu_cycles */
     evq_r = evq_w;
     reve_link_cmd(RL_C_LIVE, 1);
     g_running = true;

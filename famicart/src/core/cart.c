@@ -65,14 +65,18 @@ void cart_set_chr1k_ptr(cart_t *c, unsigned slot, uint8_t *p, bool writable) {
 }
 
 /* ---------------- nametables ---------------- */
-void cart_set_nt_ciram(cart_t *c, unsigned nt, unsigned page) { c->tables_dirty = 1; nt &= 3; c->nt_map[nt] = NULL; c->nt_ciram_a10[nt] = page & 1; }
+void cart_set_nt_ciram(cart_t *c, unsigned nt, unsigned page) { c->tables_dirty = 1; nt &= 3; c->nt_map[nt] = NULL; c->nt_ciram_a10[nt] = page & 1; c->nt_wprot &= (uint8_t)~(1u << nt); }
 void cart_set_nt_ptr(cart_t *c, unsigned nt, uint8_t *p) { c->tables_dirty = 1;
     nt &= 3;
-    if (p) c->nt_map[nt] = p; else cart_set_mirroring(c, c->mirroring);
+    if (p) { c->nt_map[nt] = p; c->nt_wprot &= (uint8_t)~(1u << nt); } else cart_set_mirroring(c, c->mirroring);
+}
+void cart_set_nt_ro(cart_t *c, unsigned nt, const uint8_t *p) { c->tables_dirty = 1;
+    nt &= 3; c->nt_map[nt] = (uint8_t *)(uintptr_t)p; c->nt_wprot |= (uint8_t)(1u << nt);
 }
 void cart_set_nt_chr1k(cart_t *c, unsigned nt, int32_t bank) { c->tables_dirty = 1;
     uint32_t b = wrap_prg(c, bank, c->chr_pages);
-    c->nt_map[nt & 3] = c->chr + (b << CHR_PAGE_SHIFT);
+    nt &= 3; c->nt_map[nt] = c->chr + (b << CHR_PAGE_SHIFT);
+    if (c->chr_is_ram) c->nt_wprot &= (uint8_t)~(1u << nt); else c->nt_wprot |= (uint8_t)(1u << nt);   /* CHR-ROM: writes are lost */
 }
 void cart_set_mirroring(cart_t *c, mirroring_t m) { c->tables_dirty = 1;
     c->mirroring = m;
@@ -83,7 +87,7 @@ void cart_set_mirroring(cart_t *c, mirroring_t m) { c->tables_dirty = 1;
     case MIRROR_1B: for (unsigned i = 0; i < 4; i++) cart_set_nt_ciram(c,i,1); break;
     case MIRROR_4:
         cart_set_nt_ciram(c,0,0); cart_set_nt_ciram(c,1,1);
-        if (c->extvram) { c->nt_map[2] = c->extvram; c->nt_map[3] = c->extvram + 1024; }
+        if (c->extvram) { c->nt_map[2] = c->extvram; c->nt_map[3] = c->extvram + 1024; c->nt_wprot &= 0x03; }
         else { cart_set_nt_ciram(c,2,0); cart_set_nt_ciram(c,3,1); }
         break;
     }
@@ -105,10 +109,10 @@ void FC_FASTCODE(cart_cpu_write)(cart_t *c, uint16_t addr, uint8_t v) {
     if (addr < 0x4020) { if (c->mapper->flags & MF_SNOOP_PPU_REGS) c->mapper->write(c, addr, v); return; }
     uint8_t *w = c->prg_wmap[addr >> 13];
 #if FC_VIRTUAL_ROM
-    if (w && !((c->mapper->flags & MF_WRITE_6000) && addr < 0x8000)) return;   /* the external RAM chip took the write */
+    if (w && !(c->w6000_hook && addr < 0x8000)) return;   /* the external RAM chip took the write */
     if (c->mapper->write) c->mapper->write(c, addr, v);                        /* no bus-conflict AND: ROM is not readable here */
 #else
-    if (w && !((c->mapper->flags & MF_WRITE_6000) && addr < 0x8000)) { w[addr & 0x1FFF] = v; return; }
+    if (w && !(c->w6000_hook && addr < 0x8000)) { w[addr & 0x1FFF] = v; return; }
     if (c->mapper->write) {
         if ((c->mapper->flags & MF_BUS_CONFLICT) && c->bus_conflicts && addr >= 0x8000) {
             const uint8_t *p = c->prg_map[addr >> 13];
@@ -133,7 +137,7 @@ void FC_FASTCODE(cart_ppu_write)(cart_t *c, uint16_t addr, uint8_t v) {
     addr &= 0x3FFF;
     if (c->has_ppu_hook) c->mapper->ppu_addr(c, addr);
     if (addr < 0x2000) { if (c->chr_wmask & (1u << (addr >> 10))) c->chr_map[addr >> 10][addr & 0x3FF] = v; return; }
-    if (addr < 0x3F00) { uint8_t *nt = c->nt_map[(addr >> 10) & 3]; if (nt) nt[addr & 0x3FF] = v; }
+    if (addr < 0x3F00) { unsigned n = (addr >> 10) & 3; uint8_t *nt = c->nt_map[n]; if (nt && !(c->nt_wprot & (1u << n))) nt[addr & 0x3FF] = v; }
 }
 void FC_FASTCODE(cart_cpu_cycle)(cart_t *c) {
     c->cpu_cycles++;

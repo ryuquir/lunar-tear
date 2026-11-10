@@ -99,7 +99,7 @@ static void vram_write(uint16_t a, uint8_t v) {
     if (a < 0x2000) { if (cart.chr_wmask & (1u << (a >> 10))) cart.chr_map[a >> 10][a & 0x3FF] = v; return; }
     if (a >= 0x3F00) return;
     unsigned nt = (a >> 10) & 3;
-    if (cart.nt_map[nt]) cart.nt_map[nt][a & 0x3FF] = v;
+    if (cart.nt_map[nt]) { if (!(cart.nt_wprot & (1u << nt))) cart.nt_map[nt][a & 0x3FF] = v; }
     else ciram[cart.nt_ciram_a10[nt]][a & 0x3FF] = v;
 }
 static void build_cart(void) {

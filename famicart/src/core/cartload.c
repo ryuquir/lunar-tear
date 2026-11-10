@@ -22,7 +22,7 @@ const char *cart_load_strerror(load_result_t r) {
 }
 
 static uint32_t mapper_exram_need(uint16_t mapper) {
-    switch (mapper) { case 5: return 1024; case 19: return 128; case 119: return 8192; default: return 0; }
+    switch (mapper) { case 5: return 1024; case 19: return 128; case 80: case 207: return 128; case 119: return 8192; default: return 0; }   /* 80 / 207: the X1-005's own 128 bytes */
 }
 
 load_result_t cart_load(cart_t *c, const uint8_t *img, uint32_t len, const cart_profile_t *profile, rom_info_t *info_out) {
@@ -82,7 +82,8 @@ static load_result_t load_common(cart_t *c, const uint8_t *img, const rom_info_t
 #endif
     /* RAM pool carve-up */
     uint32_t off = 0;
-    if (wram == 0 && (mapper == 1 || mapper == 4 || mapper == 5 || mapper == 19 || mapper == 69 || mapper == 85 || mapper == 24 || mapper == 26 || mapper == 0 || mapper == 2 || mapper == 3)) wram = 8192; /* be generous: many iNES headers omit it */
+    if (wram == 0 && (mapper == 1 || mapper == 4 || mapper == 5 || mapper == 19 || mapper == 69 || mapper == 85 || mapper == 24 || mapper == 26 || mapper == 0 || mapper == 2 || mapper == 3 || mapper == 82)) wram = 8192; /* be generous: many iNES headers omit it (82: the 5 KB are inside the X1-017) */
+    if (mapper == 19 && info.battery && info.wram_size + info.sram_size == 0 && !(profile && profile_validate(profile) && profile->wram_kb != 0xFF)) wram = 0;   /* Namco 163 carts that save in the chip's own 128 bytes have no RAM at $6000 */
 #if FC_VIRTUAL_ROM
     if (wram > FC_VROM_WRAM_SIZE) wram = FC_VROM_WRAM_SIZE;
     if (wram) { c->wram = (uint8_t *)FC_VROM_WRAM; c->wram_size = wram; }
@@ -113,6 +114,7 @@ static load_result_t load_common(cart_t *c, const uint8_t *img, const rom_info_t
 #endif
 
     c->battery = info.battery; c->bus_conflicts = info.bus_conflicts; c->system = info.system;
+    if ((mapper == 2 || mapper == 3 || mapper == 7) && sub == 2) c->bus_conflicts = true;   /* NES 2.0: submapper 2 = the board has bus conflicts */
     c->mirroring = (mirror == 0) ? MIRROR_H : (mirror == 1) ? MIRROR_V : (mirror == 2) ? MIRROR_4 : MIRROR_1A;
     if (!mapper_attach(c, mapper, sub)) return LOAD_ERR_MAPPER;
 

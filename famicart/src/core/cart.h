@@ -40,6 +40,9 @@ typedef struct cart {
     uint8_t        has_ppu_hook;       /* mapper->ppu_addr must be called on every PPU address */
     uint8_t        has_cpu_cycle_hook; /* mapper->cpu_cycle must be called every M2 */
     uint8_t        has_read_hook;      /* mapper->read must be consulted when prg_map[] is NULL */
+    uint8_t        w6000_hook;         /* $4020-$7FFF writes go to mapper->write even where prg_wmap[] is set (registers that
+                                          overlay RAM). Starts as the mapper's MF_WRITE_6000 flag; init() may change it. */
+    uint8_t        nt_wprot;           /* bit n set -> nt_map[n] is read-only (CHR-ROM used as a nametable, MMC5 fill page) */
     const uint8_t *ppu_override;       /* set by ppu_addr hook: serve this byte instead of the table lookup */
     uint8_t        audio_mask;         /* bitmask of enabled expansion audio chips (see profile.h) */
     uint8_t        nt_full;            /* rev E: the cartridge must answer every nametable fetch itself (MMC5 split / ext. attributes) */
@@ -91,6 +94,7 @@ void cart_set_chr1k_ptr(cart_t *c, unsigned slot, uint8_t *p, bool writable);
 
 void cart_set_mirroring(cart_t *c, mirroring_t m);
 void cart_set_nt_ptr(cart_t *c, unsigned nt /*0..3*/, uint8_t *p);  /* NULL => back to CIRAM per mirroring */
+void cart_set_nt_ro(cart_t *c, unsigned nt, const uint8_t *p);       /* read-only page (PPU writes to it are dropped) */
 void cart_set_nt_ciram(cart_t *c, unsigned nt, unsigned page /*0/1*/);
 void cart_set_nt_chr1k(cart_t *c, unsigned nt, int32_t bank);        /* nametable from CHR (N163, MMC5-like) */
 

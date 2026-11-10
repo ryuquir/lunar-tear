@@ -15,7 +15,7 @@ test_virtual: test_virtual.c $(CORE) $(HDR)
 	$(CC) $(CFLAGS) -DFC_VIRTUAL_ROM=1 -o $@ $(filter %.c,$^) $(LDLIBS)
 test_reve: test_reve.c $(CORE) $(REVE) $(HDR)
 	$(CC) $(CFLAGS) -o $@ $(filter %.c,$^) $(LDLIBS)
-TM := tm_unl.c tm_multi.c tm_mmc3x.c tm_lic.c tm_bandai_ee.c tm_coproc.c tm_m030.c
+TM := tm_unl.c tm_multi.c tm_mmc3x.c tm_lic.c tm_bandai_ee.c tm_coproc.c tm_m030.c tm_ram.c
 test_mappers: test_mappers.c $(TM) $(CORE) $(REVE) $(HDR)
 	$(CC) $(CFLAGS) -o $@ $(filter %.c,$^) $(LDLIBS)
 clean:

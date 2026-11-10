@@ -43,6 +43,7 @@ bool mapper_attach_desc(cart_t *c, const mapper_desc_t *m, uint8_t submapper) {
     c->has_ppu_hook = (m->flags & MF_PPU_HOOK) && m->ppu_addr;
     c->has_cpu_cycle_hook = (m->flags & MF_CPU_CYCLE) && m->cpu_cycle;
     c->has_read_hook = (m->flags & MF_READ_LOW) && m->read;
+    c->w6000_hook = (m->flags & MF_WRITE_6000) ? 1 : 0; c->nt_wprot = 0;
     /* default: 8K CHR page 0, mirroring from header, WRAM if present */
     if (c->chr_pages) cart_set_chr8k(c, 0);
     cart_set_mirroring(c, c->mirroring);

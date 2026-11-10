@@ -16,6 +16,8 @@ static void s3_write(cart_t *c, uint16_t a, uint8_t v) {
 static void FC_FASTCODE(s3_cycle)(cart_t *c) { generic_state_t *g = &c->s.g; if (!g->b[0]) return; if (g->r16[0] == 0) { g->b[0] = false; cart_irq(c, true); g->r16[0] = 0xFFFF; } else g->r16[0]--; }
 const mapper_desc_t mapper_067 = { 67, "Sunsoft-3", MF_CPU_CYCLE, s3_init, s3_write, NULL, NULL, s3_cycle, NULL };
 
+#define S4_INT16    8u          /* submapper 1: internal ROM = 8 x 16 KB */
+#define S4_WATCHDOG 107520u     /* nesdev INES_Mapper_068: 107516-107575 M2 cycles, "most likely exactly 107520" */
 static void s4_sync(cart_t *c) {
     generic_state_t *g = &c->s.g;
     for (unsigned i = 0; i < 4; i++) cart_set_chr2k(c, i, g->regs[i]);
@@ -24,12 +26,33 @@ static void s4_sync(cart_t *c) {
         cart_set_nt_chr1k(c, 0, 0x80 | g->regs[4]); cart_set_nt_chr1k(c, 1, 0x80 | (h ? g->regs[4] : g->regs[5]));
         cart_set_nt_chr1k(c, 2, 0x80 | (h ? g->regs[5] : g->regs[4])); cart_set_nt_chr1k(c, 3, 0x80 | g->regs[5]);
     } else cart_set_mirroring(c, (g->regs[6] & 1) ? MIRROR_H : MIRROR_V);
-    cart_set_prg16k(c, 0, g->regs[7] & 0x0F); cart_set_prg16k(c, 1, -1);
+    if (c->submapper == 1) {
+        /* Nantettatte!! Baseball: 128 KB internal ROM, then the sub-cartridge's ROM (16 KB, mirrored) in the image.
+         * $F000 = ...E RBBB: R = 1 internal bank BBB at $8000, R = 0 the sub-cartridge. $C000 is always the last
+         * INTERNAL bank. The sub-cartridge answers only while its watchdog runs (restarted by any write to
+         * $6000-$7FFF made with E = 0, about 107,520 CPU cycles long); after that $8000-$BFFF is open bus. */
+        uint32_t pages16 = c->prg_pages >> 1, ext = pages16 > S4_INT16 ? pages16 - S4_INT16 : 0;
+        if (g->regs[7] & 0x08) cart_set_prg16k(c, 0, g->regs[7] & 7);
+        else if (ext && g->r32[0]) cart_set_prg16k(c, 0, (int32_t)(S4_INT16 + (g->regs[7] & 7) % ext));
+        else { c->prg_map[4] = c->prg_map[5] = NULL; c->prg_wmap[4] = c->prg_wmap[5] = NULL; c->tables_dirty = 1; }
+        cart_set_prg16k(c, 1, S4_INT16 - 1);
+    } else { cart_set_prg16k(c, 0, g->regs[7] & 0x0F); cart_set_prg16k(c, 1, -1); }
     if (c->wram_size && (g->regs[7] & 0x10)) cart_set_wram_6000(c, 0, true); else cart_unmap_6000(c);
 }
-static void s4_init(cart_t *c) { generic_state_t *g = &c->s.g; for (int i = 0; i < 4; i++) g->regs[i] = (uint8_t)i; g->regs[4] = g->regs[5] = 0; g->regs[6] = 0; g->regs[7] = 0x10; s4_sync(c); }
-static void s4_write(cart_t *c, uint16_t a, uint8_t v) { generic_state_t *g = &c->s.g; if (a < 0x8000) return; g->regs[(a >> 12) - 8] = v; s4_sync(c); }
-const mapper_desc_t mapper_068 = { 68, "Sunsoft-4", 0, s4_init, s4_write, NULL, NULL, NULL, NULL };
+static void s4_init(cart_t *c) { generic_state_t *g = &c->s.g; for (int i = 0; i < 4; i++) g->regs[i] = (uint8_t)i; g->regs[4] = g->regs[5] = 0; g->regs[6] = 0; g->regs[7] = 0x10; g->r32[0] = 0;
+    c->has_cpu_cycle_hook = (c->submapper == 1);          /* only the sub-cartridge watchdog needs the cycle hook */
+    if (c->submapper == 1) g->regs[7] = 0x18;             /* internal ROM selected until the game says otherwise */
+    s4_sync(c); }
+static void s4_write(cart_t *c, uint16_t a, uint8_t v) {
+    generic_state_t *g = &c->s.g;
+    if (a < 0x8000) {
+        if (c->submapper == 1 && a >= 0x6000 && !(g->regs[7] & 0x10)) { bool was = g->r32[0] != 0; g->r32[0] = S4_WATCHDOG; if (!was) s4_sync(c); }
+        return;
+    }
+    g->regs[(a >> 12) - 8] = v; s4_sync(c);
+}
+static void FC_FASTCODE(s4_cycle)(cart_t *c) { generic_state_t *g = &c->s.g; if (g->r32[0] && --g->r32[0] == 0) s4_sync(c); }
+const mapper_desc_t mapper_068 = { 68, "Sunsoft-4", MF_CPU_CYCLE, s4_init, s4_write, NULL, NULL, s4_cycle, NULL };
 
 static void fme7_sync(cart_t *c) {
     fme7_state_t *s = &c->s.fme7;

@@ -49,10 +49,11 @@ static void vrc4_sync(cart_t *c) {
 static void vrc4_init(cart_t *c) {
     vrc4_state_t *s = &c->s.vrc4; s->prg[0] = 0; s->prg[1] = 1; for (int i = 0; i < 8; i++) s->chr[i] = (uint8_t)i; s->swap_mode = 0; s->mirroring = 0;
     s->irq_ctrl = 0; vrc4_sync(c);
+    if (c->wram_size) c->w6000_hook = 0;             /* real RAM at $6000: stored directly; the hook is only for the VRC2 latch bit */
 }
 static void vrc4_write(cart_t *c, uint16_t a, uint8_t v) {
     vrc4_state_t *s = &c->s.vrc4;
-    if (a < 0x8000) { if (a >= 0x6000 && is_vrc2(c) && !c->wram_size) s->wram_en = v & 1; return; }
+    if (a < 0x8000) { if (a >= 0x6000 && a < 0x7000 && is_vrc2(c) && !c->wram_size) s->wram_en = v & 1; return; }   /* VRC2 without RAM: 1-bit latch at $6000-$6FFF */
     unsigned r = vrc24_reg(c, a);
     switch (a & 0xF000) {
     case 0x8000: s->prg[0] = v & 0x1F; break;

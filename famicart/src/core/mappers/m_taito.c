@@ -50,7 +50,7 @@ static void x1005_sync(cart_t *c) {
 static void x1005_init(cart_t *c) { generic_state_t *g = &c->s.g; for (int i = 0; i < 16; i++) g->regs[i] = 0; g->regs[10] = 0; g->regs[12] = 1; g->regs[14] = 2; g->regs[1] = 2; x1005_sync(c); }
 static void x1005_write(cart_t *c, uint16_t a, uint8_t v) {
     generic_state_t *g = &c->s.g;
-    if (a >= 0x7F00 && a < 0x8000) { if (g->regs[8] == 0xA3 && c->wram) c->wram[a & 0x7F] = v; return; }
+    if (a >= 0x7F00 && a < 0x8000) { if (g->regs[8] == 0xA3 && c->exram) c->exram[a & 0x7F] = v; return; }
     if (a < 0x7EF0 || a > 0x7EFF) return;
     unsigned r = a & 0x0F;
     if (r == 8 || r == 9) { g->regs[8] = v; return; }
@@ -60,7 +60,7 @@ static void x1005_write(cart_t *c, uint16_t a, uint8_t v) {
 }
 static uint8_t FC_FASTCODE(x1005_read)(cart_t *c, uint16_t a, uint8_t open) {
     generic_state_t *g = &c->s.g;
-    if (a >= 0x7F00 && a < 0x8000 && g->regs[8] == 0xA3 && c->wram) return c->wram[a & 0x7F];
+    if (a >= 0x7F00 && a < 0x8000) return (g->regs[8] == 0xA3 && c->exram) ? c->exram[a & 0x7F] : open;
     if (a >= 0x7EF8 && a <= 0x7EF9) return g->regs[8];
     return open;
 }
