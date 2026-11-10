@@ -207,6 +207,14 @@ def main():
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
                     elif 'CardEdge' not in fpname:
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL); pad.SetThermalSpokeWidth(FromMM(0.4)); pad.SetThermalGap(FromMM(0.3))
+        cy = getattr(D, 'COURTYARD', {}).get(val.split(' (')[0])
+        if cy:      # a courtyard of the size given (x, y of the unrotated footprint) instead of the library's: parts that stand closer than the library allows
+            lines = [g for g in fp.GraphicalItems() if g.GetLayer() in (pcbnew.F_CrtYd, pcbnew.B_CrtYd) and hasattr(g, 'GetStart0')]
+            ox = max(abs(v) for g in lines for v in (g.GetStart0().x, g.GetEnd0().x)); oy = max(abs(v) for g in lines for v in (g.GetStart0().y, g.GetEnd0().y))
+            for g in lines:
+                a, e = g.GetStart0(), g.GetEnd0()
+                g.SetStart0(VECTOR2I(int(round(a.x * FromMM(cy[0] / 2) / ox)), int(round(a.y * FromMM(cy[1] / 2) / oy))))
+                g.SetEnd0(VECTOR2I(int(round(e.x * FromMM(cy[0] / 2) / ox)), int(round(e.y * FromMM(cy[1] / 2) / oy)))); g.SetDrawCoord()
         if JLC and getattr(D, 'GUARD_PADS', None) and val.split(' (')[0] not in getattr(D, 'LCSC', {}):
             for pad in fp.Pads():       # guard pads under the modules: covered by mask, a little larger than the module's pad
                 if pad.GetNumber() in D.GUARD_PADS and not D.NETS.get(ref, {}).get(pad.GetNumber()):

@@ -266,7 +266,7 @@ def draw_rails(board):
     g.hdim(px(rails['L'][0]), px(rails['L'][1]), py(T) + 110, '%.1f' % rw, ext=py(YE), size=18, below=True)
     g.hdim(px(rails['L'][1]), px(lo), py(T) + 150, '%.1f gap' % gap, ext=py(YE), size=18, below=True)
     ny = py(T) + 215
-    g.text(40, ny, 'If JLCPCB adds the rails instead (Gerber without rails): please put them on the same two %.1f mm edges, panel %.1f x %.1f mm,' % (T, hi - lo + 2 * rw, T), 19, INK, 'start')
+    g.text(40, ny, 'If JLCPCB adds the rails instead (Gerber without rails): please put them on the left and right edges (the two %.1f mm edges), panel %.1f x %.1f mm,' % (T, hi - lo + 2 * rw, T), 19, INK, 'start')
     g.text(40, ny + 28, 'not on the gold-finger edge and not on the opposite edge, although those are the longer edges.', 19, INK, 'start')
     os.makedirs(os.path.join(HW, 'jlcpcb'), exist_ok=True)
     g.save(os.path.join('jlcpcb', 'rails.svg'))
