@@ -1,0 +1,6 @@
+1) This is ONE board with two 5.0 mm edge rails that I drew myself: panel 103.6 x 85.7 mm, one board per panel. The rails are on the left and right edges, each joined by 3 mouse-bite tabs (5.2 mm wide, 0.6 mm holes) across a 2.0 mm routed gap. 3 fiducials and 4 tooling holes (2.0 mm) are on the rails. Please do NOT add other rails and do NOT add V-cut.
+2) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge 30 degrees. This edge must stay a free routed edge; the rails end 2.7 mm above it.
+3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
+4) You may shorten the finger copper to your standard setback for the bevel.
+5) The solder mask window over the gold fingers is intentional: it starts 4.0 mm below the root of the tab and runs to the edge. Please do not enlarge it towards the board: tracks run beside the upper ends of the fingers.
+6) The outline has two side notches, one inner slot (6.6 x 2.4 mm) and cut corners beside the tab. Inner corners are drawn with R 0.5 mm. Please keep them as drawn.

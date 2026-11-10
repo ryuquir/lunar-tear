@@ -1,0 +1,7 @@
+1) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge 30 degrees.
+2) Edge rails for assembly: please add the two 5 mm rails on the LEFT and RIGHT edges (the two 85.7 mm edges, perpendicular to the gold-finger edge). Panel size 99.6 x 85.7 mm, NOT 89.6 x 95.7 mm as the order form shows. Do NOT put a rail on the gold-finger edge or on the opposite edge.
+3) The gold-finger edge must stay a free routed edge: no rail, no V-cut, no mouse bites.
+4) If you cannot add the rails on these two edges, or cannot bevel a board with rails: do NOT move the rails; put the order on hold and contact me.
+5) You may shorten the finger copper to your standard setback for the bevel.
+6) The solder mask window over the gold fingers is intentional: it starts 4.0 mm below the root of the tab and runs to the edge. Please do not enlarge it towards the board: tracks run beside the upper ends of the fingers.
+7) The outline has two side notches, one inner slot (6.6 x 2.4 mm) and cut corners beside the tab. Inner corners are drawn with R 0.5 mm. Please keep them as drawn.

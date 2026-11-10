@@ -1,0 +1,6 @@
+I am going to order a 2-layer board, 1.2 mm, ENIG, gold fingers (30 on each side) with a 30 degree bevel, and Standard PCBA on the top side. Please see the attached drawing. My Gerber file already contains two 5.0 mm edge rails that I drew myself, on the left and right edges (perpendicular to the gold-finger edge). Each rail is joined to the board by 3 mouse-bite tabs (5.2 mm wide, 0.6 mm holes) across a 2.0 mm routed gap. There is no V-cut. The rails end 2.7 mm above the gold-finger edge, so that edge is completely free. The rails carry 3 fiducials (1 mm, centre 3.85 mm from the panel edges) and 4 tooling holes (2.0 mm). Panel size 103.6 x 85.7 mm, one board per panel.
+
+1) Can you bevel the gold-finger edge of this board?
+2) Is this rail arrangement accepted for Standard PCBA?
+3) Which Delivery Format must I select: Single PCB or Panel by Customer (1 x 1)? Is there an extra charge?
+4) If I upload the board without rails (89.6 x 85.7 mm) instead, can you add the rails on the same two edges (panel 99.6 x 85.7 mm) and still bevel the gold-finger edge?
