@@ -60,8 +60,8 @@ JLCPCB 公式の能力表では Economic PCBA は「Gold Fingers/Castellated Hol
 | 2 | 5 | No | $4.00 | $20.10 | $14.50 | **$38.60** | $7.72 | 0.64kg |
 | 2 | 10 | Yes 30° | $4.00 | $23.50 | $28.90 | **$56.40** | $5.64 | 1.17kg |
 | 2 | 10 | No | $4.00 | $23.50 | $28.90 | **$56.40** | $5.64 | 1.17kg |
-| 4 | 5 | Yes 30° | $25.00 | $20.10 | $18.50 | **$63.60** | $12.72 | 0.64kg 前後 (未記録) |
-| 4 | 5 | No | $25.00 | $20.10 | $18.50 | **$63.60** | $12.72 | 同上 |
+| 4 | 5 | Yes 30° | $25.00 | $20.10 | $18.50 | **$63.60** | $12.72 | 0.64kg |
+| 4 | 5 | No | $25.00 | $20.10 | $18.50 | **$63.60** | $12.72 | 0.64kg |
 | 4 | 10 | Yes 30° | $25.00 | $23.50 | $37.00 | **$85.50** | $8.55 | 1.17kg |
 | 4 | 10 | No | $25.00 | $23.50 | $37.00 | **$85.50** | $8.55 | 1.17kg |
 
@@ -239,3 +239,131 @@ JLCPCB 公式の能力表では Economic PCBA は「Gold Fingers/Castellated Hol
 ### Gaps (§3)
 - 秋月の DIP 並列 SRAM は 0 件 (検索で確認)。他店 (共立・千石・マルツ・aitendo) の 62256 系在庫は本パスでは未確認。
 - 74HC139 / 74HC368 / 74HC574 / CD4021 / 74HCT DIP: 秋月では入手不可 (0 件)。
+
+---
+
+## 4. ファミコン 60 ピン (2x30, 2.54mm) カードエッジコネクタ
+
+### Takeaway
+JLCPCB/LCSC に WingTAT の 60P 2.54mm 垂直スルーホール品 ED60BGFBK (LCSC C5173310) があり、在庫 299、$1.30、JLCPCB 部品ライブラリ上「Extended / Assembly Type: Wave Soldering / PCBA Type: Economic and Standard」— つまり JLCPCB に実装させられる。ただしデータシートの推奨カード厚は 1.57±0.15mm で、ファミコンのカートリッジ基板 (1.2mm) より厚い前提 (緩くなる)。ファミコン専用品としては AliExpress のクローン機用 60P スロットが $3.59-$5.82。国内店 (千石・マルツ・共立・aitendo・Amazon.co.jp・Yahoo) とデジキー・マウサーは自動取得がブロック/0 件で、在庫確認できず。
+
+### Cited Findings
+- ファミコンカートの寸法: 「The pin pitch is 2.54mm, with 2 rows of 30 pads」「Board thickness: 1.2 mm」「Card edge width: 78.4 mm」、信号パッド幅 1.6mm / 電源パッド 2.6mm、パッド間 0.94mm (ノギス実測 ±0.05mm) — [NESdev Wiki: Famicom cartridge dimensions](https://www.nesdev.org/wiki/Famicom_cartridge_dimensions) (WebFetch で本文取得 2026-11-10)
+- 板厚の適合: kevtris「You want a 60 pin connector, .1" pitch pins, and for a board thickness of .043" or so. A connector for .062" boards will work, but it will be loose and wobble about.」「I suggest buying the cheapest cart-accepting famiclone possible on ebay to get a reasonable connector.」「One possible thing would be to bend the pins on a .062" connector outwards to grab the board tighter.」(2006-12-30) — [NESdev forum t=2836](https://forums.nesdev.org/viewtopic.php?t=2836)
+
+| 候補 | 入手先 | 型番 / コード | 価格 | 在庫 (2026-11-10) | 実装 | 適合カード厚 | ファミコン適合の実績 |
+|---|---|---|---|---|---|---|---|
+| WingTAT 60P 2.54mm 垂直 THT, 金めっき | LCSC / JLCPCB | ED60BGFBK / C5173310 | $1.2959 (1+), $1.0805 (10+) | LCSC 299 / JLCPCB 299 | THT 垂直, 高さ 15.6mm, 幅 9.25mm; JLCPCB「Wave Soldering」「Economic and Standard」 | データシート「Recommended Card Layout」に 1.57±0.15 | 不明 (推論: 1.2mm カートでは緩い) |
+| WingTAT 60P 2.54mm 垂直 THT | LCSC | ED60MEBGFBK / C5242017 | $1.6695 | LCSC 94 / JLCPCB 0 | THT 垂直 15.6mm | 未取得 | 不明 |
+| WingTAT 60P 2.54mm 直角 THT | LCSC | ER60BGFBK / C5173348 | $1.8371 | 0 | 直角, 9.25mm | 未取得 | 不明 |
+| WingTAT 60P 2.54mm Free Hanging (ケーブル用) | LCSC | EC60P03BK-0001 / C5448308 | $3.1538 | 120 | 基板実装ではない | - | - |
+| Sullins EBC30 系 (30x2, 0.100") | LCSC | EBC30MMAN C6941170, EBC30DRAI C6841138, EBC30DRXI 等 | $15.78-$22.59 (1+) | 0 (「Pre/New」) | THT | 未取得 | 不明 |
+| TinyNES (実チップ使用の量産再現機) の Famicom アダプタ | (BOM 記載) | WingTAT S-60M-2.54-5 | - | LCSC 検索で品番ヒットせず | - | 未確認 | TinyNES で採用 |
+| クローン機用 60P スロット「Clone Console 60 Pin Connector Replacement ... for Famicom」 | AliExpress | - | $3.59 (新規ユーザー向け表示 $1.09) | 「6 sold」 | THT (写真未確認) | 未確認 (ファミコンカート用と推論) | 商品名上はファミコン用 |
+| 「B18B Replacement 60 Pin Game Cartridge Adapter Card Slot Connector For Famicom FC Clone Console」 | AliExpress | - | $5.82 | - | 同上 | 同上 | 商品名上はファミコン用 |
+| 「Game Card Slot For SFC SNES FC Console Connector 64Pin 60Pin 62Pin 50Pin ... 2.5mm Interval」 | AliExpress | - | $9.96 (表示 $1.09) | - | - | - | 「2.5mm Interval」表記 (2.54mm との差は未確認) |
+| Hirose CR22A-60D-2.54DS(70) (第1パス: ブログで ¥250, 2008/2022) | 千石電商 | - | - | 千石サイト検索は bot 遮断で未確認 | THT | 未確認 | ブログでファミコン用に使用 |
+- 出典: [LCSC 検索 "2.54mm edge connector 60P"](https://www.lcsc.com/search?q=2.54mm%20edge%20connector%2060P) (5 件)、[LCSC C5173310](https://www.lcsc.com/product-detail/C5173310.html)、[JLCPCB C5173310](https://jlcpcb.com/partdetail/C5173310)、ED60BGFBK データシート (JLCPCB 部品ページの Datasheet リンク, jlc-prod-smt.oss-eu-central-1.aliyuncs.com …/8590906393052864512-C5173310.pdf: 「Insertion Force:0.4Kgf Max.Per Pair」「Withdrawal Force:0.25Kgf Max.Per Pair」「Gold Plated On Contact Area」「Recommended Card Layout … 1.57±0.15」)、[LCSC 検索 EBC30](https://www.lcsc.com/search?q=EBC30) (139 件)、[AliExpress "famicom 60 pin slot"](https://www.aliexpress.com/w/wholesale-famicom-60-pin-slot.html)、[TinyNES Famicom Adapter BOM](https://raw.githubusercontent.com/loglow/TinyNES/main/Famicom%20Adapter/TinyNES_Famicom_Adapter_BOM.csv)
+- 試行して失敗した経路 (2026-11-10): マルツ `GoodsListNavi.jsp?keyword=CR22A-60D` → Cloudflare「セキュリティ検証」; 千石電商 検索 (URL 直接 / 検索窓入力) → 「該当がありません」(パラメータ脱落) の後「現在、サイトをご利用いただけない状態です」; 共立エレショップ `keyword=カードエッジ / エッジコネクタ / CR22A / ファミコン` → 「ご指定の条件に一致する商品が見つかりませんでした」(4 語とも 0 件); aitendo `?mode=srh&keyword=` (EUC-JP/ASCII) → 検索結果ではなく通常ページが返り判定不能; Amazon.co.jp `s?k=ファミコン 60ピン スロット` → エラーページ; Yahoo!ショッピング → 「ページは現在表示できません」; Digi-Key (digikey.jp / digikey.com) → Cloudflare; Mouser (mouser.jp) → 「Access Denied」。
+- ドナー機コネクタ流用: 他ノートの調査で、OpenTendo 作者が SRAM について「The RAM from an original OEM motherboard can be used on OpenTendo」と回答 (2023-10-16) — [OpenTendo issue #20](https://github.com/Redherring32/OpenTendo/issues/20) (famicom_electrical_and_pitfalls.md より)。60P コネクタ自体の取り外し体験談は本パスでは見つからず (Web 検索枠が尽きたため追加検索不能) — 未確認。
+
+### Inferences
+- 推論: PCBA に載せられる 60P 品は ED60BGFBK のみ現実的 (Extended, wave)。1.57mm 前提のため、1.2mm のファミコンカートでは接触圧不足・ガタの恐れ。kevtris の指摘どおり。実機で嵌合試験してから採用すべき。
+- 推論: 最も確実なのはドナー機の 60P コネクタ流用 (どのみち CPU/PPU を取るために本体を分解する)。60 本の THT 吸い取りは手間だが、ファミコン純正カートとの嵌合実績は確実。コネクタのメーカー型番は他ノートでも未確認。
+- 推論: AliExpress のクローン機用 60P スロットはファミコンカート (1.2mm) 用に作られていると考えられ、価格 $3.59-5.82 で 1 枚 1 個。ただしピン長・ピッチ (2.5 vs 2.54mm 表記) と取付穴形状は現物確認要。
+
+---
+
+## 5. 21.47727MHz クロック
+
+### Takeaway
+21.47727MHz の水晶は JLCPCB/LCSC に Extended 品が 4 種 (在庫 80-190 個、$0.07-0.11) あり、うち 3 種は JLCPCB で「Wave Soldering, Economic and Standard」実装可能。秋月には無い。TinyNES が使う SiTime MEMS 発振器 SIT2001BC-S2-33N-21.477270 は LCSC 在庫 0。秋月の Si5351A モジュール (¥650) は 21.4772727MHz を分数 PLL で表現できるが在庫 10 セット。ドナー機の水晶 X1 (21.47727MHz) は 2SC2021 による 1 石ディスクリート発振回路の部品で、流用するなら発振回路ごと再現する必要がある。
+
+### Cited Findings
+| 品 | 入手先 | コード | 価格 | 在庫 | 実装 |
+|---|---|---|---|---|---|
+| 21.47727MHz HC-49S 20pF ±20ppm | JLCPCB | C368768 | $0.0920 (1+) / $0.0732 (50+) | 134 | Extended, Wave Soldering, Economic and Standard |
+| 21.47727MHz HC-49S 20pF ±20/±30ppm | JLCPCB | C18213345 | $0.0737 / $0.0586 (100+) | 190 | Extended, Wave Soldering |
+| 21.47727MHz HC-49S-SMD-2P-Mini ±30ppm | JLCPCB | C7473019 | $0.0696 | 80 | Extended, Wave Soldering (表示どおり) |
+| 21.4772MHz HC-49S-SMD 20pF | JLCPCB | C22464834 | $0.1125 | 83 | Extended, SMT Assembly |
+| SIT2001BC-S2-33N-21.477270 (3.3V MEMS, SOT-23-5, ±25ppm) | LCSC | C17667580 | $1.446 | 0 | - |
+| SIT2001BC-S2-33N-21.477270E | LCSC | C1020111 | $2.8515 | 0 | - |
+| AE-Si5351A-B モジュール | 秋月 | 110679 | ¥650 | 10 セット | 手はんだ |
+| SiT2001B / SiT8208 ブランク (要プログラマー) | 秋月 | 113512 / 113513 | ¥130 / ¥140 | 922 / 1,277 | 表面実装 SOT23-5、プログラマー Time Machine II (113514) 必要 |
+- 出典: [JLCPCB C368768](https://jlcpcb.com/partdetail/C368768), [C18213345](https://jlcpcb.com/partdetail/C18213345), [C7473019](https://jlcpcb.com/partdetail/C7473019), [C22464834](https://jlcpcb.com/partdetail/C22464834), [LCSC 検索 SIT2001BC-S2-33N-21.477270](https://www.lcsc.com/search?q=SIT2001BC-S2-33N-21.477270), [秋月 AE-Si5351A-B](https://akizukidenshi.com/catalog/g/g110679/)
+- TinyNES は「IC MEMS OSC XO 21.477270MHZ SMD, SiTime, SIT2001BC-S2-33N-21.477270」を使用 — [TinyNES Main Board BOM](https://raw.githubusercontent.com/loglow/TinyNES/main/Main%20Board/TinyNES_Main_Board_BOM.csv)
+- 純正 HVC-CPU-GPM-02 は「2SC2021 1 石発振 (X1, C1 18p, TC1 30p, C3 51p, R10 100k, R11 1.2k, R9 150Ω, C2 10n)」のコレクタから CPU/PPU へ 10nF 結合 — famicom_electrical_and_pitfalls.md (出典 [TrexMakes Nintendo_Famicom_Console](https://codeberg.org/TrexMakes/Nintendo_Famicom_Console))
+- 秋月の 21.477 検索 0 件 (§3.5)。Digi-Key/Mouser は bot 遮断で未確認 (§4 と同じ)。
+
+### Inferences
+- 推論 (計算): Si5351A (25MHz 水晶) で 21.4772727MHz = 236.25/11 MHz を出すには PLL = 859.0909MHz (= 40 x 21.4772727) とし、PLL 倍率 = 859.0909/25 = 34 + 4/11 (a=34, b=4, c=11)、出力分周 40 (整数) で、水晶誤差を除けば厳密に一致する。Pico から I2C で設定可能。
+- 推論: 最も安く PCBA 化できるのは JLCPCB の HC-49S 水晶 (C18213345, $0.07) + Basic のトランジスタ (MMBT3904 等) と受動部品で純正と同じ 1 石発振を組む案。ただし在庫は 134-190 個と少なく、10 枚程度なら足りる。発振回路の定数は純正 (2SC2021) と異なるトランジスタで要検証。
+- 推論: ドナー機の水晶 X1 の流用は可能 (部品自体は汎用 HC-49 系水晶) だが、発振回路 (2SC2021 + トリマ TC1 等) も新基板に再現する必要がある。2SC2021 の入手性は未確認。
+- 推論: RP2350 の PIO 生成は 12MHz 水晶基準で最良 +1058ppm (他ノート rgb_pico2_feasibility.md) — 色副搬送波を使わない RGB 出力なら許容できる可能性があるが、NTSC 規定 (±40Hz ≈ ±2ppm) からは大きく外れる。
+
+---
+
+## 6. BOM 方針 3 案と 1 枚あたりコスト (5 枚 / 10 枚)
+
+### Takeaway
+金指を本体基板に作る限り PCBA は Standard 確定で、Standard では Basic にも 1 種類 $1.53 の装填料がかかるため「Basic のみ」にしても装填料は無料にならない (Preferred の免除も Economic 限定)。試算 (下表、全て推論を含む概算) では 1 枚あたり総額は、A (Basic のみ + 秋月手はんだ) 5 枚 約¥6,800 / 10 枚 約¥5,200、B (Basic+Preferred+少数 Extended、新品 SRAM) 約¥8,800 / ¥6,800、C (金指エッジ基板を分離 + 本体 Economic PCBA、B と同じ部品) 約¥7,600 / ¥6,200。SRAM をドナー流用すると B・C とも約¥1,250/枚下がる。最安は「C の構成で PCBA は Basic のみ (C')」で 約¥5,100 / ¥4,350。いずれもドナー Famicom 本体の価格は含まない。
+
+### 共通の仮定 (全て推論。実 BOM 未確定のため桁を示すもの)
+- 為替 ¥158/USD (JLCPCB 表示 157.7523)。
+- 本体基板 150x200mm 2 層 1.6mm ENIG。金指版 PCB 代は §2 の実見積: 5 枚 $39.70 (Standard PCBA でエッジレール付加後の実表示)、10 枚は $56.40 にレール分の比率を掛けた $58.0 (推論; レール付き 10 枚の実見積は未取得)。
+- 分離案 C のエッジ基板: 120x60mm 2 層 ENIG 金指 30° 面取り、PCBA なし。実見積 5 枚 $24.90 / 10 枚 $29.30 (Engineering $4 + ENIG $17.40/$18.30 + Board $3.50/$7.00)。本体基板 150x150mm 2 層 LeadFree HASL: 5 枚 $16.50 / 10 枚 $27.80 (Economic PCBA の表で 2L 1.6mm Green HASL は 2-50 枚可)。— [cart.jlcpcb.com/quote](https://cart.jlcpcb.com/quote) 2026-11-10。日本向け OCS 送料: エッジ基板単体 $7.23、本体 150x150 は $8.66。
+- PCBA 料金は §1 の料金表 (Standard: Setup $25.56 + ステンシル $8.21 + 全種類 $1.53/種; Economic: Setup $8.18 + ステンシル $1.53 + Extended のみ $3.07/種; SMT $0.0016/ジョイント; THT は $3.50/注文 + $0.0164/ジョイント)。Confirm Parts Placement ($0.45)、部品の最小購入数・損耗分 (attrition) は含めない。
+- 部品種類数: Basic 20 種 (抵抗 6 値、MLCC 4 値、AMS1117-3.3、ULN2003A、LM358、74HC14、MMBT3904/S8050、SS34、LED、TVS 等)。SMT ジョイント 300 (A, C') / 500 (B, C) 個/枚。Basic 部品代 $1.50/枚。
+- B・C で PCBA に追加する部品 (12 種; 単価は第1パス §2 と本ノート §4-5 の LCSC 表示): 74HC373 $0.339、74HC138 $0.200、74LVC245 x3 $0.206、74HC165 x2 $0.111 (Preferred)、IS62C256AL x2 $3.9694、21.47727MHz 水晶 C18213345 $0.0737 (wave)、60P ED60BGFBK $1.2959 (wave)、LM386 SOP $0.108、ポリスイッチ 1812 $0.062、SMD 電解 3 個 計 $0.30 (仮)、DIP-40 ソケット 2 個 計 $0.50 (仮; LCSC の DIP-40 ソケット品は本パスで未確認) → 部品代 $13.16/枚 (SRAM ドナー流用なら $5.22)。THT ジョイント 142/枚 (60P 60 + DIP40 x2 80 + 水晶 2) → $2.33/枚 + $3.50/注文。
+- 秋月手はんだ (A, C'): DIP-40 丸ピンソケット x2 ¥220、Pico 2 ¥990、Pico 用ピンソケット (FH-1x20-3.2CO) ¥250、74HC373 ¥130、74HC138 (139 の代替) ¥40、74HC165 x2 ¥200、レベル変換 AE-LLCNV8-DIP20 x2 ¥500、M2073 ¥40、電解 5 個 ¥80、MF-R300 ¥40 = **¥2,490/枚**。SRAM・水晶・60P コネクタはドナー機から流用 (¥0) と仮定。B・C の手はんだは Pico 2 + ソケット ¥1,240/枚、C は基板間接続用ピンヘッダ/ソケット ¥150/枚を追加 (FH-2x20SG ¥80 + PH-1x40SG x2 ¥70)。
+- 秋月送料: 佐川「荷物1個口あたり550円」、「商品合計…税込11,000円…以上は…送料無料」— [秋月 ご利用案内](https://akizukidenshi.com/catalog/pages/buy.aspx)。5 枚分以上の一括注文はほぼ ¥11,000 を超えるので送料 0 とした。
+- JLCPCB→日本の送料: OCS 相当で $10-13 (PCBA 分の重量増を見込んだ推論値)。輸入消費税: 注文総額が ¥10,000 を超えるので 10% を加算 (事業用 = 課税価格 100% と仮定)。通関手数料・立替手数料は未確認のため含めない。
+
+### 試算結果 (1 枚あたり、税込概算)
+
+| 方針 | 内容 | 5 枚: JLCPCB 側 (税込) | 5 枚: 総額/枚 | 10 枚: JLCPCB 側 (税込) | 10 枚: 総額/枚 |
+|---|---|---|---|---|---|
+| A | 金指一体基板、Standard PCBA は Basic 20 種のみ、他は秋月 DIP を手はんだ、ドナーから SRAM・水晶・60P 流用 | $136.37 ($27.27/枚 ≈ ¥4,309) | **≈ ¥6,800** | $169.59 ($16.96/枚 ≈ ¥2,679) | **≈ ¥5,170** |
+| B | 金指一体基板、Standard PCBA に Basic+Preferred+Extended 32 種 (新品 IS62C256AL x2、60P と水晶も wave 実装)、手はんだは Pico 2 のみ | $240.21 ($48.04/枚) | **≈ ¥8,830** | $352.11 ($35.21/枚) | **≈ ¥6,800** |
+| B' | B で SRAM をドナー流用 | $196.54 | ≈ ¥7,450 | $264.79 | ≈ ¥5,420 |
+| C | 金指エッジ基板 (PCBA なし) + 本体 Economic PCBA (B と同じ部品、Extended 10 種は $3.07、Preferred/Basic は無料) | $195.52 ($39.10/枚) | **≈ ¥7,570** | $304.57 ($30.46/枚) | **≈ ¥6,200** |
+| C (SRAM 流用) | | $151.86 | ≈ ¥6,190 | $217.25 | ≈ ¥4,820 |
+| C' | C の基板構成で PCBA は Basic のみ (装填料 $0)、他は A と同じ秋月手はんだ | $78.11 ($15.62/枚) | **≈ ¥5,110** | $108.47 ($10.85/枚) | **≈ ¥4,350** |
+(計算スクリプトの値。丸め誤差 ±¥10。ドナー Famicom 本体の調達費、カートリッジ、筐体配線、Pico 用ファーム開発は含まない)
+
+### Inferences
+- 推論: 「Basic のみ」ルールは Economic PCBA でこそ意味がある (Basic/Preferred は装填料 0)。金指一体基板 (Standard) では Basic も 1 種 $1.53 なので、ルールの経済的根拠が薄れ、代わりに「種類数の最小化」がそのまま効く。
+- 推論: 分離案 C/C' はエッジ基板に ENIG 代 (約 $17-18) を払い、本体は HASL で安く作れる。本体を Economic にできるため固定費が $33.77 → $9.71 に下がる。基板間接続 (JAMMA 信号 約 40 本 + 電源) の手はんだと嵌合信頼性が代償。
+- 推論: 10 枚では A と C' の差は約 ¥800/枚、B と C の差は約 ¥600/枚。差の大部分は Standard の固定費 (Setup+ステンシル+Basic 装填料) の按分。
+- 推論: どの方針でも JLCPCB の 21.47727MHz 水晶 (在庫 134-190) と ED60BGFBK (在庫 299)、IS62C256AL (在庫 2,548) の在庫が 10 枚分 (各 10-20 個) を満たす。秋月 Si5351A モジュールは在庫 10 なので 10 枚を超えると不足。
+
+### Gaps (§6)
+- レール付き Standard PCBA の 10 枚 PCB 代、部品 BOM を入れた実 PCBA 見積 (Gerber+BOM+CPL のアップロードが必要) は未取得。
+- LCSC の DIP-40 ソケット (THT, wave 可) の品番・価格・在庫は未確認。
+- 通関手数料・UPS/OCS の立替手数料額、PCB の関税率は未確認。
+- ドナー Famicom の価格は本調査範囲外 (未確認)。
+
+---
+
+## 既存ノートへの訂正 (parts_and_manufacturing.md に対して)
+
+| # | 第1パスの記述 | 訂正 / 補足 | 根拠 |
+|---|---|---|---|
+| 1 | §5「ゴールドフィンガー追加費の第三者推定: 5 枚注文で $10-20」 | Instant Quote 実測で金指 Yes + 30° 面取りの追加費は **$0** (2 層/4 層、5/10 枚の全 8 条件で同額)。$20 前後かかるのは金指ではなく ENIG 表面処理 ($20.10 / 5 枚、$23.50 / 10 枚; 120x60mm では $17.40 / $18.30) | §2 |
+| 2 | §4「LCSC/JLCPCB にはファミコン用 60P 2.54mm カードエッジは確認できず … 2x30 と一致するピン数は DB 内で確認できず — 未確認」 | 60P 2.54mm の WingTAT ED60BGFBK (C5173310, 在庫 299, $1.30, JLCPCB Extended・Wave Soldering・Economic and Standard) ほか 60P 品が LCSC に 5 件ある。ただしデータシートの推奨カード厚 1.57±0.15mm でファミコンカート (1.2mm) 専用ではない | §4 |
+| 3 | §5「日本向け送料・関税: JLCPCB 固有の数値は取得できず — 未確認」「基板価格 … 未確認」 | 実見積と日本向け送料を取得 (§2)。日本向けの配送選択肢は DDP 表記なし (配達時に税を払う方式と推論) | §2 |
+| 4 | §1 Inferences「ゴールドフィンガー付き基板は Economic PCBA が使えず Standard PCBA 必須」 | 正しい (Gold Fingers: Yes で Economic ボタンが灰色化することを実画面で確認)。ただし「エッジパッドはあるが Gold Fingers: No (ENIG, 面取りなし)」では見積システム上 Economic が選べた。審査で再分類されるかは未確認 | §1 |
+| 5 | §2.2 IS62C256AL-45ULI-TR (C14323) 在庫 2,792 / $4.45 | 2026-11-10 の LCSC 表示は在庫 2,548、$3.9694 (1+, 割引後) / $4.6698 (定価) | §5 調査時の LCSC 検索 |
+| 6 | §1「THT は Basic/Extended の装填料なし」 | 公式ページで「THT 部品に装填料がかからない」旨の明記は見つからなかった (ブログ・FAQ は THT を $3.50/注文 + ジョイント単価で説明しているのみ)。**未確認**に格下げすべき | §1 |
+| 7 | §3「Raspberry Pi Pico 用ピンソケット」等、秋月表の値 | 本パスで再取得した値 (Pico 2 ¥990 など) と一致。訂正なし | §3 |
+| 8 | §1「FAQ が古い可能性」 | FAQ ページは「Last updated on Sep 09, 2026」だが依然 $8.00/$1.50/$0.0017/$3、698 種と記載。ソリューションページの料金表 (2026-11-10 取得) は $8.18/$1.53/$0.0016/$3.07 で、FAQ 本文が更新されていないと判断 (推論) | §1 |
+
+---
+
+## 全体の未確認事項
+- エッジパッドあり・金指オプション No の注文が Economic PCBA のまま審査を通るか (JLCPCB への問い合わせが必要)。
+- 国内店 (千石電商・マルツ・共立エレショップ・aitendo)、Amazon.co.jp、Yahoo!ショッピング、Digi-Key、Mouser のファミコン 60P コネクタ在庫: いずれも bot 遮断・エラー・0 件で確認できず (試行内容は §4)。
+- ドナー機の 60P コネクタを取り外した実例・コネクタのメーカー型番: Web 検索枠を使い切ったため追加調査不可。
+- ファミコン専用クローン 60P スロット (AliExpress) の板厚・ピッチ (2.5 / 2.54mm) の実寸。
+- 74HC139 / 74HC368 / 74HC574 / CD4021 / 74HCT DIP および DIP 並列 SRAM の国内入手先 (秋月 0 件。他店未確認)。
+- 輸入時の通関手数料、HS 8534 等の関税率。

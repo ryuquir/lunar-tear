@@ -6,7 +6,7 @@
 - RP2350 Datasheet, Release 8, Build date 01/10/2026, Build version 80d627281ed5 — https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf
 - Raspberry Pi Pico 2 Datasheet, Build date 03/07/2026, Build version d4e0f1799616 — https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf
 
-（作業中: 以下のセクションは調査進行に合わせて追記）
+構成: §1 5 V 耐性 / §2 E9 / §4 PIO / §5 エミュレータ・映像 / §6 出力しきい値 / §7 マッパー統計 / §8 sanni / §9 I/O 拡張 / §10 メモリ・秋月ボード / §11 起動時間 / §12 検証表 / §13 結論（推論）/ §14 既存ノートへの訂正 / §15 未確認事項
 
 ## 1. RP2350 の 5 V 耐性・フェイルセーフ・Pico 2 の GPIO
 
@@ -47,7 +47,7 @@ E9 は「入力イネーブル時、不定電圧域でパッドが約 120 µA �
 - 秋月の在庫ロットが A4 かどうかは購入品の刻印確認（または `rp2350_chip_version()`）で判断するしかない（未確認）。
 
 ## 3. 出力駆動: 3.3 V 出力で 5 V 入力を駆動できるか
-（§3 は下に追記）
+→ §6 を参照（調査順の都合で §6 に記載）。
 
 ## 4. PIO・クロック・DMA（バス作業に必要な事実）
 
@@ -178,3 +178,158 @@ RP2350 は PIO ブロック 3 個×SM 4 個＝12 SM、各 SM は 1 クロック 
 | ≤768 KB | 880 | 99.9% |
 | ≤1024 KB | 881 | 100% |
 - PRG 単体は 8 KB〜512 KB（最多 128 KB: 496 本）、CHR は 0（CHR-RAM、208 本）〜256 KB。最大は Metal Slader Glory（MMC5 / HVC-ELROM、PRG 512 KB + CHR 512 KB = 1 MB）。768 KB 級: 青き狼と白き牝鹿 元朝秘史、星のカービィ 夢の泉の物語、Just Breed、信長の野望 武将風雲録（各 512+256）。
+
+## 8. sanni Cart Reader のマッパー判定とバス操作
+
+### Cited Findings（https://raw.githubusercontent.com/sanni/cartreader/master/Cart_Reader/NES.ino 、2026-11-10 取得。NES.ino の最終コミット 2026-03-07、リポジトリは "archived by the owner on Jun 15, 2026"、GPL-3.0 — https://github.com/sanni/cartreader ）
+- 判定方法（`getMapping()`）: コメント "Read last 8kb block of PRG ROM and compute CRC32 / Some mappers (like MMC3) map the last 8KB block of PRG ROM to 0xE000 while 0x8000 can contain random data after bootup"。実装は CPU $8000–$9FFF の 8 KB と $E000–$FFFF の 8 KB をそれぞれ CRC32 し、SD カードの `nes.txt` の各エントリ（"ファイル名" 行＋ "全体CRC,8KB CRC,iNES ヘッダ16バイト" 行）の 8 KB CRC と照合。両方 0xFF（CRC 0xBD7BC39F）なら "No data found. Using manual selection"、見つからなければ "CRC not found in database / Using manual selection"。
+- `nes.txt`: 22,143 行（1 エントリ 3 行 → 約 7,380 エントリ）。例 "AA421A37,61BC931A,4E45531A34015008000F000700000001" — https://raw.githubusercontent.com/sanni/cartreader/master/sd/nes.txt
+- 対応マッパー表 `mapsize[]`: 196 エントリ（0〜999 の iNES 番号、PRG/CHR/RAM サイズ範囲付き）。
+- 使用信号（`setup_NES()`）: "CPU R/W, IRQ, PPU /RD, PPU /A13, CIRAM /CE, PPU /WR, /ROMSEL, PHI2"（PORTF の 8 本）、"A0-A7"（PORTL）、"A8-A14"（PORTA）、"D0-D7"（PORTK）、CIRAM A10 入力（PORTC、内部プルアップ）。`set_address()` は PRG 読み出しでも CHR 読み出しでも同じ PORTL/PORTA に 15 ビットを出し、PPU /A13 だけ別ピンで反転出力。
+- PRG 読み出し `read_prg_byte()`: MODE_READ → PRG_READ（R/W=High）→ ROMSEL_HI → set_address → PHI2_HI → A15 なら ROMSEL_LOW → `_delay_us(1)` → PINK を読む。
+- CHR 読み出し `read_chr_byte()`: PHI2_HI → ROMSEL_HI → set_address → CHR_READ_LOW（PPU /RD=Low）→ `_delay_us(1)` → 読む → CHR_READ_HI。
+- 書き込み `write_prg_byte()`: PHI2 Low → データ出力 → アドレス → PHI2 High → /ROMSEL → 1 µs → PHI2 Low → 1 µs → /ROMSEL High → 読み出しモードへ → "Set phi2 to high state to keep cartridge unreseted"。MMC1 用 5 ビットシリアル書き込み、MMC5 の M2 パルス（`dumpPRG_pulsem2`）、Bandai 24C01/24C02 EEPROM 用ビットバング関数も持つ。
+
+### 推論
+- sanni 方式はコード上 CPU と PPU の**アドレスバスとデータバスをそれぞれ同じ MCU ポートに束ねて**いる（ハード側で配線を共通化していると読める。アダプタ回路図での確認は未実施＝未確認）。この方式なら必要信号は アドレス 15＋データ 8＋制御 8＋CIRAM A10 1＝**32 本**で、分離した 54 本より大幅に少ない。
+- ただし本基板では実 CPU/PPU モード（Mode A）のために CPU バスと PPU バスを分離しておく必要があるため、ダンプ用に束ねることはできない（推論）。
+- マッパー判定は「CRC → データベース」方式が実績ある唯一の汎用手段。DB はフラッシュに置ける規模（約 7,400 件 × 約 12 バイト（CRC+ヘッダ要約）≈ 90 KB、推論）。
+
+## 9. I/O 本数とシフトレジスタによる拡張、ダンプ時間
+
+### Cited Findings
+- 60 ピン Famicom カートの信号（第 1 パス §4 で NESdev から確認済み）: CPU 側 27（A0–A14、D0–D7、M2、R/W、/ROMSEL、/IRQ）、PPU 側 27（A0–A13、D0–D7、/RD、/WR、/A13、CIRAM A10、CIRAM /CE）— https://www.nesdev.org/wiki/Cartridge_connector
+- sanni は 32 本（§8）。
+- 秋月の汎用シフトレジスタ（2026-11-10 取得）:
+
+| 品名 | 型番 | 販売コード | 価格（税込） | 通販在庫 | URL |
+|---|---|---|---|---|---|
+| 8ビットシフトレジスター（DIP） | TC74HC595AP(F) | 131760 | ¥110 | 748 個 | https://akizukidenshi.com/catalog/g/g131760/ |
+| 8ビットシフトレジスター（SOP） | TC74HC595AF | 110077 | ¥50 | 2,540 個 | https://akizukidenshi.com/catalog/g/g110077/ |
+| 8ビットシフトレジスター | U74HC595AG-D16 | 114053 | ¥40 | 500 個（"2月中旬入荷予定" 表記あり） | https://akizukidenshi.com/catalog/g/g114053/ |
+| 8ビットシフトレジスター（DIP） | TC74HC165AP(F) | 114679 | ¥100 | 1,010 個 | https://akizukidenshi.com/catalog/g/g114679/ |
+
+- 74HC595 の fclock（TI SN74HC595, VCC=4.5 V）25 MHz（SN74HC595 列）、74HC165 21〜31 MHz（§6 表）。
+- ダンプ時間の実測値（sanni / ClusterM）: 公開値は見つからず（未確認）。ClusterM famicom-dumper-writer は "this device is very fast"（STM32F103 の FSMC＋EPM3064 CPLD）とのみ記載 — https://github.com/ClusterM/famicom-dumper-writer
+
+### 推論: シフトレジスタ構成とダンプ時間
+- 構成例（GPIO 7 本）: 74HC595 × 5 段（SER/SRCLK/RCLK = 3 本）で CPU A0–A14（15）＋PPU A0–A13（14）＋M2・R/W・/ROMSEL・PPU /RD・PPU /WR・PPU /A13（6）＝ 35 ビットを出力。CPU D0–D7 書き込み用に 74HC595 1 段を追加し /OE を GPIO 1 本で制御。読み取りは 74HC165 × 2 段＋（JAMMA 入力 24〜28 本分 3〜4 段）を SH/LD・CLK・QH の 3 本で。**計 7 本**でカート全信号と JAMMA 入力を扱える。ダンプは静的動作（M2 も /ROMSEL も低速でよい）なので 595 出力で問題ない。ただし MMC5 のように M2 パルスで状態を検出するマッパーや、M2 停止をリセットとみなす MMC 系（sanni の "keep cartridge unreseted" 参照）は、M2 を GPIO 直結にして PIO で連続クロックを出すほうが確実 → +1 本で 8 本。
+- 1 バイトあたり: 595 チェーン 48 ビット＋165 チェーン 16 ビット ≈ 64 クロック。PIO で 10 MHz シフト（74HC の 4.5 V 規格 21〜25 MHz の半分以下）なら約 6.4 µs＋1 µs のアクセス待ち ≈ 7.5 µs/バイト。→ 256 KB（日本カートの 86%）で約 2.0 s、512 KB（99%）で約 3.9 s、最大 1 MB（Metal Slader Glory）で約 7.9 s。シフト 2 MHz に落としても 512 KB で約 17 s。
+- 高速化: CPU D0–D7 を FT GPIO に直結（+8 本、165 不要化）、アドレス下位 8 ビットだけ別チェーンにする、等で 1〜2 µs/バイトまで縮む（256 KB で 0.5 s 前後）。
+
+## 10. メモリ: カート容量 vs RP2350 RAM / Pico 2 フラッシュ、および大容量カート時の選択肢
+
+### Cited Findings
+- RP2350: "520 kB on-chip SRAM, in 10 independent banks"、"Up to 16 MB of external QSPI flash or PSRAM through dedicated QSPI bus"、"Additional 16 MB flash or PSRAM through optional second chip-select" — RP2350 Datasheet p.13
+- Pico 2: "RP2350A microcontroller with 4 MB flash"、フラッシュは "Winbond W25Q32RV" — Pico 2 Datasheet p.3–4
+- Winbond W25Q32JV（Pico 2 の W25Q32RV とは別品種、参考値）: "Min. 100K Program-Erase cycles per sector"、"More than 20-year data retention"、tPP 0.4 ms typ / 3 ms max（256 B ページ）、tSE（4 KB）45 ms typ / 400 ms max、tBE2（64 KB）150 ms typ / 2,000 ms max — https://www.winbond.com/resource-files/w25q32jv%20revg%2003272018%20plus.pdf （W25Q32RV のデータシートは winbond.com から PDF として取得できず未確認）
+- pico-infonesPlus: PSRAM 無しでは "the ROM is written to flash memory during startup … taking several seconds"、PSRAM 有りでは直接 PSRAM へ — §5
+- 秋月で買える RP2350 系（2026-11-10 取得。価格は税込、在庫は「通販購入可能数」）:
+
+| 品名 | 型番 | 販売コード | 価格 | 在庫 | GPIO / メモリ（秋月記載） | URL |
+|---|---|---|---|---|---|---|
+| Raspberry Pi Pico 2 | SC1631 | 129604 | ¥990 | 1,462 | GPIO 26、4 MB flash、520 kB | https://akizukidenshi.com/catalog/g/g129604/ |
+| Raspberry Pi Pico 2 H(完成品) | SC1632 | 130982 | ¥1,180 | 53（在庫僅少） | GPIO 26 | https://akizukidenshi.com/catalog/g/g130982/ |
+| Seeed XIAO RP2350 | 102010550 | 129619 | ¥1,100 | 308 | "19のGPIO"、2 MB flash | https://akizukidenshi.com/catalog/g/g129619/ |
+| Tiny 2350 (Pimoroni) | PIM721 | 130201 | ¥1,600 | 17 | GPIO 12、4 MB | https://akizukidenshi.com/catalog/g/g130201/ |
+| Plasma 2350 (Pimoroni) | PIM723 | 130202 | ¥2,340 | 37 | GPIO 15、4 MB | https://akizukidenshi.com/catalog/g/g130202/ |
+| W5100S-EVB-Pico2 (WIZnet) | W5100S-EVB-Pico2 | 130218 | ¥2,420 | 73 | 秋月表記 "GPIO：48"（Pico 形状のため誤記の可能性、未確認） | https://akizukidenshi.com/catalog/g/g130218/ |
+| RP2350A（チップ単体、QFN60） | SC1509 | 130369 | ¥190 | 521 | GPIO 30 | https://akizukidenshi.com/catalog/g/g130369/ |
+| RP2350B（チップ単体、QFN80） | SC1510 | 130370 | ¥220 | 242 | GPIO 48 | https://akizukidenshi.com/catalog/g/g130370/ |
+| RP2354A（2 MB flash 内蔵、QFN60） | SC1511 | 131439 | ¥250 | 281 | GPIO 30 | https://akizukidenshi.com/catalog/g/g131439/ |
+| RP2354B（2 MB flash 内蔵、QFN80） | SC1512 | 131441 | ¥280 | 115 | GPIO 48 | https://akizukidenshi.com/catalog/g/g131441/ |
+| RP2350A実装基板（秋月製 QFN60 変換基板） | AE-QFN60-7X7-0.4(RP2350A) | 131106 | ¥450 | 189 | GPIO 30 | https://akizukidenshi.com/catalog/g/g131106/ |
+| Pimoroni Pico LiPo - 16MB（**RP2040**、参考） | PIM560 | 116997 | ¥1,480 | 170 | — | https://akizukidenshi.com/catalog/g/g116997/ |
+
+- 秋月の検索（キーワード "PSRAM"、"APS6404"、"ESP-PSRAM64"、"LY68L6400"、"Pico Plus"、"RP2350B"、"SRAM"）では、**RP2350B 搭載の完成ボード、PSRAM 搭載の RP2350 ボード、QSPI PSRAM チップ単体はいずれもヒットせず**（"SRAM" では 23LC512-I/P（SPI SRAM 64 KB）、M68AF127B（1 Mb パラレル SRAM）のみ）— https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=PSRAM&search=search ほか
+
+### 推論
+- 日本カートの 86%（≤256 KB）は PRG+CHR をそのまま RP2350 の SRAM に置けるが、エミュレータ本体の作業領域（フレームバッファ、CHR-RAM 8 KB、WRAM 8 KB、音声バッファ等）を考えると SRAM 内に収められるのは 256 KB 程度までが現実的。それ以上（14%）はフラッシュ（XIP）に書くか PSRAM が必要。
+- フラッシュ摩耗: 電源投入ごとに無条件に書き直しても 100K 回 ÷ 1 日 1 回 ≒ 270 年、1 日 10 回でも約 27 年で、ゲームセンター用途では寿命上の問題にならない。さらに「ダンプ CRC がフラッシュ上の既存イメージと同じなら書かない」にすれば実質書き込みはカート交換時だけ。書き込み時間は 512 KB で 64 KB ブロック消去 8 回（typ 1.2 s）＋2048 ページ（typ 0.8 s）≈ 2 s（typ）、最悪値では 16 s＋6 s。
+- オンデマンド読み出し（エミュレータが毎アクセスでカートを読む）は、6502 の命令フェッチ毎にシフトレジスタ往復（数 µs）が入るため実時間エミュレーション（1 命令 ≒ 1〜4 µs 相当の実機時間）には遅すぎる。CPU D0–7 と A0–A14 を全て GPIO 直結すれば理屈上は可能だがピンが足りない（推論）。→ 選択肢は「SRAM に全部載る小容量はRAM、それ以上はフラッシュ XIP」の 2 段構え。
+- PSRAM: 秋月で入手できないため、ユーザーの調達ルールでは採れない（LCSC/JLCPCB の PSRAM の Basic 可否は本調査範囲外、未確認）。
+
+## 11. 起動時間と電源断耐性: Pico ファーム vs Linux Pi
+
+### Cited Findings
+- IronOxidizer/instant-pi（電源投入→ユーザ空間、±0.3 s）: Pi Zero W で "RPi OS Full 70 / Buildroot 10.5 / Buildroot Instant Pi 4.7 / CD Bootloader Overhead 4.1" 秒、Pi 1B で 77 / 13.0 / 5.9 / 4.3 秒。Pi Zero 2 W と 4B の欄は空欄 — https://github.com/IronOxidizer/instant-pi （README）
+- furkantokac（Pi 3、高速度カメラで計測、2021-03-29 公開）: "Linux shell in 1.75 seconds, power-up to Qt (QML) application in 2.82 seconds"。内訳: Raspberry boot stage 1.25 s（変更不可）、start.elf 0.25 s、kernel 0.25 s、init 0、Qt アプリ 1.07 s。既定 Buildroot では合計 10.17 s — https://www.furkantokac.com/rpi3-fast-boot-less-than-2-seconds/
+- 読み取り専用 root: raspi-config の Overlay File System 等（第 1 パス §1 で確認済みの出典）— https://github.com/raspberrypi/bookworm-feedback/issues/137 ／ https://learn.adafruit.com/read-only-raspberry-pi
+- RP2350 ブートは ROM 内のブートロム → フラッシュの A/B パーティション＋TBYB（第 1 パス §7）。Pico 2 Datasheet: "The USB boot code is stored in ROM on RP2350, so can not be accidentally overwritten."
+
+### 推論
+- Pi Zero 2 W は Pi 3 と同系 SoC（BCM2710A1）なので、Buildroot 最小構成で 2〜5 秒、Raspberry Pi OS Lite なら数十秒が目安（Zero 2 W 自体の実測値は見つからず未確認）。Pico 2 は電源投入から main() まで数十 ms オーダー（データシートに数値記載なし、未確認）で、ゲーム開始までの時間はカートダンプ時間（§9: 256 KB で約 2 s）が支配的。
+- 電源断: Pico は FS を持たず、フラッシュ書き込み中（カート交換直後のみ）以外は電源断で壊れる要素がない。書き込み中の断も「書き込み完了フラグ＋CRC 検査で起動時に再ダンプ」で回復可能。Linux は読み取り専用 root にしても SD カードのコントローラ自体の電源断耐性に依存する。
+
+## 12. 第 1 パス主張の検証表
+
+| # | 第 1 パスの主張（raspberry_pi_emulation_path.md） | 判定 | 一次資料の原文・根拠 |
+|---|---|---|---|
+| 1 | RP2350 FT ピンは IOVDD=3.3 V 給電中に限り 5.5 V まで耐える | **検証済** | "they will tolerate voltages up to 5.5 V, provided IOVDD is powered to 3.3 V"（RP2350 DS Table 1673, p.1331）、VPIN_FT 5.5 V（IOVDD=3.3 V）（Table 1680, p.1335） |
+| 2 | 非 ADC GPIO（RP2350A: GPIO0–25、RP2350B: GPIO0–39）が FT、ADC 兼用ピンは非 FT | **検証済** | Table 1674（p.1332–1333） |
+| 3 | Pico 2 で 5 V 直結可は GPIO0–22 の 23 本、GPIO26–28 不可 | **検証済** | Pico 2 DS p.14 "exposes 26 of the 30 … GPIO0 to GPIO22 are digital only and GPIO 26-28 …"、ADC ピンは "must not exceed IOVDD plus about 300 mV" |
+| 4 | Pico 2 DS「GPIO0–25 は RP2350 無給電時も電圧印加可」 | **補足訂正** | 原文は正しいが、上限は "3.3 V-failsafe (unpowered)"（DS p.13）、VPIN_FT は IOVDD=0V で 3.63 V（Table 1680）。**無給電中の 5 V 印加は不可** |
+| 5 | E9 は A2 のみ、A3 で修正、量産は A4 | **検証済** | D.5.1 "Affects RP2350 A2"、"Fixed by RP2350 A3, Documentation"、Table 7 "A4 Production version" |
+| 6 | E9 の内容（約 120 µA、約 2.2 V、8.2 kΩ 以下で回避、プルアップは正常） | **検証済** | D.5.1 原文（§2） |
+| 7 | 日本で 2026 年末に売られる Pico 2 のステッピング | **未確認** | 秋月 129604 の商品ページに記載なし。公式は "Eventually all Pico 2 products will use the A4 stepping" のみ |
+| 8 | 3.3 V 出力で 5 V CMOS（74HC）入力を駆動するのは危険、74HCT が安全 | **検証済（数値追加）** | RP2350 VOH min 2.62 V（Table 1683）vs 74HC VIH 3.15 V@4.5 V（TI SN74HC595 §6.3）、74HCT VIH 2 V（TI SN74HCT245） |
+| 9 | 2A03/2C02 入力は TTL しきい値 | **一次資料なし（二次・実験のみ）** | 既存ノート famicom_electrical_and_pitfalls.md の NESdev 引用のみ。公式データシートは存在確認できず |
+| 10 | PIO 3 ブロック×4 SM、1 命令/クロック、2 段同期器と INPUT_SYNC_BYPASS | **検証済** | RP2350 DS §11（§4 表） |
+| 11 | 最大システムクロック | **検証済: 150 MHz** | "a 150 MHz system clock, the maximum supported on RP2350"（p.531）。pico-infonesPlus は 252 MHz 動作（定格外） |
+| 12 | pico-infonesPlus: RP2040/RP2350 対応、DVI/HDMI のみ、SD 読込、PSRAM 無しはフラッシュ書込、GPL-3.0 | **検証済**（リポジトリは PicoPlus-devel へ移管、v0.56） | README / LICENSE |
+| 13 | pico-infonesPlus のマッパーは 0/1/2/3/4/5/24/69/85 等 | **訂正** | MapperTable は 157 エントリ（§5 に全列挙）。日本ライセンス品で使われる 58 マッパー全てを含む |
+| 14 | VRC7 は RP2350＋PSRAM＋オーバークロック必須、時々グリッチ | **検証済** | README Known Issues |
+| 15 | pico_scanvideo_dpi はタイミング変更で 15 kHz に流用可能 | **部分訂正** | 15 kHz プリセット無し、timing 構造体に CSync・インターレース項目無し。自作タイミング＋PIO 改造が必要 |
+| 16 | PICO9918 は PIO で VGA または SCART RGB、12 ビット RGB | **検証済＋詳細** | 4 bit/色、3.9k/1.8k/910/470 Ω、Sync 47 Ω、SCART は 480i/576i インターレース 13.5 MHz、CSync は HSYNC ピンから |
+| 17 | sanni: 8 KB CRC32 → nes.txt、無ければ手動選択、PHI2→/ROMSEL→1 µs で読む | **検証済（表現を精密化）** | CPU $8000 と $E000 の各 8 KB を CRC。読み出しシーケンスはコード通り |
+| 18 | sanni リポジトリは 2026-06-15 にアーカイブ | **検証済** | GitHub 表示 "archived by the owner on Jun 15, 2026" |
+| 19 | Famicom カートは約 54 信号 | **検証済** | NESdev Cartridge connector（第 1 パス）。sanni はバス共通化で 32 本 |
+| 20 | RP2350B 搭載ボードの秋月在庫は部品担当の確認事項 | **今回確認** | 秋月に RP2350B はチップ単体（130370、¥220）のみ。RP2350B 完成ボード・PSRAM 搭載ボードは検索でヒットせず |
+| 21 | 読み出しは 1 バイト数 µs、512 KB で数秒以内 | **推論のまま（計算根拠を追加）** | §9: 7.5 µs/バイトで 512 KB ≈ 3.9 s。実測値は未確認 |
+| 22 | Linux Pi の起動時間 | **一部確認** | Pi Zero W 最小 4.7 s（instant-pi）、Pi 3 最小 1.75 s（shell）/2.82 s（Qt アプリ）。Zero 2 W の実測は未確認 |
+
+## 13. 結論: Pico 2 1 個で足りるか（推論）
+
+**推論**: エミュレーション＋起動時ダンプ方式（Mode B、ドナー無し）なら Pico 2 1 個で足りる。実 CPU/PPU＋Pico による RGB 生成（Mode A）は、RGB 化の方式次第で 1 個では足りない可能性が高い。
+
+### Mode B（エミュレーション）の GPIO 予算（Pico 2: 5 V 可 23 本＋3.3 V 専用 3 本＝26 本）
+| 用途 | 本数 | 5 V 接続 | 備考 |
+|---|---|---|---|
+| RGB DAC 4 bit×3 | 12 | 不要（抵抗のみ） | GPIO26–28 の 3 本はここに割当て可。3 bit×3 なら 9 本 |
+| CSync | 1 | 不要 | PICO9918 同様 PIO で生成 |
+| 音声 PWM | 1 | 不要 | RC フィルタ→アンプ |
+| 74HC595 チェーン（SER/SRCLK/RCLK） | 3 | 74HC 側は 5 V 給電 → 3.3 V 入力は保証外。**74HCT595 にするか 595 を 3.3 V 給電**（§6） | カート アドレス 29 本・制御 6 本・コインカウンタ等 |
+| CPU データ書き込み用 595 の /OE | 1 | 同上 | マッパーレジスタ書き込み用 |
+| 74HC165 チェーン（SH/LD/CLK/QH） | 3 | QH（5 V）→ FT ピンは可（IOVDD 給電中のみ） | CPU D0–7、PPU D0–7、CIRAM A10、JAMMA 入力 24〜28 |
+| M2 直結（PIO で連続クロック） | 1 | 5 V 側入力が TTL しきい値なら直結可（マッパー IC は未確認）→ 74HCT 経由が安全 | MMC5/MMC3 のリセット検出対策 |
+| **小計** | **22** | | 残り 4 本（サービス/テスト SW 直結、/IRQ 監視、予備） |
+
+- 処理能力: pico-infonesPlus は 252 MHz（定格 150 MHz の 1.68 倍）で動いており、業務用で連続運転する際の定格外動作がリスク。150 MHz で全速動作するかは未確認。
+- メモリ: 日本カートの 86% は SRAM に、残りはフラッシュ XIP に置く。PSRAM は秋月で入手不可。
+- カバー率: マッパー上位 5 種で 71%、10 種で 82%、15 種で 88%（nesdir 881 本標本）。ダンプ用のバンク切替ドライバとエミュレータ側の実装を両方書く必要があるので、「N 種サポート」の N は両方の実装数で決まる。拡張音源はエミュレータ側で再現（VRC6/N163/5B/MMC5 は pico-infonesPlus に実装済み、VRC7 は不安定）。
+- 5 V 電源シーケンス: Pico の 3.3 V が立つ前に 5 V 信号が FT ピンに来ないよう、595/165/バッファの /OE または電源を Pico の 3V3 で制御する（§1 推論）。
+
+### Mode A（実 CPU/PPU）
+- 既存ノート rgb_from_rp2c02.md の見積もりでは EXT 方式 RGB 化に 30〜35 本必要で、Pico 2（26 本）では不足。RP2350B（48 GPIO）は秋月でチップ単体のみ（QFN-80、PCBA 側で実装なら JLC では Extended＝既存ノート parts_class_reverification.md）。→ Mode A でも Pico 2 1 個で済ませるなら、RGB 化をカラールックアップの外付け化や 3 bit×3 DAC への削減、595 経由化などで本数を削る設計が必要（推論）。
+
+## 14. 既存ノートへの訂正
+- raspberry_pi_emulation_path.md §1 Inferences「既存 InfoNES 系はマッパー 0/1/2/3/4/5/24/69/85 等をカバー」→ pico-infonesPlus の MapperTable は 157 マッパー（6 はコメントアウト、85 は RP2350 のみ）。日本ライセンス品の 58 マッパーは全て登録済み（§5, §7）。
+- 同 §1 Cited Findings の URL https://github.com/fhoedemakers/pico-infonesPlus → 現在は https://github.com/PicoPlus-devel/pico-infonesPlus （README 内リンクも PicoPlus-devel を指す）。最新 v0.56（2026-11-08）。
+- 同 §5 で引用された Pico 2 DS の「無給電でも GPIO0–25 に電圧を印加できる」は 3.63 V 以下に限る（RP2350 DS "3.3 V-failsafe (unpowered)"、VPIN_FT IOVDD=0V で 3.63 V）。第 1 パスの推論（無給電中の 5 V 印加は違反）は正しいが、引用文だけ読むと誤解を招くため明記する。
+- 同 §3「pico_scanvideo_dpi はタイミングを 15.7 kHz/60 Hz に変更すれば理論上流用可能」→ 定義済みモードは全て 31 kHz 以上、timing 構造体に CSync/インターレース項目なし。HSYNC/VSYNC 別出力しかないので CSync は PIO プログラム改造か外付けゲートが必要。
+- 同 §3「PICO9918 … SCART RGB」→ SCART 出力は 480i/576i の**インターレース**（13.5 MHz）で 240p ではない。JAMMA 用 240p の直接の前例ではない。
+- 同 §4「PRG の最終 8 KB（$8000 と、MMC3 用に $E000）の CRC32」→ 正確には CPU $8000–$9FFF と $E000–$FFFF の 2 つの 8 KB 窓をそれぞれ CRC32 し、DB の 8 KB CRC 欄と照合（どちらかが一致すればよい）。
+- 同 §5 Gaps「Akizuki で入手できる Pico 2 の現行ステッピング」→ 秋月の商品ページには記載が無いことを確認（依然として未確認）。
+- rgb_round2_details.md の「ADC 兼用ピン除外は未確認」→ RP2350 DS Table 1674 で GPIO26–29（RP2350A）が "Digital IO / Analogue"（FT ではない）と確認済み。
+
+## 15. 未確認事項
+- 2026 年 11 月に秋月等で販売中の Pico 2 のステッピング（A2/A3/A4）。購入品の刻印確認が必要。
+- 2A03 / 2C02 の入力しきい値の一次資料、およびカート内マッパー IC（MMC1/MMC3/VRC 等）と 74xx161/74xx32 が LS か HC か（3.3 V 直結の可否）。
+- sanni アダプタ基板で CPU/PPU バスを物理的に共通化しているかの回路図確認（コードからの推論のみ）。
+- 日本カート約 1,053 本のうち nesdir 未収録の約 170 本のマッパー分布。nescartdb.com は Cloudflare によりアクセス不可。
+- Pico 2 の W25Q32RV の書き換え耐性（W25Q32JV の 100K 回を参考値として使用）。
+- Pi Zero 2 W の最小 Linux 起動時間の実測値、Pico 2 の電源投入→main() の時間。
+- pico-infonesPlus が 150 MHz（定格）で全速動作するか、および InfoNES 系のテスト ROM 通過率。
+- シフトレジスタ方式の実ダンプ時間（実測なし、§9 は計算値）。
+- 秋月 W5100S-EVB-Pico2 の "GPIO：48" 表記の真偽。
+- Web 検索はセッション上限に達したため、後半（ダンプ速度の実例、Zero 2 W 起動時間）は既知 URL の直接取得のみで調査した。
