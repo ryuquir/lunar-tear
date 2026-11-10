@@ -11,6 +11,8 @@ Without options the track width, clearance and via size come from the design fil
   --no-rip             only use free room (no track of another net is removed)
   --only NET           work on the open connections of one net
   --protect NET,NET    tracks of these nets are never removed
+The routes of this tool end at the first grid cell inside the target pad, a few hundredths of a millimetre from its
+edge: run anchor_tracks.py afterwards (finish_package.sh does), which carries such ends on to the pad centre.
 On a crowded board the plain mode can run away: every route it forces through removes tracks of other nets, which
 then need a route themselves. close_open.py drives this tool one connection at a time and keeps a step only when
 the number of open connections went down.

@@ -131,7 +131,7 @@ def add_finger_mask(board):
     x0, x1 = TAB_X0, TAB_X0 + TAB_W
     for layer in (pcbnew.F_Mask, pcbnew.B_Mask):
         s = pcbnew.FP_SHAPE(fp); s.SetShape(pcbnew.SHAPE_T_RECT); s.SetLayer(layer); s.SetFilled(True); s.SetWidth(0)
-        s.SetStart(mm(x0 - 0.5, BODY_H + FINGER_KEEP)); s.SetEnd(mm(x1 + 0.5, TOTAL_H + 0.5)); s.SetLocalCoord()
+        s.SetStart(um(x0 - 0.5, BODY_H + FINGER_KEEP)); s.SetEnd(um(x1 + 0.5, TOTAL_H + 0.5)); s.SetLocalCoord()
         fp.Add(s)
     fp.SetAttributes(fp.GetAttributes() | pcbnew.FP_ALLOW_SOLDERMASK_BRIDGES)
     return 2
