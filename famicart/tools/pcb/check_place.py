@@ -9,6 +9,9 @@ its USB overhang; other parts: courtyard, else pads/graphics bounding box) and c
 and for every pad (also the part of a module's pads that lies outside its body): same edge margin, off the keep-outs
 of its side. Nothing but the card edge J1 may reach lower than shells.TAB_BAND above the shoulder (the shell closes
 around the tab base): module bodies, USB connectors, courtyards and pads are all held to that line.
+Outlines prepared for JLCPCB (shells.hvc_large with relief / side_inset, rev G on): the left and right edges carry the
+assembly edge rails, normally joined by V-cut, and JLCPCB wants copper at least 0.4 mm from a V-cut edge, so bodies and
+pads keep FC_SIDE_MARGIN (0.4 mm) from those two edges.
 Exit status 1 when anything fails.   FC_DESIGN=design_reve2 FC_HW_DIR=... python3 check_place.py"""
 import os, sys, importlib
 import numpy as np
@@ -20,6 +23,7 @@ D = importlib.import_module(os.environ.get('FC_DESIGN', 'design'))
 HW = os.path.abspath(os.environ['FC_HW_DIR'])
 SH = getattr(D, 'SHELL', None)
 G = 0.05; MARGIN = float(os.environ.get('FC_EDGE_MARGIN', '0.3'))
+SIDE = float(os.environ.get('FC_SIDE_MARGIN', '0.4'))                                # to a V-cut (edge rail) side edge
 BODY = {'RPi_Pico_SMD': 1.6, 'RPi_Pico_SMD_Short': 1.6, 'XIAO-RP2350-Edge': 1.0}      # modules: USB connector overhang past the marked end (mm)
 
 def pip(px, py, poly):
@@ -48,6 +52,9 @@ def main():
     for dx in range(-k, k + 1):
         for dy in range(-k, k + 1):
             if dx * dx + dy * dy <= k * k: ok &= np.roll(np.roll(board, dy, 0), dx, 1)
+    side_lo, side_hi = (SH.get('edge_x') or (0.0, 90.0)) if SH else (0.0, 90.0)
+    sm = max(MARGIN, SIDE) if (SH and SH.get('fillets')) else MARGIN       # JLCPCB outline: wider margin to the side edges
+    ok &= (PX >= side_lo + sm - 1e-9) & (PX <= side_hi - sm + 1e-9)
     ko = {'F': np.zeros(board.shape, bool), 'B': np.zeros(board.shape, bool)}
     for side, p in (SH['comp_keepouts'] if SH else []): ko[side] |= pip(PX, PY, p)
     occ = {'F': np.zeros(board.shape, int), 'B': np.zeros(board.shape, int)}
@@ -84,7 +91,7 @@ def main():
             if usb:   # the connector may stick out past the LEFT/RIGHT board edge (shell side clearance), and past the top
                       # edge where the shell says so (shells.py usb_top), nowhere else
                 u = (PX >= usb[0]) & (PX <= usb[2]) & (PY >= usb[1]) & (PY <= usb[3])
-                side_out = (PX < MARGIN + G) | (PX > 90 - MARGIN - G)
+                side_out = (PX < side_lo + sm + G) | (PX > side_hi - sm - G)
                 if SH and SH.get('usb_top'): side_out |= (PY < MARGIN + G) & (PX >= SH['usb_top'][0]) & (PX <= SH['usb_top'][1])
                 if (u & ~ok & ~side_out).any(): bad.append(f'{ref} ({side}) USB connector leaves the board other than past a side edge')
                 if (u & ko[side]).any(): bad.append(f'{ref} ({side}) USB connector on a shell keep-out')

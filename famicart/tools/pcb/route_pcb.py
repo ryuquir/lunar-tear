@@ -25,8 +25,7 @@ def main():
     gen_pcb.main()                     # always start from a freshly generated, unrouted board
     board = pcbnew.LoadBoard(PCB)
     dsn = os.path.join(WORK, 'famicart.dsn'); ses = os.path.join(WORK, 'famicart.ses')
-    TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
-    VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
+    TRK, CLR, VIA, VDR = gen_pcb.rules()
     n = dsn_export.export(board, dsn, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR)
     print('DSN written with', n, 'nets')
     pre = os.environ.get('FC_SES')            # import an existing session file instead of running the router
@@ -85,6 +84,7 @@ def report_and_export(board=None, inner=True):
     """DRC report + fab outputs (gerbers, drill, PDFs/PNGs) for the board at PCB. Also used after finish_route.py."""
     if board is None:
         board = pcbnew.LoadBoard(PCB); pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
+        pcbnew.SaveBoard(PCB, board)                # the exports below read the file: it must carry the fills
     drc = os.path.join(HW, 'drc_report.txt')
     pcbnew.WriteDRCReport(board, drc, pcbnew.EDA_UNITS_MILLIMETRES, True)
     txt = open(drc).read()

@@ -110,6 +110,14 @@ void tm_ram(int *checks, int *fails) {
     TM_CHECK(cart_ppu_read(&c, 0x2000) == 0x99, "mmc5: ExRAM is the nametable in mode 0");
     wr(0x5105, 0xFF);
     TM_CHECK(cart_ppu_read(&c, 0x2000) == 0x42 && cart_ppu_read(&c, 0x23C0) == 0x55, "mmc5: fill mode still works");
+    cart_ppu_write(&c, 0x2005, 0x99);                /* the PPU writes into a fill-mode nametable: nothing to store it */
+    TM_CHECK(cart_ppu_read(&c, 0x2005) == 0x42, "mmc5: a PPU write cannot change the fill page (got %02X)", cart_ppu_read(&c, 0x2005));
+    wr(0x5105, 0xAA); wr(0x5104, 2);
+    cart_ppu_write(&c, 0x2005, 0x99);
+    TM_CHECK(cart_ppu_read(&c, 0x2005) == 0x00, "mmc5: ... nor the all-zero page");
+    wr(0x5104, 0);
+    cart_ppu_write(&c, 0x2005, 0x99);
+    TM_CHECK(cart_ppu_read(&c, 0x2005) == 0x99 && c.exram[5] == 0x99, "mmc5: ExRAM as a nametable is writable by the PPU");
 
     /* ================= VRC2 / VRC4 with RAM ================= */
     static const uint16_t vrc[] = { 21, 22, 23, 25 };
@@ -150,6 +158,13 @@ void tm_ram(int *checks, int *fails) {
     TM_CHECK(c.exram && c.exram[5] == 0xD1 && c.exram[6] == 0xD2, "n163: chip RAM port with auto-increment");
     wr(0xF800, 0x05);
     TM_CHECK(rd0(0x4800) == 0xD1 && rd0(0x4800) == 0xD1, "n163: chip RAM read without auto-increment");
+    /* CHR-ROM pages used as nametables are read-only: a PPU write must not change the ROM image held in RAM */
+    wr(0xC000, 0x05);                                /* nametable 0 = CHR-ROM page 5 */
+    TM_CHECK(cart_ppu_read(&c, 0x2000) == 0x05, "n163: CHR-ROM page as nametable");
+    cart_ppu_write(&c, 0x2000, 0xEE);
+    TM_CHECK(cart_ppu_read(&c, 0x2000) == 0x05 && tm_chr[5 * 1024] == 0x05, "n163: PPU write to a CHR-ROM nametable is dropped (got %02X)", cart_ppu_read(&c, 0x2000));
+    wr(0xC000, 0xE0);                                /* back to the console's nametable RAM */
+    TM_CHECK(tm_nt(&c, 0) == 0, "n163: nametable 0 back on CIRAM");
     /* battery but no external RAM in the database: the game saves in the 128 bytes of chip RAM */
     TM_CHECK(load(19, 0, 128, 128, 0, 0, true), "n163 battery / no WRAM load");
     TM_CHECK(c.wram == NULL && c.prg_map[3] == NULL, "n163: no external RAM invented for a chip-RAM-only cart (%u bytes)", (unsigned)c.wram_size);

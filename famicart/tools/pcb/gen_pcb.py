@@ -53,11 +53,46 @@ TAB_X0 = (BOARD_W - TAB_W) / 2          # 5.8
 TOTAL_H = BODY_H + TAB_H                 # 46.1 (rev A-E)
 CHAMFER = 1.0
 
+def rules():
+    """(track, clearance, via diameter, via drill) in mm: the FC_TRACK / FC_CLEAR / FC_VIA / FC_VIA_DRILL environment
+    variables, else the design's TRACK / CLEAR / VIA_DIA / VIA_DRILL, else the values used up to rev F2."""
+    g = lambda env, attr, d: float(os.environ.get(env, getattr(D, attr, d)))
+    return g('FC_TRACK', 'TRACK', 0.15), g('FC_CLEAR', 'CLEAR', 0.15), g('FC_VIA', 'VIA_DIA', 0.5), g('FC_VIA_DRILL', 'VIA_DRILL', 0.25)
+
+JLC = bool(getattr(D, 'JLC_RULES', False))      # rev G on: silk minimums, no paste on hand-soldered parts (see main)
+SILK_MIN_LINE, SILK_MIN_TEXT = 0.15, 1.0        # JLCPCB: silkscreen line >= 0.15 mm, text height >= 1.0 mm
+
 def mm(x, y): return VECTOR2I(FromMM(x), FromMM(y))
 
 def add_seg(board, x1, y1, x2, y2, layer=pcbnew.Edge_Cuts, w=0.1):
     s = pcbnew.PCB_SHAPE(board); s.SetShape(pcbnew.SHAPE_T_SEGMENT)
     s.SetStart(mm(x1, y1)); s.SetEnd(mm(x2, y2)); s.SetLayer(layer); s.SetWidth(FromMM(w)); board.Add(s)
+
+def add_arc(board, start, mid, end, layer=pcbnew.Edge_Cuts, w=0.1):
+    s = pcbnew.PCB_SHAPE(board); s.SetShape(pcbnew.SHAPE_T_ARC)
+    s.SetArcGeometry(mm(*start), mm(*mid), mm(*end)); s.SetLayer(layer); s.SetWidth(FromMM(w)); board.Add(s)
+
+def add_outline(board, pts, fillets=(), r=0.0):
+    """Closed polygon on Edge.Cuts. Vertices listed in `fillets` (concave corners) are drawn as arcs of radius r:
+    a router bit cannot cut a sharp inner corner, so the radius is part of the drawing."""
+    import math
+    pts = [tuple(p) for p in pts]
+    if pts[0] == pts[-1]: pts = pts[:-1]
+    n = len(pts); isf = lambda p: r > 0 and any(abs(p[0] - f[0]) < 1e-6 and abs(p[1] - f[1]) < 1e-6 for f in fillets)
+    ends = []                      # per vertex: (point where the incoming edge ends, point where the outgoing edge starts)
+    for i, v in enumerate(pts):
+        if not isf(v): ends.append((v, v)); continue
+        a, b = pts[i - 1], pts[(i + 1) % n]
+        ua = ((a[0] - v[0]), (a[1] - v[1])); la = math.hypot(*ua); ua = (ua[0] / la, ua[1] / la)
+        ub = ((b[0] - v[0]), (b[1] - v[1])); lb = math.hypot(*ub); ub = (ub[0] / lb, ub[1] / lb)
+        assert abs(ua[0] * ub[0] + ua[1] * ub[1]) < 1e-9 and la > 2 * r and lb > 2 * r, 'fillets are for right-angle corners with room for the radius'
+        A = (v[0] + r * ua[0], v[1] + r * ua[1]); B = (v[0] + r * ub[0], v[1] + r * ub[1])
+        C = (v[0] + r * (ua[0] + ub[0]), v[1] + r * (ua[1] + ub[1])); k = r / math.sqrt(2.0)
+        add_arc(board, A, (C[0] - k * (ua[0] + ub[0]), C[1] - k * (ua[1] + ub[1])), B)
+        ends.append((A, B))
+    for i in range(n):
+        (_, p0), (p1, _) = ends[i], ends[(i + 1) % n]
+        add_seg(board, p0[0], p0[1], p1[0], p1[1])
 
 def add_text(board, text, x, y, layer, size=1.0, thick=0.15, mirror=False):
     t = pcbnew.PCB_TEXT(board); t.SetText(text); t.SetPosition(mm(x, y)); t.SetLayer(layer)
@@ -88,8 +123,7 @@ def main():
     NL = int(os.environ.get('FC_LAYERS', getattr(D, 'LAYERS', 2)))     # 2, 4 or 6 copper layers
     ds.SetCopperLayerCount(NL)
     ds.SetBoardThickness(FromMM(THICKNESS))
-    TRK = float(os.environ.get('FC_TRACK', '0.15')); CLR = float(os.environ.get('FC_CLEAR', '0.15'))
-    VIA = float(os.environ.get('FC_VIA', '0.5')); VDR = float(os.environ.get('FC_VIA_DRILL', '0.25'))
+    TRK, CLR, VIA, VDR = rules()
     ds.m_TrackMinWidth = FromMM(TRK); ds.m_ViasMinSize = FromMM(VIA); ds.m_MinThroughDrill = FromMM(VDR)
     ds.m_MinClearance = FromMM(CLR); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM((VIA - VDR) / 2 - 0.005); ds.m_HoleClearance = FromMM(0.2)
     ds.m_SolderMaskMinWidth = FromMM(0.0); ds.m_SolderMaskExpansion = FromMM(0.0); ds.m_CopperEdgeClearance = FromMM(0.3)
@@ -119,6 +153,25 @@ def main():
             t.SetPosition(mm(0, 6.0 if 'Pico' in fpname else 2.0)); t.SetLocalCoord()
             t.SetTextAngleDegrees(90); t.SetKeepUpright(True)
             fp.Add(t)
+        if JLC:
+            # JLCPCB silkscreen minimums (line 0.15 mm, text height 1.0 mm): KiCad's library footprints use 0.12 mm lines
+            for g in fp.GraphicalItems():
+                if g.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS): continue
+                if 'TEXT' in g.GetClass():
+                    ts = max(ToMM(g.GetTextSize().x), ToMM(g.GetTextSize().y), SILK_MIN_TEXT) if min(ToMM(g.GetTextSize().x), ToMM(g.GetTextSize().y)) < SILK_MIN_TEXT else None
+                    if ts: g.SetTextSize(VECTOR2I(FromMM(ts), FromMM(ts)))
+                    if ToMM(g.GetTextThickness()) < SILK_MIN_LINE: g.SetTextThickness(FromMM(SILK_MIN_LINE))
+                elif ToMM(g.GetWidth()) < SILK_MIN_LINE: g.SetWidth(FromMM(SILK_MIN_LINE))
+            # hand-soldered parts (no LCSC number: modules, card socket, wire pads) get no solder paste: JLCPCB cuts
+            # stencil openings only for the parts it places, and a bare ENIG pad is what hand soldering wants anyway
+            if val.split(' (')[0] not in getattr(D, 'LCSC', {}):
+                for pad in fp.Pads():
+                    ls = pad.GetLayerSet()
+                    if ls.Contains(pcbnew.F_Paste) or ls.Contains(pcbnew.B_Paste):
+                        ls.RemoveLayer(pcbnew.F_Paste); ls.RemoveLayer(pcbnew.B_Paste); pad.SetLayerSet(ls)
+                    # ... and thermal reliefs into the GND pour: a pad that is one piece with the pour is hard to heat with an iron
+                    if 'CardEdge' not in fpname:
+                        pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL); pad.SetThermalSpokeWidth(FromMM(0.4)); pad.SetThermalGap(FromMM(0.3))
         board.Add(fp)
         fp.SetPosition(mm(x, y)); fp.SetOrientationDegrees(rot)
         if side == 'B': fp.Flip(fp.GetPosition(), False)
@@ -310,10 +363,10 @@ def main():
         close = lambda a, b: abs(a[0] - b[0]) < 1e-6 and abs(a[1] - b[1]) < 1e-6
         assert close(body_pts[0], (x0, H)) and close(body_pts[-1], (x1, H)), 'outline_body must run from (x0, H) to (x1, H)'
         pts = [(x1, H), (x1, T - CHAMFER), (x1 - CHAMFER, T), (x0 + CHAMFER, T), (x0, T - CHAMFER), (x0, H)] + [tuple(p) for p in body_pts[1:-1]] + [(x1, H)]
-    for (ax, ay), (bx, by) in zip(pts, pts[1:]): add_seg(board, ax, ay, bx, by)
+    fil, fr = (SHELL.get('fillets', []), SHELL.get('fillet_r', 0.0)) if SHELL else ([], 0.0)
+    add_outline(board, pts, fil, fr)
     for cut in (SHELL['cutouts'] if SHELL else getattr(D, 'CUTOUTS', [])):          # internal cut-outs (shell slot)
-        cp = list(cut) + [cut[0]]
-        for (ax, ay), (bx, by) in zip(cp, cp[1:]): add_seg(board, ax, ay, bx, by)
+        add_outline(board, list(cut), fil, fr)
     # shell screw / boss holes (NPTH): D.HOLES = [(x, y, diameter_mm), ...]
     for i, (hx, hy, hd) in enumerate(getattr(D, 'HOLES', [])):
         fp = pcbnew.FOOTPRINT(board); fp.SetReference('H%d' % (i + 1)); fp.SetValue('shell hole'); fp.SetPosition(mm(hx, hy))
@@ -324,7 +377,7 @@ def main():
         fp.Add(pad); board.Add(fp)
     # soldermask keepout line (fab note): 4 mm below the tab base nothing but fingers
     add_seg(board, x0, H + 4.0, x1, H + 4.0, layer=pcbnew.F_Fab, w=0.1)
-    add_text(board, 'FAB: %.1f mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented' % THICKNESS, 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
+    add_text(board, ('FAB: %.1f mm FR4, ENIG, gold fingers with 30 deg bevel, vias tented' if JLC else 'FAB: %.1f mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented') % THICKNESS, 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
     # board-level silk text: D.SILK_TEXT = [(text, x, y, 'F'|'B', size_mm), ...] (must sit clear of pads: check the DRC
     # report for silk_over_copper); default = the revision on the back, top centre
     for (stxt, sx, sy, sside, ssize) in getattr(D, 'SILK_TEXT', [('famicart %s  (back)' % getattr(D, 'REV', 'rev B'), 45, 2.0, 'B', 1.2)]):

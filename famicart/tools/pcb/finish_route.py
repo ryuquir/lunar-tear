@@ -7,6 +7,7 @@ plane nets (GND on In1, +3V3 on the last inner layer) an island may also be fini
 the plane reliably covers. Re-runs zone fill + DRC after each round.
 
   python3 finish_route.py board.kicad_pcb [--track 0.12] [--clear 0.1] [--via 0.5 --drill 0.2]
+Without options the track width, clearance and via size come from the design file (FC_DESIGN) when it defines them.
 """
 import sys, re, math, heapq, os, argparse, tempfile
 import numpy as np
@@ -14,14 +15,17 @@ import pcbnew
 from pcbnew import ToMM, FromMM, VECTOR2I
 
 ap = argparse.ArgumentParser()
-ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=0.1); ap.add_argument('--clear', type=float, default=0.1)
-ap.add_argument('--via', type=float, default=0.5); ap.add_argument('--drill', type=float, default=0.2)
+ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=None); ap.add_argument('--clear', type=float, default=None)
+ap.add_argument('--via', type=float, default=None); ap.add_argument('--drill', type=float, default=None)
 ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10); ap.add_argument('--cleanup-only', action='store_true')
 args = ap.parse_args()
-G = args.grid; W = args.track; C = args.clear; VR = args.via / 2; DR = args.drill / 2
 import importlib as _il
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-BW, BH = 90.0, float(getattr(_il.import_module(os.environ.get('FC_DESIGN', 'design')), 'BODY_H', 35.4))   # routable body
+_D = _il.import_module(os.environ.get('FC_DESIGN', 'design'))
+# rule values: the command line, else the design's own (rev G on: TRACK / CLEAR / VIA_DIA / VIA_DRILL), else the old defaults
+def _rule(arg, attr, old): return arg if arg is not None else float(getattr(_D, attr, old))
+G = args.grid; W = _rule(args.track, 'TRACK', 0.1); C = _rule(args.clear, 'CLEAR', 0.1); VR = _rule(args.via, 'VIA_DIA', 0.5) / 2; DR = _rule(args.drill, 'VIA_DRILL', 0.2) / 2
+BW, BH = 90.0, float(getattr(_D, 'BODY_H', 35.4))   # routable body
 NX, NY = int(round(BW / G)) + 1, int(round((BH + 10.8) / G)) + 1   # the grid also covers the card-edge tab so finger tracks are representable
 PLANES = {'GND': 'In1.Cu', '+3V3': None}   # +3V3 layer filled in from the board
 

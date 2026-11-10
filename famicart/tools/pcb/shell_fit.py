@@ -179,4 +179,6 @@ def run(sh, label):
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         if name == '.': continue
-        run(shells.hvc_small() if name == 'small' else shells.hvc_large(75.0), name)
+        sh = {'small': shells.hvc_small, 'large': lambda: shells.hvc_large(75.0),
+              'large-jlc': lambda: shells.hvc_large(75.0, relief=0.6, side_inset=0.2)}[name]()     # large-jlc: the outline rev G is made with
+        run(sh, name)

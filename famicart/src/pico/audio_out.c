@@ -1,4 +1,4 @@
-/* Expansion audio output: PWM carrier at sysclk/1024 (~246 kHz), 10-bit samples, fed by DMA
+/* Expansion audio output: PWM carrier at sysclk/1024 (234.4 kHz at 240 MHz, 146.5 kHz at 150 MHz), 10-bit samples, fed by DMA
  * from a ring buffer that the main loop refills from expaudio_render(). The analogue side is
  * a 2-pole RC low-pass into the cartridge audio mix (pin 46) -- see docs/04_hardware.md. */
 #include "board.h"

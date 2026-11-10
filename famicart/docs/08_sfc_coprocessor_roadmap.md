@@ -17,6 +17,7 @@
    - **絵を描くもの（U2）**: Super FX、Cx4。PPU が読む CHR-RAM を U2 自身が持っているので、描いた結果がそのまま画面に出る。
    - どちらもコア 1 はバス応答で埋まっているので、使えるのはコア 0 の空き時間だけ。重いチップ（SA-1・GSU-2）は、コプロセッサ専用のマイコンを足した **rev F** が必要になる見込み。
 4. **権利**: Cx4・DSP-n・ST010/011/018 は、チップ内部のプログラムやデータ ROM（ダンプ）が動作に必要。これは任天堂などの著作物なので同梱できない。代わりに、snes9x のように動作を C で書き直したもの（HLE）を使う。DSP-n は HLE が既にある [6]。ST018 は HLE がない。
+5. **2026-11-10 の再調査（一次資料で確認済み）**: 下の「提供できる範囲」の節にまとめた。要点は、(a) ST018 は HLE がどこにも無く、ST011 は未完成の HLE が 1 つあるだけなので、この 2 つはチップ内蔵 ROM のダンプなしには提供できない、(b) 公開されている HLE はどれもライセンスに条件がある、(c) Cortex-M33 は ARM（A32）命令を実行できないので、ST018 のコードを直接走らせる案は成り立たない、(d) rev G での置き場所は [12](12_rev_g_plan.md) に移した、の 4 点。
 
 ## チップ別の比較と実装方針
 
@@ -30,11 +31,34 @@
 | Super FX（GSU-1/2） | 16 ビット RISC、命令 98 種、レジスタ 16 本 | 10.74 / 21.4 MHz | 約 10 | 不要 | U2 コア 0 で GSU インタプリタ。PLOT 命令の出力先を FC の 2 ビット CHR 形式にする | S3 |
 | Cx4 | 日立 HG51B169 | 20 MHz | 2 | データ ROM 3 KB | 三角関数表を自前で生成し U2 に | S3 |
 | SA-1 | 65C816 + DMA・乗除算・ビットマップ変換 | 10.74 MHz | 35 | 不要 | まず U1 コア 0 で低速版、実用速度は rev F の専用マイコン | S4 |
-| ST010 / ST011 | µPD96050 | 10〜11 / 15 MHz | 各 1 | 52 KB 必要 | HLE のみ（ST011 は将棋エンジンで HLE 困難） | S5 |
-| ST018 | ARMv3（ARM60 系） | 21.44 MHz | 1 | 160 KB 必要 | 「ARM コプロセッサ」として M33 上で ARM 命令を直接実行する案を検討 | S5 |
+| ST010 / ST011 | µPD96050 | 10〜11 / 15 MHz | 各 1 | 52 KB 必要 | ST010 は HLE。ST011 は完成した HLE が無い（下の節） | S5 |
+| ST018 | ARMv3（ARM60 系） | 21.44 MHz | 1 | 160 KB 必要 | HLE が無い。利用者が持つダンプがあれば ARMv3 のインタプリタで動かせるが、実時間にはならない。~~M33 上で ARM 命令を直接実行する案~~ は不可（Cortex-M は A32 命令を持たない）[12] | S5 |
 | BS-X MCC | メモリ制御 | — | 衛星放送 | BIOS 必要 | 対象外（放送が前提） | — |
+| スーパーゲームボーイ（ICD2 ＋ゲームボーイの CPU） | 別のゲーム機 1 台分 | — | — | 起動 ROM 必要 | 対象外 | — |
+| サテラビュー用データパック、スーファミターボ、ニンテンドウパワー（書き換えカセット）、XBAND（モデム） | カセット側の周辺機器 | — | — | — | 対象外（演算チップではない） | — |
 
 クロックの資料間の違い: Super FX は GSU-1 を 10.74 MHz、GSU-2 を 21 MHz とする資料と、21.47 MHz の信号で MARIO Chip 1 だけ 10.74 MHz とする資料がある。ST010 は 10 MHz とする資料と 11 MHz とする資料がある。DSP-1 は 7.6 MHz の記載と、部品の上限 8.192 MHz だけの記載がある [1][2][3]。
+
+## 提供できる範囲（2026-11-10、fullsnes と各エミュレータのソースで確認）
+
+| 区分 | チップ | 提供の形 | 根拠 |
+|---|---|---|---|
+| A. プログラムを外から与えるもの（内蔵 ROM なし） | SA-1（65C816、10.74 MHz）、Super FX（GSU-1／2）、Cx4（日立 HG51B169。内蔵は数表 1024 × 24 ビットだけで、プログラムはゲーム側の ROM にある） | 命令単位のインタプリタ。Cx4 の数表は fullsnes にある式（除算・平方根・正弦・逆正弦・正接・余弦）から生成する | fullsnes [1]、bsnes の数表 [4] |
+| B. 固定機能 | S-DD1、SPC7110（展開・データ ROM ポート・乗除算・RTC-4513）、OBC-1、S-RTC | レジスタ動作の再実装。内蔵プログラムは無い。fullsnes に未解明と書かれたレジスタが一部ある（S-DD1 の $4802／$4803、OBC-1 の $7FF7、SPC7110 の数か所） | fullsnes [1] |
+| C. 内蔵プログラムを持つもの（HLE あり） | DSP-1／1A／1B、DSP-2、DSP-3、DSP-4（NEC µPD77C25。命令 ROM 2048 × 24 ビット、データ ROM 1024 × 16 ビット）、ST010（µPD96050） | コマンド単位の HLE（数マイクロ秒で終わる）。公開実装: snes9x（DSP-1〜4、ST010、Cx4）、ZSNES（DSP-1・3・4、ST010、Cx4、S-DD1、OBC-1）、bsnes（DSP-1・2・4、ST010、Cx4） | 各ソース [5][6][13] |
+| D. 内蔵プログラムを持ち、HLE が無い／未完成 | ST011（µPD96050、将棋ソフト 1 本）、ST018（ARMv3、将棋ソフト 1 本） | **提供できない。** ST011 は ZSNES に未完成の HLE があるだけ（作者自身が「足りない命令が多い」と書いている）。ST018 は snes9x・bsnes 系とも応答の殻だけ。Mesen2・ares・MAME は内蔵 ROM のダンプを使う低位エミュレーションで、ダンプは著作物。利用者が自分のチップから取ったダンプを持つ場合に限り、低位エミュレーションで動かせるが、実時間にはならない | snes9x の seta011.cpp／seta018.cpp、ZSNES の seta11.c、Mesen2・ares のファーム一覧 [3][6][13][14] |
+| E. 対象外 | スーパーゲームボーイ、サテラビュー（BS-X）、スーファミターボ、ニンテンドウパワー、XBAND、MSU-1（当時の製品ではない） | — | fullsnes [1] |
+
+**ライセンス**（公開 HLE を使う場合）:
+
+- snes9x: 非商用に限る（LICENSE: 「for non-commercial purposes」「Snes9x is freeware for PERSONAL USE only」）。これを含むファームを載せたカセットは売れない。
+- ZSNES: GPL バージョン 2 のみ。bsnes: GPL バージョン 3 以降。どちらも、ファームを配るならソースの公開が条件になる。
+- snes9x の DSP-1 と DSP-3 の HLE には、チップのデータ ROM（1024 語の数表）がそのまま入っている。Cx4 の数表は数式から作れるが、DSP の数表が数式だけで再現できるかは未確認。
+- 個人で使う範囲ではどれも使える。配布を考えるなら、公開されている仕様（fullsnes のコマンド表）から書き直すのが確実。
+
+**速度の見通し**（未測定。実機での計測が要る）: RP2350 の 1 コアで、SA-1 は実チップの 0.5〜0.9 倍、Super FX は GSU-1 相当（0.3〜0.8 倍）という命令数からの見積もり。µPD77C25・HG51B169・ARM を命令単位で実時間に再現するのは無理で、DSP・ST010 はコマンド単位の HLE（実チップより速い）で、Cx4 は「数表つきの演算機能」として使う。pico-snesPlus の「Super FX・SA-1 のゲームは 3 フレームに 1 回」は、SNES 全体を再現したうえで外付け PSRAM の帯域が足を引いている数字で、チップ単体の速度ではない [11]。
+
+**市販本数**（fullsnes の章見出しによる）: SA-1 35、Super FX 10（未発売・試作を含む。発売されたのは 8）、Cx4 2、DSP 系と ST010／ST011 を合わせて 23、ST018 1、OBC-1 1、S-DD1 2、SPC7110 3、S-RTC 1。
 
 ## 具体例（FC で何ができるか）
 
@@ -70,3 +94,6 @@
 9. RP2350 product brief — https://datasheets.raspberrypi.com/rp2350/rp2350-product-brief.pdf
 10. Pimoroni: Overclocking the Pico 2 — https://learn-new.pimoroni.com/article/overclocking-the-pico-2
 11. pico-snesPlus — https://github.com/fhoedemakers/pico-snesPlus
+12. Arm ACLE（M プロファイルは A32 命令を持たない）— https://arm-software.github.io/acle/cmse/cmse.html
+13. ZSNES 1.51 のチップ実装（dsp1emu.c、dsp3emu.c、dsp4emu.c、c4emu.c、seta10.c、seta11.c、GPL v2）— https://github.com/emillon/zsnes
+14. Mesen2（内蔵 ROM のファイル一覧。GPL v3）— https://github.com/SourMesen/Mesen2 、 snes9x の LICENSE — https://raw.githubusercontent.com/snes9xgit/snes9x/master/LICENSE

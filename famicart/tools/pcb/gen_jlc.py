@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Produce the JLCPCB order package (PCB + SMT assembly) in hardware/jlcpcb/:
    gerbers.zip, bom_jlc.csv (Comment, Designator, Footprint, LCSC Part #), cpl_jlc.csv (Designator, Mid X, Mid Y, Layer, Rotation).
+A board with gold fingers cannot be ordered as "Economic PCBA" (JLCPCB PCB assembly capabilities: gold fingers "Not
+Support"); it is a "Standard PCBA" order, which needs edge rails and fiducials (JLCPCB adds both). The README written
+next to the files says so and gives the order options and the assembly cost from JLCPCB's price table.
 LCSC part numbers: designs with their own LCSC map (rev E on: Basic parts only) use that map and nothing else;
 older designs read <hw dir>/jlc_parts.json (created from DEFAULT_PARTS on first run; edit it to substitute parts)."""
 import os, sys, csv, json, subprocess, shutil
@@ -19,7 +22,23 @@ PARTS_JSON = os.path.join(HW, 'jlc_parts.json')
 # The 1k x4 array is four identical isolated resistors, so 90 and 270 are the same placement.
 # Do not take SOT-23 from the common "cpl_rotations_db.csv" (-90): that entry does not fit this part.
 # The order preview remains the final check.
-CPL_ROT = {'R_Array_Convex_4x0603': 270, 'SOT-23': 180}
+# SOIC-8 (W25Q128JVSIQ, C97521; rev G): JLCPCB's footprint is named SOIC-8_L5.3-W5.3-P1.27-LS8.0-BL, and by EasyEDA's
+# naming rule the -BL token means pin 1 at the bottom left of their drawing, which is 270 for a KiCad SOIC at 0
+# (the common rotation tables agree: "^SOIC-" = 270). This one was not compared pad by pad (EasyEDA refused the
+# download), so U7's pin 1 is the first thing to look at in the order preview.
+CPL_ROT = {'R_Array_Convex_4x0603': 270, 'SOT-23': 180, 'SOIC-8_5.23x5.23mm_P1.27mm': 270}
+
+# JLCPCB "PCB assembly price" (help article, last updated 2026-10-22), Standard PCBA, single-sided, USD
+JLC_PRICE = dict(date='2026-10-22', setup=25.56, stencil=8.21, feeder=1.53, joint=0.0016, board=0.48, packing=0.50, confirm=0.45)
+def assembly_estimate(types, joints, n):
+    """Standard PCBA fees without the parts themselves, a fixture (if JLCPCB quotes one), shipping and tax.
+    The per-joint fee has a floor of $0.48 per board ("single board assembly surcharge")."""
+    P = JLC_PRICE
+    return P['setup'] + P['stencil'] + P['feeder'] * types + max(P['joint'] * joints, P['board']) * n + P['packing'] + P['confirm']
+# files that go into gerbers.zip for designs made to JLCPCB's rules: the fabrication layers and the drill files only
+# (the F.Fab / B.Fab plots are drawings for people; a fab note on them must not reach the order)
+FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl', '_Cu.g2', '_Cu.g3', '_Cu.g4', '_Cu.g5', '_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo',
+              '_Mask.gts', '_Mask.gbs', '-Edge_Cuts.gm1', '.drl')
 
 DEFAULT_PARTS = {   # value-key [or "value@pkg"] -> (LCSC, comment, note)   (looked up via the JLCPCB parts API, 2026-10)
  # ---- rev B (Pico 2 module) ----
@@ -135,12 +154,18 @@ README_D = '''# JLCPCB 注文パッケージ（famicart rev D: PRG ROM / CHR ROM
 
 README_E = '''# JLCPCB 注文パッケージ（famicart rev E: JLCPCB Basic 部品のみ + 秋月の手はんだモジュール）
 
+> **訂正（2026-11-10）**: 金フィンガー（Gold Fingers）付きの基板は JLCPCB の **Economic PCBA では受け付けられない**
+> （PCB Assembly Capabilities の表で Economic は Gold fingers "Not Support"）。**Standard PCBA** で注文する。
+> Standard は捨て基板（Edge Rails）とフィデューシャルが必要で、注文画面で **Added by JLCPCB** を選べば JLCPCB が付ける。
+> 料金は Economic より高い（セットアップ $25.56、ステンシル $8.21、部品 1 種類ごとに $1.53。2026-10-22 の料金表）。
+> この版は rev G に置き換えた（`docs/12_rev_g_plan.md`）。新しく作るなら `hardware/revg/` を使う。
+
 ## PCB（Instant Quote → Add gerber file → gerbers.zip）
 - **Layers 2** / Dimensions 90 x 46.1 mm / **PCB Thickness 1.2 mm** / Surface Finish **ENIG**
 - **Gold Fingers: Yes** → **Bevelling: 30°**（カードエッジ）/ Copper 1 oz / Via Covering: Tented
 - Min Track/Spacing 0.15 mm、Via 0.5/0.25 mm（JLC 標準仕様内、追加料金なし）
 
-## SMT Assembly（PCB Assembly → **Economic / Top side のみ**）
+## SMT Assembly（PCB Assembly → **Standard PCBA / Top side のみ** / Edge Rails・Fiducials: Added by JLCPCB）
 - BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`。**全部品が JLCPCB Basic Parts**（`parts_check.csv` に API での確認結果）。Extended 部品の追加料金はかからない。
 - 実装しない部品（DNP）: @DNP@
 - 部品プレビューで向きを確認するもの: 2N7002（Q1/Q2）、1N4148WS・B5819W（カソード帯）、抵抗アレイ。
@@ -157,11 +182,18 @@ README_E = '''# JLCPCB 注文パッケージ（famicart rev E: JLCPCB Basic 部�
 
 ## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
 - PCB 5 枚（2 層・金フィンガー・ENIG・1.2 mm）: 約 US$ 30–45
-- 実装（Economic 片面、Basic のみ、約 47 点/枚）: セットアップ約 US$ 8 + 部品代 約 US$ 0.5/枚 + 実装費 → 5 枚で約 US$ 20–30
+- 実装（Standard 片面、Basic のみ 10 種類、約 47 点/枚）: セットアップ $25.56 + ステンシル $8.21 + フィーダー $1.53 × 10 種類 + 実装費 → 5 枚で約 US$ 55 ＋ 部品代
+- 基板 1 枚が 70 × 70 mm より小さい（90 × 46.1 mm）ので、Standard PCBA では JLCPCB 側の捨て基板で 70 mm 以上にする必要がある（注文画面の指示に従う）
 - モジュール（秋月）: 1 枚あたり ¥3,080（Pico 2 ×2 + XIAO RP2350）
 '''
 
 README_F = '''# JLCPCB 注文パッケージ（famicart rev F: rev E + SFC 型コプロセッサ用 Pico 2 ×2、Basic 部品のみ）
+
+> **訂正（2026-11-10）**: 金フィンガー（Gold Fingers）付きの基板は JLCPCB の **Economic PCBA では受け付けられない**
+> （PCB Assembly Capabilities の表で Economic は Gold fingers "Not Support"）。**Standard PCBA** で注文する。
+> Standard は捨て基板（Edge Rails）とフィデューシャルが必要で、注文画面で **Added by JLCPCB** を選べば JLCPCB が付ける。
+> 料金は Economic より高い（セットアップ $25.56、ステンシル $8.21、部品 1 種類ごとに $1.53。2026-10-22 の料金表）。
+> この版は rev G に置き換えた（`docs/12_rev_g_plan.md`）。新しく作るなら `hardware/revg/` を使う。
 
 ## PCB（Instant Quote → Add gerber file → gerbers.zip）
 - **Layers 2** / Dimensions **90 x 70.1 mm**（本体 59.4 mm + 端子タブ 10.7 mm）/ **PCB Thickness 1.2 mm** / Surface Finish **ENIG**
@@ -169,7 +201,7 @@ README_F = '''# JLCPCB 注文パッケージ（famicart rev F: rev E + SFC 型�
 - Min Track/Spacing 0.15 mm、Via 0.5/0.25 mm（JLC 標準仕様内、追加料金なし）
 - 純正シェルには入らない（上に 24 mm 長い）。ファミコンのスロットは上が開いているので基板のまま挿せる。外装が要るなら 3D プリントで。
 
-## SMT Assembly（PCB Assembly → **Economic / Top side のみ**）
+## SMT Assembly（PCB Assembly → **Standard PCBA / Top side のみ** / Edge Rails・Fiducials: Added by JLCPCB）
 - BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`。**全部品が JLCPCB Basic Parts**（`parts_check.csv` に API での確認結果）。
 - 実装しない部品（DNP）: @DNP@
 - 部品プレビューで向きを確認するもの: 2N7002（Q1/Q2）、1N4148WS・B5819W（カソード帯）、抵抗アレイ。
@@ -185,11 +217,17 @@ README_F = '''# JLCPCB 注文パッケージ（famicart rev F: rev E + SFC 型�
 
 ## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
 - PCB 5 枚（2 層・90×70 mm・金フィンガー・ENIG・1.2 mm）: 約 US$ 35–55
-- 実装（Economic 片面、Basic のみ）: 5 枚で約 US$ 20–35
+- 実装（Standard 片面、Basic のみ 10 種類）: セットアップ $25.56 + ステンシル $8.21 + フィーダー $1.53 × 10 種類 + 実装費 → 5 枚で約 US$ 55 ＋ 部品代
 - モジュール（秋月）: 1 枚あたり ¥5,060（Pico 2 ×4 + XIAO RP2350）
 '''
 
 README_F2 = '''# JLCPCB 注文パッケージ（famicart rev F2: 任天堂の大型カセットシェル用、Basic 部品のみ）
+
+> **訂正（2026-11-10）**: 金フィンガー（Gold Fingers）付きの基板は JLCPCB の **Economic PCBA では受け付けられない**
+> （PCB Assembly Capabilities の表で Economic は Gold fingers "Not Support"）。**Standard PCBA** で注文する。
+> Standard は捨て基板（Edge Rails）とフィデューシャルが必要で、注文画面で **Added by JLCPCB** を選べば JLCPCB が付ける。
+> 料金は Economic より高い（セットアップ $25.56、ステンシル $8.21、部品 1 種類ごとに $1.53。2026-10-22 の料金表）。
+> この版は rev G に置き換えた（`docs/12_rev_g_plan.md`）。新しく作るなら `hardware/revg/` を使う。
 
 回路は rev F と同じ（Pico 2 ×4 + XIAO RP2350）。外形・切り欠き・スリットを任天堂の大型シェル（HVC-ExROM 系。光栄・エニックス・
 スクウェアの大型カセット、市販の互換「でかカセットケース」）に合わせ、シェルのリブとボスを避けて部品を置いた版。
@@ -203,7 +241,7 @@ README_F2 = '''# JLCPCB 注文パッケージ（famicart rev F2: 任天堂の大
 - 外形に**左右の切り欠きと内部スリット（5.4 × 2.4 mm）**がある。ガーバーの Edge_Cuts にそのまま入っているので追加指定は不要。
 - Min Track/Spacing 0.15 mm、Via 0.5/0.25 mm（JLC 標準仕様内、追加料金なし）
 
-## SMT Assembly（PCB Assembly → **Economic / Top side のみ**）
+## SMT Assembly（PCB Assembly → **Standard PCBA / Top side のみ** / Edge Rails・Fiducials: Added by JLCPCB）
 - BOM: `bom_jlc.csv` / CPL: `cpl_jlc.csv`。**全部品が JLCPCB Basic Parts**（`parts_check.csv` に API での確認結果）。
 - 実装しない部品（DNP）: @DNP@
 - CPL の角度は JLCPCB の部品ライブラリの向きに合わせて補正済み: **抵抗アレイ RN1〜RN16 = 270°、2N7002 Q1/Q2 = 180°**（KiCad 上は 0°）。
@@ -223,9 +261,128 @@ README_F2 = '''# JLCPCB 注文パッケージ（famicart rev F2: 任天堂の大
 
 ## 費用の目安（5 枚、2025–26 年の JLCPCB 価格帯、送料・税別）
 - PCB 5 枚（2 層・90×86 mm・金フィンガー・ENIG・1.2 mm）: 約 US$ 40–60
-- 実装（Economic 片面、Basic のみ）: 5 枚で約 US$ 20–35
+- 実装（Standard 片面、Basic のみ 10 種類）: セットアップ $25.56 + ステンシル $8.21 + フィーダー $1.53 × 10 種類 + 実装費 → 5 枚で約 US$ 55 ＋ 部品代
 - モジュール（秋月）: 1 枚あたり ¥5,060（Pico 2 ×4 + XIAO RP2350）
 - シェル: 任天堂の大型カセットの中古シェル、または互換の「でかカセットケース」
+'''
+
+README_G = '''# JLCPCB 注文パッケージ（famicart rev G: 任天堂の大型カセットシェル用、Basic 部品のみ）
+
+Pico 2 ×2 + XIAO RP2350 ×2 が基本構成、Pico 2 ×2 は増設用（載せなくても動く）。16 MB の SPI フラッシュを載せ、microSD
+ソケットは任意。回路と配置の説明は `docs/12_rev_g_plan.md`。
+
+**状態**: 設計レビューの指摘を反映した版で、**実機では未検証**。rev G 用のファームウェアはまだ無い（ピン配置と一部の信号の
+極性が rev F と違う。`docs/12_rev_g_plan.md` の作業一覧）。**シェルへの収まりも実物では未確認**なので、最初の注文は最少枚数にして、
+モジュールをはんだ付けする前に基板だけをシェルに入れて確かめること。
+
+## 1. 注文の種類
+- 金フィンガー付きの基板は **Economic PCBA では受け付けられない**（JLCPCB の実装仕様表で Gold fingers は Economic "Not Support"、
+  Standard "Support"）。**Standard PCBA** で注文する。
+- Standard PCBA は捨て基板（Edge Rails）とフィデューシャルが必須。注文画面で **Added by JLCPCB** を選ぶと JLCPCB が付ける
+  （基板には置いていない）。捨て基板は付いたまま届くので、受け取ってから外す。
+- 実装は表面（Top）だけ。全部品が JLCPCB Basic Parts（@TYPES@ 種類・@PARTS@ 点/枚。在庫と区分は `parts_check.csv`）。
+
+## 2. PCB の指定（Instant Quote → Add gerber file → `gerbers.zip`）
+| 項目 | 指定 |
+|---|---|
+| Base Material / Layers | FR-4 / 2 |
+| Dimensions | @SIZE@ mm（ガーバーから自動で入る。本体 75.0 mm + 端子タブ 10.7 mm）|
+| PCB Qty | 5（最少）|
+| PCB Thickness | **1.2 mm** |
+| Surface Finish | **ENIG**、Gold Thickness は **2 U"**（厚いほう。端子が擦れるため）|
+| Gold Fingers | **Yes**、Bevelling **30°** |
+| Outer Copper Weight | 1 oz |
+| Via Covering | Tented |
+| Min via hole size/diameter | 0.3 mm の標準のまま（設計値: 穴 0.3 mm・径 0.5 mm）|
+| Board Outline Tolerance | ±0.2 mm（Regular）|
+| Mark on PCB | Order Number (Specify Position)。裏面シルクの `JLCJLCJLCJLC` の位置に注文番号が入る |
+
+PCB Remark（そのまま貼る）:
+
+> Edge rails for assembly: LEFT and RIGHT sides only. The bottom side is the gold-finger card edge and must stay free.
+> Please keep the two side notches, the inner slot and the rounded inner corners (R0.5 mm) as drawn.
+
+**端子の金について**: JLCPCB の金フィンガーは ENIG（無電解ニッケル 3〜6 µm の上に置換金 0.05〜0.1 µm）で、抜き差しの多い
+コネクタ用の硬質金めっき（電解めっき、0.5〜1.5 µm）ではない。JLCPCB は硬質金めっきを扱っていない（同社の記事に明記。表面処理は
+HASL・ENIG・OSP）。同じ記事は、ENIG の金は数十回の抜き差しで減り、硬質金は 500〜1000 回以上もつ、としている（出典のない目安）。
+このカセットは挿したまま使うのが前提で、ゲームの入れ替えは USB か microSD で行う。金が減っても下のニッケルで導通はするが、
+接触が不安定になったら端子を無水アルコールで拭く。
+
+## 3. PCB Assembly の指定
+| 項目 | 指定 |
+|---|---|
+| PCBA Type | **Standard** |
+| Assembly Side | Top Side |
+| PCBA Qty | 2 または 5 |
+| Edge Rails/Fiducials | **Added by JLCPCB** |
+| Confirm Parts Placement | Yes（部品の向きを製造前に画面で確認できる）|
+| BOM / CPL | `bom_jlc.csv` / `cpl_jlc.csv` |
+
+- 実装しない部品（手はんだ・基板パターン）: @DNP@
+- CPL の角度は JLCPCB の部品ライブラリの向きに合わせて補正済み: **抵抗アレイ = 270°、SOT-23（2N7002・BAV99）= 180°、U7（SOIC-8）= 270°**（KiCad 上は 0°）。
+  アレイと 2N7002 は JLCPCB のフットプリントとパッド単位で照合した値。BAV99 は同じ SOT-23 として同じ補正を掛けてある（照合はしていない）。
+  U7 は JLCPCB のフットプリント名（末尾 -BL ＝ 1 番ピンが左下）から決めた値で、これも照合はしていない。
+  **部品プレビューで、U7 の 1 番ピン（丸印）が基板のシルクの印と同じ角にあること、BAV99（@CLAMPS@）の 1 本足の側が 2N7002 と同じ向きであること**を
+  必ず確かめる。あわせて 2N7002、B5819W（カソード帯）、抵抗アレイ、SW1 がパッドに重なっているかも見る。
+
+## 4. 費用（JLCPCB の料金表 @PRICEDATE@ 更新分から計算。部品代・送料・税は別）
+| | 2 枚実装 | 5 枚実装 |
+|---|---|---|
+| 実装費（Standard・片面） | 約 US$ @EST2@ | 約 US$ @EST5@ |
+
+- 内訳: セットアップ $25.56 + ステンシル $8.21 + フィーダー $1.53 × @TYPES@ 種類 + はんだ付け $0.0016 × @JOINTS@ 接点 × 枚数
+  （1 枚あたり最低 $0.48）+ 梱包 $0.50 + 配置確認 $0.45。**部品の種類が 1 つ増えるごとに $1.53** かかる。
+- 治具（Fixture）費が見積もりに加わることがある（料金表では 1 個 $8.21、29 枚以下は 2 個。どの注文に掛かるかは料金表に書かれていない）。
+- 捨て基板を JLCPCB に外してもらう場合は追加の加工費がかかる（金額は料金表に無い。注文時に依頼する）。
+- PCB 代は見積もり画面の表示による（ENIG・金フィンガー・1.2 mm を選ぶので、標準の基板より高い）。
+- モジュール（秋月）: 基本構成 ¥4,180（Pico 2 ×2 + XIAO RP2350 ×2）、増設の Pico 2 は 1 枚 ¥990、microSD ソケット ¥150。
+
+## 5. JLCPCB の製造条件との照合
+| 項目 | この基板 | JLCPCB の条件 |
+|---|---|---|
+| 基板サイズ | @SIZE@ mm | Standard PCBA は 70 × 70 mm 以上。金フィンガーは 50 × 50 mm 以上 |
+| 材質・板厚 | FR-4、1.2 mm | FR-4 は 0.4〜2.0 mm（1.2 mm あり）|
+| 表面処理・端子 | ENIG、金フィンガー、30° 面取り。端子の銅は基板端の 1.0 mm 以上手前で終わる | 端子の金は ENIG。面取りは 30° か 45°。面取りする範囲に銅を置かない |
+| 配線幅 / 間隔 | @TRACK@ / @CLEAR@ mm | 0.10 / 0.10 mm 以上（2 層・1 oz）|
+| ビア | 径 @VIA@ mm、穴 @VDR@ mm | 穴 0.3 mm 以上が標準（それより小さい穴は割高）。径は穴 + 0.1 mm 以上（推奨 + 0.15 mm）|
+| 穴と穴 / 穴と配線 | 0.25 mm 以上 / 0.2 mm 以上 | 0.2 mm 以上 / 0.2 mm 以上 |
+| 銅箔と基板端 | 0.3 mm 以上。捨て基板が付く左右の端は 0.4 mm 以上 | ルーター加工の端 0.2 mm 以上、V カットの端 0.4 mm 以上 |
+| スリット・切り欠き | 幅 2.4 mm。内側の角は R0.5 mm で作図 | 非めっきスリットは幅 1.0 mm 以上。角に丸みの無い角穴・スリットは作れない |
+| 外形の公差 | 切り欠きの奥行きとスリットの長さに 0.6 mm、左右の端に 0.2 mm の逃げ | ルーター加工 ±0.2 mm、V カット ±0.4 mm |
+| シルク | 線幅 0.15 mm 以上、文字の高さ 1.0 mm 以上 | 線幅 0.15 mm 以上、文字の高さ 1.0 mm 以上 |
+| レジスト | パッド間のレジストは 0.3 mm 以上 | 0.10 mm 以上（黒・白は 0.13 mm）|
+| 実装 | 表面のみ、Basic Parts のみ | Standard PCBA は片面・両面とも可 |
+| はんだペースト | 手はんだ部品のパッドには置いていない | ステンシルの開口は実装する部品のパッドだけに作られる |
+
+ガーバーの ZIP には製造に使う層（銅箔・レジスト・シルク・ペースト・外形）とドリルだけを入れてある。
+
+## 6. 受け取ってから
+1. 捨て基板を外す（V カットは折る。ミシン目は切って、残った突起をやすりで落とす）。左右の端面をやすりで平らにする。
+2. **基板だけ**をシェルに入れて、左右の切り欠き・スリット・端子タブの位置を確かめる。タブの付け根など、内側の角に残る丸みが
+   シェルに当たる場合は、やすりで落とす。
+3. モジュールにファームを書き込んでから、はんだ付けする。裏面（U2 → U1、増設するなら U5）を先に、表面（U3・U6、増設するなら U4、
+   使うなら J3）を後に。基板のシルクに `U1 cpu` のように役割が書いてある。シルクの `USB` の字がある側にモジュールの USB 端子を向ける。
+4. Pico 2 は端面（キャステレーション）40 か所だけをはんだ付けする。XIAO は縁の 14 ピンだけ（裏面パッドは使わない）。
+5. XIAO の 5V ピンは USB の VBUS と直結している。**本体の電源が入っている間は、電源の入っていない PC やハブに U3・U6 の USB を
+   つながない**（本体の 5 V が USB ケーブル側へ出る）。
+
+## 7. 手はんだ部品（秋月電子）
+| 部品 | 秋月 通販コード | 価格 | 位置 |
+|---|---|---|---|
+| Raspberry Pi Pico 2 | 129604 | ¥990 ×2（＋増設 ×2）| **裏**: U2（下、PPU 側）・U1（上、CPU 側）・U5（中、PPU 側の増設）／**表**: U4（上、CPU 側の増設）|
+| Seeed XIAO RP2350 | 129619 | ¥1,100 ×2 | **表**: U3（中央右、IRQ・拡張音源・ネームテーブル制御）・U6（上、ハブ: SFC チップ機能・保存・更新）|
+| microSD ソケット Hirose DM3AT-SF-PEJM5 | 102395 | ¥150（任意）| **表**: J3（右上）|
+
+## 出典（JLCPCB 公式、2026-11-10 に確認）
+- 実装仕様（Economic / Standard の違い、金フィンガー、基板サイズ）: https://jlcpcb.com/capabilities/pcb-assembly-capabilities
+- 基板の製造仕様（配線・ビア・外形・スリット・シルク・レジスト）: https://jlcpcb.com/capabilities/pcb-capabilities
+- 追加料金になる場合（小径穴ほか）: https://jlcpcb.com/help/article/In-what-cases-will-there-be-charged-extra
+- 金フィンガーと面取り: https://jlcpcb.com/help/article/jlcpcb-gold-fingers 、 https://jlcpcb.com/blog/considerations-for-gold-finger-bevel-design
+- 硬質金めっきと ENIG の違い、JLCPCB が硬質金を扱わないこと（2026-08-08 更新の記事）: https://jlcpcb.com/blog/hard-gold-pcb-finish
+- 捨て基板とフィデューシャル: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order
+- 実装の料金表（@PRICEDATE@ 更新）: https://jlcpcb.com/help/article/pcb-assembly-price
+- 実装の FAQ（フィデューシャルは JLCPCB が追加、面付け）: https://jlcpcb.com/help/article/pcb-assembly-faqs
+- ステンシルの開口: https://jlcpcb.com/help/article/smt-stencil-data-prepared-for-smt-orders
 '''
 
 def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
@@ -265,7 +422,7 @@ def main():
     for ref, (lib, sym, val, fp, _) in D.PARTS.items():
         key = val.split(' (')[0]
         groups.setdefault((key, fp), []).append(ref)
-    dnp = []
+    dnp = []; placed = set(); ntypes = 0
     with open(os.path.join(OUT, 'bom_jlc.csv'), 'w', newline='') as f:
         w = csv.writer(f); w.writerow(['Comment', 'Designator', 'Footprint', 'LCSC Part #'])
         for (key, fp), refs in groups.items():
@@ -277,7 +434,7 @@ def main():
             if note == 'NOT FOUND': print('WARNING: no LCSC part for', key, fp)
             refs.sort(key=lambda r: (r.rstrip('0123456789'), int(''.join(ch for ch in r if ch.isdigit()) or 0)))
             if not lcsc: dnp += refs; continue
-            w.writerow([comment or key, ','.join(refs), fp.split(':')[1], lcsc])
+            w.writerow([comment or key, ','.join(refs), fp.split(':')[1], lcsc]); placed.update(refs); ntypes += 1
     # ---- CPL via kicad-cli pos export ----
     pos = os.path.join(OUT, 'pos.csv')
     subprocess.run(['kicad-cli', 'pcb', 'export', 'pos', '--format', 'csv', '--units', 'mm', '--side', 'both', '-o', pos, PCB], check=True, capture_output=True)
@@ -295,10 +452,31 @@ def main():
     # ---- Gerbers ----
     fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')
     if os.path.exists(z): os.remove(z)
-    shutil.make_archive(z[:-4], 'zip', fab)
+    if getattr(D, 'JLC_RULES', False):
+        import zipfile
+        names = sorted(n for n in os.listdir(fab) if n.endswith(FAB_SUFFIX))
+        need = ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'F_Silkscreen.gto', 'B_Silkscreen.gbo', 'Edge_Cuts.gm1', 'PTH.drl')
+        missing = [k for k in need if not any(n.endswith(k) for n in names)]
+        if missing: raise SystemExit(f'fab files missing for the JLCPCB zip: {missing} (run route_pcb.py first)')
+        with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for n in names: zf.write(os.path.join(fab, n), n)
+        print('gerbers.zip:', ', '.join(names))
+    else:
+        shutil.make_archive(z[:-4], 'zip', fab)
     if hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
-    with open(os.path.join(OUT, 'README.md'), 'w') as f:
-        f.write({'rev B': README_B, 'rev C': README_C, 'rev E': README_E, 'rev F': README_F, 'rev F2': README_F2}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp)))
+    txt = {'rev B': README_B, 'rev C': README_C, 'rev E': README_E, 'rev F': README_F, 'rev F2': README_F2, 'rev G': README_G}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp))
+    if '@TYPES@' in txt:
+        import pcbnew, gen_pcb
+        b = pcbnew.LoadBoard(PCB); bb = b.GetBoardEdgesBoundingBox()
+        joints = sum(len(list(fp.Pads())) for fp in b.GetFootprints() if fp.GetReference() in placed)
+        TRK, CLR, VIA, VDR = gen_pcb.rules()
+        for k, v in (('@TYPES@', str(ntypes)), ('@PARTS@', str(len(placed))), ('@JOINTS@', str(joints)), ('@PRICEDATE@', JLC_PRICE['date']),
+                     ('@EST2@', '%.0f' % assembly_estimate(ntypes, joints, 2)), ('@EST5@', '%.0f' % assembly_estimate(ntypes, joints, 5)),
+                     ('@SIZE@', '%.1f × %.1f' % (pcbnew.ToMM(bb.GetWidth()) - 0.1, pcbnew.ToMM(bb.GetHeight()) - 0.1)),
+                     ('@TRACK@', '%.2f' % TRK), ('@CLEAR@', '%.2f' % CLR), ('@VIA@', '%.1f' % VIA), ('@VDR@', '%.1f' % VDR),
+                     ('@CLAMPS@', '・'.join(sorted((r for r, v in D.PARTS.items() if v[2] == 'BAV99'), key=lambda r: int(r[1:]))))):
+            txt = txt.replace(k, v)
+    with open(os.path.join(OUT, 'README.md'), 'w') as f: f.write(txt)
     print('written:', OUT, 'DNP:', dnp)
 
 if __name__ == '__main__':
