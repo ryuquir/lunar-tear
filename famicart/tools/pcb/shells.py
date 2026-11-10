@@ -102,6 +102,7 @@ def hvc_large(H=75.0, relief=0.0, side_inset=0.0):
         # concave corners, drawn with FILLET_R by gen_pcb.py (check_place.py keeps using the sharp polygon, which has
         # LESS board at these corners: the conservative side)
         fillets = [(xb, y(st)), (nl, y(22.8)), (nl, y(25.2)), (W - nl, y(25.2)), (W - nl, y(22.8)), (W - xb, y(st))] + list(slot)
+        fillets += [(TAB_X0, H), (TAB_X1, H)]          # the two inner corners at the root of the card-edge tab
     ko = _common_keepouts(H, 22.8, 25.2)
     for x0, x1 in ((45 - 45.5, 45 - 41.3), (45 + 41.3, 45 + 45.5)):                     # front ribs near the lower bosses
         ko.append(('F', _rect(x0, y(3.55), x1, y(1.65))))

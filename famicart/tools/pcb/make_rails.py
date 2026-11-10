@@ -7,10 +7,13 @@ the longer sides by default, which on this board are the top edge and the gold-f
 outer edge cannot be bevelled. Here the rails are part of the data: on the left and right edges, 2 mm away from the
 board, each held by three tabs with a row of 0.6 mm holes that touch the board's edge line from outside (snap off, file
 the ridge of at most 0.3 mm down to the edge).
-Everything is routed, there is no V-cut, and the gold-finger edge stays a free edge. Three fiducials (1 mm copper,
-2 mm mask opening) sit on the rails, 3.5 mm from the outer edge (JLCPCB asks for 3.35 mm).
+Everything is routed, there is no V-cut, and the gold-finger edge stays a free edge: the rails stop above its line.
+Three fiducials (1 mm copper, 2 mm mask opening, centred 3.85 mm from the panel edges) and four 2 mm tooling holes sit on
+the rails, as JLCPCB's capabilities page asks for SMT assembly of mouse-bite panels.
 
-The cartridge board inside the rails is the routed board unchanged: same coordinates, so BOM and CPL are shared.
+The cartridge board inside the rails is the routed board unchanged: same coordinates, so BOM and CPL are shared; the
+rounded inner corners inside the board must come out as the board's own (SHELL['fillets']), and the archive is written
+only when the design rule check of the railed board has no error (check_jlc.py compares the two boards object by object).
     FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 make_rails.py"""
 import os, sys, re, shutil, subprocess, zipfile, importlib
 import pcbnew
@@ -41,7 +44,7 @@ def chain(lc):
     n = len(pts)
     for i, v in enumerate(pts):
         a, b = pts[i - 1], pts[(i + 1) % n]
-        if abs((v[0] - a[0]) * (b[1] - v[1]) - (v[1] - a[1]) * (b[0] - v[0])) > 1e-9: out.append((round(v[0], 6), round(v[1], 6)))
+        if abs((v[0] - a[0]) * (b[1] - v[1]) - (v[1] - a[1]) * (b[0] - v[0])) > 1e-9: out.append((round(v[0], 3), round(v[1], 3)))
     return out
 
 def area2(pts): return sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(pts, pts[1:] + pts[:1]))
@@ -66,8 +69,10 @@ def main():
     panel = poly(bpts)
     gap, rw = RA['gap'], RA['width']
     rails = {'L': (LO - gap - rw, LO - gap), 'R': (HI + gap, HI + gap + rw)}
+    YE = T - RA.get('end_gap', 0.0)                           # the rails stop short of the gold-finger edge line
+    ypos = lambda y: y if y >= 0 else YE + y                  # negative: measured from the rail's lower end
     for side, (xa, xb) in rails.items():
-        panel.BooleanAdd(rect(xa, 0.0, xb, T), PM)
+        panel.BooleanAdd(rect(xa, 0.0, xb, YE), PM)
         for yc in RA['tabs'][side]:
             ta, tb = (LO - gap - 0.5, LO + 0.5) if side == 'L' else (HI - 0.5, HI + gap + 0.5)       # overlaps rail and board
             panel.BooleanAdd(rect(ta, yc - RA['tab'] / 2, tb, yc + RA['tab'] / 2), PM)
@@ -88,25 +93,40 @@ def main():
                 d = FromMM(RA['hole']); pad.SetSize(VECTOR2I(d, d)); pad.SetDrillSize(VECTOR2I(d, d)); pad.SetPosition(gen_pcb.mm(x, y))
                 pad.SetLayerSet(pcbnew.LSET.AllCuMask()); pad.SetNumber('')
                 fp.Add(pad); board.Add(fp)
+    # ---- tooling holes on the rail centre lines
+    for i, (side, y) in enumerate(RA.get('tooling', ())):
+        xa, xb = rails[side]; x, y = (xa + xb) / 2, ypos(y)
+        fp = pcbnew.FOOTPRINT(board); fp.SetReference('TH%d' % (i + 1)); fp.SetValue('tooling hole'); fp.SetPosition(gen_pcb.mm(x, y))
+        fp.Reference().SetVisible(False); fp.Value().SetVisible(False)
+        fp.SetAttributes(pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_BOARD_ONLY)
+        pad = pcbnew.PAD(fp); pad.SetAttribute(pcbnew.PAD_ATTRIB_NPTH); pad.SetShape(pcbnew.PAD_SHAPE_CIRCLE)
+        d = FromMM(RA['tooling_d']); pad.SetSize(VECTOR2I(d, d)); pad.SetDrillSize(VECTOR2I(d, d)); pad.SetPosition(gen_pcb.mm(x, y))
+        pad.SetLayerSet(pcbnew.LSET.AllCuMask()); pad.SetNumber('')
+        fp.Add(pad); board.Add(fp)
     # ---- fiducials on the rails (top side: the side JLCPCB assembles)
     for i, (side, y) in enumerate(RA['fiducials']):
-        xa, xb = rails[side]; x = xa + RA['fid_inset'] if side == 'L' else xb - RA['fid_inset']
+        xa, xb = rails[side]; x = xa + RA['fid_inset'] if side == 'L' else xb - RA['fid_inset']; y = ypos(y)
         fp = pcbnew.FootprintLoad(os.path.join(gen_pcb.SYS_FP, 'Fiducial.pretty'), 'Fiducial_1mm_Mask2mm')
         fp.SetReference('FID%d' % (i + 1)); fp.Reference().SetVisible(False); fp.Value().SetVisible(False)
         fp.SetAttributes(pcbnew.FP_SMD | pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_BOARD_ONLY)
         for g in list(fp.GraphicalItems()):
             if g.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS): fp.Remove(g)
         board.Add(fp); fp.SetPosition(gen_pcb.mm(x, y))
-    for side in 'LR': gen_pcb.add_text(board, 'EDGE RAIL - BREAK OFF', rails[side][0] + (1.4 if side == 'L' else 3.6), T / 2, pcbnew.F_SilkS, 1.0, 0.15)
+    for side in 'LR': gen_pcb.add_text(board, 'EDGE RAIL - BREAK OFF', rails[side][0] + (1.2 if side == 'L' else 3.8), T / 2, pcbnew.F_SilkS, 1.0, 0.15)
     for d in board.GetDrawings():
         if d.GetClass() == 'PCB_TEXT' and d.GetText().startswith('EDGE RAIL'): d.SetTextAngleDegrees(90)
     # ---- replace the outline drawing (last: after board.Remove() pcbnew hands out untyped objects for new footprints)
     for d in list(board.GetDrawings()):
         if d.GetLayer() == pcbnew.Edge_Cuts: board.Remove(d)
-    nfil = 0
+    nfil = 0; inboard = set()
     for pts, hole in contours:
         fil = inner_corners(pts, hole); nfil += len(fil)
+        inboard |= {v for v in fil if LO + 0.001 < v[0] < HI - 0.001}
         gen_pcb.add_outline(board, pts, fil, R)
+    # the rounded corners inside the board must be exactly the ones the board itself is drawn with (SHELL['fillets']):
+    # the cartridge board in the panel has to be the same board, corner for corner
+    want = {(round(x, 3), round(y, 3)) for x, y in SH['fillets']}
+    assert inboard == want, 'rounded corners inside the board differ from SHELL fillets: %s' % sorted(inboard ^ want)
     pcbnew.SaveBoard(DST, board)
     board = pcbnew.LoadBoard(DST); board.BuildConnectivity()
     # ---- checks
@@ -115,20 +135,20 @@ def main():
     txt = open(rep).read(); errors = txt.count('Severity: error'); kinds = {}
     for kk in re.findall(r'^\[(\w+)\]', txt, re.M): kinds[kk] = kinds.get(kk, 0) + 1
     bb = board.GetBoardEdgesBoundingBox(); pw, ph = ToMM(bb.GetWidth()) - 0.1, ToMM(bb.GetHeight()) - 0.1
-    print('panel %.1f x %.1f mm; contours %d (1 outer, %d cut-outs), %d rounded inner corners, %d break-off holes, %d fiducials'
-          % (pw, ph, len(contours), len(contours) - 1, nfil, k, len(RA['fiducials'])))
+    print('panel %.1f x %.1f mm; contours %d (1 outer, %d cut-outs), %d rounded inner corners, %d break-off holes, %d tooling holes, %d fiducials'
+          % (pw, ph, len(contours), len(contours) - 1, nfil, k, len(RA.get('tooling', ())), len(RA['fiducials'])))
     print('DRC of the railed board: errors', errors, kinds)
+    z = os.path.join(HW, 'jlcpcb', 'gerbers_rails.zip'); os.makedirs(os.path.dirname(z), exist_ok=True)
+    if os.path.exists(z): os.remove(z)
+    if errors: raise SystemExit('the railed board has design rule errors: no archive written')
     # ---- fabrication files
     fab = os.path.join(HW, 'fab_rails'); shutil.rmtree(fab, ignore_errors=True); os.makedirs(fab)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', 'F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts', '-o', fab + '/', DST], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', fab + '/', DST], check=True, capture_output=True)
     names = sorted(n for n in os.listdir(fab) if n.endswith(gen_jlc.FAB_SUFFIX))
-    z = os.path.join(HW, 'jlcpcb', 'gerbers_rails.zip'); os.makedirs(os.path.dirname(z), exist_ok=True)
-    if os.path.exists(z): os.remove(z)
     with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as zf:
         for n in names: zf.write(os.path.join(fab, n), n)
     print('written', z, ':', ', '.join(names))
-    sys.exit(1 if errors else 0)
 
 if __name__ == '__main__':
     main()

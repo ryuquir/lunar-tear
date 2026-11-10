@@ -58,7 +58,7 @@ def pad_padstack(pad, fp_flipped):
         shapes = [f'(shape (rect {l} {-hx} {-hy} {hx} {hy}))' for l in layers]
     return name, f'(padstack {q(name)} ' + ' '.join(shapes) + ' (attach off))'
 
-def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False):
+def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False, net_width=None):
     set_layers(board)
     padstacks = {}
     images = {}
@@ -182,7 +182,11 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in sig) + f' (circuit (use_via {q(via_name)}) (use_layer {sig_layers})) (rule (width {U(track)}) (clearance {U(clearance)})))')
         out.append(f'    (class power ' + ' '.join(q(n) for n in pwr) + f' (circuit (use_via {q(via_name)}) (use_layer {alll})) (rule (width {U(max(track, 0.2))}) (clearance {U(clearance)})))')
     else:
-        out.append(f'    (class kicad_default ' + ' '.join(q(n) for n in nets) + f' (circuit (use_via {q(via_name)})) (rule (width {U(track)}) (clearance {U(clearance)})))')
+        groups = {}                                   # 2 layers: one class per track width (net_width: {net: mm})
+        for n in nets: groups.setdefault(round((net_width or {}).get(n, track), 4), []).append(n)
+        for w, ns in sorted(groups.items()):
+            cname = 'kicad_default' if abs(w - track) < 1e-9 else 'w%d' % int(round(w * 1000))
+            out.append(f'    (class {cname} ' + ' '.join(q(n) for n in ns) + f' (circuit (use_via {q(via_name)})) (rule (width {U(w)}) (clearance {U(clearance)})))')
     out.append('  )')
     # existing tracks/vias -> fixed ("protect") wiring so the autorouter keeps them
     wires = []

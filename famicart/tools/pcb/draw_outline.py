@@ -219,9 +219,13 @@ def draw_rails(board):
     g.text(40, 52, 'famicart %s - board with edge rails for Standard PCBA (top side, gold fingers at the bottom)' % D.REV, 26, INK, 'start', 'bold')
     g.text(40, 88, 'Dimensions in mm. Rails are joined by mouse-bite tabs (routed, no V-cut). 2 layers, 1.2 mm, ENIG, 30 degree bevel on the gold-finger edge.', 19, MUTED, 'start')
     rails = {'L': (lo - gap - rw, lo - gap), 'R': (hi + gap, hi + gap + rw)}
+    YE = T - RA.get('end_gap', 0.0); ypos = lambda y: y if y >= 0 else YE + y
     for side, (xa, xb) in rails.items():
-        g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="2.2"/>' % (px(xa), py(0), (xb - xa) * S, T * S, EDGE))
+        g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="2.2"/>' % (px(xa), py(0), (xb - xa) * S, YE * S, EDGE))
         g.text(px((xa + xb) / 2) + 7, py(T / 2), 'EDGE RAIL %.0f mm - break off' % rw, 18, INK, 'middle', rot=-90)
+    for (side, y) in RA.get('tooling', ()):
+        xa, xb = rails[side]
+        g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="1.2"/>' % (px((xa + xb) / 2), py(ypos(y)), RA['tooling_d'] / 2 * S, INK))
         for yc in RA['tabs'][side]:
             ta, tb = (lo - gap, lo) if side == 'L' else (hi, hi + gap)
             g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="1.6"/>' % (px(ta), py(yc - RA['tab'] / 2), (tb - ta) * S, RA['tab'] * S, EDGE))
@@ -229,7 +233,7 @@ def draw_rails(board):
             for i in range(RA['holes']):
                 g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="0.8"/>' % (px(xe), py(yc + (i - (RA['holes'] - 1) / 2) * RA['pitch']), RA['hole'] / 2 * S, INK))
     for (side, y) in RA['fiducials']:
-        xa, xb = rails[side]; x = xa + RA['fid_inset'] if side == 'L' else xb - RA['fid_inset']
+        xa, xb = rails[side]; x = xa + RA['fid_inset'] if side == 'L' else xb - RA['fid_inset']; y = ypos(y)
         g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="0.8"/><circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>' % (px(x), py(y), 1.0 * S, MUTED, px(x), py(y), 0.5 * S, GOLD))
     board_shape(g, ox, oy)
     for (num, a, b, c, d, front) in fingers(board):
@@ -241,19 +245,26 @@ def draw_rails(board):
     # labels
     yc = RA['tabs']['L'][1]
     g.line(px(lo - gap / 2), py(yc), px(lo) + 150, py(yc) - 60, INK, 1.0)
-    g.text(px(lo) + 156, py(yc) - 64, 'mouse-bite tab %.1f mm wide, %d holes of %.1f mm touching the board edge line' % (RA['tab'], RA['holes'], RA['hole']), 18, INK, 'start')
-    g.text(px(lo) + 156, py(yc) - 40, '(3 tabs on each side)', 18, INK, 'start')
+    g.text(px(lo) + 156, py(yc) - 64, 'mouse-bite tab %.1f mm wide: %d holes of %.1f mm, %.1f mm apart,' % (RA['tab'], RA['holes'], RA['hole'], RA['pitch'] - RA['hole']), 18, INK, 'start')
+    g.text(px(lo) + 156, py(yc) - 40, 'touching the board edge line from outside (3 tabs on each side)', 18, INK, 'start')
     fs, fy = RA['fiducials'][0]; fx = rails[fs][0] + RA['fid_inset']
     g.line(px(fx), py(fy), px(lo) + 110, py(fy) + 46, INK, 1.0)
     g.text(px(lo) + 116, py(fy) + 52, 'fiducial (3 in total): copper 1 mm, solder mask opening 2 mm,', 18, INK, 'start')
-    g.text(px(lo) + 116, py(fy) + 76, '%.1f mm from the outer edge of the rail' % RA['fid_inset'], 18, INK, 'start')
+    g.text(px(lo) + 116, py(fy) + 76, 'centre %.2f mm from the panel edges' % RA['fid_inset'], 18, INK, 'start')
+    if RA.get('tooling'):
+        ts, ty = RA['tooling'][0]; tx = (rails[ts][0] + rails[ts][1]) / 2
+        g.line(px(tx), py(ypos(ty)), px(lo) + 110, py(ypos(ty)) + 60, INK, 1.0)
+        g.text(px(lo) + 116, py(ypos(ty)) + 66, 'tooling hole %.1f mm, not plated (%d in total)' % (RA['tooling_d'], len(RA['tooling'])), 18, INK, 'start')
     g.text(px(W / 2), py(59), 'CARTRIDGE BOARD  %.1f x %.1f' % (hi - lo, T), 24, EDGE, 'middle', 'bold')
     g.text(px(W / 2), py(59) + 30, 'parts on this side are placed by JLCPCB', 18, EDGE, 'middle')
     # dimensions
     g.hdim(px(rails['L'][0]), px(rails['R'][1]), py(0) - 34, '%.1f (with rails)' % (hi - lo + 2 * (gap + rw)), ext=py(0))
     g.vdim(py(0), py(T), px(rails['R'][1]) + 60, '%.1f' % T, ext=px(rails['R'][1]), side='right')
-    g.hdim(px(rails['L'][0]), px(rails['L'][1]), py(T) + 110, '%.1f' % rw, ext=py(T), size=18, below=True)
-    g.hdim(px(rails['L'][1]), px(lo), py(T) + 150, '%.1f gap' % gap, ext=py(T), size=18, below=True)
+    if RA.get('end_gap'):
+        g.vdim(py(YE), py(T), px(rails['R'][0]) - 26, '%.1f' % RA['end_gap'], size=18, side='left')
+        g.text(px(rails['R'][1]) + 80, py(YE) - 6, 'rails stop above', 16, MUTED, 'start'); g.text(px(rails['R'][1]) + 80, py(YE) + 14, 'the finger edge', 16, MUTED, 'start')
+    g.hdim(px(rails['L'][0]), px(rails['L'][1]), py(T) + 110, '%.1f' % rw, ext=py(YE), size=18, below=True)
+    g.hdim(px(rails['L'][1]), px(lo), py(T) + 150, '%.1f gap' % gap, ext=py(YE), size=18, below=True)
     ny = py(T) + 215
     g.text(40, ny, 'If JLCPCB adds the rails instead (Gerber without rails): please put them on the same two %.1f mm edges, panel %.1f x %.1f mm,' % (T, hi - lo + 2 * rw, T), 19, INK, 'start')
     g.text(40, ny + 28, 'not on the gold-finger edge and not on the opposite edge, although those are the longer edges.', 19, INK, 'start')

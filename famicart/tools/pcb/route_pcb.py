@@ -26,7 +26,7 @@ def main():
     board = pcbnew.LoadBoard(PCB)
     dsn = os.path.join(WORK, 'famicart.dsn'); ses = os.path.join(WORK, 'famicart.ses')
     TRK, CLR, VIA, VDR = gen_pcb.rules()
-    n = dsn_export.export(board, dsn, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR)
+    n = dsn_export.export(board, dsn, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR, net_width=getattr(gen_pcb.D, 'NET_WIDTH', None))
     print('DSN written with', n, 'nets')
     pre = os.environ.get('FC_SES')            # import an existing session file instead of running the router
     if pre and os.path.exists(pre): ses = pre
@@ -63,7 +63,7 @@ def main():
             for t in doomed: board.Remove(t)
             print('stage 2: ripped up', len(doomed), 'items around', len(pts), 'open points (radius', rip, 'mm)')
             pcbnew.SaveBoard(PCB, board); board = pcbnew.LoadBoard(PCB)
-        dsn_export.export(board, dsn2, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR)
+        dsn_export.export(board, dsn2, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR, net_width=getattr(gen_pcb.D, 'NET_WIDTH', None))
         cmd = ['xvfb-run', '-a', 'java', '-jar', JAR, '-de', dsn2, '-do', ses2, '-mp', str(PASSES), '-mt', '1', '-oit', os.environ.get('FC_OIT', '8'), '-da']
         print('stage 2:', ' '.join(cmd))
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=int(os.environ.get('FC_TIMEOUT', '1500')))

@@ -6,7 +6,7 @@ Support"); it is a "Standard PCBA" order, which needs edge rails and fiducials (
 next to the files says so and gives the order options and the assembly cost from JLCPCB's price table.
 LCSC part numbers: designs with their own LCSC map (rev E on: Basic parts only) use that map and nothing else;
 older designs read <hw dir>/jlc_parts.json (created from DEFAULT_PARTS on first run; edit it to substitute parts)."""
-import os, sys, csv, json, subprocess, shutil
+import os, sys, re, csv, json, subprocess, shutil
 sys.path.insert(0, os.path.dirname(__file__))
 import os as _os, importlib as _il
 _DESIGN = _os.environ.get('FC_DESIGN', 'design')
@@ -282,34 +282,58 @@ Pico 2 ×2 + XIAO RP2350 ×2 が基本構成、Pico 2 ×2 は増設用（載せ�
 | `rails.png` | 捨て基板の位置の図。JLCPCB への問い合わせに添付する |
 | `parts_check.csv`、`cpl_check.csv` | 部品の区分・在庫と、部品の向きの検査結果 |
 
-このデータの基板は、配線 @NTRACKS@ 本・ビア @NVIAS@ 個・未接続 0。
+このデータの基板は、配線 @NTRACKS@ 本・ビア @NVIAS@ 個・未接続 @NOPEN@。
 
 ## 1. 注文の種類と、捨て基板の付け方
 - 金フィンガー付きの基板は **Economic PCBA では受け付けられない**（JLCPCB の実装仕様表で Gold fingers は Economic "Not Support"、
   Standard "Support"）。**Standard PCBA** で注文する。実装は表面（Top）だけ、@TYPES@ 種類・@PARTS@ 点/枚。
 - Standard PCBA は捨て基板（Edge Rails、幅 5 mm 以上）とフィデューシャルが必須。
 - **JLCPCB に任せると、捨て基板は既定で「長いほうの 2 辺」に付く**（注文フォームの注意書き: "Please add two 5mm edge rails along
-  the longer sides of your PCB"）。この基板は 89.6 × 85.7 mm なので、長い辺は**上の辺と端子の辺**になる。端子の辺に捨て基板が付くと、
+  the longer sides of your PCB"）。この基板は @SIZE@ mm なので、長い辺は**上の辺と端子の辺**になる。端子の辺に捨て基板が付くと、
   端子の面取りができず（JLCPCB の金フィンガーの説明: 面付けして端子が内側に来ると面取りできない）、端子の辺が割り取った面になる。
 - そこでデータを 2 通り用意した。
-  - **A 案（推奨）`gerbers_rails.zip`**: 捨て基板を自分で描き込んだデータ。左右（85.7 mm の辺）に幅 5 mm の捨て基板を 2 mm 離して置き、
-    片側 3 か所のタブ（幅 4.2 mm。直径 0.6 mm の穴 5 個が、基板の端の線に外側から接している）でつないである。すべてルーター加工で、
-    V カットは無い。折り取ると、タブの所に高さ 0.3 mm 以下の突起が残るので、やすりで端の線まで落とす。
-    端子の辺には何も付かない。フィデューシャル（銅 1 mm、レジスト開口 2 mm）は捨て基板の上に 3 個。全体は @PANEL@ mm。
-    注文画面では、捨て基板とフィデューシャルを「自分で付けた」（Added by Customer に当たる選択肢）にする。
-  - **B 案 `gerbers.zip`**: 基板だけのデータ。捨て基板は JLCPCB に付けてもらい（Added by JLCPCB）、左右に付けるよう Remark で頼む。
-    **Confirm Production file を Yes** にして、製造データの大きさが 99.6 × 85.7 mm（左右に付いた場合）であることを確かめてから承認する。
-    89.6 × 95.7 mm になっていたら上下に付いているので、承認しない。JLCPCB は「形が四角や円でない基板の面付けは自分でやること」とも
-    書いているので、B 案は断られることがある。そのときは A 案を使う。
-- どちらの案でも、「捨て基板の付いた基板の端子を面取りしてもらえるか」は JLCPCB のどのページにも書かれていない。
-  **支払いの前に、サポート（チャット）に `rails.png` を見せて確かめる**。質問文（そのまま貼る）:
 
-> I am going to order a 2-layer board, 1.2 mm, ENIG, with 60 gold fingers and a 30 degree bevel, and Standard PCBA on the top side.
-> Please see the attached drawing. The gold fingers are on ONE edge only (the edge with the 78.4 mm wide tab). The two 5 mm edge
-> rails are on the two 85.7 mm edges, perpendicular to the gold-finger edge, joined to the board by mouse-bite tabs. There is no V-cut.
-> 1) Can you bevel the gold-finger edge of this board? 2) Is this rail arrangement accepted for Standard PCBA?
+**A 案（推奨）`gerbers_rails.zip`**: 捨て基板を自分で描き込んだデータ。全体 @PANEL@ mm、基板は 1 枚。
+- 捨て基板は左右に 1 本ずつ。幅 @RAILW@ mm、長さ @RAILLEN@ mm。基板との間は幅 @GAP@ mm のルーター加工の溝で、V カットは無い。
+- 端子の辺には何も付かない。捨て基板は端子の辺の線より @ENDGAP@ mm 手前で終わる（面取りの刃が通る所を空けるため）。
+- 基板とは片側 @NTABS@ か所のタブ（幅 @TABW@ mm）でつながる。タブには直径 @HOLE@ mm の穴が @NHOLES@ 個、穴と穴の間を @WEB@ mm 空けて
+  並んでいる（ミシン目）。穴は基板の端の線に外側から接している。折り取ると高さ @RIDGE@ mm 以下の突起が残るので、やすりで端の線まで落とす。
+- 捨て基板の上に、フィデューシャル @NFID@ 個（銅 1 mm、レジスト開口 2 mm、中心がパネルの端から @FIDIN@ mm）と、ツーリング穴
+  @NTOOL@ 個（直径 @TOOLD@ mm、めっき無し）がある。
+- これらの数値は、JLCPCB が「自社で実装するミシン目パネル」に示している条件に合わせてある（5 章の表の「捨て基板」の行）。
+- 注文画面では **Delivery Format を "Panel by Customer"（Panel Format は Column 1・Row 1）**、実装の **Edge Rails/Fiducials を
+  "Added by Customer"** にする。JLCPCB の定義では、捨て基板をミシン目でつないだデータは「自分で面付けしたデータ」に当たる。
+  ただし「基板 1 枚＋自分で描いた捨て基板」の注文のしかたを書いたページは無いので、下の質問の 3) で確かめる。
 
-- 面取りはできないと言われた場合: 面取り無しで作ってもらい、受け取ってから手で面取りする（6 章）。捨て基板を上下に移す提案は断る。
+**B 案 `gerbers.zip`**: 基板だけのデータ（@SIZE@ mm）。捨て基板は JLCPCB に付けてもらい（Added by JLCPCB）、左右に付けるよう Remark で頼む。
+- 注文フォームは、大きさを自動で **@FORMB@ mm** に書き換える（上の辺と端子の辺に付けた大きさ。フォームの文面はこれを
+  "on the shorter sides" と呼ぶ）。これはフォームの既定の動作で、フォーム上では変えられない。Remark で左右に付けるよう頼み、
+  結果は製造データで確かめる（この動作はフォームのスクリプトと文面の一覧から読んだもので、画面では確かめていない）。
+- **Confirm Production file を Yes** にして、製造データの大きさが @PANELB@ mm（左右に付いた場合）で、端子の辺に V カットの線が
+  無いことを確かめてから承認する。@FORMB@ mm なら上下に付いているので、承認しない。
+- JLCPCB が付ける捨て基板は V カットでつながる。左右の端は V カットの面（公差 ±0.4 mm）になり、銅箔から端までの 0.4 mm に余裕が
+  無い。JLCPCB は「形が四角や円でない基板の面付けは自分でやること」とも書いているので、B 案は断られることがある。そのときは A 案を使う。
+
+**支払いの前に**: どちらの案でも、「捨て基板の付いた基板の端子を面取りしてもらえるか」は JLCPCB のどのページにも書かれていない。
+サポート（チャット）に `rails.png` を見せて確かめる。質問文（そのまま貼る）:
+
+> I am going to order a 2-layer board, 1.2 mm, ENIG, gold fingers (30 on each side) with a 30 degree bevel, and Standard PCBA
+> on the top side. Please see the attached drawing. My Gerber file already contains two @RAILW@ mm edge rails that I drew myself,
+> on the left and right edges (perpendicular to the gold-finger edge). Each rail is joined to the board by @NTABS@ mouse-bite tabs
+> (@TABW@ mm wide, @HOLE@ mm holes) across a @GAP@ mm routed gap. There is no V-cut. The rails end @ENDGAP@ mm above the gold-finger
+> edge, so that edge is completely free. The rails carry @NFID@ fiducials (1 mm, centre @FIDIN@ mm from the panel edges) and
+> @NTOOL@ tooling holes (@TOOLD@ mm). Panel size @PANEL_X@ mm, one board per panel.
+> 1) Can you bevel the gold-finger edge of this board?
+> 2) Is this rail arrangement accepted for Standard PCBA?
+> 3) Which Delivery Format must I select: Single PCB or Panel by Customer (1 x 1)? Is there an extra charge?
+> 4) If I upload the board without rails (@SIZE_X@ mm) instead, can you add the rails on the same two edges
+> (panel @PANELB_X@ mm) and still bevel the gold-finger edge?
+
+答えに応じて変える所:
+- 1) が「面取りできない」の場合: Gold Fingers の **Beveling を "No"** にし、Remark の "Please bevel this edge 30 degrees." を消す。
+  面取り無しで作ってもらい、受け取ってから手で面取りする（6 章）。捨て基板を上下に移す提案は断る。
+- 2) が「この捨て基板では実装できない」の場合: 足りない寸法を聞き、`tools/pcb/design_revg.py` の `RAILS` を直してデータを作り直す。
+- 3) が "Single PCB" の場合: Delivery Format をそれに合わせる。追加料金があれば 4 章の見積もりに加える。
 
 ## 2. PCB の指定（Instant Quote → Add gerber file）
 注文フォームの項目名は変わることがある（下の項目名は 2026-11-10 にフォームの文面で確認できたもの。面取りの角度、金の厚さ、外形公差、
@@ -322,39 +346,52 @@ Pico 2 ×2 + XIAO RP2350 ×2 が基本構成、Pico 2 ×2 は増設用（載せ�
 | PCB Qty | 5（最少。3 枚などは選べない）|
 | Product Type | Industrial/Consumer electronics |
 | Different Design | 1 |
-| Delivery Format | **Single PCB**（"Panel by JLCPCB" は選ばない。選ぶと面取りの指定が消える）|
+| Delivery Format | A 案: **Panel by Customer**、Panel Format は Column 1・Row 1。B 案: **Single PCB**。どちらの案でも "Panel by JLCPCB" は選ばない（選ぶと面取りの指定が消える）|
 | PCB Thickness | **1.2 mm**（公差 ±10 %: 1.08〜1.32 mm）|
 | PCB Color / Silkscreen | Green / White（ほかの色は納期が 2 日延びる）|
-| Surface Finish | **ENIG**、Gold Thickness は **2 U"**（約 0.05 µm。1 U" は約 0.025 µm。端子が擦れるので厚いほう）|
+| Surface Finish | **ENIG**、Gold Thickness は **2 U"**（約 0.05 µm。1 U" は約 0.025 µm。端子が擦れるので厚いほう。5 枚で約 $17 の追加）|
 | Outer Copper Weight | 1 oz |
 | Via Covering | Tented |
-| Min via hole size/diameter | 標準のまま（設計値: 穴 0.3 mm・径 0.5 mm）|
+| Min via hole size/diameter | 標準のまま（設計値: 穴 @VDR@ mm・径 @VIA@ mm）|
 | Board Outline Tolerance | ±0.2 mm（Regular。ルーター加工の辺の値）|
 | Mark on PCB | **Remove Mark**（既定。JLCPCB は 2026 年 5 月に注文番号の印字をやめた）|
 | Electrical Test | Flying Probe Fully Test |
-| Gold Fingers | **Yes**、Bevelling **30°**（ENIG を選んだときだけ端子が金になる。HASL を選ぶと端子ははんだ〔錫〕になる）|
+| Gold Fingers | **Yes**、Beveling **30°**（ENIG を選んだときだけ端子が金になる。HASL を選ぶと端子ははんだ〔錫〕になる）|
 | Castellated Holes | No |
-| Confirm Production file | **Yes**（製造データを見てから承認する。捨て基板の位置と面取りをここで確かめる）|
+| Material Type、Via Plating Method、Edge Plating、Blind Slots、UL Marking、Humidity Indicator Card | 既定のまま |
+| Confirm Production file | **Yes**（約 $1）。選ぶと「48 時間以内に確認しないと、自動で承認して製造に進む」という画面が出るので、**"Do not confirm automatically"** を選ぶ |
+
+製造データ（Production file）が届いたら、承認する前に次を確かめる: 捨て基板が左右にあること、端子の辺に捨て基板も V カットの線も
+無いこと、面取りの指示が入っていること、外形の切り欠きとスリットが図面どおりであること。
 
 PCB Remark（A 案。そのまま貼る）:
 
-> 1) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (60 fingers). Please bevel this edge 30 degrees.
-> 2) The two 5 mm edge rails for assembly are already in the Gerber data, on the two 85.7 mm edges, joined by mouse-bite tabs
-> (0.6 mm holes). Please do NOT add other rails and do NOT add V-cut. The gold-finger edge must stay a free routed edge.
-> 3) If a board with rails cannot be bevelled, please make the boards without bevel and tell me before production.
+> 1) This is ONE board with two @RAILW@ mm edge rails that I drew myself: panel @PANEL_X@ mm, one board per panel. The rails are
+> on the left and right edges, each joined by @NTABS@ mouse-bite tabs (@TABW@ mm wide, @HOLE@ mm holes) across a @GAP@ mm routed gap.
+> @NFID@ fiducials and @NTOOL@ tooling holes (@TOOLD@ mm) are on the rails. Please do NOT add other rails and do NOT add V-cut.
+> 2) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge
+> 30 degrees. This edge must stay a free routed edge; the rails end @ENDGAP@ mm above it.
+> 3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
 > 4) You may shorten the finger copper to your standard setback for the bevel.
-> 5) The outline has two side notches, one inner slot (6.6 x 2.4 mm) and cut corners beside the tab. Inner corners are drawn
+> 5) The solder mask window over the gold fingers is intentional: it starts 4.0 mm below the root of the tab and runs to the
+> edge. Please do not enlarge it towards the board: tracks run beside the upper ends of the fingers.
+> 6) The outline has two side notches, one inner slot (6.6 x 2.4 mm) and cut corners beside the tab. Inner corners are drawn
 > with R 0.5 mm. Please keep them as drawn.
 
 PCB Remark（B 案。そのまま貼る）:
 
-> 1) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (60 fingers). Please bevel this edge 30 degrees.
-> 2) Edge rails for assembly: please add the two 5 mm rails on the two 85.7 mm edges (the edges perpendicular to the gold-finger
-> edge). Panel size 99.6 x 85.7 mm. Do NOT put a rail on the gold-finger edge or on the opposite edge, although these are the
-> longer edges. 3) The gold-finger edge must stay a free routed edge: no rail, no V-cut, no mouse bites.
-> 4) If a board with rails cannot be bevelled: keep the rails as in 2), make the boards without bevel, and tell me before production.
+> 1) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge
+> 30 degrees.
+> 2) Edge rails for assembly: please add the two 5 mm rails on the LEFT and RIGHT edges (the two 85.7 mm edges, perpendicular
+> to the gold-finger edge). Panel size @PANELB_X@ mm, NOT @FORMB_X@ mm as the order form shows. Do NOT put a rail on the
+> gold-finger edge or on the opposite edge.
+> 3) The gold-finger edge must stay a free routed edge: no rail, no V-cut, no mouse bites.
+> 4) If you cannot add the rails on these two edges, or cannot bevel a board with rails: do NOT move the rails; put the order
+> on hold and contact me.
 > 5) You may shorten the finger copper to your standard setback for the bevel.
-> 6) The outline has two side notches, one inner slot (6.6 x 2.4 mm) and cut corners beside the tab. Inner corners are drawn
+> 6) The solder mask window over the gold fingers is intentional: it starts 4.0 mm below the root of the tab and runs to the
+> edge. Please do not enlarge it towards the board: tracks run beside the upper ends of the fingers.
+> 7) The outline has two side notches, one inner slot (6.6 x 2.4 mm) and cut corners beside the tab. Inner corners are drawn
 > with R 0.5 mm. Please keep them as drawn.
 
 **端子の金について**: JLCPCB は硬質金めっき（抜き差しの多いコネクタ用の電解めっき、0.5〜1.5 µm 級）を扱っておらず、金フィンガーにも
@@ -363,8 +400,9 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 ない目安）。このカセットは挿したまま使う前提で、ゲームの入れ替えは USB か microSD で行う。金が減っても下のニッケルで導通はするが、
 接触が不安定になったら端子を無水アルコールで拭く。
 
-**面取りの寸法**: JLCPCB の図では、面取りは 30° ± 5°、端子の銅は基板の端から 1.15 mm（板厚 1.6 mm 以下）手前で止める。この基板の
-端子は端から 1.2 mm 以上（電源・GND の長い 4 本）と 2.0 mm（そのほか）手前で終わる。JLCPCB は必要なら端子の銅を自分で短くする。
+**面取りの寸法**: JLCPCB の図では、面取りは 30° ± 5°、端子の銅は基板の端から 1.15 mm（板厚 1.6 mm 以下）手前で止める。注文フォームの
+表示では、板厚 1.2 mm・30° の面取りは深さ 0.89 mm、残る厚み 0.4 mm。この基板の端子は端から 1.2 mm 以上（電源・GND の長い 4 本）と
+2.0 mm（そのほか）手前で終わるので、面取りは銅に届かない（余裕 0.3 mm 以上）。JLCPCB は必要なら端子の銅を自分で短くする。
 
 ## 3. PCB Assembly の指定
 | 項目 | 指定 |
@@ -372,24 +410,27 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 | PCBA Type | **Standard** |
 | Assembly Side | Top Side |
 | PCBA Qty | 2 または 5 |
-| Edge Rails/Fiducials | A 案: 自分で付けた（Added by Customer）。B 案: Added by JLCPCB |
+| Edge Rails/Fiducials | A 案: **Added by Customer**。B 案: Added by JLCPCB |
+| Tooling holes（項目が出た場合）| A 案: 自分で付けた側（Added by Customer）。B 案: JLCPCB に任せる側 |
+| File provided as（面付けの注文で出る項目）| "Complete File, just proceed with my own files"（BOM と CPL はこの 1 枚で完結している）|
 | Confirm Parts Placement | Yes（部品の向きを製造前に画面で確認できる）|
+| 部品の選び方 | By Customer (Self-Service)。BOM に LCSC の部品番号が入っている |
 | BOM / CPL | `bom_jlc.csv` / `cpl_jlc.csv` |
+| 捨て基板を外すサービス（Depaneling）| 選ばない（選ばなければ捨て基板は付いたまま届く。外してもらうのは有料）|
 
-- 実装の Remark にも、PCB Remark の 1)〜3) を貼る。
-- 部品の照合画面の正しい状態: **10 行・@PARTS@ 点がすべて一致、すべて Basic、未選択の部品なし**。
+- 実装の Remark にも、PCB Remark の 1)〜3) を貼る（フォームの注意書き: 実装についての Remark は実装の欄に書くこと）。
+- JLCPCB は検査用の記号を捨て基板に自動で印刷する（フォームの注意書き）。基板本体には影響しない。
+- 部品の照合画面の正しい状態: **@TYPES@ 行・@PARTS@ 点がすべて一致、すべて Basic、未選択の部品なし**。
 - 実装しない部品（手はんだ・基板パターン）: @DNP@
 - CPL の角度は JLCPCB の部品ライブラリの向きに合わせて補正済み: 抵抗アレイ = 270°、SOT-23（2N7002・BAV99）= 180°、U7（SOIC-8）= 270°
-  （KiCad 上は 0°）。JLCPCB は自社の部品ライブラリ（LCSC 番号ごとの EasyEDA のフットプリント）を、CPL の角度だけ反時計回りに回して置く
-  （同社の説明: "Positive values are counter clockwise"）。全 @PARTS@ 点について、そのフットプリントを CPL のとおりに置いたときに、
-  各パッドが基板の同じ番号のパッドに重なることを確かめてある（`tools/pcb/check_cpl.py`。別の検証役による独立の照合でも一致）。
+  を、基板上の角度に足してある。JLCPCB は自社の部品ライブラリ（LCSC 番号ごとの EasyEDA のフットプリント）を、CPL の角度だけ
+  反時計回りに回して置く（同社の説明: "Positive values are counter clockwise"）。全 @PARTS@ 点について、そのフットプリントを CPL の
+  とおりに置いたときに、各パッドが基板の同じ番号のパッドに重なることを確かめてある（`tools/pcb/check_cpl.py`）。
   JLCPCB はライブラリを書き換えることがある（2026 年に 2 点が更新された）ので、**注文する日に `check_cpl.py` をもう一度実行する**。
-- **部品プレビューで見る点**（上から見て、端子を下にした向き）:
-  1. U7: 1 番ピンの印が**左上**。1〜4 番ピンが左側に上から並ぶ。
-  2. B5819W（@SCHOTTKY@）: カソードの帯が**下（端子側）**。
-  3. 2N7002 と BAV99（@SOT23@）: 足 2 本が**左**、1 本が**右**。
-  4. 抵抗アレイ: 長い辺が縦。SW1: 足が上と下。
-  **U7 かダイオードが 180° 回って見えたら承認しない**（回転の向きが取り違えられると、この 2 種類だけが逆になる）。
+- **部品プレビューで見る点**（上から見て、端子を下にした向き。下の向きはこのデータの基板から読み取ったもの）:
+@ORIENT@
+  **U7 か B5819W（@SCHOTTKY@）が 180° 回って見えたら承認しない**（回転の向きが取り違えられると、向きのある部品のうちこの 2 種類が
+  逆になる。SOT-23 は 180° 回るとパッドに合わなくなるので、画面で分かる）。
 
 ## 4. 費用（JLCPCB の料金表 @PRICEDATE@ 更新分から計算。部品代・送料・税は別）
 | | 2 枚実装 | 5 枚実装 |
@@ -402,10 +443,10 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
   Extended で料金は同じ。Basic だけにしているのは、在庫が安定していて入手しやすいから）。
 - 治具費は料金表では 1 個 $8.21、29 枚以下は 2 個。どの注文に掛かるかは料金表に書かれていない。料金表にはほかに、ステンシルと
   治具の保管料（各 $4.93）の項目がある。
-- PCB 代は見積もり画面の表示による。ENIG・金フィンガー・1.2 mm を選ぶので標準の基板より高い。捨て基板が付くと面付け扱いになり、
-  102 × 102 mm 以下の特別価格は使えない（JLCPCB の説明）。
+- PCB 代（5 枚、ENIG 2 U"・金フィンガー・30° 面取り・1.2 mm・Confirm Production file 込み、送料別。2026-11-10 の見積もり画面）:
+  A 案の大きさ（@PANEL@ mm）で約 US$ 44、B 案の大きさ（@SIZE@ mm）で約 US$ 40。A 案は 102 × 102 mm 以下の特別価格の対象外で、
+  "Panel by Customer" を選んでも見積もりは同じだった。面付けデータは、注文後に JLCPCB が料金を直すことがある（同社の説明）。
 - 納期: Standard PCBA の製造は 4 日以上（Economic は 1〜3 日）。
-- 捨て基板は付いたまま届く。JLCPCB に外してもらうこともできる（有料。注文時に選ぶ）。
 - モジュール（秋月）: 基本構成 ¥4,180（Pico 2 ×2 + XIAO RP2350 ×2）、増設の Pico 2 は 1 枚 ¥990、microSD ソケット ¥150。
 
 ## 5. JLCPCB の製造条件との照合
@@ -417,24 +458,26 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 | 端子部のレジスト | タブの付け根から 4.0 mm より先（配線を置かない範囲）は、表裏とも端子の間を含めて全面開口 | 金フィンガーの範囲はレジストを全面開口にする（残すと抜き差しで剥がれる）|
 | 端子の近く | ビアは端子から 1.0 mm 以上離す。シルクは無い | めっき穴・SMD パッドは金フィンガーから 1.0 mm 以上。端子の近くにレジスト・シルクを置かない（同社の記事の指針）|
 | 面取りと面付け | 捨て基板は左右。端子の辺は外周のまま。V カット無し | 面付けして端子が内側に来ると面取りできない |
-| 捨て基板 | 幅 5.0 mm、左右。フィデューシャル 3 個（銅 1 mm、開口 2 mm、外側の端から 3.5 mm）| 幅 5 mm 以上。フィデューシャル 3〜4 個、銅 1 mm、開口は銅の 2 倍、基板の端から 3.35 mm 以上 |
+| 捨て基板（A 案）| 幅 @RAILW@ mm、左右。タブは幅 @TABW@ mm、穴 @HOLE@ mm、穴の間 @WEB@ mm。フィデューシャル @NFID@ 個（銅 1 mm、開口 2 mm、中心がパネルの端から @FIDIN@ mm）。ツーリング穴 @TOOLD@ mm × @NTOOL@ | 幅 5 mm 以上。ミシン目のタブは幅 5 mm 以上、穴 0.5〜0.8 mm、穴の間 0.2〜0.3 mm。フィデューシャルは 1 mm、中心がパネルの端から 3.85 mm（パッドの縁まで 3.35 mm）、開口は銅の 2 倍、3〜4 個。ツーリング穴 2 mm |
 | 配線幅 / 間隔 | @TRACK@ / @CLEAR@ mm | 0.10 / 0.10 mm 以上（2 層・1 oz）|
 | ビア | 径 @VIA@ mm、穴 @VDR@ mm | 穴 0.3 mm 以上が標準。径は穴 + 0.1 mm 以上（推奨 + 0.15 mm）。追加料金は「穴 0.3 mm 未満かつ径 0.4 mm 以下」のとき |
 | 穴と穴 / 穴と配線 | 0.25 mm 以上 / 0.2 mm 以上 | 0.2 mm 以上 / 0.2 mm 以上 |
 | 銅箔と基板端 | 0.3 mm 以上。左右の端は 0.4 mm 以上（タブの穴は基板の外側にあり、穴の縁から銅まで 0.4 mm）| ルーター加工の端 0.2 mm 以上、V カットの端 0.4 mm 以上。穴と配線は 0.2 mm 以上 |
-| スリット・切り欠き | 幅 2.4 mm（捨て基板との間は 2.0 mm）。内側の角は R0.5 mm で作図 | 非めっきスリットは幅 1.0 mm 以上。角に丸みの無い角穴・スリットは作れない |
+| スリット・切り欠き | 幅 2.4 mm（捨て基板との間は @GAP@ mm）。内側の角は R0.5 mm で作図 | 非めっきスリットは幅 1.0 mm 以上。角に丸みの無い角穴・スリットは作れない |
 | 外形の公差 | 切り欠きの奥行きとスリットの長さに 0.6 mm、左右の端に 0.2 mm の逃げ | ルーター加工 ±0.2 mm、V カット ±0.4 mm |
-| シルク | 線幅 0.15 mm 以上、文字の高さ 1.0 mm 以上 | 線幅 0.15 mm 以上、文字の高さ 1.0 mm 以上 |
-| レジスト | パッド間のレジストは 0.3 mm 以上 | 0.10 mm 以上（黒・白は 0.13 mm）|
+| シルク | 線幅 0.15 mm 以上、文字の高さ 1.0 mm 以上（英字は大文字だけ）| 線幅 0.15 mm 以上、文字の高さ 1.0 mm 以上 |
+| レジスト | パッドの開口はパッドと同じ大きさ。開口と開口の間のレジストは @MASKWEB@ | 0.10 mm 以上（黒・白は 0.13 mm）。開口と隣の配線は 0.09 mm 以上 |
 | 実装 | 表面のみ | Standard PCBA は片面・両面とも可 |
 | はんだペースト | 手はんだ部品のパッドには置いていない | ステンシルの開口は実装する部品のパッドだけに作られる |
 
-ガーバーの ZIP には製造に使う層（銅箔・レジスト・シルク・ペースト・外形）とドリルだけを入れてある。
+ガーバーの ZIP には製造に使う層（銅箔・レジスト・シルク・ペースト・外形）とドリルだけを入れてある。`tools/pcb/check_jlc.py` は、
+2 つの ZIP の中身が基板ファイルを今プロットしたものと同じであること、捨て基板付きの基板の中身（配線・ビア・部品・ベタ・外形）が
+基板だけのものと同じであること、捨て基板の寸法（上の表の数値）を、データから測って検査する。
 
 ## 6. 受け取ってから
 1. 板厚をノギスで測る（1.08〜1.32 mm の範囲で届く）。
-2. 捨て基板を外す。A 案はタブの穴の列で折り、端面に残った突起（高さ 0.3 mm 以下）を、基板の端の線までやすりで落とす（左右 3 か所ずつ）。
-   B 案は V カットなら折り、端面をやすりで平らにする。
+2. 捨て基板を外す。A 案はタブの穴の列で折り、端面に残った突起（高さ @RIDGE@ mm 以下）を、基板の端の線までやすりで落とす
+   （左右 @NTABS@ か所ずつ）。B 案は V カットなら折り、端面をやすりで平らにする。
    面取り無しで届いた場合は、端子の辺の角を表裏とも 30〜45° の角度で 0.3〜0.5 mm ほど、目の細かいやすりで落とす
    （端子の銅は端から 1.2 mm 以上手前で終わっているので、金には触れない）。角が立ったままだと本体のコネクタの接点を傷める。
 3. **基板だけ**をシェルに入れて、左右の切り欠き・スリット・端子タブの位置を確かめる。タブの付け根など、内側の角に残る丸みが
@@ -445,10 +488,15 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
    **裏** = Pico 2（U1・U2・U5）約 3.8 mm。任天堂の純正基板は背の高い部品を裏（31〜60 番の面）に載せているので、表のほうが狭い
    可能性がある。表の隙間が XIAO に足りない場合、この版ではシェルの表側を閉じられない（表側のシェルの内側を削るか、開けたまま
    使い、次の版で XIAO を裏に移す）。動作には影響しない。
-4. モジュールにファームを書き込んでから、はんだ付けする。裏面（U2 → U1、増設するなら U5）を先に、表面（U3・U6、増設するなら U4、
-   使うなら J3）を後に。基板のシルクに `U1 cpu` のように役割が書いてある。シルクの `USB` の字がある側にモジュールの USB 端子を向ける。
-5. Pico 2 は端面（キャステレーション）40 か所だけをはんだ付けする。XIAO は縁の 14 ピンだけ（裏面パッドは使わない）。
-6. XIAO の 5V ピンは USB の VBUS と直結している。**本体の電源が入っている間は、電源の入っていない PC やハブに U3・U6 の USB を
+4. モジュールに**ファームを書き込んでから**はんだ付けする（U2 の USB 端子は基板の内側を向くので、付けたあとはケーブルを挿しにくい）。
+   Pico 2 は、USB コネクタの固定足 4 か所（裏面に出ている）のはんだが盛り上がっていれば、先に平らにする（基板から浮くため）。
+5. はんだ付けの順番: 裏面（U2 → U1、増設するなら U5）を先に、表面を後に。表面は **U6 → J3（使うなら）→ U4（増設するなら）**、
+   U3 はいつでもよい。U2 を付けるときは、すぐ下の金フィンガーにはんだやフラックスが付かないよう、端子をテープで覆う。
+   基板のシルクに `U1 CPU` のように役割が書いてある。シルクの `USB` の字がある側に、モジュールの USB 端子を向ける
+   （XIAO は 180° 回しても載ってしまい、その向きでは 5 V が別のピンに入る）。
+6. Pico 2 は端面（キャステレーション）40 か所だけをはんだ付けする。XIAO は縁の 14 ピンだけ（裏面パッドは使わない）。
+   付けたあと、はんだブリッジが無いか見る所: @BRIDGES@
+7. XIAO の 5V ピンは USB の VBUS と直結している。**本体の電源が入っている間は、電源の入っていない PC やハブに U3・U6 の USB を
    つながない**（本体の 5 V が USB ケーブル側へ出る）。
 
 ## 7. 手はんだ部品（秋月電子）
@@ -458,17 +506,17 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 | Seeed XIAO RP2350 | 129619 | ¥1,100 ×2 | **表**: U3（中央右、IRQ・拡張音源・ネームテーブル制御）・U6（上、ハブ: SFC チップ機能・保存・更新）|
 | microSD ソケット Hirose DM3AT-SF-PEJM5 | 102395 | ¥150（任意）| **表**: J3（右上）|
 
-## 出典（JLCPCB 公式、2026-11-10 に確認）
-- 実装仕様（Economic / Standard の違い、金フィンガー、基板サイズ）: https://jlcpcb.com/capabilities/pcb-assembly-capabilities
-- 基板の製造仕様（配線・ビア・外形・スリット・シルク・レジスト・板厚の公差）: https://jlcpcb.com/capabilities/pcb-capabilities
+## 出典（JLCPCB 公式、2026-11-10 に確認。同社のヘルプ記事は更新日が変わるので、注文する日にもう一度読む）
+- 実装仕様（Economic / Standard の違い、金フィンガー、基板サイズ、面付けの種類）: https://jlcpcb.com/capabilities/pcb-assembly-capabilities
+- 基板の製造仕様（配線・ビア・外形・スリット・シルク・レジスト・板厚の公差、"Mouse bites Panel" の行: タブ・ミシン目・ツーリング穴・フィデューシャルの数値）: https://jlcpcb.com/capabilities/pcb-capabilities
 - 追加料金になる場合（小径穴、金の厚さ、面付けと特別価格）: https://jlcpcb.com/help/article/In-what-cases-will-there-be-charged-extra
-- 金フィンガー（2026-09-18 更新。面取りの角度、面付けと面取り、端子部のレジスト全面開口、銅の後退）: https://jlcpcb.com/help/article/jlcpcb-gold-fingers
-- 面取りの寸法の図（2026-03-31 更新）: https://jlcpcb.com/blog/considerations-for-gold-finger-bevel-design
-- 金フィンガーの設計の指針（2026-03-31 更新。めっき穴・パッドは端子から 1.0 mm 以上）: https://jlcpcb.com/blog/pcb-gold-fingers
-- 硬質金めっきと ENIG、JLCPCB が硬質金を扱わないこと（2026-08-08 更新）: https://jlcpcb.com/blog/hard-gold-pcb-finish
-- 捨て基板とフィデューシャル（2026-09-09 更新）: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order
-- 注文フォーム（捨て基板は長い辺に付く旨の注意書き、Delivery Format、Mark on PCB）: https://cart.jlcpcb.com/quote
-- 注文番号の印字の廃止（2026-05-22 更新）: https://jlcpcb.com/help/article/how-to-mark-on-pcb
+- 金フィンガー（面取りの角度、面付けと面取り、端子部のレジスト全面開口、銅の後退）: https://jlcpcb.com/help/article/jlcpcb-gold-fingers
+- 面取りの寸法の図: https://jlcpcb.com/blog/considerations-for-gold-finger-bevel-design
+- 金フィンガーの設計の指針（めっき穴・パッドは端子から 1.0 mm 以上）: https://jlcpcb.com/blog/pcb-gold-fingers
+- 硬質金めっきと ENIG、JLCPCB が硬質金を扱わないこと: https://jlcpcb.com/blog/hard-gold-pcb-finish
+- 捨て基板とフィデューシャル（図: フィデューシャルのパッドの縁から基板の端まで 3.35 mm 以上）: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order
+- 注文フォーム（捨て基板は長い辺に付く旨の注意書き、Delivery Format の定義、Beveling、Confirm Production file、Mark on PCB、見積もり）: https://cart.jlcpcb.com/quote
+- 注文番号の印字の廃止: https://jlcpcb.com/help/article/how-to-mark-on-pcb
 - 面付けと V カットの条件: https://jlcpcb.com/help/article/pcb-panelization
 - 実装の料金表（@PRICEDATE@ 更新）: https://jlcpcb.com/help/article/pcb-assembly-price
 - 実装の FAQ（面付けの方法、フィデューシャル）: https://jlcpcb.com/help/article/pcb-assembly-faqs
@@ -504,6 +552,98 @@ def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
     for r in rows: print('  %-9s %-28s %-8s %9s %s' % tuple(str(x) for x in r))
     if bad: raise SystemExit(f'parts check FAILED for {bad} (must be JLCPCB Basic with stock >= {min_stock})')
     print(f'parts check: all {len(rows)} LCSC parts are JLCPCB Basic with stock >= {min_stock}')
+
+def _dir(dx, dy):
+    """Where a point lies as seen from the part centre, in the view of the notes (from above, gold fingers at the bottom)."""
+    if abs(dx) > 2 * abs(dy): return '右' if dx > 0 else '左'
+    if abs(dy) > 2 * abs(dx): return '下' if dy > 0 else '上'
+    return ('右' if dx > 0 else '左') + ('下' if dy > 0 else '上')
+
+def _refs(refs):
+    return '・'.join(sorted(refs, key=lambda r: (r.rstrip('0123456789'), int(''.join(ch for ch in r if ch.isdigit()) or 0))))
+
+def orientation_notes(b, D):
+    """The lines of the notes that say how each kind of part must look in JLCPCB's placement preview, read from the board."""
+    import pcbnew
+    def off(fp, num):
+        p = next(q for q in fp.Pads() if q.GetNumber() == num); return p.GetPosition().x - fp.GetPosition().x, p.GetPosition().y - fp.GetPosition().y
+    def grouped(val, fn):
+        g = {}
+        for ref, q in D.PARTS.items():
+            if q[2].split(' (')[0] == val: g.setdefault(fn(b.FindFootprintByReference(ref)), []).append(ref)
+        return g
+    def span(fp):
+        xs = [p.GetPosition().x for p in fp.Pads()]; ys = [p.GetPosition().y for p in fp.Pads()]
+        return '縦' if max(ys) - min(ys) > max(xs) - min(xs) else '横'
+    out = []
+    u7 = b.FindFootprintByReference('U7')
+    if u7:
+        d1, d4 = off(u7, '1'), off(u7, '4'); vertical = abs(d4[1] - d1[1]) > abs(d4[0] - d1[0])
+        row = ('右' if d1[0] > 0 else '左') if vertical else ('下' if d1[1] > 0 else '上')
+        run = ('上から下へ' if d4[1] > d1[1] else '下から上へ') if vertical else ('左から右へ' if d4[0] > d1[0] else '右から左へ')
+        out.append('U7: 1 番ピンの印が**%s**。1〜4 番ピンが%s側に、%s並ぶ。' % (_dir(*d1), row, run))
+    for val, pad, text in (('B5819W', '1', 'カソードの帯が**%s**'),):
+        g = grouped(val, lambda fp: _dir(*off(fp, pad)))
+        out.append('B5819W: ' + '、'.join('%s は%s' % (_refs(r), text % k) for k, r in sorted(g.items())) + '。')
+    g = {}
+    for val in ('2N7002', 'BAV99'):
+        for k, r in grouped(val, lambda fp: _dir(*off(fp, '3'))).items(): g.setdefault(k, []).extend(r)
+    if g: out.append('2N7002 と BAV99（SOT-23）: ' + '、'.join('%s は足 1 本の側が**%s**' % (_refs(r), k) for k, r in sorted(g.items())) + '。')
+    arr = {}
+    for ref, q in D.PARTS.items():
+        if 'R_Array' in q[3] and b.FindFootprintByReference(ref): arr.setdefault(span(b.FindFootprintByReference(ref)), []).append(ref)
+    if arr: out.append('抵抗アレイ: ' + '、'.join(('%d 個すべて' % len(r) if len(arr) == 1 else _refs(r) + ' は') + '長い辺が%s' % k for k, r in sorted(arr.items())) + '。')
+    sw = b.FindFootprintByReference('SW1')
+    if sw: out.append('SW1: 足が%s。' % ('上と下' if span(sw) == '縦' else '左と右'))
+    return '\n'.join('  %d. %s' % (i + 1, t) for i, t in enumerate(out))
+
+def _boxes(b, layer, only=None):
+    out = []
+    for fp in b.GetFootprints():
+        for p in fp.Pads():
+            if not p.GetLayerSet().Contains(layer) or (only and not only(fp, p)): continue
+            bb = p.GetBoundingBox(); out.append((bb.GetX(), bb.GetY(), bb.GetRight(), bb.GetBottom(), fp.GetReference(), p.GetNumber(), p.GetNetname(), p.GetSolderMaskExpansion()))
+    return out
+
+def _gap(a, c, grow=0):
+    import math
+    dx = max(c[0] - a[2], a[0] - c[2], 0) - (grow if max(c[0] - a[2], a[0] - c[2]) > 0 else 0)
+    dy = max(c[1] - a[3], a[1] - c[3], 0) - (grow if max(c[1] - a[3], a[1] - c[3]) > 0 else 0)
+    return math.hypot(max(dx, 0), max(dy, 0))
+
+def mask_web_note(b):
+    """Smallest strip of solder mask between two pad openings of one side (pads are axis-parallel boxes; openings that
+    lie inside the gold-finger window, where there is no mask at all, do not count)."""
+    import pcbnew, gen_pcb
+    ywin = pcbnew.FromMM(gen_pcb.BODY_H + gen_pcb.FINGER_KEEP) if getattr(D, 'JLC_RULES', False) else None
+    best = None
+    for layer in (pcbnew.F_Mask, pcbnew.B_Mask):
+        bx = sorted(_boxes(b, layer))
+        for i, a in enumerate(bx):
+            for c in bx[i + 1:]:
+                if c[0] - a[2] > 2000000: break
+                if a[4] == c[4] == 'J1' and ywin is not None: continue          # finger to finger: inside or beside the window
+                g = _gap(a, c, a[7] + c[7])
+                if g > 0 and (best is None or g < best[0]): best = (g, a, c)
+    if not best: return '-'
+    g, a, c = best
+    return '%.2f mm 以上（最小は %s の %s 番と %s 番のパッドの間）' % (g / 1e6 - 0.0005, a[4], a[5], c[5]) if a[4] == c[4] else '%.2f mm 以上（最小は %s.%s と %s.%s の間）' % (g / 1e6 - 0.0005, a[4], a[5], c[4], c[5])
+
+def bridge_note(b, D, limit=1.0):
+    """Hand-soldered module pads with a foreign pad of another part within `limit` mm: the places to inspect for bridges."""
+    import pcbnew
+    hand = {r for r in D.PARTS if r.startswith('U') and r != 'U7'}
+    near = {}
+    for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+        bx = _boxes(b, layer)
+        for a in bx:
+            if a[4] not in hand or not a[5] or not a[5].isdigit(): continue
+            for c in bx:
+                if c[4] == a[4] or c[4] in hand or (a[6] and a[6] == c[6]): continue
+                g = _gap(a, c) / 1e6
+                if g < limit: near.setdefault((a[4], c[4]), {})[int(a[5])] = min(g, near.get((a[4], c[4]), {}).get(int(a[5]), 9.0))
+    if not near: return 'モジュールのパッドから %.1f mm 以内に、ほかの部品のパッドは無い。' % limit
+    return '、'.join('%s の %s 番パッドと %s（%.2f mm）' % (m, '・'.join(str(n) for n in sorted(v)), o, min(v.values())) for (m, o), v in sorted(near.items())) + '。'
 
 def routed_or_exit():
     """An order package made from an unrouted board looks complete (the notes, the BOM and the CPL do not depend on the
@@ -579,19 +719,32 @@ def main():
         TRK, CLR, VIA, VDR = gen_pcb.rules()
         ntr = sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_TRACK'); nvi = sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_VIA')
         RA = getattr(D, 'RAILS', None); bw, bh = pcbnew.ToMM(bb.GetWidth()) - 0.1, pcbnew.ToMM(bb.GetHeight()) - 0.1
+        b.BuildConnectivity(); nopen = b.GetConnectivity().GetUnconnectedCount(False)
         byval = lambda v: '・'.join(sorted((r for r, q in D.PARTS.items() if q[2] == v), key=lambda r: (r[0], int(''.join(ch for ch in r if ch.isdigit())))))
         fix = 2 * 8.21                         # price table: 1-29 boards need two fixtures
-        for k, v in (('@PANEL@', '%.1f × %.1f' % (bw + 2 * (RA['gap'] + RA['width']), bh) if RA else '-'),
-                     ('@FIX2@', '%.0f' % (assembly_estimate(ntypes, joints, 2) + fix)), ('@FIX5@', '%.0f' % (assembly_estimate(ntypes, joints, 5) + fix)),
-                     ('@NTRACKS@', str(ntr)), ('@NVIAS@', str(nvi)), ('@SCHOTTKY@', byval('B5819W')),
-                     ('@SOT23@', byval('2N7002') + '・' + byval('BAV99'))):
-            txt = txt.replace(k, v)
+        num = lambda v: ('%.2f' % v).rstrip('0').rstrip('.') if abs(v * 10 - round(v * 10)) > 1e-9 else '%.1f' % v
+        rep = [('@FIX2@', '%.0f' % (assembly_estimate(ntypes, joints, 2) + fix)), ('@FIX5@', '%.0f' % (assembly_estimate(ntypes, joints, 5) + fix)),
+               ('@NTRACKS@', str(ntr)), ('@NVIAS@', str(nvi)), ('@NOPEN@', str(nopen)), ('@SCHOTTKY@', byval('B5819W')),
+               ('@ORIENT@', orientation_notes(b, D)), ('@MASKWEB@', mask_web_note(b)), ('@BRIDGES@', bridge_note(b, D))]
+        if RA:                                 # every number of the rails in the notes comes from the design; check_jlc.py measures the railed board against JLCPCB's limits
+            pw = bw + 2 * (RA['gap'] + RA['width']); small_first = (bw, bh + 10.0) if bh <= bw else (bw + 10.0, bh)
+            rep += [('@PANEL@', '%.1f × %.1f' % (pw, bh)), ('@PANEL_X@', '%.1f x %.1f' % (pw, bh)), ('@SIZE_X@', '%.1f x %.1f' % (bw, bh)),
+                    ('@PANELB@', '%.1f × %.1f' % (bw + 10.0, bh)), ('@PANELB_X@', '%.1f x %.1f' % (bw + 10.0, bh)),
+                    ('@FORMB@', '%.1f × %.1f' % small_first), ('@FORMB_X@', '%.1f x %.1f' % small_first),       # the order form adds 10 mm to the smaller dimension
+                    ('@RAILW@', num(RA['width'])), ('@GAP@', num(RA['gap'])), ('@RAILLEN@', num(bh - RA.get('end_gap', 0.0))), ('@ENDGAP@', num(RA.get('end_gap', 0.0))),
+                    ('@NTABS@', str(len(RA['tabs']['L']))), ('@TABW@', num(RA['tab'])), ('@HOLE@', num(RA['hole'])), ('@NHOLES@', str(RA['holes'])),
+                    ('@WEB@', num(RA['pitch'] - RA['hole'])), ('@RIDGE@', num(RA['hole_out'])), ('@NFID@', str(len(RA['fiducials']))), ('@FIDIN@', num(RA['fid_inset'])),
+                    ('@NTOOL@', str(len(RA.get('tooling', ())))), ('@TOOLD@', num(RA.get('tooling_d', 0.0)))]
+            assert len(RA['tabs']['L']) == len(RA['tabs']['R']), 'the notes describe the same number of tabs on both rails'
+        else: rep.append(('@PANEL@', '-'))
+        for k, v in rep: txt = txt.replace(k, v)
         for k, v in (('@TYPES@', str(ntypes)), ('@PARTS@', str(len(placed))), ('@JOINTS@', str(joints)), ('@PRICEDATE@', JLC_PRICE['date']),
                      ('@EST2@', '%.0f' % assembly_estimate(ntypes, joints, 2)), ('@EST5@', '%.0f' % assembly_estimate(ntypes, joints, 5)),
                      ('@SIZE@', '%.1f × %.1f' % (pcbnew.ToMM(bb.GetWidth()) - 0.1, pcbnew.ToMM(bb.GetHeight()) - 0.1)),
-                     ('@TRACK@', '%.2f' % TRK), ('@CLEAR@', '%.2f' % CLR), ('@VIA@', '%.1f' % VIA), ('@VDR@', '%.1f' % VDR),
-                     ('@CLAMPS@', '・'.join(sorted((r for r, v in D.PARTS.items() if v[2] == 'BAV99'), key=lambda r: int(r[1:]))))):
+                     ('@TRACK@', '%.2f' % TRK), ('@CLEAR@', '%.2f' % CLR), ('@VIA@', '%.1f' % VIA), ('@VDR@', '%.1f' % VDR)):
             txt = txt.replace(k, v)
+        left = sorted(set(re.findall(r'@[A-Z0-9_]+@', txt)))
+        if left: raise SystemExit('order notes: placeholders without a value: %s' % left)
     with open(os.path.join(OUT, 'README.md'), 'w') as f: f.write(txt)
     print('written:', OUT, 'DNP:', dnp)
 

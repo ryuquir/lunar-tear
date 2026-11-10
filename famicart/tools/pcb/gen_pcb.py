@@ -64,13 +64,18 @@ SILK_MIN_LINE, SILK_MIN_TEXT = 0.15, 1.0        # JLCPCB: silkscreen line >= 0.1
 
 def mm(x, y): return VECTOR2I(FromMM(x), FromMM(y))
 
+def um(x, y):
+    """A drawing end point, snapped to the 0.001 mm grid. pcbnew.FromMM() cuts off instead of rounding, so a value such as
+    5.8 - 0.5 = 5.299999999999999 would become 5.299999 mm and leave a step of 1 nm between two outline items."""
+    return VECTOR2I(int(round(x * 1000.0)) * 1000, int(round(y * 1000.0)) * 1000)
+
 def add_seg(board, x1, y1, x2, y2, layer=pcbnew.Edge_Cuts, w=0.1):
     s = pcbnew.PCB_SHAPE(board); s.SetShape(pcbnew.SHAPE_T_SEGMENT)
-    s.SetStart(mm(x1, y1)); s.SetEnd(mm(x2, y2)); s.SetLayer(layer); s.SetWidth(FromMM(w)); board.Add(s)
+    s.SetStart(um(x1, y1)); s.SetEnd(um(x2, y2)); s.SetLayer(layer); s.SetWidth(FromMM(w)); board.Add(s)
 
 def add_arc(board, start, mid, end, layer=pcbnew.Edge_Cuts, w=0.1):
     s = pcbnew.PCB_SHAPE(board); s.SetShape(pcbnew.SHAPE_T_ARC)
-    s.SetArcGeometry(mm(*start), mm(*mid), mm(*end)); s.SetLayer(layer); s.SetWidth(FromMM(w)); board.Add(s)
+    s.SetArcGeometry(um(*start), VECTOR2I(int(round(mid[0] * 1e6)), int(round(mid[1] * 1e6))), um(*end)); s.SetLayer(layer); s.SetWidth(FromMM(w)); board.Add(s)
 
 def add_outline(board, pts, fillets=(), r=0.0):
     """Closed polygon on Edge.Cuts. Vertices listed in `fillets` (concave corners) are drawn as arcs of radius r:
@@ -170,12 +175,17 @@ def main():
         if role:
             # hand-soldered modules look alike but carry different firmware: print "U1 reve_cpu" on the silk under each
             # one (footprint-owned text, along the module's long axis; KiCad moves / flips it with the footprint)
-            t = pcbnew.FP_TEXT(fp); t.SetText('%s %s' % (ref, role)); t.SetLayer(pcbnew.F_SilkS)
+            # (JLCPCB designs: capitals, because lower-case letters of a 1.1 mm text are under the 1.0 mm minimum height)
+            t = pcbnew.FP_TEXT(fp); t.SetText(('%s %s' % (ref, role)).upper() if JLC else '%s %s' % (ref, role)); t.SetLayer(pcbnew.F_SilkS)
             ts = 1.5 if 'Pico' in fpname else 1.1
             t.SetTextSize(VECTOR2I(FromMM(ts), FromMM(ts))); t.SetTextThickness(FromMM(ts * 0.14))
             t.SetPosition(mm(0, 6.0 if 'Pico' in fpname else 2.0)); t.SetLocalCoord()
             t.SetTextAngleDegrees(90); t.SetKeepUpright(True)
             fp.Add(t)
+            if JLC and 'XIAO' in fpname:        # a XIAO fits turned by 180 degrees: mark its USB end like the Pico footprints do
+                u = pcbnew.FP_TEXT(fp); u.SetText('USB'); u.SetLayer(pcbnew.F_SilkS)
+                u.SetTextSize(VECTOR2I(FromMM(1.0), FromMM(1.0))); u.SetTextThickness(FromMM(0.15))
+                u.SetPosition(mm(0, -8.2)); u.SetLocalCoord(); fp.Add(u)
         if JLC:
             # JLCPCB silkscreen minimums (line 0.15 mm, text height 1.0 mm): KiCad's library footprints use 0.12 mm lines
             for g in fp.GraphicalItems():
@@ -197,8 +207,16 @@ def main():
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
                     elif 'CardEdge' not in fpname:
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL); pad.SetThermalSpokeWidth(FromMM(0.4)); pad.SetThermalGap(FromMM(0.3))
+        if JLC and getattr(D, 'GUARD_PADS', None) and val.split(' (')[0] not in getattr(D, 'LCSC', {}):
+            for pad in fp.Pads():       # guard pads under the modules: covered by mask, a little larger than the module's pad
+                if pad.GetNumber() in D.GUARD_PADS and not D.NETS.get(ref, {}).get(pad.GetNumber()):
+                    ls = pad.GetLayerSet(); ls.RemoveLayer(pcbnew.F_Mask); ls.RemoveLayer(pcbnew.B_Mask); pad.SetLayerSet(ls)
+                    g = FromMM(2 * D.GUARD_PADS[pad.GetNumber()]); pad.SetSize(VECTOR2I(pad.GetSize().x + g, pad.GetSize().y + g))
         if JLC and 'CardEdge' in fpname:    # shorten the fingers that reach into JLCPCB's bevel cutback (footprint at 0, 0)
             for pad in fp.Pads():
+                # mask opening = pad: above the mask window other tracks pass 0.19 mm beside the finger tops, and
+                # JLCPCB wants 0.09 mm between a mask opening and a neighbouring track (the footprint's 0.1 mm margin left 0.088)
+                pad.SetLocalSolderMaskMargin(0)
                 over = ToMM(pad.GetPosition().y) + ToMM(pad.GetSize().y) / 2 - (TAB_H - FINGER_SETBACK)
                 if over > 1e-6:
                     pad.SetSize(VECTOR2I(pad.GetSize().x, pad.GetSize().y - FromMM(over)))
@@ -431,6 +449,11 @@ def main():
         for i, (side, poly) in enumerate(SHELL['comp_keepouts']):   # shell ribs / posts: no components on that side
             add_rule_area(board, 'shell_rib_%s%d' % (side, i), poly, [pcbnew.F_Cu if side == 'F' else pcbnew.B_Cu],
                           tracks=False, vias=False, pour=False, footprints=True)
+    # tracks laid before routing (supply trunk, ground straps): the autorouter keeps them (dsn_export: "protect")
+    for net, w, pts in getattr(D, 'PREROUTE', []):
+        for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+            t = pcbnew.PCB_TRACK(board); t.SetStart(mm(ax, ay)); t.SetEnd(mm(bx, by)); t.SetWidth(FromMM(w))
+            t.SetLayer(pcbnew.F_Cu); t.SetNet(netmap[net]); board.Add(t)
     # GND pours on both layers over the body (not the tab)
     body = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
     if NL >= 4:   # inner planes: In1 = GND, last inner = +3V3 (6 layers: In2/In3 are extra signal layers)
