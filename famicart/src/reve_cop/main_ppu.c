@@ -47,15 +47,15 @@ static void configure(const reve_load_t *ld) {
 
 int main(void) {
     reve_clock_init();
-    for (uint g = 0; g < 14; g++) { gpio_init(g); gpio_set_input_hysteresis_enabled(g, true); }
-    gpio_init(PIN_PPU_RD); gpio_set_input_hysteresis_enabled(PIN_PPU_RD, true);
+    for (uint g = 0; g < 14; g++) { gpio_init(g); gpio_disable_pulls(g); gpio_set_input_hysteresis_enabled(g, true); }   /* no pad pull-downs on bus pins */
+    gpio_init(PIN_PPU_RD); gpio_disable_pulls(PIN_PPU_RD); gpio_set_input_hysteresis_enabled(PIN_PPU_RD, true);
     gpio_init(PIN_LED); gpio_set_dir(PIN_LED, true);
     uint off = pio_add_program(pio_d, &reve_ppu_data_program);
     sm_d = pio_claim_unused_sm(pio_d, true);
     pio_sm_config dc = reve_ppu_data_program_get_default_config(off);
     sm_config_set_out_pins(&dc, PIN_PPU_D_BASE, 8); sm_config_set_jmp_pin(&dc, PIN_PPU_RD);
     sm_config_set_out_shift(&dc, true, false, 32);
-    for (uint g = PIN_PPU_D_BASE; g < PIN_PPU_D_BASE + 8; g++) { pio_gpio_init(pio_d, g); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); }
+    for (uint g = PIN_PPU_D_BASE; g < PIN_PPU_D_BASE + 8; g++) { pio_gpio_init(pio_d, g); gpio_disable_pulls(g); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); }
     pio_sm_set_consecutive_pindirs(pio_d, sm_d, PIN_PPU_D_BASE, 8, false);
     pio_sm_init(pio_d, sm_d, off, &dc);
     pio_sm_set_enabled(pio_d, sm_d, true);

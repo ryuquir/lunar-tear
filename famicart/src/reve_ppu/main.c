@@ -138,8 +138,10 @@ static void bulk_byte(uint32_t off, uint8_t v) {
 
 int main(void) {
     reve_clock_init();
-    for (uint g = 0; g < 14; g++) { gpio_init(g); gpio_set_input_hysteresis_enabled(g, true); }
-    gpio_init(PIN_PPU_RD); gpio_set_input_hysteresis_enabled(PIN_PPU_RD, true);
+    /* RP2350 pads leave reset with their pull-down enabled and gpio_init() keeps it: switch it off on every bus pin,
+     * or each pin loads the console's NMOS outputs and drains the open data bus */
+    for (uint g = 0; g < 14; g++) { gpio_init(g); gpio_disable_pulls(g); gpio_set_input_hysteresis_enabled(g, true); }
+    gpio_init(PIN_PPU_RD); gpio_disable_pulls(PIN_PPU_RD); gpio_set_input_hysteresis_enabled(PIN_PPU_RD, true);
     gpio_init(PIN_LED); gpio_set_dir(PIN_LED, true);
     /* PIO1: CIRAM /CE + A10 table at offset 0 */
     uint off_ce = pio_add_program(pio_ce, &reve_ciram_program);   /* .origin 0 */
@@ -160,7 +162,7 @@ int main(void) {
     pio_sm_config dc = reve_ppu_data_program_get_default_config(off_d);
     sm_config_set_out_pins(&dc, PIN_PPU_D_BASE, 8); sm_config_set_jmp_pin(&dc, PIN_PPU_RD);
     sm_config_set_out_shift(&dc, true, false, 32);
-    for (uint g = PIN_PPU_D_BASE; g < PIN_PPU_D_BASE + 8; g++) { pio_gpio_init(pio_d, g); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); gpio_set_drive_strength(g, GPIO_DRIVE_STRENGTH_8MA); }
+    for (uint g = PIN_PPU_D_BASE; g < PIN_PPU_D_BASE + 8; g++) { pio_gpio_init(pio_d, g); gpio_disable_pulls(g); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); gpio_set_drive_strength(g, GPIO_DRIVE_STRENGTH_8MA); }
     pio_sm_set_consecutive_pindirs(pio_d, sm_d, PIN_PPU_D_BASE, 8, false);
     pio_sm_init(pio_d, sm_d, off_d, &dc);
     pio_sm_set_enabled(pio_d, sm_d, true);

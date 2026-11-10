@@ -48,9 +48,9 @@ static void __not_in_flash_func(bus_core1)(void) {
 
 int main(void) {
     reve_clock_init();
-    for (uint g = 0; g < 15; g++) { gpio_init(g); gpio_set_input_hysteresis_enabled(g, true); }
-    for (uint g = PIN_CPU_D_BASE; g < PIN_CPU_D_BASE + 8; g++) { gpio_init(g); gpio_set_dir(g, false); gpio_put(g, 0); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); }
-    gpio_init(PIN_ROMSEL); gpio_init(PIN_WS);
+    for (uint g = 0; g < 15; g++) { gpio_init(g); gpio_disable_pulls(g); gpio_set_input_hysteresis_enabled(g, true); }   /* no pad pull-downs on bus pins */
+    for (uint g = PIN_CPU_D_BASE; g < PIN_CPU_D_BASE + 8; g++) { gpio_init(g); gpio_disable_pulls(g); gpio_set_dir(g, false); gpio_put(g, 0); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); }
+    gpio_init(PIN_ROMSEL); gpio_disable_pulls(PIN_ROMSEL); gpio_init(PIN_WS); gpio_disable_pulls(PIN_WS);
     gpio_init(PIN_LED); gpio_set_dir(PIN_LED, true);
     cop_cpu_reset(&cop);
     uint off = pio_add_program(pio_w, &reve_wcap_program);

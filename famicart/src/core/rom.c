@@ -85,6 +85,12 @@ static bool parse_header(const uint8_t *h, uint32_t len, rom_info_t *o) {
         o->chr_ram_size = o->chr_size ? 0 : 8192;
         o->system = (h[9] & 1) ? 1 : 0;
     }
+    if (o->mapper == 30) {
+        /* UNROM 512: byte 6 bit 3 with bit 0 clear is a one-screen board, with bit 0 set four screens from CHR-RAM;
+         * the battery bit marks self-flashable PRG, not save RAM; an iNES 1 header means 32 KB of CHR-RAM. */
+        if (f6 & 0x08) o->mirroring = (f6 & 0x01) ? 2 : 3;
+        if (!nes2) { o->wram_size = o->sram_size = 0; if (!o->chr_size) o->chr_ram_size = 32768; }
+    }
     return true;
 }
 

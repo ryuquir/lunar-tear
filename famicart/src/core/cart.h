@@ -47,6 +47,8 @@ typedef struct cart {
 
     /* ---- ROM / RAM backing storage ---- */
     const uint8_t *prg_rom;  uint32_t prg_size;   uint32_t prg_pages;  /* 8K pages */
+    uint8_t       *prg_rw;   /* same image, writable, when it lives in RAM and the board lets the game re-program it
+                              (mapper 30 flash); NULL otherwise. Set by the platform after loading. */
     uint8_t       *chr;      uint32_t chr_size;   uint32_t chr_pages;  /* 1K pages */
     bool           chr_is_ram;
     uint8_t       *wram;     uint32_t wram_size;  bool battery;

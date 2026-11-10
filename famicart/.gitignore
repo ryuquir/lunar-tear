@@ -5,3 +5,4 @@ test/test_core
 *.bin
 test/test_reve
 test/test_mappers
+test/test_virtual

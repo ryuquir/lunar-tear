@@ -132,9 +132,11 @@ static void __not_in_flash_func(bus_core1)(void) {
 }
 
 static void bus_start(void) {
-    for (uint g = 0; g < 15; g++) { gpio_init(g); gpio_set_input_hysteresis_enabled(g, true); }
-    for (uint g = PIN_CPU_D_BASE; g < PIN_CPU_D_BASE + 8; g++) { gpio_init(g); gpio_set_dir(g, false); gpio_put(g, 0); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); gpio_set_drive_strength(g, GPIO_DRIVE_STRENGTH_8MA); }
-    gpio_init(PIN_ROMSEL); gpio_init(PIN_WS);
+    /* RP2350 pads leave reset with their pull-down enabled and gpio_init() keeps it: switch it off on every bus pin,
+     * or each pin loads the console's NMOS outputs and drains the open data bus */
+    for (uint g = 0; g < 15; g++) { gpio_init(g); gpio_disable_pulls(g); gpio_set_input_hysteresis_enabled(g, true); }
+    for (uint g = PIN_CPU_D_BASE; g < PIN_CPU_D_BASE + 8; g++) { gpio_init(g); gpio_disable_pulls(g); gpio_set_dir(g, false); gpio_put(g, 0); gpio_set_slew_rate(g, GPIO_SLEW_RATE_FAST); gpio_set_drive_strength(g, GPIO_DRIVE_STRENGTH_8MA); }
+    gpio_init(PIN_ROMSEL); gpio_disable_pulls(PIN_ROMSEL); gpio_init(PIN_WS); gpio_disable_pulls(PIN_WS);
     uint off = pio_add_program(pio_w, &reve_wcap_program);
     sm_w = pio_claim_unused_sm(pio_w, true);
     pio_sm_config cfg = reve_wcap_program_get_default_config(off);

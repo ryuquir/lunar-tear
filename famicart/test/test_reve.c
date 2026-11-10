@@ -89,33 +89,46 @@ static void test_rcommit(void) {
     CHECK(rcommit_wanted(0x2002, false) && rcommit_wanted(0x3FFF, false) && !rcommit_wanted(0x2006, false) && rcommit_wanted(0x5204, true) && !rcommit_wanted(0x5204, false), "wanted filter");
 }
 
-/* Simulate the CPU parked in JMP $4C4C and the handshake into the game's reset vector. */
+/* Simulate the CPU parked in JMP $4C4C and the handshake into the game's reset vector.
+ * One bus cycle = U1 looks the byte up when the address appears, and confirms the read when it ends; core 0 may arm
+ * the handshake at any moment in between. arm_at = the cycle during which that happens. */
+static uint8_t bp_game(uint16_t a) { return a == 0xFFFC ? 0x34 : a == 0xFFFD ? 0x92 : 0xA9; }
+static uint8_t bp_cycle(bootpark_t *b, uint16_t a, int arm_at, int *cycle) {
+    uint8_t v;
+    if (a >= 0x8000) v = bootpark_rom(b, a, bp_game(a));
+    else if (!bootpark_low(b, a, &v)) v = 0xFF;                 /* nobody drives */
+    if (*cycle == arm_at) bootpark_arm(b);
+    if (a < 0x8000) bootpark_commit(b, a);
+    (*cycle)++;
+    return v;
+}
+static uint16_t bp_run(int arm_at, uint8_t *end_state) {
+    bootpark_t b; bootpark_init(&b);
+    int cycle = 0; uint16_t pc = 0x4C4C;
+    for (int n = 0; n < 12; n++) {
+        uint8_t op = bp_cycle(&b, pc, arm_at, &cycle);
+        if (b.state == BP_RUN) break;                           /* that was the first fetch of the game */
+        uint8_t lo = bp_cycle(&b, (uint16_t)(pc + 1), arm_at, &cycle), hi = bp_cycle(&b, (uint16_t)(pc + 2), arm_at, &cycle);
+        uint16_t t = (uint16_t)(lo | (hi << 8));
+        if (op == 0x4C) pc = t;
+        else if (op == 0x6C) { uint8_t vl = bp_cycle(&b, t, arm_at, &cycle), vh = bp_cycle(&b, (uint16_t)(t + 1), arm_at, &cycle); pc = (uint16_t)(vl | (vh << 8)); }
+        else { pc = 0xDEAD; break; }                            /* the CPU is executing something that is not our loop */
+    }
+    *end_state = b.state;
+    return pc;
+}
 static void test_bootpark(void) {
     bootpark_t b; bootpark_init(&b); uint8_t v;
     CHECK(bootpark_rom(&b, 0xFFFC, 0x00) == 0x4C && bootpark_rom(&b, 0xFFFD, 0x80) == 0x4C, "parked vectors = $4C4C");
     CHECK(bootpark_low(&b, 0x4C4C, &v) && v == 0x4C, "parked loop byte");
     CHECK(!bootpark_low(&b, 0x6000, &v), "no drive elsewhere");
-    /* CPU loop: opcode at 4C4C, operands 4C4D/4C4E. Arm while the CPU is reading an operand. */
-    unsigned pc = 0x4C4D; bootpark_arm(&b);
-    uint16_t cpu_pc = 0; int guard = 0;
-    for (;;) {
-        /* fetch opcode */
-        uint8_t op;
-        if (pc >= 0x8000) op = bootpark_rom(&b, (uint16_t)pc, 0xEA); else { if (!bootpark_low(&b, (uint16_t)pc, &op)) op = 0x4C; bootpark_commit(&b, (uint16_t)pc); }
-        if (pc == 0x4C4D) { /* we started mid-instruction: this was the operand low; continue the JMP */ uint8_t hi; bootpark_low(&b, 0x4C4E, &hi); bootpark_commit(&b, 0x4C4E); pc = 0x4C4C; continue; }
-        uint16_t a1 = (uint16_t)(pc + 1), a2 = (uint16_t)(pc + 2); uint8_t lo, hi;
-        if (!bootpark_low(&b, a1, &lo)) lo = 0x4C;
-        bootpark_commit(&b, a1);
-        if (!bootpark_low(&b, a2, &hi)) hi = 0x4C;
-        bootpark_commit(&b, a2);
-        uint16_t t = (uint16_t)(lo | (hi << 8));
-        if (op == 0x4C) pc = t;
-        else if (op == 0x6C) { uint8_t vl = bootpark_rom(&b, t, 0x34), vh = bootpark_rom(&b, (uint16_t)(t + 1), 0x92); cpu_pc = (uint16_t)(vl | (vh << 8)); pc = cpu_pc; bootpark_rom(&b, cpu_pc, 0xA9); break; }
-        else break;
-        if (++guard > 10) break;
+    /* arm during the opcode fetch (cycle 0, 3), during either operand (1, 2, 4, 5), and before the CPU arrives */
+    for (int arm_at = -1; arm_at < 7; arm_at++) {
+        uint8_t st; uint16_t pc = bp_run(arm_at, &st);
+        if (arm_at < 0) { CHECK(pc == 0x4C4C && st == BP_PARKED, "never armed: the CPU stays in the loop ($%04X)", pc); continue; }
+        CHECK(pc == 0x9234, "armed in cycle %d: CPU took the game's reset vector ($%04X)", arm_at, pc);
+        CHECK(st == BP_RUN, "armed in cycle %d: running after the first game fetch (%u)", arm_at, st);
     }
-    CHECK(cpu_pc == 0x9234, "CPU took the game's reset vector ($%04X)", cpu_pc);
-    CHECK(b.state == BP_RUN, "running after the first game fetch (%u)", b.state);
 }
 
 static void test_romcache(void) {

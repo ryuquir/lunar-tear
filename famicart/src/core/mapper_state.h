@@ -57,6 +57,9 @@ typedef struct { uint8_t bank, prg_mode, mirroring, chr[8], prg[3]; uint8_t irq_
 
 typedef struct { uint8_t regs[32]; uint16_t r16[8]; uint32_t r32[4]; bool b[8]; } generic_state_t;
 
+/* 30 UNROM 512: register, decode variant, nametable mode, flash command state; prg_dirty = the game re-programmed PRG */
+typedef struct { uint8_t reg, split, flash, ntmode, f_mode, f_step, f_id, prg_dirty; } m030_state_t;
+
 typedef union {
     mmc1_state_t    mmc1;
     mmc3_state_t    mmc3;
@@ -72,5 +75,6 @@ typedef union {
     taito_state_t   taito;
     rambo1_state_t  rambo1;
     generic_state_t g;
+    m030_state_t    m030;
     uint8_t         raw[512];
 } mapper_state_t;

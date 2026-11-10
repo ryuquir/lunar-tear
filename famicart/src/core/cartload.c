@@ -73,6 +73,7 @@ static load_result_t load_common(cart_t *c, const uint8_t *img, const rom_info_t
     } else {
     memcpy(rom_pool, img + info.data_offset, info.prg_size);
     c->prg_rom = rom_pool; c->prg_size = info.prg_size; c->prg_pages = info.prg_size >> PRG_PAGE_SHIFT;
+    c->prg_rw = rom_pool;
     if (info.chr_size) {
         memcpy(rom_pool + info.prg_size, img + info.data_offset + info.prg_size, info.chr_size);
         c->chr = rom_pool + info.prg_size; c->chr_size = info.chr_size; c->chr_is_ram = false;

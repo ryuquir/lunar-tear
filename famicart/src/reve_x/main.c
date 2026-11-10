@@ -103,7 +103,7 @@ int main(void) {
     gpio_init(PIN_IRQ_GATE); gpio_set_dir(PIN_IRQ_GATE, true); gpio_put(PIN_IRQ_GATE, 0);
     gpio_init(PIN_LED); gpio_set_dir(PIN_LED, true);
     const uint ins[] = { PIN_M2, PIN_PA12, PIN_PA13, PIN_PPU_RD };
-    for (unsigned i = 0; i < 4; i++) { gpio_init(ins[i]); gpio_set_input_hysteresis_enabled(ins[i], true); }
+    for (unsigned i = 0; i < 4; i++) { gpio_init(ins[i]); gpio_disable_pulls(ins[i]); gpio_set_input_hysteresis_enabled(ins[i], true); }   /* no pad pull-downs on bus pins */
     uint off = pio_add_program(pio_b, &reve_m2_program);
     sm_m2 = pio_claim_unused_sm(pio_b, true);
     pio_sm_config c = reve_m2_program_get_default_config(off);
