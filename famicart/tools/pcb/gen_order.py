@@ -21,12 +21,13 @@ OUT = os.path.join(HW, 'order')
 # ---- what to order (defaults; the buyer may change them)
 PCB_QTY, PCBA_QTY = 5, 2            # JLCPCB: 5 boards is the minimum, 2 of them assembled
 BUILD = 2                           # sets of hand-soldered parts to buy: one per assembled board
-# Akizuki: (order code, name on the page, maker's part number, unit price in yen incl. tax, pieces per board, where it goes)
+# Akizuki: (order code, name on the page, maker's part number, unit price in yen incl. tax, pieces per board that the
+# board needs, pieces per board that are optional, where it goes)
 AKIZUKI_DATE = '2026-11-10'
-AKIZUKI = [('129604', 'Raspberry Pi Pico 2', 'SC1631', 990, 4, 'U1・U2（基本）と U4・U5（増設）'),
-           ('129619', 'Seeed XIAO RP2350', '102010550', 1100, 2, 'U3・U6'),
-           ('102395', 'ヒロセ・マイクロSDカードコネクター DM3AT-SF-PEJM5', 'DM3AT-SF-PEJM5', 150, 1, 'J3（microSD を使う場合）')]
-AKIZUKI_FREE_SHIPPING, AKIZUKI_SHIPPING = 11000, 550
+AKIZUKI = [('129604', 'Raspberry Pi Pico 2', 'SC1631', 990, 2, 2, 'U1・U2（必ず要る）と U4・U5（任意の増設）'),
+           ('129619', 'Seeed XIAO RP2350', '102010550', 1100, 2, 0, 'U3・U6（必ず要る）'),
+           ('102395', 'ヒロセ・マイクロSDカードコネクター DM3AT-SF-PEJM5', 'DM3AT-SF-PEJM5', 150, 0, 1, 'J3（任意。microSD を使う場合）')]
+AKIZUKI_FREE_SHIPPING, AKIZUKI_SHIP_SAGAWA, AKIZUKI_SHIP_YAMATO, AKIZUKI_COD = 11000, 550, 600, 300
 JLC_DATE = '2026-11-10'            # day on which the order form and the part catalogue were read (the amounts come from the order notes)
 
 def need(pattern, text, what):
@@ -106,6 +107,14 @@ def main():
     for s in ('**Panel by Customer**', 'Do not confirm automatically', 'Added by Customer', 'Complete File, just proceed with my own files', 'By Customer (Self-Service)',
               '**ENIG**', '**2 U"**', 'Beveling **30°**', '**1.2 mm**', 'Remove Mark', 'Flying Probe Fully Test'):
         if s not in notes: raise SystemExit('gen_order: the order notes no longer contain %r; adapt gen_order.py' % s)
+    # the Akizuki list must be the hand-soldered parts of the design: same order codes, same number of pieces per board
+    per_board = {}
+    for ref, q in D.PARTS.items():
+        key = q[2].split(' (')[0]
+        if key in getattr(D, 'HAND', {}): per_board[key] = per_board.get(key, 0) + 1
+    want = {D.HAND[k][0].replace('Akizuki ', ''): n for k, n in per_board.items()}
+    have = {code: base + opt for code, name, mpn, price, base, opt, use in AKIZUKI}
+    if want != have: raise SystemExit('gen_order: the Akizuki list %s is not the hand-soldered parts of the design %s' % (have, want))
     os.makedirs(OUT, exist_ok=True)
     def write(name, text):
         open(os.path.join(OUT, name), 'w').write(text); print('written', os.path.join(OUT, name))
@@ -114,15 +123,21 @@ def main():
     write('jlcpcb_pcb_remark_plan_b.txt', '\n'.join(remark_b) + '\n')
     write('jlcpcb_assembly_remark_plan_a.txt', '\n'.join(remark_a[:3]) + '\n')
     write('jlcpcb_assembly_remark_plan_b.txt', '\n'.join(remark_b[:4]) + '\n')
-    # ---- Akizuki list
-    rows = [(code, name, mpn, price, per * BUILD, price * per * BUILD, 'https://akizukidenshi.com/catalog/g/g%s/' % code, use) for code, name, mpn, price, per, use in AKIZUKI]
-    total = sum(r[5] for r in rows); ship = 0 if total >= AKIZUKI_FREE_SHIPPING else AKIZUKI_SHIPPING
-    one = sum(price * per for _, _, _, price, per, _ in AKIZUKI)
+    # ---- Akizuki list: everything for BUILD boards (option a); the other two choices are totals in the instructions
+    rows = [(code, name, mpn, price, (base + opt) * BUILD, opt * BUILD, price * (base + opt) * BUILD, 'https://akizukidenshi.com/catalog/g/g%s/' % code, use)
+            for code, name, mpn, price, base, opt, use in AKIZUKI]
+    total = sum(r[6] for r in rows)
+    base_total = sum(price * base * BUILD for _, _, _, price, base, opt, _ in AKIZUKI)
+    one = sum(price * (base + opt) for _, _, _, price, base, opt, _ in AKIZUKI)
+    ship_note = lambda v: '送料無料' if v >= AKIZUKI_FREE_SHIPPING else '送料が加わる'
     with open(os.path.join(OUT, 'akizuki_parts.csv'), 'w', newline='') as f:
-        w = csv.writer(f); w.writerow(['販売コード', '品名', '型番', '単価（税込・円）', '数量', '小計（円）', 'URL', '使う場所'])
-        w.writerows(rows); w.writerow(['', '合計（税込）', '', '', sum(r[4] for r in rows), total, '', '送料 %d 円' % ship])
+        w = csv.writer(f); w.writerow(['販売コード', '品名', '型番', '単価（税込・円）', '数量（%d 台分の全部）' % BUILD, 'うち任意の部品', '小計（円）', 'URL', '使う場所'])
+        w.writerows(rows); w.writerow(['', '合計（税込）', '', '', sum(r[4] for r in rows), sum(r[5] for r in rows), total, '', ship_note(total)])
     print('written', os.path.join(OUT, 'akizuki_parts.csv'))
     yen = lambda v: '{:,}'.format(v)
+    qty = lambda f: '、'.join('%s ×%d' % (name.replace('ヒロセ・マイクロSDカードコネクター DM3AT-SF-PEJM5', 'microSD コネクタ'), f(base, opt)) for _, name, _, _, base, opt, _ in AKIZUKI if f(base, opt))
+    price_date = need(r'JLCPCB の料金表 (\d{4}-\d{2}-\d{2}) 更新分から計算', notes, 'the date of the price list').group(1)
+    lim_pcb, lim_asm = int(JLC_PCB_A * 1.3), int(JLC_ASM_FIX * 1.3)
     # ---- the instructions
     T = 'ファミコン基板（famicart rev G）発注指示書'
     B = [('h1', T),
@@ -130,12 +145,15 @@ def main():
                '書いてあるとおりに進め、「止まって確認」とある所では必ず依頼者（このフォルダの持ち主）の返事を待ってください。'),
          ('h2', '依頼の内容'),
          ('ul', ['JLCPCB に、基板 **%d 枚**の製造と、そのうち **%d 枚**への部品実装（Standard PCBA、表面のみ）を発注する。' % (PCB_QTY, PCBA_QTY),
-                 '秋月電子通商の通販で、手はんだ用のモジュールとコネクタを **%d 台分**発注する。' % BUILD,
+                 '秋月電子通商の通販で、手はんだ用のモジュールとコネクタを発注する。数量は、下の「数量」の 3 通りから依頼者が選ぶ。',
                  '2 件は別々の注文で、どちらを先に進めてもよい。秋月の注文は、JLCPCB のサポートの回答を待たずに進めてよい。']),
          ('h2', '必ず守ること'),
-         ('ol', ['**支払いの直前で止まる。** 注文内容と合計金額（送料・税を含む）を依頼者に見せ、承認をもらってから支払う。依頼者があらかじめ上限金額を決めて任せている場合は、その範囲なら進めてよい。',
+         ('ol', ['**注文を確定する直前（支払いの直前）で止まる。** 注文内容と合計金額（送料・手数料・税を含む）を依頼者に見せ、承認をもらってから確定と支払いをする。'
+                 '秋月の代金引換と銀行振込は、支払いより前に注文が確定するので、注文を確定するボタンを押す前に止まる（秋月は確定後に内容を変更できず、取り消しは発送作業の前だけ）。'
+                 '依頼者があらかじめ上限金額を決めて任せていて、合計がその範囲に収まる場合だけ、この確認を省いてよい。',
                  '**ログイン情報、配送先、支払い方法は依頼者から受け取る。** このフォルダにも、この文書にも書かれていない。受け取った情報を、注文に必要な相手（JLCPCB、秋月）以外に渡さない。',
-                 '**判断が要る所で推測しない。** この文書に書かれていない選択肢や、書かれている値を選べない場面では、止まって依頼者に聞く（下の「止まって確認する場面」）。',
+                 '**判断が要る所で推測しない。** この文書の表にある項目で、書かれている値を選べない場合は、止まって依頼者に聞く。表に無い項目は、基板・実装とも、最初から選ばれている値のままにする。'
+                 'ただし、最初から選ばれている値が無くて自分で選ばないと進めない項目と、選ぶと追加料金が出る項目は、止まって確認する（下の「止まって確認する場面」）。',
                  '**JLCPCB からの提案を自分で承諾しない。** 担当者やサポートが、この文書と違うやり方（捨て基板の位置を変える、V カットにする、面取りをやめる、部品を別の品番に替える、など）を提案してきたら、内容を依頼者に伝えて指示を待つ。',
                  '**部品を別の品番に替えない。** JLCPCB の画面が出す代替部品の候補も、秋月の似た商品も選ばない。']),
          ('h2', 'このフォルダのファイル'),
@@ -148,16 +166,21 @@ def main():
            ['`jlcpcb_support_question.txt`', 'サポートへの質問文（英語）。そのまま送る'],
            ['`jlcpcb_pcb_remark_plan_a.txt`、`jlcpcb_assembly_remark_plan_a.txt`', 'A 案の注文フォームに貼る Remark（PCB 用と実装用）'],
            ['`jlcpcb_pcb_remark_plan_b.txt`、`jlcpcb_assembly_remark_plan_b.txt`', 'B 案に切り替えた場合の Remark'],
-           ['`jlcpcb_order_notes.md`', '設計者が書いた注文メモの全文。この文書の根拠と、細かい理由が書いてある。迷ったときに読む'],
+           ['`jlcpcb_order_notes.md`', '設計者が書いた注文メモの全文。この文書の根拠と、細かい理由が書いてある。この文書と食い違う所は、この文書に従う。メモに出てくる `docs/…` や `tools/pcb/…` のファイルはこのフォルダに無いので、探さなくてよい'],
            ['`akizuki_parts.csv`', '秋月で買う品目、販売コード、数量、金額'],
            ['`outline.png`、`placement.png`', '基板の外形図と部品の配置図（参考）'],
            ['`parts_check.csv`、`cpl_check.csv`', 'JLCPCB の部品の区分・在庫と、部品の向きを照合した結果（参考。%s 時点）' % JLC_DATE]]),
          ('h2', '数量'),
          ('table', ['注文先', '品目', '数量', '補足'],
           [['JLCPCB', '基板（PCB Qty）', '%d 枚' % PCB_QTY, '注文できる最少の枚数'],
-           ['JLCPCB', '部品実装（PCBA Qty）', '%d 枚' % PCBA_QTY, '残りの %d 枚は部品なしの基板で届く' % (PCB_QTY - PCBA_QTY)]] +
-          [['秋月', '%s（販売コード %s）' % (name, code), '%d 個' % qty, use] for code, name, mpn, price, qty, sub, url, use in rows]),
-         ('p', '秋月の数量は、実装した %d 枚を両方とも全部の機能つきで組み立てる数です。1 台だけ組む場合は半分（1 台分で %s 円）になります。依頼者から数量の指定があれば、そちらに従ってください。' % (BUILD, yen(one))),
+           ['JLCPCB', '部品実装（PCBA Qty）', '%d 枚' % PCBA_QTY, '残りの %d 枚は部品なしの基板で届く' % (PCB_QTY - PCBA_QTY)],
+           ['秋月', 'モジュールとコネクタ', '下の 3 通りから選ぶ', '依頼者が選ぶ']]),
+         ('p', '基板 1 枚に載る手はんだ部品は、Raspberry Pi Pico 2 が 4 個（U1・U2 は必ず要る。U4・U5 は任意の増設）、Seeed XIAO RP2350 が 2 個（U3・U6。必ず要る）、microSD のコネクタが 1 個（J3。任意）です。'
+               '任意の部品は、載せなくても基板が動きます。**秋月でカートに入れる前に、次の 3 通りと金額を依頼者に見せ、選ばれた数量で注文してください。** 上限金額を任されている場合でも、数量は選んでもらいます。'),
+         ('table', ['選び方', '数量', '商品合計（税込）', '送料'],
+          [['(a) %d 台分の全部' % BUILD, qty(lambda b, o: (b + o) * BUILD), '%s 円' % yen(total), ship_note(total)],
+           ['(b) %d 台分の必ず要る部品だけ' % BUILD, qty(lambda b, o: b * BUILD), '%s 円' % yen(base_total), ship_note(base_total)],
+           ['(c) 1 台分の全部', qty(lambda b, o: b + o), '%s 円' % yen(one), ship_note(one)]]),
          ('h2', 'JLCPCB の手順'),
          ('h3', '支払いの前にサポートへ質問する'),
          ('p', 'この基板は端に金めっきの接点（金フィンガー）があり、その辺を斜めに削る加工（面取り、Beveling）を頼みます。実装に必要な捨て基板（Edge Rails）は、データの中に左右に描き込んであります。'
@@ -169,20 +192,22 @@ def main():
          ('quote', question),
          ('table', ['質問', '回答', 'すること'],
           [['1) 面取りできるか', 'できる', '次へ進む'],
-           ['1) 面取りできるか', 'できない', '**止まって確認。** 依頼者が「面取りなしで作る」と決めた場合は、Gold Fingers の Beveling を No にし、Remark から "Please bevel this edge 30 degrees." の 1 文を消して進める'],
+           ['1) 面取りできるか', 'できない', '**止まって確認。** 依頼者が「面取りなしで作る」と決めた場合は、Gold Fingers の Beveling を No にし、PCB 用と実装用の両方の Remark から "Please bevel this edge 30 degrees." の 1 文を消して進める（ほかの文は変えない）'],
            ['2) この捨て基板で実装できるか', 'できる', '次へ進む'],
            ['2) この捨て基板で実装できるか', 'できない、または条件つき', '**止まって確認。** 足りない点（寸法や数）を聞き取って依頼者に伝える。データの作り直しが要る'],
            ['3) Delivery Format', 'Panel by Customer', 'この文書のとおりに選ぶ'],
            ['3) Delivery Format', 'Single PCB', 'Delivery Format を Single PCB にする。追加料金の説明があれば依頼者に伝える'],
            ['4) 基板だけのデータでも左右に捨て基板を付けて面取りできるか', 'どちらでも', '回答を記録して依頼者に伝える。A 案が使える間は B 案に切り替えない']]),
-         ('p', '2 営業日たっても回答が無い場合や、回答があいまいな場合は、止まって依頼者に確認してください。'),
+         ('p', '2 営業日たっても回答が無い場合、回答があいまいな場合、質問 1)〜3) のどれかに答えが無い場合は、支払いへ進まずに、止まって依頼者に確認してください（答えの無い質問だけをもう一度送ってよい）。'
+               '4) だけ答えが無い場合は進めてかまいません。3) の答えが Single PCB でも Panel by Customer でもない場合と、追加料金の説明があった場合は、内容を依頼者に伝えて指示を待ちます。'),
          ('h3', '基板（PCB）の指定'),
          ('ol', ['[注文フォーム](https://cart.jlcpcb.com/quote) を開き、"Add gerber file" に `gerbers_rails.zip` を上げる。',
                  '読み込まれた大きさ（Dimensions）が **%s mm** であることを確かめる。0.5 mm 以上違う場合は止まって確認。' % panel,
                  '下の表のとおりに選ぶ。表に無い項目は、最初から選ばれている値のままにする。',
-                 'PCB Remark の欄に、`jlcpcb_pcb_remark_plan_a.txt` の英文をそのまま貼る。']),
+                 'PCB Remark の欄に、`jlcpcb_pcb_remark_plan_a.txt` の英文をそのまま貼る。欄に全文が入らない場合は、自分で削らずに止まって確認。']),
          ('table', ['項目', '選ぶ値'],
-          [['Base Material', 'FR-4'], ['Layers', '2'], ['PCB Qty', '%d' % PCB_QTY], ['Product Type', 'Industrial/Consumer electronics'], ['Different Design', '1'],
+          [['Base Material', 'FR-4'], ['Layers', '2'], ['PCB Qty（Delivery Format を Panel by Customer にすると、項目名が Panel Qty に変わる）', '%d' % PCB_QTY],
+           ['Product Type', 'Industrial/Consumer electronics'], ['Different Design', '1'],
            ['Delivery Format', '**Panel by Customer**。Panel Format は Column 1、Row 1（サポートが Single PCB と答えた場合はそれに合わせる）。"Panel by JLCPCB" は選ばない'],
            ['PCB Thickness', '**1.2 mm**（最初に選ばれている値が違えば、1.2 mm に変える）'], ['PCB Color', 'Green'], ['Silkscreen', 'White'],
            ['Surface Finish', '**ENIG**。Gold Thickness は **2 U"**'], ['Outer Copper Weight', '1 oz'], ['Via Covering', 'Tented'],
@@ -192,19 +217,22 @@ def main():
          ('p', 'PCB Remark に貼る文（`jlcpcb_pcb_remark_plan_a.txt` と同じ内容）:'),
          ('quote', remark_a),
          ('h3', '部品実装（PCB Assembly）の指定'),
-         ('ol', ['PCB Assembly を有効にし、下の表のとおりに選ぶ。',
+         ('ol', ['PCB Assembly を有効にし、下の表のとおりに選ぶ。表に無い項目は、最初から選ばれている値のままにする。',
                  'BOM に `bom_jlc.csv`、CPL に `cpl_jlc.csv` を上げる。',
                  '部品の照合画面で、**%s 行・%s 点がすべて一致し、すべて Basic で、未選択の部品が無い**ことを確かめる。1 行でも在庫切れ、Extended、不一致があれば止まって確認。代替部品の候補は選ばない。' % (ntypes, nparts),
                  '部品の配置のプレビューで、下の「部品の向きの確認」の %d 点を確かめる。' % len(orient),
-                 '実装用の Remark の欄に、`jlcpcb_assembly_remark_plan_a.txt` の英文をそのまま貼る。',
+                 '実装用の Remark の欄に、`jlcpcb_assembly_remark_plan_a.txt` の英文をそのまま貼る。欄に全文が入らない場合は、自分で削らずに止まって確認。',
                  'カートに入れ、配送方法の候補とそれぞれの金額を控える。配送方法は依頼者が選ぶ。',
                  '支払いの前にデータの審査を受けられる選択肢（Review Before Payment など）が出た場合は、そちらを選ぶ。',
-                 '合計金額と内訳を依頼者に見せ、承認をもらってから支払う。']),
+                 '支払う日が %s より後になる場合は、支払いの前に止まり、依頼者に「部品の向きの照合（`check_cpl.py`）を今日もう一度実行して、%s 点とも合格したか」を確かめてもらう。'
+                 'JLCPCB が部品ライブラリの向きを書き換えることがあるため。この道具はこのフォルダに無く、GrokBOT は実行できない。' % (JLC_DATE, nparts),
+                 '合計金額と内訳を依頼者に見せ、承認をもらってから支払う（「必ず守ること」の 1）。']),
          ('table', ['項目', '選ぶ値'],
           [['PCBA Type', '**Standard**（Economic は金フィンガー付きの基板を受け付けない）'], ['Assembly Side', 'Top Side'], ['PCBA Qty', '%d' % PCBA_QTY],
            ['Edge Rails/Fiducials', '**Added by Customer**'], ['Tooling holes（項目が出た場合）', 'Added by Customer'],
-           ['File provided as（項目が出た場合）', 'Complete File, just proceed with my own files'], ['Confirm Parts Placement', 'Yes'],
-           ['部品の選び方', 'By Customer (Self-Service)'], ['捨て基板を外すサービス（Depaneling）', '選ばない']]),
+           ['File provided as（項目が出た場合）', 'Complete File, just proceed with my own files'],
+           ['Confirm Parts Placement', '**Yes**。期限までに確認しないと自動で承認されて製造に進むので、選ぶと出る画面では **"Do not confirm automatically"** を選ぶ（Confirm Production file と同じ。この選択肢が出ない場合は止まって確認）'],
+           ['Parts Selection（部品の選び方）', 'By Customer (Self-Service)'], ['捨て基板を外すサービス（Depaneling）', '選ばない']]),
          ('p', '実装しない部品（照合画面に出なくて正しいもの）: %s。これらは依頼者が自分ではんだ付けする部品と、基板のパターンです。' % dnp),
          ('h3', '部品の向きの確認'),
          ('p', 'プレビューは、基板を上から見て、金色の接点が下に来る向きで確かめます。'),
@@ -212,41 +240,53 @@ def main():
          ('p', '**U7 か B5819W（D10〜D15）が 180° 回って見える場合は、承認せずに止まって確認してください。** そのほかの点が違って見える場合も同じです。'),
          ('h3', '金額の目安'),
          ('ul', ['基板: 約 US$ %d（%d 枚。%s の見積もり画面の値。ENIG、金フィンガー、面取り、Confirm Production file を含み、送料は別）。' % (JLC_PCB_A, PCB_QTY, JLC_DATE),
-                 '実装: 約 US$ %d（%d 枚。治具の費用が加わると約 US$ %d）。部品代は見積もり画面に出る金額で、この文書では計算していない。' % (JLC_ASM, PCBA_QTY, JLC_ASM_FIX),
+                 '実装: 約 US$ %d（%d 枚。JLCPCB の料金表〔%s 更新〕から計算した値で、見積もり画面では確かめていない。治具の費用が加わると約 US$ %d。料金表にはほかに、ステンシルと治具の保管料の項目がある）。'
+                 '部品代は見積もり画面に出る金額で、この文書では計算していない。' % (JLC_ASM, PCBA_QTY, price_date, JLC_ASM_FIX),
                  '送料、関税、消費税は、見積もり画面と配送業者の案内による。この文書では確かめていない。',
-                 '合計がこの目安より 3 割以上高い場合は、理由（どの項目が高いか）を添えて依頼者に伝える。']),
+                 '比べるのは項目ごと。基板の代金（送料を除く）が US$ %d を超える場合、または実装の料金（部品代を除き、治具の費用を含む）が US$ %d を超える場合は、止まって、どの項目が高いかを添えて依頼者に伝える。'
+                 '部品代、送料、税にはこの文書の目安が無いので、金額をそのまま依頼者に見せる。' % (lim_pcb, lim_asm)]),
          ('h3', '注文したあと'),
          ('ol', ['製造データ（Production file）の確認依頼が届いたら、承認する前に依頼者に見せる。確かめる点は、捨て基板が左右にあること、金色の接点の辺に捨て基板も V カットの線も無いこと、面取りの指示が入っていること、外形の切り欠きとスリットが `rails.png` のとおりであること。',
                  '部品の配置の確認依頼（Confirm Parts Placement）が届いたら、「部品の向きの確認」の %d 点を確かめ、画面を依頼者に見せてから承認する。' % len(orient),
                  'JLCPCB から質問や変更の提案が届いたら、内容を依頼者に伝えて指示を待つ。']),
          ('h3', 'B 案に切り替える場合'),
          ('p', 'JLCPCB が「捨て基板を描き込んだデータは受け付けない」と答え、依頼者が切り替えを認めた場合だけ、次のように変えます。'),
-         ('ul', ['上げるデータは `gerbers.zip`。Dimensions は %s mm。' % board,
-                 'Delivery Format は Single PCB。実装の Edge Rails/Fiducials は Added by JLCPCB。',
-                 '注文フォームは大きさを %s mm と表示する（上下に捨て基板を付けた大きさ）。これはフォームの既定の動きで、Remark で左右に付けるよう頼む。' % form_b,
+         ('ul', ['サポートが質問 4) に「できる」と答えていない場合は、B 案で注文しない（止まって確認）。',
+                 '上げるデータは `gerbers.zip`。Dimensions は %s mm。' % board,
+                 'Delivery Format は Single PCB（Panel Format は使わない）。実装の Edge Rails/Fiducials は Added by JLCPCB、Tooling holes（項目が出た場合）も JLCPCB に任せる側を選ぶ。',
+                 '注文フォームは大きさを %s mm（上下に捨て基板を付けた大きさ）に書き換えるはずだが、設計者はフォームの文面から読んだだけで、画面では確かめていない。表示された大きさを控えて依頼者に伝える。どの値が出ても、Remark で左右に付けるよう頼む。' % form_b,
                  'Remark は `jlcpcb_pcb_remark_plan_b.txt` と `jlcpcb_assembly_remark_plan_b.txt` を貼る。',
+                 '基板の金額の目安は約 US$ %d。' % JLC_PCB_B,
                  '製造データの大きさが %s mm（左右に付いた場合）でなければ承認しない。' % panel_b]),
          ('h2', '秋月電子通商の手順'),
-         ('ol', ['[秋月電子通商の通販サイト](https://akizukidenshi.com/) で、下の表の品目を**販売コードで**探してカートに入れる。',
+         ('ol', ['「数量」の 3 通りを依頼者に見せ、どれにするかを選んでもらう。',
+                 '[秋月電子通商の通販サイト](https://akizukidenshi.com/) で、下の表の品目を**販売コードで**探し、選ばれた数量をカートに入れる。',
                  '品名と型番が表と同じであることを確かめる。名前の似た別の商品（Raspberry Pi Pico 2 W、Pico 2 H、初代の Pico、ピンヘッダー付きの品）は選ばない。',
-                 'カートの商品合計が %s 円（税込）であることを確かめる。%s' % (yen(total), '税込 %s 円以上なので送料は掛からない。' % yen(AKIZUKI_FREE_SHIPPING) if ship == 0 else '送料は 1 個口 %d 円。' % AKIZUKI_SHIPPING),
+                 'カートの商品合計が、選ばれた数量 × 表の単価の合計（(a) なら %s 円）と同じであることを確かめる。税込 %s 円以上なら送料は掛からず、未満なら送料（佐川急便 %d 円、ヤマト運輸 %d 円）が加わる。'
+                 % (yen(total), yen(AKIZUKI_FREE_SHIPPING), AKIZUKI_SHIP_SAGAWA, AKIZUKI_SHIP_YAMATO),
                  '在庫が足りない品目、価格が表と違う品目、購入数の制限に掛かる品目があれば、止まって確認する。',
-                 '支払い方法と配送先は依頼者の指定に従う。']),
-         ('table', ['販売コード', '品名', '型番', '単価（税込）', '数量', '小計'],
-          [[code, '[%s](%s)' % (name, url), mpn, '%s 円' % yen(price), '%d' % qty, '%s 円' % yen(sub)] for code, name, mpn, price, qty, sub, url, use in rows] +
-          [['', '合計', '', '', '%d' % sum(r[4] for r in rows), '%s 円' % yen(total)]]),
-         ('p', '価格と在庫は %s に秋月のサイトで確かめた値です（3 品目とも在庫あり）。同社の案内では、送料は佐川急便が 1 個口 550 円、ヤマト運輸が 600 円で、商品合計が税込 11,000 円以上なら無料です。'
-               'クレジットカード払いは会員登録と 3D セキュア 2.0 対応のカードが要り、代金引換は手数料 300 円です。' % AKIZUKI_DATE),
+                 '支払い方法と配送先は依頼者の指定に従う。',
+                 '注文を確定するボタンを押す前に止まり、内容と合計（送料・手数料を含む）を依頼者に見せて承認をもらう。']),
+         ('p', '下の表は (a) の数量です。'),
+         ('table', ['販売コード', '品名', '型番', '単価（税込）', '数量', 'うち任意', '小計'],
+          [[code, '[%s](%s)' % (name, url), mpn, '%s 円' % yen(price), '%d' % n, '%d' % nopt, '%s 円' % yen(sub)] for code, name, mpn, price, n, nopt, sub, url, use in rows] +
+          [['', '合計', '', '', '%d' % sum(r[4] for r in rows), '%d' % sum(r[5] for r in rows), '%s 円' % yen(total)]]),
+         ('p', '価格と在庫は %s に秋月のサイトで確かめた値です（3 品目とも在庫あり。通販で買える数は、それぞれ 1,462 個、308 個、1,500 個でした）。同社の案内では、送料は佐川急便が 1 個口 %d 円、ヤマト運輸が %d 円で、商品合計が税込 %s 円以上なら無料です。'
+               % (AKIZUKI_DATE, AKIZUKI_SHIP_SAGAWA, AKIZUKI_SHIP_YAMATO, yen(AKIZUKI_FREE_SHIPPING))),
+         ('p', '支払い方法は 3 つです。クレジットカード（会員登録と、3D セキュア 2.0 対応のカードが要る）、代金引換（手数料 %d 円。配達のときに現金で払う。離島は使えない）、銀行振込（全額前払い。振込手数料は客の負担。会員登録が要る）。会員登録をしない注文で使えるのは代金引換だけです。' % AKIZUKI_COD),
          ('h2', '止まって確認する場面'),
-         ('ul', ['支払いの直前（JLCPCB、秋月とも）。',
-                 'JLCPCB のサポートが、面取りできない、この捨て基板では実装できない、と答えたとき。回答が無い、あいまいなとき。',
-                 '注文フォームに、この文書の表にある値が無いとき。読み込まれた大きさが違うとき。',
+         ('ul', ['注文の確定と支払いの直前（JLCPCB、秋月とも。依頼者が上限金額を決めて任せていて、合計がその範囲に収まる場合を除く）。',
+                 '秋月でカートに入れる前（数量の 3 通りから選んでもらう）。',
+                 'JLCPCB のサポートが、面取りできない、この捨て基板では実装できない、と答えたとき。回答が無い、あいまい、質問 1)〜3) のどれかに答えが無いとき。追加料金の説明があったとき。',
+                 '注文フォームで、この文書の表にある値を選べないとき。最初から選ばれている値が無い項目や、選ぶと追加料金が出る項目に当たったとき。読み込まれた大きさが違うとき。',
+                 'Remark が欄に入りきらないとき。',
                  '部品の照合画面で、在庫切れ、Extended、不一致、未選択があるとき。',
                  '部品の向きが「部品の向きの確認」と違って見えるとき。',
-                 '製造データや部品の配置の確認依頼が届いたとき（承認の前）。',
+                 '支払う日が %s より後になるとき（部品の向きの照合を、依頼者にもう一度実行してもらう）。' % JLC_DATE,
+                 '製造データや部品の配置の確認依頼が届いたとき（承認の前）。自動で承認されない設定（Do not confirm automatically）を選べなかったとき。',
                  'JLCPCB から質問、変更の提案、追加料金の連絡が届いたとき。',
                  '秋月で在庫が足りない、価格が違う、購入数の制限があるとき。',
-                 '合計金額が目安より 3 割以上高いとき。']),
+                 '基板の代金が US$ %d、または実装の料金（部品代を除く）が US$ %d を超えたとき。' % (lim_pcb, lim_asm)]),
          ('h2', '終わったら報告すること'),
          ('ul', ['JLCPCB: 注文番号、選んだ Delivery Format、合計金額と内訳、配送方法、納期の見込み、サポートの回答の全文。',
                  '秋月: 注文番号、合計金額、発送の見込み。',
@@ -263,11 +303,11 @@ def main():
                  'JLCPCB 金フィンガーと面取り: https://jlcpcb.com/help/article/jlcpcb-gold-fingers',
                  'JLCPCB 捨て基板とフィデューシャル: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order',
                  'JLCPCB 実装の料金表: https://jlcpcb.com/help/article/pcb-assembly-price'] +
-                ['秋月電子通商 %s（%s 確認）: https://akizukidenshi.com/catalog/g/g%s/' % (name, AKIZUKI_DATE, code) for code, name, mpn, price, per, use in AKIZUKI] +
+                ['秋月電子通商 %s（%s 確認）: https://akizukidenshi.com/catalog/g/g%s/' % (name, AKIZUKI_DATE, code) for code, name, mpn, price, base, opt, use in AKIZUKI] +
                 ['秋月電子通商 注文方法（送料、支払い方法。%s 確認）: https://akizukidenshi.com/catalog/pages/buy.aspx' % AKIZUKI_DATE])]
     write('grokbot_instructions.md', to_md(B))
     write('grokbot_instructions.html', to_html(B, T))
-    print('order folder: PCB %d, PCBA %d, Akizuki %d sets = %s yen (shipping %d yen)' % (PCB_QTY, PCBA_QTY, BUILD, yen(total), ship))
+    print('order folder: PCB %d, PCBA %d, Akizuki %d sets = %s yen (all), %s yen (required parts only), %s yen (one set)' % (PCB_QTY, PCBA_QTY, BUILD, yen(total), yen(base_total), yen(one)))
 
 if __name__ == '__main__':
     main()

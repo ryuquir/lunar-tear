@@ -343,7 +343,7 @@ Pico 2 ×2 + XIAO RP2350 ×2 が基本構成、Pico 2 ×2 は増設用（載せ�
 |---|---|
 | Base Material / Layers | FR-4 / 2 |
 | Dimensions | A 案 @PANEL@ mm、B 案 @SIZE@ mm（ガーバーから自動で入る。基板は本体 75.0 mm + 端子タブ 10.7 mm）|
-| PCB Qty | 5（最少。3 枚などは選べない）|
+| PCB Qty | 5（最少。3 枚などは選べない。Delivery Format を Panel by Customer にすると、項目名が Panel Qty に変わる）|
 | Product Type | Industrial/Consumer electronics |
 | Different Design | 1 |
 | Delivery Format | A 案: **Panel by Customer**、Panel Format は Column 1・Row 1。B 案: **Single PCB**。どちらの案でも "Panel by JLCPCB" は選ばない（選ぶと面取りの指定が消える）|
@@ -383,7 +383,7 @@ PCB Remark（B 案。そのまま貼る）:
 > 1) Gold fingers are on ONE edge only: the edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge
 > 30 degrees.
 > 2) Edge rails for assembly: please add the two 5 mm rails on the LEFT and RIGHT edges (the two 85.7 mm edges, perpendicular
-> to the gold-finger edge). Panel size @PANELB_X@ mm, NOT @FORMB_X@ mm as the order form shows. Do NOT put a rail on the
+> to the gold-finger edge). The panel size must be @PANELB_X@ mm (not @FORMB_X@ mm). Do NOT put a rail on the
 > gold-finger edge or on the opposite edge.
 > 3) The gold-finger edge must stay a free routed edge: no rail, no V-cut, no mouse bites.
 > 4) If you cannot add the rails on these two edges, or cannot bevel a board with rails: do NOT move the rails; put the order
@@ -413,8 +413,8 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 | Edge Rails/Fiducials | A 案: **Added by Customer**。B 案: Added by JLCPCB |
 | Tooling holes（項目が出た場合）| A 案: 自分で付けた側（Added by Customer）。B 案: JLCPCB に任せる側 |
 | File provided as（面付けの注文で出る項目）| "Complete File, just proceed with my own files"（BOM と CPL はこの 1 枚で完結している）|
-| Confirm Parts Placement | Yes（部品の向きを製造前に画面で確認できる）|
-| 部品の選び方 | By Customer (Self-Service)。BOM に LCSC の部品番号が入っている |
+| Confirm Parts Placement | Yes（部品の向きを製造前に画面で確認できる）。Confirm Production file と同じく、期限までに確認しないと自動で承認されるので、選ぶと出る画面では **"Do not confirm automatically"** を選ぶ（フォームの文面の一覧から読んだもので、画面では確かめていない）|
+| Parts Selection（部品の選び方）| By Customer (Self-Service)。BOM に LCSC の部品番号が入っている |
 | BOM / CPL | `bom_jlc.csv` / `cpl_jlc.csv` |
 | 捨て基板を外すサービス（Depaneling）| 選ばない（選ばなければ捨て基板は付いたまま届く。外してもらうのは有料）|
 
