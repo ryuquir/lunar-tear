@@ -246,6 +246,10 @@ res('2.2k', -19.4, 38.0, 'EXT_P', 'EXT')                                        
 cap('10u', C0805, -41.2, 5.7, '+5V')
 
 POWER_NETS = {'+5V', 'GND'}
+# Hand-soldered pads get thermal reliefs into the GND pour (gen_pcb.py). The four shell tabs of the card socket are
+# joined solidly instead: they hold the socket, and beside the socket's keep-out areas one of them has room for a
+# single spoke only (KiCad asks for two).
+SOLID_PADS = {('J3', '11')}
 
 # firmware of each hand-soldered module, printed on the silk under it
 ROLE = {'U1': 'cpu', 'U2': 'ppu', 'U3': 'x', 'U4': 'cpu-ext', 'U5': 'ppu-ext', 'U6': 'hub'}

@@ -191,7 +191,9 @@ def main():
                     if ls.Contains(pcbnew.F_Paste) or ls.Contains(pcbnew.B_Paste):
                         ls.RemoveLayer(pcbnew.F_Paste); ls.RemoveLayer(pcbnew.B_Paste); pad.SetLayerSet(ls)
                     # ... and thermal reliefs into the GND pour: a pad that is one piece with the pour is hard to heat with an iron
-                    if 'CardEdge' not in fpname:
+                    if (ref, pad.GetNumber()) in getattr(D, 'SOLID_PADS', ()):      # mounting tabs: one piece with the pour
+                        pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+                    elif 'CardEdge' not in fpname:
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL); pad.SetThermalSpokeWidth(FromMM(0.4)); pad.SetThermalGap(FromMM(0.3))
         board.Add(fp)
         fp.SetPosition(mm(x, y)); fp.SetOrientationDegrees(rot)

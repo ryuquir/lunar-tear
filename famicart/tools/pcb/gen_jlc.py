@@ -412,14 +412,19 @@ def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
     import urllib.request
     url = 'https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList'
     rows, bad = [], []
+    import time
     for code in sorted(set(codes)):
-        req = urllib.request.Request(url, data=json.dumps({'currentPage': 1, 'pageSize': 5, 'keyword': code}).encode(), headers={'Content-Type': 'application/json'})
-        try:
-            items = ((json.load(urllib.request.urlopen(req, timeout=30)).get('data') or {}).get('componentPageInfo') or {}).get('list') or []
-        except Exception as e:
-            rows.append((code, '?', '?', '?', f'lookup failed: {e}')); bad.append(code); continue
-        it = next((i for i in items if i.get('componentCode') == code), None)
-        if not it: rows.append((code, '?', '?', '?', 'not found')); bad.append(code); continue
+        req = urllib.request.Request(url, data=json.dumps({'currentPage': 1, 'pageSize': 30, 'keyword': code}).encode(), headers={'Content-Type': 'application/json'})
+        it, err = None, 'not found'
+        for attempt in range(5):         # the catalogue search now and then answers with an empty list: ask again
+            try:
+                items = ((json.load(urllib.request.urlopen(req, timeout=30)).get('data') or {}).get('componentPageInfo') or {}).get('list') or []
+                it = next((i for i in items if i.get('componentCode') == code), None); err = 'not found'
+            except Exception as e:
+                err = f'lookup failed: {e}'
+            if it: break
+            time.sleep(2.0)
+        if not it: rows.append((code, '?', '?', '?', err)); bad.append(code); continue
         lib, stock = it.get('componentLibraryType'), int(it.get('stockCount') or 0)
         ok = lib == 'base' and stock >= min_stock
         rows.append((code, it.get('componentModelEn'), 'Basic' if lib == 'base' else 'Extended', stock, 'OK' if ok else 'NG'))
