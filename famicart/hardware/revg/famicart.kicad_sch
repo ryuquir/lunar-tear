@@ -19351,8 +19351,8 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 63db2c02-8367-5091-84a1-8d9eb9a0f66a)
-    (property "Reference" "D5"
+    (uuid 27f44363-e159-5f87-aba5-39bb959a437e)
+    (property "Reference" "D1"
       (at 483.34 351.24 0)
       (effects
         (font
@@ -19400,13 +19400,13 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D5")
+          (reference "D1")
           (unit 1)
         )
       )
     )
   )
-  (global_label "GND"
+  (global_label "RUN_A"
     (shape bidirectional)
     (at 475.72 353.24 180)
     (fields_autoplaced)
@@ -19427,28 +19427,11 @@
       )
     )
   )
-  (global_label "+5V"
-    (shape bidirectional)
-    (at 490.96 353.24 0)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
-    )
+  (no_connect
+    (at 490.96 353.24)
     (uuid 36be106f-144e-5a6b-9056-4e6591c438ae)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490.96 353.24 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
   )
-  (global_label "M2"
+  (global_label "nRST"
     (shape bidirectional)
     (at 483.34 358.32 270)
     (fields_autoplaced)
@@ -19476,8 +19459,8 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 608116ca-5f8a-5afe-a2d5-8b3b435ed3e0)
-    (property "Reference" "D6"
+    (uuid 684d6118-4ace-5de0-8cb7-70118e6ef457)
+    (property "Reference" "D2"
       (at 77.62 385.4 0)
       (effects
         (font
@@ -19525,13 +19508,13 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D6")
+          (reference "D2")
           (unit 1)
         )
       )
     )
   )
-  (global_label "GND"
+  (global_label "RUN_B"
     (shape bidirectional)
     (at 70 387.4 180)
     (fields_autoplaced)
@@ -19552,28 +19535,11 @@
       )
     )
   )
-  (global_label "+5V"
-    (shape bidirectional)
-    (at 85.24 387.4 0)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
-    )
+  (no_connect
+    (at 85.24 387.4)
     (uuid b37657ee-8f49-5945-b631-f369ee349053)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 85.24 387.4 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
   )
-  (global_label "CPU_RW"
+  (global_label "nRST"
     (shape bidirectional)
     (at 77.62 392.48 270)
     (fields_autoplaced)
@@ -19601,8 +19567,8 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 6ce6f3b7-0261-5c57-8814-d54a7bf704fc)
-    (property "Reference" "D7"
+    (uuid bc1236fd-9ccf-5a60-a8d1-df146e58cae7)
+    (property "Reference" "D3"
       (at 152.86 385.4 0)
       (effects
         (font
@@ -19650,13 +19616,13 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D7")
+          (reference "D3")
           (unit 1)
         )
       )
     )
   )
-  (global_label "GND"
+  (global_label "RUN_D"
     (shape bidirectional)
     (at 145.24 387.4 180)
     (fields_autoplaced)
@@ -19677,28 +19643,11 @@
       )
     )
   )
-  (global_label "+5V"
-    (shape bidirectional)
-    (at 160.48 387.4 0)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
-    )
+  (no_connect
+    (at 160.48 387.4)
     (uuid 835cc74f-4796-562e-a5ba-9eb9a8498b11)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 160.48 387.4 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
   )
-  (global_label "nROMSEL"
+  (global_label "nRST"
     (shape bidirectional)
     (at 152.86 392.48 270)
     (fields_autoplaced)
@@ -19726,8 +19675,8 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 9939b4b8-3072-530d-b6e9-104652f1ee89)
-    (property "Reference" "D8"
+    (uuid c79fcf26-2e7c-5cfd-9711-f66cf12288ba)
+    (property "Reference" "D4"
       (at 228.1 385.4 0)
       (effects
         (font
@@ -19775,13 +19724,13 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D8")
+          (reference "D4")
           (unit 1)
         )
       )
     )
   )
-  (global_label "GND"
+  (global_label "RUN_E"
     (shape bidirectional)
     (at 220.48 387.4 180)
     (fields_autoplaced)
@@ -19802,28 +19751,11 @@
       )
     )
   )
-  (global_label "+5V"
-    (shape bidirectional)
-    (at 235.72 387.4 0)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
-    )
+  (no_connect
+    (at 235.72 387.4)
     (uuid 3f4ed447-fd8d-5c8f-acb7-1997bc132658)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 235.72 387.4 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
   )
-  (global_label "nIRQ"
+  (global_label "nRST"
     (shape bidirectional)
     (at 228.1 392.48 270)
     (fields_autoplaced)
@@ -19851,8 +19783,8 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid a8304deb-29c8-5860-b74f-2be25b978b64)
-    (property "Reference" "D9"
+    (uuid 63db2c02-8367-5091-84a1-8d9eb9a0f66a)
+    (property "Reference" "D5"
       (at 303.34 385.4 0)
       (effects
         (font
@@ -19900,7 +19832,7 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D9")
+          (reference "D5")
           (unit 1)
         )
       )
@@ -19948,7 +19880,7 @@
       )
     )
   )
-  (global_label "PWE_G"
+  (global_label "M2"
     (shape bidirectional)
     (at 303.34 392.48 270)
     (fields_autoplaced)
@@ -19970,15 +19902,15 @@
     )
   )
   (symbol
-    (lib_id "Device:R")
-    (at 370.96 388.67 0)
+    (lib_id "Diode:BAV99")
+    (at 378.58 387.4 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid d58b6426-2d52-5514-9345-a07c1dfeeabc)
-    (property "Reference" "R1"
-      (at 370.96 386.67 0)
+    (uuid 608116ca-5f8a-5afe-a2d5-8b3b435ed3e0)
+    (property "Reference" "D6"
+      (at 378.58 385.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -19986,8 +19918,8 @@
         (justify left)
       )
     )
-    (property "Value" "2.2k"
-      (at 370.96 390.67 0)
+    (property "Value" "BAV99"
+      (at 378.58 389.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -19995,8 +19927,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 370.96 388.67 0)
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+      (at 378.58 387.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20005,7 +19937,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 370.96 388.67 0)
+      (at 378.58 387.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20019,28 +19951,31 @@
     (pin "2"
       (uuid fb70b46d-c4fc-5ddf-9275-1f36e7962a84)
     )
+    (pin "3"
+      (uuid 69a487f5-5613-5a3e-8654-286bb3a7f182)
+    )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R1")
+          (reference "D6")
           (unit 1)
         )
       )
     )
   )
-  (global_label "nROMSEL"
+  (global_label "GND"
     (shape bidirectional)
-    (at 370.96 384.86 90)
+    (at 370.96 387.4 180)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify left)
+      (justify right)
     )
-    (uuid 69a487f5-5613-5a3e-8654-286bb3a7f182)
+    (uuid 41af5752-3e43-5753-a26d-740bc46f23e9)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370.96 384.86 0)
+      (at 370.96 387.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20051,7 +19986,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 370.96 392.48 270)
+    (at 386.2 387.4 0)
     (fields_autoplaced)
     (effects
       (font
@@ -20059,79 +19994,20 @@
       )
       (justify left)
     )
-    (uuid 41af5752-3e43-5753-a26d-740bc46f23e9)
+    (uuid d188fcce-db45-5ce2-9a80-29ae1fd64f11)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370.96 392.48 0)
+      (at 386.2 387.4 0)
       (effects
         (font
           (size 1.27 1.27)
         )
         hide
-      )
-    )
-  )
-  (symbol
-    (lib_id "Device:R")
-    (at 430.96 388.67 0)
-    (unit 1)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (uuid 565d47b4-d4bc-574e-90d5-87a144d0a318)
-    (property "Reference" "R2"
-      (at 430.96 386.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Value" "100k"
-      (at 430.96 390.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 430.96 388.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Datasheet" "~"
-      (at 430.96 388.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (pin "1"
-      (uuid d188fcce-db45-5ce2-9a80-29ae1fd64f11)
-    )
-    (pin "2"
-      (uuid 10937526-3ebf-5e5a-9207-eda276eff971)
-    )
-    (instances
-      (project "famicart"
-        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R2")
-          (unit 1)
-        )
       )
     )
   )
   (global_label "CPU_RW"
     (shape bidirectional)
-    (at 430.96 384.86 90)
+    (at 378.58 392.48 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20139,9 +20015,92 @@
       )
       (justify left)
     )
-    (uuid f36d7f0d-8cd4-5d3b-ac29-5e9284d77270)
+    (uuid 10937526-3ebf-5e5a-9207-eda276eff971)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430.96 384.86 0)
+      (at 378.58 392.48 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (symbol
+    (lib_id "Diode:BAV99")
+    (at 453.82 387.4 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid 6ce6f3b7-0261-5c57-8814-d54a7bf704fc)
+    (property "Reference" "D7"
+      (at 453.82 385.4 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Value" "BAV99"
+      (at 453.82 389.4 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+      (at 453.82 387.4 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "Datasheet" "~"
+      (at 453.82 387.4 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (pin "1"
+      (uuid f36d7f0d-8cd4-5d3b-ac29-5e9284d77270)
+    )
+    (pin "2"
+      (uuid f5c9ea37-a5e7-584f-b244-4ead953905a5)
+    )
+    (pin "3"
+      (uuid 182bb2c8-f423-5cec-a2a7-eca216e07b75)
+    )
+    (instances
+      (project "famicart"
+        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
+          (reference "D7")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (global_label "GND"
+    (shape bidirectional)
+    (at 446.2 387.4 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify right)
+    )
+    (uuid 3844b99e-e517-560b-9f52-2c9711b5d86e)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 446.2 387.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20152,87 +20111,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 430.96 392.48 270)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
-    )
-    (uuid f5c9ea37-a5e7-584f-b244-4ead953905a5)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430.96 392.48 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-  )
-  (symbol
-    (lib_id "Device:R")
-    (at 490.96 388.67 0)
-    (unit 1)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (uuid b1892280-6b71-54d5-87de-b55385383e6f)
-    (property "Reference" "R3"
-      (at 490.96 386.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Value" "2.2k"
-      (at 490.96 390.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 490.96 388.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Datasheet" "~"
-      (at 490.96 388.67 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (pin "1"
-      (uuid 182bb2c8-f423-5cec-a2a7-eca216e07b75)
-    )
-    (pin "2"
-      (uuid 3844b99e-e517-560b-9f52-2c9711b5d86e)
-    )
-    (instances
-      (project "famicart"
-        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R3")
-          (unit 1)
-        )
-      )
-    )
-  )
-  (global_label "AUDIO_IN"
-    (shape bidirectional)
-    (at 490.96 384.86 90)
+    (at 461.44 387.4 0)
     (fields_autoplaced)
     (effects
       (font
@@ -20242,7 +20121,7 @@
     )
     (uuid d1326f96-ec73-5fcf-83e0-bc89875ced76)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490.96 384.86 0)
+      (at 461.44 387.4 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20251,9 +20130,9 @@
       )
     )
   )
-  (global_label "AMIX"
+  (global_label "nROMSEL"
     (shape bidirectional)
-    (at 490.96 392.48 270)
+    (at 453.82 392.48 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20263,7 +20142,7 @@
     )
     (uuid 3d7d2258-75b2-52e1-806a-51ed687ab3e9)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490.96 392.48 0)
+      (at 453.82 392.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20273,15 +20152,15 @@
     )
   )
   (symbol
-    (lib_id "Device:R")
-    (at 70 420.29 0)
+    (lib_id "Diode:BAV99")
+    (at 77.62 416.48 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 9477642e-78bd-5a4c-9891-30e91eeb7e32)
-    (property "Reference" "R4"
-      (at 70 418.29 0)
+    (uuid 9939b4b8-3072-530d-b6e9-104652f1ee89)
+    (property "Reference" "D8"
+      (at 77.62 414.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20289,8 +20168,8 @@
         (justify left)
       )
     )
-    (property "Value" "2.2k"
-      (at 70 422.29 0)
+    (property "Value" "BAV99"
+      (at 77.62 418.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20298,8 +20177,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 70 420.29 0)
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+      (at 77.62 416.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20308,7 +20187,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 70 420.29 0)
+      (at 77.62 416.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20322,26 +20201,29 @@
     (pin "2"
       (uuid 5a30e87c-d3dc-500d-8ab9-84884e2f4580)
     )
+    (pin "3"
+      (uuid 8adc72b5-6751-53ac-bc5f-2afa9f218ecb)
+    )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R4")
+          (reference "D8")
           (unit 1)
         )
       )
     )
   )
-  (global_label "AMIX"
+  (global_label "GND"
     (shape bidirectional)
-    (at 70 416.48 90)
+    (at 70 416.48 180)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify left)
+      (justify right)
     )
-    (uuid 8adc72b5-6751-53ac-bc5f-2afa9f218ecb)
+    (uuid 07557efd-9b06-50d8-ba58-2237e982d456)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 70 416.48 0)
       (effects
@@ -20352,9 +20234,9 @@
       )
     )
   )
-  (global_label "AUDIO_OUT"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 70 424.1 270)
+    (at 85.24 416.48 0)
     (fields_autoplaced)
     (effects
       (font
@@ -20362,9 +20244,30 @@
       )
       (justify left)
     )
-    (uuid 07557efd-9b06-50d8-ba58-2237e982d456)
+    (uuid fa6ba5cd-818b-5a6b-8354-c3c341da45d9)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 424.1 0)
+      (at 85.24 416.48 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (global_label "nIRQ"
+    (shape bidirectional)
+    (at 77.62 421.56 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
+    (uuid 2cd8e13c-d300-5ce3-8b19-b149bde7c7f4)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 77.62 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20374,15 +20277,15 @@
     )
   )
   (symbol
-    (lib_id "Device:C")
-    (at 130 420.29 0)
+    (lib_id "Diode:BAV99")
+    (at 152.86 416.48 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 8eb811ec-8187-54e8-a91f-3878922fee78)
-    (property "Reference" "C1"
-      (at 130 418.29 0)
+    (uuid a8304deb-29c8-5860-b74f-2be25b978b64)
+    (property "Reference" "D9"
+      (at 152.86 414.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20390,8 +20293,8 @@
         (justify left)
       )
     )
-    (property "Value" "10n"
-      (at 130 422.29 0)
+    (property "Value" "BAV99"
+      (at 152.86 418.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20399,8 +20302,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-      (at 130 420.29 0)
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+      (at 152.86 416.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20409,7 +20312,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 130 420.29 0)
+      (at 152.86 416.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20418,54 +20321,36 @@
       )
     )
     (pin "1"
-      (uuid fa6ba5cd-818b-5a6b-8354-c3c341da45d9)
+      (uuid 9f80e39c-d222-5306-b652-84703409d632)
     )
     (pin "2"
-      (uuid 2cd8e13c-d300-5ce3-8b19-b149bde7c7f4)
+      (uuid a37bb8b0-46e5-5c98-af82-cbbbbf2123a0)
+    )
+    (pin "3"
+      (uuid ae6eea77-fd33-5276-945c-03de72f5ff32)
     )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C1")
+          (reference "D9")
           (unit 1)
         )
-      )
-    )
-  )
-  (global_label "AF1"
-    (shape bidirectional)
-    (at 130 416.48 90)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
-    )
-    (uuid 9f80e39c-d222-5306-b652-84703409d632)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 130 416.48 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
       )
     )
   )
   (global_label "GND"
     (shape bidirectional)
-    (at 130 424.1 270)
+    (at 145.24 416.48 180)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify left)
+      (justify right)
     )
-    (uuid a37bb8b0-46e5-5c98-af82-cbbbbf2123a0)
+    (uuid 9b75ce1e-5f32-5c34-86af-0597dabc7cf8)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 130 424.1 0)
+      (at 145.24 416.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20474,68 +20359,9 @@
       )
     )
   )
-  (symbol
-    (lib_id "Device:C")
-    (at 190 420.29 0)
-    (unit 1)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (uuid 5cda78e4-40ed-501e-b8c1-2fbc42eb1575)
-    (property "Reference" "C2"
-      (at 190 418.29 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Value" "10n"
-      (at 190 422.29 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-      (at 190 420.29 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Datasheet" "~"
-      (at 190 420.29 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (pin "1"
-      (uuid ae6eea77-fd33-5276-945c-03de72f5ff32)
-    )
-    (pin "2"
-      (uuid 9b75ce1e-5f32-5c34-86af-0597dabc7cf8)
-    )
-    (instances
-      (project "famicart"
-        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C2")
-          (unit 1)
-        )
-      )
-    )
-  )
-  (global_label "AF2"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 190 416.48 90)
+    (at 160.48 416.48 0)
     (fields_autoplaced)
     (effects
       (font
@@ -20545,7 +20371,7 @@
     )
     (uuid 35cb17d8-a815-5c2b-88e7-6d9156c36363)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 190 416.48 0)
+      (at 160.48 416.48 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20554,9 +20380,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "PWE_G"
     (shape bidirectional)
-    (at 190 424.1 270)
+    (at 152.86 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20566,7 +20392,7 @@
     )
     (uuid 7ecf7058-6e92-5744-9c29-3668de6ec835)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 190 424.1 0)
+      (at 152.86 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20577,14 +20403,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 250 420.29 0)
+    (at 220.48 417.75 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 61d7df97-c315-5c8f-9402-729477fffd30)
-    (property "Reference" "R5"
-      (at 250 418.29 0)
+    (uuid d58b6426-2d52-5514-9345-a07c1dfeeabc)
+    (property "Reference" "R1"
+      (at 220.48 415.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20593,7 +20419,7 @@
       )
     )
     (property "Value" "2.2k"
-      (at 250 422.29 0)
+      (at 220.48 419.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20602,7 +20428,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 250 420.29 0)
+      (at 220.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20611,7 +20437,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 250 420.29 0)
+      (at 220.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20628,15 +20454,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R5")
+          (reference "R1")
           (unit 1)
         )
       )
     )
   )
-  (global_label "IRQ_G"
+  (global_label "nROMSEL"
     (shape bidirectional)
-    (at 250 416.48 90)
+    (at 220.48 413.94 90)
     (fields_autoplaced)
     (effects
       (font
@@ -20646,7 +20472,7 @@
     )
     (uuid c5e84da2-ccac-5f1b-8140-e703172a9ef1)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 416.48 0)
+      (at 220.48 413.94 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20655,9 +20481,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 250 424.1 270)
+    (at 220.48 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20667,7 +20493,7 @@
     )
     (uuid ceb4ff27-b111-560b-b155-94a12a07843d)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 424.1 0)
+      (at 220.48 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20678,14 +20504,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 310 420.29 0)
+    (at 280.48 417.75 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 46e73fa5-0783-5ced-897d-69e6a7802d2b)
-    (property "Reference" "R6"
-      (at 310 418.29 0)
+    (uuid 565d47b4-d4bc-574e-90d5-87a144d0a318)
+    (property "Reference" "R2"
+      (at 280.48 415.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20693,8 +20519,8 @@
         (justify left)
       )
     )
-    (property "Value" "2.2k"
-      (at 310 422.29 0)
+    (property "Value" "100k"
+      (at 280.48 419.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20703,7 +20529,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 310 420.29 0)
+      (at 280.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20712,7 +20538,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 310 420.29 0)
+      (at 280.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20729,15 +20555,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R6")
+          (reference "R2")
           (unit 1)
         )
       )
     )
   )
-  (global_label "PWS_D"
+  (global_label "CPU_RW"
     (shape bidirectional)
-    (at 310 416.48 90)
+    (at 280.48 413.94 90)
     (fields_autoplaced)
     (effects
       (font
@@ -20747,7 +20573,7 @@
     )
     (uuid eefbf9cb-826e-524c-8c2b-072f0ce017df)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 310 416.48 0)
+      (at 280.48 413.94 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20756,9 +20582,9 @@
       )
     )
   )
-  (global_label "3V3_B"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 310 424.1 270)
+    (at 280.48 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20768,7 +20594,7 @@
     )
     (uuid 2ddd0db7-92a6-509c-9f6d-1f0a93391448)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 310 424.1 0)
+      (at 280.48 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20779,14 +20605,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 370 420.29 0)
+    (at 340.48 417.75 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 56bcfa23-99c0-5907-b4fb-10174061ecc8)
-    (property "Reference" "R7"
-      (at 370 418.29 0)
+    (uuid b1892280-6b71-54d5-87de-b55385383e6f)
+    (property "Reference" "R3"
+      (at 340.48 415.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20795,7 +20621,7 @@
       )
     )
     (property "Value" "2.2k"
-      (at 370 422.29 0)
+      (at 340.48 419.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20804,7 +20630,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 370 420.29 0)
+      (at 340.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20813,7 +20639,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 370 420.29 0)
+      (at 340.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20830,15 +20656,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R7")
+          (reference "R3")
           (unit 1)
         )
       )
     )
   )
-  (global_label "PWS_D"
+  (global_label "AUDIO_IN"
     (shape bidirectional)
-    (at 370 416.48 90)
+    (at 340.48 413.94 90)
     (fields_autoplaced)
     (effects
       (font
@@ -20848,7 +20674,7 @@
     )
     (uuid 9c3838cd-3b6d-547d-92ec-6a6b085221ae)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370 416.48 0)
+      (at 340.48 413.94 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20857,9 +20683,9 @@
       )
     )
   )
-  (global_label "3V3_B"
+  (global_label "AMIX"
     (shape bidirectional)
-    (at 370 424.1 270)
+    (at 340.48 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20869,7 +20695,7 @@
     )
     (uuid 0379bbc1-c308-5394-b0bb-139119330a90)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370 424.1 0)
+      (at 340.48 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20879,15 +20705,15 @@
     )
   )
   (symbol
-    (lib_id "Device:C")
-    (at 430 420.29 0)
+    (lib_id "Device:R")
+    (at 400.48 417.75 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 5d57b43e-968c-5413-973b-e6dd9c823f34)
-    (property "Reference" "C3"
-      (at 430 418.29 0)
+    (uuid 9477642e-78bd-5a4c-9891-30e91eeb7e32)
+    (property "Reference" "R4"
+      (at 400.48 415.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20895,8 +20721,8 @@
         (justify left)
       )
     )
-    (property "Value" "10u"
-      (at 430 422.29 0)
+    (property "Value" "2.2k"
+      (at 400.48 419.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20904,8 +20730,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-      (at 430 420.29 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 400.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20914,7 +20740,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 430 420.29 0)
+      (at 400.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20931,15 +20757,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C3")
+          (reference "R4")
           (unit 1)
         )
       )
     )
   )
-  (global_label "+5V"
+  (global_label "AMIX"
     (shape bidirectional)
-    (at 430 416.48 90)
+    (at 400.48 413.94 90)
     (fields_autoplaced)
     (effects
       (font
@@ -20949,7 +20775,7 @@
     )
     (uuid 4ef3cc7c-5d42-586b-a1c3-b4b97adee008)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430 416.48 0)
+      (at 400.48 413.94 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20958,9 +20784,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "AUDIO_OUT"
     (shape bidirectional)
-    (at 430 424.1 270)
+    (at 400.48 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -20970,7 +20796,7 @@
     )
     (uuid 3ee46566-3063-5458-95a7-799085fe7852)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430 424.1 0)
+      (at 400.48 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20981,14 +20807,14 @@
   )
   (symbol
     (lib_id "Device:C")
-    (at 490 420.29 0)
+    (at 460.48 417.75 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 5e3c4974-121d-5857-8aa0-77e5e5738574)
-    (property "Reference" "C4"
-      (at 490 418.29 0)
+    (uuid 8eb811ec-8187-54e8-a91f-3878922fee78)
+    (property "Reference" "C1"
+      (at 460.48 415.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -20996,8 +20822,8 @@
         (justify left)
       )
     )
-    (property "Value" "10u"
-      (at 490 422.29 0)
+    (property "Value" "10n"
+      (at 460.48 419.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21005,8 +20831,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-      (at 490 420.29 0)
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+      (at 460.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21015,7 +20841,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 490 420.29 0)
+      (at 460.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21032,15 +20858,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C4")
+          (reference "C1")
           (unit 1)
         )
       )
     )
   )
-  (global_label "+5V"
+  (global_label "AF1"
     (shape bidirectional)
-    (at 490 416.48 90)
+    (at 460.48 413.94 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21050,7 +20876,7 @@
     )
     (uuid 111780f6-4aed-5a09-92cb-d4d3fa5f23ae)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490 416.48 0)
+      (at 460.48 413.94 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21061,7 +20887,7 @@
   )
   (global_label "GND"
     (shape bidirectional)
-    (at 490 424.1 270)
+    (at 460.48 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21071,7 +20897,7 @@
     )
     (uuid b74a8666-59e3-5005-b5ca-6500ee496391)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490 424.1 0)
+      (at 460.48 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21081,15 +20907,15 @@
     )
   )
   (symbol
-    (lib_id "Device:R")
-    (at 70 451.91 0)
+    (lib_id "Device:C")
+    (at 520.48 417.75 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 1e73dd92-e44f-5bf3-bd91-9df833f7d0b1)
-    (property "Reference" "R8"
-      (at 70 449.91 0)
+    (uuid 5cda78e4-40ed-501e-b8c1-2fbc42eb1575)
+    (property "Reference" "C2"
+      (at 520.48 415.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21097,8 +20923,8 @@
         (justify left)
       )
     )
-    (property "Value" "2.2k"
-      (at 70 453.91 0)
+    (property "Value" "10n"
+      (at 520.48 419.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21106,8 +20932,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 70 451.91 0)
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+      (at 520.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21116,7 +20942,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 70 451.91 0)
+      (at 520.48 417.75 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21133,15 +20959,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R8")
+          (reference "C2")
           (unit 1)
         )
       )
     )
   )
-  (global_label "LINK"
+  (global_label "AF2"
     (shape bidirectional)
-    (at 70 448.1 90)
+    (at 520.48 413.94 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21151,7 +20977,7 @@
     )
     (uuid 3b4363db-c310-56a8-a78c-f1050a9af2cf)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 448.1 0)
+      (at 520.48 413.94 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21160,9 +20986,9 @@
       )
     )
   )
-  (global_label "LINK_PU"
+  (global_label "GND"
     (shape bidirectional)
-    (at 70 455.72 270)
+    (at 520.48 421.56 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21172,7 +20998,7 @@
     )
     (uuid ca964379-6b6b-5f06-b9f5-fabed3c29fdc)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 455.72 0)
+      (at 520.48 421.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21183,14 +21009,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 130 451.91 0)
+    (at 70 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 79269377-6933-5b75-8834-3f7b088a0a65)
-    (property "Reference" "R9"
-      (at 130 449.91 0)
+    (uuid 61d7df97-c315-5c8f-9402-729477fffd30)
+    (property "Reference" "R5"
+      (at 70 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21199,7 +21025,7 @@
       )
     )
     (property "Value" "2.2k"
-      (at 130 453.91 0)
+      (at 70 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21208,7 +21034,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 130 451.91 0)
+      (at 70 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21217,7 +21043,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 130 451.91 0)
+      (at 70 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21234,15 +21060,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R9")
+          (reference "R5")
           (unit 1)
         )
       )
     )
   )
-  (global_label "LINK_PU"
+  (global_label "IRQ_G"
     (shape bidirectional)
-    (at 130 448.1 90)
+    (at 70 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21252,7 +21078,7 @@
     )
     (uuid 883b1b0e-1b53-5fad-8851-d6ee14b49f2d)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 130 448.1 0)
+      (at 70 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21261,9 +21087,9 @@
       )
     )
   )
-  (global_label "3V3_A"
+  (global_label "GND"
     (shape bidirectional)
-    (at 130 455.72 270)
+    (at 70 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21273,7 +21099,7 @@
     )
     (uuid 2893a3ae-7b48-5f40-aa45-cfb542173b02)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 130 455.72 0)
+      (at 70 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21284,14 +21110,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 190 451.91 0)
+    (at 130 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid d8e4af86-8560-52b2-8ccb-12352e6730a4)
-    (property "Reference" "R10"
-      (at 190 449.91 0)
+    (uuid 46e73fa5-0783-5ced-897d-69e6a7802d2b)
+    (property "Reference" "R6"
+      (at 130 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21300,7 +21126,7 @@
       )
     )
     (property "Value" "2.2k"
-      (at 190 453.91 0)
+      (at 130 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21309,7 +21135,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 190 451.91 0)
+      (at 130 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21318,7 +21144,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 190 451.91 0)
+      (at 130 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21335,15 +21161,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R10")
+          (reference "R6")
           (unit 1)
         )
       )
     )
   )
-  (global_label "SD_CS"
+  (global_label "PWS_D"
     (shape bidirectional)
-    (at 190 448.1 90)
+    (at 130 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21353,7 +21179,7 @@
     )
     (uuid 24e4e275-18fa-504a-8c67-27057979f588)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 190 448.1 0)
+      (at 130 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21362,9 +21188,9 @@
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "3V3_B"
     (shape bidirectional)
-    (at 190 455.72 270)
+    (at 130 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21374,7 +21200,7 @@
     )
     (uuid bee23f99-5c3a-5b78-a13b-28c52de33e49)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 190 455.72 0)
+      (at 130 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21385,14 +21211,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 250 451.91 0)
+    (at 190 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 2c84a1c5-3596-506d-b447-1b5359a6f2af)
-    (property "Reference" "R11"
-      (at 250 449.91 0)
+    (uuid 56bcfa23-99c0-5907-b4fb-10174061ecc8)
+    (property "Reference" "R7"
+      (at 190 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21400,8 +21226,8 @@
         (justify left)
       )
     )
-    (property "Value" "100k"
-      (at 250 453.91 0)
+    (property "Value" "2.2k"
+      (at 190 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21410,7 +21236,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 250 451.91 0)
+      (at 190 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21419,7 +21245,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 250 451.91 0)
+      (at 190 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21436,15 +21262,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R11")
+          (reference "R7")
           (unit 1)
         )
       )
     )
   )
-  (global_label "V5S"
+  (global_label "PWS_D"
     (shape bidirectional)
-    (at 250 448.1 90)
+    (at 190 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21454,7 +21280,7 @@
     )
     (uuid a490ec8c-2d9d-5cf9-892c-ada85125016d)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 448.1 0)
+      (at 190 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21463,9 +21289,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "3V3_B"
     (shape bidirectional)
-    (at 250 455.72 270)
+    (at 190 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21475,7 +21301,7 @@
     )
     (uuid 23ba3f28-b67c-5738-bd5a-236906cad7db)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 455.72 0)
+      (at 190 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21485,15 +21311,15 @@
     )
   )
   (symbol
-    (lib_id "Device:R")
-    (at 310 451.91 0)
+    (lib_id "Device:C")
+    (at 250 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 68d5d5a2-9405-52c3-96bd-6a079e6dcc3a)
-    (property "Reference" "R12"
-      (at 310 449.91 0)
+    (uuid 5d57b43e-968c-5413-973b-e6dd9c823f34)
+    (property "Reference" "C3"
+      (at 250 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21501,8 +21327,8 @@
         (justify left)
       )
     )
-    (property "Value" "100k"
-      (at 310 453.91 0)
+    (property "Value" "10u"
+      (at 250 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21510,8 +21336,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 310 451.91 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 250 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21520,7 +21346,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 310 451.91 0)
+      (at 250 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21537,7 +21363,7 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R12")
+          (reference "C3")
           (unit 1)
         )
       )
@@ -21545,7 +21371,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 310 448.1 90)
+    (at 250 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21555,7 +21381,7 @@
     )
     (uuid 34155739-18a3-507f-8edf-e97c1c2e37c3)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 310 448.1 0)
+      (at 250 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21564,9 +21390,9 @@
       )
     )
   )
-  (global_label "V5S"
+  (global_label "GND"
     (shape bidirectional)
-    (at 310 455.72 270)
+    (at 250 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21576,7 +21402,7 @@
     )
     (uuid 0d020e78-7067-544e-b797-698666740c4b)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 310 455.72 0)
+      (at 250 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21586,15 +21412,15 @@
     )
   )
   (symbol
-    (lib_id "Device:R")
-    (at 370 451.91 0)
+    (lib_id "Device:C")
+    (at 310 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 2a8c886a-7194-5b75-9810-55963e2e4b57)
-    (property "Reference" "R13"
-      (at 370 449.91 0)
+    (uuid 5e3c4974-121d-5857-8aa0-77e5e5738574)
+    (property "Reference" "C4"
+      (at 310 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21602,8 +21428,8 @@
         (justify left)
       )
     )
-    (property "Value" "100k"
-      (at 370 453.91 0)
+    (property "Value" "10u"
+      (at 310 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21611,8 +21437,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 370 451.91 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 310 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21621,7 +21447,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 370 451.91 0)
+      (at 310 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21638,15 +21464,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R13")
+          (reference "C4")
           (unit 1)
         )
       )
     )
   )
-  (global_label "SD_DAT1"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 370 448.1 90)
+    (at 310 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21656,7 +21482,7 @@
     )
     (uuid af62946e-360a-5efe-9468-b375c8a6ef4b)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370 448.1 0)
+      (at 310 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21665,9 +21491,9 @@
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "GND"
     (shape bidirectional)
-    (at 370 455.72 270)
+    (at 310 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21677,7 +21503,7 @@
     )
     (uuid 9cc5c000-84cf-5bea-84bd-50d94fb5bd55)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370 455.72 0)
+      (at 310 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21688,14 +21514,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 430 451.91 0)
+    (at 370 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid ff273a23-d02f-5d0d-adf9-00ca33d83ff2)
-    (property "Reference" "R14"
-      (at 430 449.91 0)
+    (uuid 1e73dd92-e44f-5bf3-bd91-9df833f7d0b1)
+    (property "Reference" "R8"
+      (at 370 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21703,8 +21529,8 @@
         (justify left)
       )
     )
-    (property "Value" "100k"
-      (at 430 453.91 0)
+    (property "Value" "2.2k"
+      (at 370 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21713,7 +21539,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 430 451.91 0)
+      (at 370 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21722,7 +21548,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 430 451.91 0)
+      (at 370 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21739,15 +21565,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R14")
+          (reference "R8")
           (unit 1)
         )
       )
     )
   )
-  (global_label "SD_DAT2"
+  (global_label "LINK"
     (shape bidirectional)
-    (at 430 448.1 90)
+    (at 370 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21757,7 +21583,7 @@
     )
     (uuid 8956dcc5-6df9-5ea0-9ce6-1ea7cb112135)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430 448.1 0)
+      (at 370 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21766,9 +21592,9 @@
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "LINK_PU"
     (shape bidirectional)
-    (at 430 455.72 270)
+    (at 370 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21778,7 +21604,7 @@
     )
     (uuid ca765520-b09e-50f1-accf-94cf5405739c)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430 455.72 0)
+      (at 370 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21788,15 +21614,15 @@
     )
   )
   (symbol
-    (lib_id "Device:C")
-    (at 490 451.91 0)
+    (lib_id "Device:R")
+    (at 430 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 40698028-3198-5885-99b5-6ddd0d45ca0a)
-    (property "Reference" "C5"
-      (at 490 449.91 0)
+    (uuid 79269377-6933-5b75-8834-3f7b088a0a65)
+    (property "Reference" "R9"
+      (at 430 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21804,8 +21630,8 @@
         (justify left)
       )
     )
-    (property "Value" "10u"
-      (at 490 453.91 0)
+    (property "Value" "2.2k"
+      (at 430 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21813,8 +21639,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-      (at 490 451.91 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 430 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21823,7 +21649,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 490 451.91 0)
+      (at 430 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21840,15 +21666,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C5")
+          (reference "R9")
           (unit 1)
         )
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "LINK_PU"
     (shape bidirectional)
-    (at 490 448.1 90)
+    (at 430 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21858,7 +21684,7 @@
     )
     (uuid 65a3cf25-1f7b-5550-9933-091d0175ddbd)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490 448.1 0)
+      (at 430 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21867,9 +21693,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "3V3_A"
     (shape bidirectional)
-    (at 490 455.72 270)
+    (at 430 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21879,7 +21705,7 @@
     )
     (uuid 39f1aad7-2937-5584-a540-c6e8494f93fc)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490 455.72 0)
+      (at 430 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21890,14 +21716,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 70 483.53 0)
+    (at 490 449.37 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 781aab0f-ee98-5aac-ba35-8a6fe00ac9eb)
-    (property "Reference" "R15"
-      (at 70 481.53 0)
+    (uuid d8e4af86-8560-52b2-8ccb-12352e6730a4)
+    (property "Reference" "R10"
+      (at 490 447.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21906,7 +21732,7 @@
       )
     )
     (property "Value" "2.2k"
-      (at 70 485.53 0)
+      (at 490 451.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21915,7 +21741,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 70 483.53 0)
+      (at 490 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21924,7 +21750,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 70 483.53 0)
+      (at 490 449.37 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21941,15 +21767,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R15")
+          (reference "R10")
           (unit 1)
         )
       )
     )
   )
-  (global_label "F_CS"
+  (global_label "SD_CS"
     (shape bidirectional)
-    (at 70 479.72 90)
+    (at 490 445.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -21959,7 +21785,7 @@
     )
     (uuid acb32d19-178d-5aca-a870-862cb296d197)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 479.72 0)
+      (at 490 445.56 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21970,7 +21796,7 @@
   )
   (global_label "3V3_F"
     (shape bidirectional)
-    (at 70 487.34 270)
+    (at 490 453.18 270)
     (fields_autoplaced)
     (effects
       (font
@@ -21980,7 +21806,7 @@
     )
     (uuid c12e9a65-3e86-53df-abf5-37e9637c4b84)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 487.34 0)
+      (at 490 453.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -21991,14 +21817,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 130 483.53 0)
+    (at 70 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid f58dff17-331f-51e3-b90c-38c8b7c166a9)
-    (property "Reference" "R16"
-      (at 130 481.53 0)
+    (uuid 2c84a1c5-3596-506d-b447-1b5359a6f2af)
+    (property "Reference" "R11"
+      (at 70 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22007,7 +21833,7 @@
       )
     )
     (property "Value" "100k"
-      (at 130 485.53 0)
+      (at 70 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22016,7 +21842,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 130 483.53 0)
+      (at 70 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22025,7 +21851,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 130 483.53 0)
+      (at 70 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22042,15 +21868,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R16")
+          (reference "R11")
           (unit 1)
         )
       )
     )
   )
-  (global_label "SPI_MISO"
+  (global_label "V5S"
     (shape bidirectional)
-    (at 130 479.72 90)
+    (at 70 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22060,7 +21886,7 @@
     )
     (uuid 7daa5333-d496-52bf-bf8e-5f25cb416371)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 130 479.72 0)
+      (at 70 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22069,9 +21895,9 @@
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "GND"
     (shape bidirectional)
-    (at 130 487.34 270)
+    (at 70 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22081,7 +21907,7 @@
     )
     (uuid cc0418ba-28a5-5dcd-862a-17809ad3cf5e)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 130 487.34 0)
+      (at 70 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22092,14 +21918,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 190 483.53 0)
+    (at 130 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 0812629c-5dd4-5352-9ef0-19047466afc1)
-    (property "Reference" "R17"
-      (at 190 481.53 0)
+    (uuid 68d5d5a2-9405-52c3-96bd-6a079e6dcc3a)
+    (property "Reference" "R12"
+      (at 130 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22108,7 +21934,7 @@
       )
     )
     (property "Value" "100k"
-      (at 190 485.53 0)
+      (at 130 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22117,7 +21943,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 190 483.53 0)
+      (at 130 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22126,7 +21952,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 190 483.53 0)
+      (at 130 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22143,15 +21969,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R17")
+          (reference "R12")
           (unit 1)
         )
       )
     )
   )
-  (global_label "F_IO2"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 190 479.72 90)
+    (at 130 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22161,7 +21987,7 @@
     )
     (uuid 7c2971b1-e868-54bd-8db5-68ec9b2c2eb8)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 190 479.72 0)
+      (at 130 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22170,9 +21996,9 @@
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "V5S"
     (shape bidirectional)
-    (at 190 487.34 270)
+    (at 130 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22182,7 +22008,7 @@
     )
     (uuid e578da4c-bb93-560b-b2ca-52ed4c645224)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 190 487.34 0)
+      (at 130 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22192,15 +22018,15 @@
     )
   )
   (symbol
-    (lib_id "Device:C")
-    (at 250 483.53 0)
+    (lib_id "Device:R")
+    (at 190 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid b1d6d6d3-4422-5b7a-955a-4c316b4289b9)
-    (property "Reference" "C6"
-      (at 250 481.53 0)
+    (uuid 2a8c886a-7194-5b75-9810-55963e2e4b57)
+    (property "Reference" "R13"
+      (at 190 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22208,8 +22034,8 @@
         (justify left)
       )
     )
-    (property "Value" "10u"
-      (at 250 485.53 0)
+    (property "Value" "100k"
+      (at 190 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22217,8 +22043,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-      (at 250 483.53 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 190 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22227,7 +22053,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 250 483.53 0)
+      (at 190 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22244,15 +22070,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C6")
+          (reference "R13")
           (unit 1)
         )
       )
     )
   )
-  (global_label "3V3_F"
+  (global_label "SD_DAT1"
     (shape bidirectional)
-    (at 250 479.72 90)
+    (at 190 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22262,7 +22088,7 @@
     )
     (uuid f7bd66da-3231-5759-88a5-8591a83a27a2)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 479.72 0)
+      (at 190 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22271,9 +22097,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "3V3_F"
     (shape bidirectional)
-    (at 250 487.34 270)
+    (at 190 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22283,7 +22109,7 @@
     )
     (uuid 111bb697-64a3-56d3-b8bc-2c6cf65fdeda)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 487.34 0)
+      (at 190 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22294,14 +22120,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 310 483.53 0)
+    (at 250 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 27bfe139-05c4-5e6f-b04a-bb9913027973)
-    (property "Reference" "R18"
-      (at 310 481.53 0)
+    (uuid ff273a23-d02f-5d0d-adf9-00ca33d83ff2)
+    (property "Reference" "R14"
+      (at 250 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22310,7 +22136,7 @@
       )
     )
     (property "Value" "100k"
-      (at 310 485.53 0)
+      (at 250 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22319,7 +22145,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 310 483.53 0)
+      (at 250 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22328,7 +22154,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 310 483.53 0)
+      (at 250 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22345,15 +22171,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R18")
+          (reference "R14")
           (unit 1)
         )
       )
     )
   )
-  (global_label "F_IO3"
+  (global_label "SD_DAT2"
     (shape bidirectional)
-    (at 310 479.72 90)
+    (at 250 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22363,7 +22189,7 @@
     )
     (uuid 1c7dd1a9-04fa-570d-9b82-544575b3343b)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 310 479.72 0)
+      (at 250 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22374,7 +22200,7 @@
   )
   (global_label "3V3_F"
     (shape bidirectional)
-    (at 310 487.34 270)
+    (at 250 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22384,7 +22210,7 @@
     )
     (uuid 753ad76f-bac0-576a-91c1-67d33c8ec76e)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 310 487.34 0)
+      (at 250 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22395,14 +22221,14 @@
   )
   (symbol
     (lib_id "Device:C")
-    (at 370 483.53 0)
+    (at 310 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 27e32a86-09ac-5641-b7d6-0fed124e8b16)
-    (property "Reference" "C7"
-      (at 370 481.53 0)
+    (uuid 40698028-3198-5885-99b5-6ddd0d45ca0a)
+    (property "Reference" "C5"
+      (at 310 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22410,8 +22236,8 @@
         (justify left)
       )
     )
-    (property "Value" "10n"
-      (at 370 485.53 0)
+    (property "Value" "10u"
+      (at 310 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22419,8 +22245,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-      (at 370 483.53 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 310 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22429,7 +22255,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 370 483.53 0)
+      (at 310 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22446,7 +22272,7 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C7")
+          (reference "C5")
           (unit 1)
         )
       )
@@ -22454,7 +22280,7 @@
   )
   (global_label "3V3_F"
     (shape bidirectional)
-    (at 370 479.72 90)
+    (at 310 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22464,7 +22290,7 @@
     )
     (uuid 9a78f840-1452-5e4f-85b1-14553b1f7b14)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370 479.72 0)
+      (at 310 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22475,7 +22301,7 @@
   )
   (global_label "GND"
     (shape bidirectional)
-    (at 370 487.34 270)
+    (at 310 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22485,7 +22311,7 @@
     )
     (uuid 9ddd2c37-4bd1-5426-9abf-79c414e74139)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 370 487.34 0)
+      (at 310 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22496,14 +22322,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 430 483.53 0)
+    (at 370 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 4e865213-1529-5a92-a7ac-e1c30069e597)
-    (property "Reference" "R19"
-      (at 430 481.53 0)
+    (uuid 781aab0f-ee98-5aac-ba35-8a6fe00ac9eb)
+    (property "Reference" "R15"
+      (at 370 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22512,7 +22338,7 @@
       )
     )
     (property "Value" "2.2k"
-      (at 430 485.53 0)
+      (at 370 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22521,7 +22347,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 430 483.53 0)
+      (at 370 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22530,7 +22356,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 430 483.53 0)
+      (at 370 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22547,15 +22373,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R19")
+          (reference "R15")
           (unit 1)
         )
       )
     )
   )
-  (global_label "LINK"
+  (global_label "F_CS"
     (shape bidirectional)
-    (at 430 479.72 90)
+    (at 370 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22565,7 +22391,7 @@
     )
     (uuid 6725d19a-f84d-5fde-98c6-a5da3674ef97)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430 479.72 0)
+      (at 370 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22574,9 +22400,9 @@
       )
     )
   )
-  (global_label "LINK_T"
+  (global_label "3V3_F"
     (shape bidirectional)
-    (at 430 487.34 270)
+    (at 370 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22586,7 +22412,7 @@
     )
     (uuid 331b2dc1-4152-5a11-8320-1442de2911a9)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 430 487.34 0)
+      (at 370 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22597,14 +22423,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 490 483.53 0)
+    (at 430 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 58513580-f9fd-5545-b0d7-e0452c724b26)
-    (property "Reference" "R20"
-      (at 490 481.53 0)
+    (uuid f58dff17-331f-51e3-b90c-38c8b7c166a9)
+    (property "Reference" "R16"
+      (at 430 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22612,8 +22438,8 @@
         (justify left)
       )
     )
-    (property "Value" "2.2k"
-      (at 490 485.53 0)
+    (property "Value" "100k"
+      (at 430 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22622,7 +22448,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 490 483.53 0)
+      (at 430 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22631,7 +22457,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 490 483.53 0)
+      (at 430 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22648,15 +22474,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "R20")
+          (reference "R16")
           (unit 1)
         )
       )
     )
   )
-  (global_label "EXT_P"
+  (global_label "SPI_MISO"
     (shape bidirectional)
-    (at 490 479.72 90)
+    (at 430 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22666,7 +22492,7 @@
     )
     (uuid d134858d-3928-5da6-aba4-1fb7db51b061)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490 479.72 0)
+      (at 430 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22675,9 +22501,9 @@
       )
     )
   )
-  (global_label "EXT"
+  (global_label "3V3_F"
     (shape bidirectional)
-    (at 490 487.34 270)
+    (at 430 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22687,7 +22513,7 @@
     )
     (uuid adfd294d-a918-57d5-b212-d55551b72311)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 490 487.34 0)
+      (at 430 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22697,15 +22523,15 @@
     )
   )
   (symbol
-    (lib_id "Device:C")
-    (at 70 515.15 0)
+    (lib_id "Device:R")
+    (at 490 480.99 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 08a1f5b8-f737-505c-844a-f8d3c320b21b)
-    (property "Reference" "C8"
-      (at 70 513.15 0)
+    (uuid 0812629c-5dd4-5352-9ef0-19047466afc1)
+    (property "Reference" "R17"
+      (at 490 478.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22713,8 +22539,8 @@
         (justify left)
       )
     )
-    (property "Value" "10u"
-      (at 70 517.15 0)
+    (property "Value" "100k"
+      (at 490 482.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22722,8 +22548,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-      (at 70 515.15 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 490 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22732,7 +22558,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 70 515.15 0)
+      (at 490 480.99 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22749,15 +22575,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "C8")
+          (reference "R17")
           (unit 1)
         )
       )
     )
   )
-  (global_label "+5V"
+  (global_label "F_IO2"
     (shape bidirectional)
-    (at 70 511.34 90)
+    (at 490 477.18 90)
     (fields_autoplaced)
     (effects
       (font
@@ -22767,7 +22593,7 @@
     )
     (uuid 9e607d16-5a0a-5a83-9930-27342033ac80)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 511.34 0)
+      (at 490 477.18 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22776,9 +22602,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "3V3_F"
     (shape bidirectional)
-    (at 70 518.96 270)
+    (at 490 484.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -22788,7 +22614,7 @@
     )
     (uuid 0ac97ee7-5023-57d3-ab3b-671d4dc238a8)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 518.96 0)
+      (at 490 484.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22798,15 +22624,15 @@
     )
   )
   (symbol
-    (lib_id "famicart:WirePads_1x3")
-    (at 130 513.88 0)
+    (lib_id "Device:C")
+    (at 70 512.61 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid c3a53f66-3eaa-5e69-a0f1-cbc2c7a1dbc2)
-    (property "Reference" "J2"
-      (at 130 511.88 0)
+    (uuid b1d6d6d3-4422-5b7a-955a-4c316b4289b9)
+    (property "Reference" "C6"
+      (at 70 510.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22814,8 +22640,8 @@
         (justify left)
       )
     )
-    (property "Value" "RST/GND/LINK pads"
-      (at 130 515.88 0)
+    (property "Value" "10u"
+      (at 70 514.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22823,8 +22649,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "famicart:WirePads_1x3"
-      (at 130 513.88 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 70 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22833,7 +22659,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 130 513.88 0)
+      (at 70 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22847,31 +22673,28 @@
     (pin "2"
       (uuid 6a98c7ae-4b46-5bfa-8eb4-94c943fe2c25)
     )
-    (pin "3"
-      (uuid 76dc71a1-d76b-503e-a535-2d8487d94299)
-    )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "J2")
+          (reference "C6")
           (unit 1)
         )
       )
     )
   )
-  (global_label "nRST"
+  (global_label "3V3_F"
     (shape bidirectional)
-    (at 124.92 511.34 180)
+    (at 70 508.8 90)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
-    (uuid fa480640-9a28-5d80-9148-c76f1d15c203)
+    (uuid 76dc71a1-d76b-503e-a535-2d8487d94299)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 124.92 511.34 0)
+      (at 70 508.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22882,38 +22705,17 @@
   )
   (global_label "GND"
     (shape bidirectional)
-    (at 124.92 513.88 180)
+    (at 70 516.42 270)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
-    (uuid 617d09c4-35e1-50da-8b86-9dd3a19651a5)
+    (uuid fa480640-9a28-5d80-9148-c76f1d15c203)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 124.92 513.88 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-  )
-  (global_label "LINK_T"
-    (shape bidirectional)
-    (at 124.92 516.42 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify right)
-    )
-    (uuid 319ffdaf-e3df-56c8-8c79-0ae63fb2ca57)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 124.92 516.42 0)
+      (at 70 516.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22923,15 +22725,15 @@
     )
   )
   (symbol
-    (lib_id "famicart:WirePads_1x3")
-    (at 190 513.88 0)
+    (lib_id "Device:R")
+    (at 130 512.61 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 158ec407-165d-5b1a-ad18-b76df35236b6)
-    (property "Reference" "J4"
-      (at 190 511.88 0)
+    (uuid 27bfe139-05c4-5e6f-b04a-bb9913027973)
+    (property "Reference" "R18"
+      (at 130 510.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22939,8 +22741,8 @@
         (justify left)
       )
     )
-    (property "Value" "EXT/GND/3V3 pads"
-      (at 190 515.88 0)
+    (property "Value" "100k"
+      (at 130 514.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22948,8 +22750,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "famicart:WirePads_1x3"
-      (at 190 513.88 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 130 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22958,7 +22760,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 190 513.88 0)
+      (at 130 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -22967,57 +22769,33 @@
       )
     )
     (pin "1"
-      (uuid 6dd3edf6-692e-5a2e-8c00-3aa2fdca1958)
+      (uuid 617d09c4-35e1-50da-8b86-9dd3a19651a5)
     )
     (pin "2"
-      (uuid 20653809-3157-580e-b573-fd4d9561e95e)
-    )
-    (pin "3"
-      (uuid c5c7307a-aedd-59ea-9ada-67c2d17ef6ea)
+      (uuid 319ffdaf-e3df-56c8-8c79-0ae63fb2ca57)
     )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "J4")
+          (reference "R18")
           (unit 1)
         )
       )
     )
   )
-  (global_label "EXT_P"
+  (global_label "F_IO3"
     (shape bidirectional)
-    (at 184.92 511.34 180)
+    (at 130 508.8 90)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
-    (uuid c6c1bec7-b742-5ce9-842e-6c4175d67ec6)
+    (uuid 6dd3edf6-692e-5a2e-8c00-3aa2fdca1958)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 184.92 511.34 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-  )
-  (global_label "GND"
-    (shape bidirectional)
-    (at 184.92 513.88 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify right)
-    )
-    (uuid 3ad06381-c533-5549-bf72-abf0fc566120)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 184.92 513.88 0)
+      (at 130 508.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23028,17 +22806,17 @@
   )
   (global_label "3V3_F"
     (shape bidirectional)
-    (at 184.92 516.42 180)
+    (at 130 516.42 270)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
-    (uuid de3a75ed-1ada-5ef8-afb4-5aae84aaa65c)
+    (uuid 20653809-3157-580e-b573-fd4d9561e95e)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 184.92 516.42 0)
+      (at 130 516.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23048,15 +22826,15 @@
     )
   )
   (symbol
-    (lib_id "Switch:SW_Push")
-    (at 255.08 511.34 0)
+    (lib_id "Device:C")
+    (at 190 512.61 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 6963bebe-d432-52eb-b90c-0c6421f37e60)
-    (property "Reference" "SW1"
-      (at 255.08 509.34 0)
+    (uuid 27e32a86-09ac-5641-b7d6-0fed124e8b16)
+    (property "Reference" "C7"
+      (at 190 510.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23064,8 +22842,8 @@
         (justify left)
       )
     )
-    (property "Value" "RESET"
-      (at 255.08 513.34 0)
+    (property "Value" "10n"
+      (at 190 514.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23073,8 +22851,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A"
-      (at 255.08 511.34 0)
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+      (at 190 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23083,7 +22861,108 @@
       )
     )
     (property "Datasheet" "~"
-      (at 255.08 511.34 0)
+      (at 190 512.61 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (pin "1"
+      (uuid c5c7307a-aedd-59ea-9ada-67c2d17ef6ea)
+    )
+    (pin "2"
+      (uuid c6c1bec7-b742-5ce9-842e-6c4175d67ec6)
+    )
+    (instances
+      (project "famicart"
+        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
+          (reference "C7")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (global_label "3V3_F"
+    (shape bidirectional)
+    (at 190 508.8 90)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
+    (uuid 3ad06381-c533-5549-bf72-abf0fc566120)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 190 508.8 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (global_label "GND"
+    (shape bidirectional)
+    (at 190 516.42 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
+    (uuid de3a75ed-1ada-5ef8-afb4-5aae84aaa65c)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 190 516.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (symbol
+    (lib_id "Device:R")
+    (at 250 512.61 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid 4e865213-1529-5a92-a7ac-e1c30069e597)
+    (property "Reference" "R19"
+      (at 250 510.61 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Value" "2.2k"
+      (at 250 514.61 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 250 512.61 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "Datasheet" "~"
+      (at 250 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23100,25 +22979,25 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "SW1")
+          (reference "R19")
           (unit 1)
         )
       )
     )
   )
-  (global_label "nRST"
+  (global_label "LINK"
     (shape bidirectional)
-    (at 250 511.34 180)
+    (at 250 508.8 90)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
     (uuid 21ac95c1-07b2-5a67-9935-1225b65a29fa)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 250 511.34 0)
+      (at 250 508.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23127,9 +23006,9 @@
       )
     )
   )
-  (global_label "GND"
+  (global_label "LINK_T"
     (shape bidirectional)
-    (at 260.16 511.34 0)
+    (at 250 516.42 270)
     (fields_autoplaced)
     (effects
       (font
@@ -23139,7 +23018,7 @@
     )
     (uuid f5cc7225-35f8-537e-842d-9cf421b98083)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 260.16 511.34 0)
+      (at 250 516.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23149,15 +23028,15 @@
     )
   )
   (symbol
-    (lib_id "Device:D_Schottky")
-    (at 323.97 511.34 0)
+    (lib_id "Device:R")
+    (at 310 512.61 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 27f44363-e159-5f87-aba5-39bb959a437e)
-    (property "Reference" "D1"
-      (at 323.97 509.34 0)
+    (uuid 58513580-f9fd-5545-b0d7-e0452c724b26)
+    (property "Reference" "R20"
+      (at 310 510.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23165,8 +23044,8 @@
         (justify left)
       )
     )
-    (property "Value" "B5819W"
-      (at 323.97 513.34 0)
+    (property "Value" "2.2k"
+      (at 310 514.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23174,8 +23053,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 323.97 511.34 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+      (at 310 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23184,7 +23063,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 323.97 511.34 0)
+      (at 310 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23201,25 +23080,25 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D1")
+          (reference "R20")
           (unit 1)
         )
       )
     )
   )
-  (global_label "nRST"
+  (global_label "EXT_P"
     (shape bidirectional)
-    (at 320.16 511.34 180)
+    (at 310 508.8 90)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
     (uuid 25b0b973-6f14-55d9-bde8-d77505a36101)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 320.16 511.34 0)
+      (at 310 508.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23228,9 +23107,9 @@
       )
     )
   )
-  (global_label "RUN_A"
+  (global_label "EXT"
     (shape bidirectional)
-    (at 327.78 511.34 0)
+    (at 310 516.42 270)
     (fields_autoplaced)
     (effects
       (font
@@ -23240,7 +23119,7 @@
     )
     (uuid 8cba44fc-47ca-5d06-bc26-51e0ccf6b339)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 327.78 511.34 0)
+      (at 310 516.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23250,15 +23129,15 @@
     )
   )
   (symbol
-    (lib_id "Device:D_Schottky")
-    (at 391.59 511.34 0)
+    (lib_id "Device:C")
+    (at 370 512.61 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 684d6118-4ace-5de0-8cb7-70118e6ef457)
-    (property "Reference" "D2"
-      (at 391.59 509.34 0)
+    (uuid 08a1f5b8-f737-505c-844a-f8d3c320b21b)
+    (property "Reference" "C8"
+      (at 370 510.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23266,8 +23145,8 @@
         (justify left)
       )
     )
-    (property "Value" "B5819W"
-      (at 391.59 513.34 0)
+    (property "Value" "10u"
+      (at 370 514.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23275,8 +23154,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 391.59 511.34 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+      (at 370 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23285,7 +23164,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 391.59 511.34 0)
+      (at 370 512.61 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23302,25 +23181,25 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D2")
+          (reference "C8")
           (unit 1)
         )
       )
     )
   )
-  (global_label "nRST"
+  (global_label "+5V"
     (shape bidirectional)
-    (at 387.78 511.34 180)
+    (at 370 508.8 90)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify right)
+      (justify left)
     )
     (uuid 22f29cc6-a666-5b76-a1e4-540250df876d)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 387.78 511.34 0)
+      (at 370 508.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23329,9 +23208,9 @@
       )
     )
   )
-  (global_label "RUN_B"
+  (global_label "GND"
     (shape bidirectional)
-    (at 395.4 511.34 0)
+    (at 370 516.42 270)
     (fields_autoplaced)
     (effects
       (font
@@ -23341,7 +23220,7 @@
     )
     (uuid a8785fff-4a38-5445-a4f8-1bdd979aefc4)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 395.4 511.34 0)
+      (at 370 516.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23351,15 +23230,15 @@
     )
   )
   (symbol
-    (lib_id "Device:D_Schottky")
-    (at 459.21 511.34 0)
+    (lib_id "famicart:WirePads_1x3")
+    (at 430 511.34 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid bc1236fd-9ccf-5a60-a8d1-df146e58cae7)
-    (property "Reference" "D3"
-      (at 459.21 509.34 0)
+    (uuid c3a53f66-3eaa-5e69-a0f1-cbc2c7a1dbc2)
+    (property "Reference" "J2"
+      (at 430 509.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23367,8 +23246,8 @@
         (justify left)
       )
     )
-    (property "Value" "B5819W"
-      (at 459.21 513.34 0)
+    (property "Value" "RST/GND/LINK pads"
+      (at 430 513.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23376,8 +23255,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 459.21 511.34 0)
+    (property "Footprint" "famicart:WirePads_1x3"
+      (at 430 511.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23386,7 +23265,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 459.21 511.34 0)
+      (at 430 511.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23400,10 +23279,13 @@
     (pin "2"
       (uuid 4d1f37b0-ab1f-5593-bf4d-d727fb7ad23b)
     )
+    (pin "3"
+      (uuid b27a646b-deb7-56f4-a362-6b31d63b0eb7)
+    )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D3")
+          (reference "J2")
           (unit 1)
         )
       )
@@ -23411,38 +23293,17 @@
   )
   (global_label "nRST"
     (shape bidirectional)
-    (at 455.4 511.34 180)
+    (at 424.92 508.8 180)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
       (justify right)
-    )
-    (uuid b27a646b-deb7-56f4-a362-6b31d63b0eb7)
-    (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 455.4 511.34 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-  )
-  (global_label "RUN_D"
-    (shape bidirectional)
-    (at 463.02 511.34 0)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify left)
     )
     (uuid 2498847e-360b-5506-b983-d865eea802ba)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 463.02 511.34 0)
+      (at 424.92 508.8 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23451,68 +23312,9 @@
       )
     )
   )
-  (symbol
-    (lib_id "Device:D_Schottky")
-    (at 73.81 542.96 0)
-    (unit 1)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (uuid c79fcf26-2e7c-5cfd-9711-f66cf12288ba)
-    (property "Reference" "D4"
-      (at 73.81 540.96 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Value" "B5819W"
-      (at 73.81 544.96 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        (justify left)
-      )
-    )
-    (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 73.81 542.96 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Datasheet" "~"
-      (at 73.81 542.96 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (pin "1"
-      (uuid 039da1dd-5ba5-5659-b117-9917738120c2)
-    )
-    (pin "2"
-      (uuid 68355c2c-c518-58fa-ac48-96cb00b91ba6)
-    )
-    (instances
-      (project "famicart"
-        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D4")
-          (unit 1)
-        )
-      )
-    )
-  )
-  (global_label "nRST"
+  (global_label "GND"
     (shape bidirectional)
-    (at 70 542.96 180)
+    (at 424.92 511.34 180)
     (fields_autoplaced)
     (effects
       (font
@@ -23520,9 +23322,9 @@
       )
       (justify right)
     )
-    (uuid 2192b59a-06f1-5eb8-a049-40b1da3b3ea7)
+    (uuid 039da1dd-5ba5-5659-b117-9917738120c2)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 70 542.96 0)
+      (at 424.92 511.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23531,19 +23333,19 @@
       )
     )
   )
-  (global_label "RUN_E"
+  (global_label "LINK_T"
     (shape bidirectional)
-    (at 77.62 542.96 0)
+    (at 424.92 513.88 180)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify left)
+      (justify right)
     )
-    (uuid b43898cd-390e-5e11-96f5-15c347fbe300)
+    (uuid 68355c2c-c518-58fa-ac48-96cb00b91ba6)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 77.62 542.96 0)
+      (at 424.92 513.88 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23553,15 +23355,15 @@
     )
   )
   (symbol
-    (lib_id "Device:D_Schottky")
-    (at 141.43 542.96 0)
+    (lib_id "famicart:WirePads_1x3")
+    (at 490 511.34 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 5dbd216e-9e42-5ea8-b319-da0039533789)
-    (property "Reference" "D10"
-      (at 141.43 540.96 0)
+    (uuid 158ec407-165d-5b1a-ad18-b76df35236b6)
+    (property "Reference" "J4"
+      (at 490 509.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23569,8 +23371,8 @@
         (justify left)
       )
     )
-    (property "Value" "B5819W"
-      (at 141.43 544.96 0)
+    (property "Value" "EXT/GND/3V3 pads"
+      (at 490 513.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23578,8 +23380,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 141.43 542.96 0)
+    (property "Footprint" "famicart:WirePads_1x3"
+      (at 490 511.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23588,7 +23390,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 141.43 542.96 0)
+      (at 490 511.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23597,23 +23399,47 @@
       )
     )
     (pin "1"
-      (uuid a6d29e05-c974-5ff8-8408-f90d234f5fdf)
+      (uuid 2192b59a-06f1-5eb8-a049-40b1da3b3ea7)
     )
     (pin "2"
-      (uuid 9efe4517-1109-5063-b081-441af6d937be)
+      (uuid b43898cd-390e-5e11-96f5-15c347fbe300)
+    )
+    (pin "3"
+      (uuid a6d29e05-c974-5ff8-8408-f90d234f5fdf)
     )
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D10")
+          (reference "J4")
           (unit 1)
         )
       )
     )
   )
-  (global_label "VSYS_A"
+  (global_label "EXT_P"
     (shape bidirectional)
-    (at 137.62 542.96 180)
+    (at 484.92 508.8 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify right)
+    )
+    (uuid 9efe4517-1109-5063-b081-441af6d937be)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 484.92 508.8 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (global_label "GND"
+    (shape bidirectional)
+    (at 484.92 511.34 180)
     (fields_autoplaced)
     (effects
       (font
@@ -23623,7 +23449,7 @@
     )
     (uuid 7dbfb601-d407-5280-96f9-01ea1003dea0)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 137.62 542.96 0)
+      (at 484.92 511.34 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23632,19 +23458,19 @@
       )
     )
   )
-  (global_label "+5V"
+  (global_label "3V3_F"
     (shape bidirectional)
-    (at 145.24 542.96 0)
+    (at 484.92 513.88 180)
     (fields_autoplaced)
     (effects
       (font
         (size 1.27 1.27)
       )
-      (justify left)
+      (justify right)
     )
     (uuid 5f2fe08b-6855-5e23-936b-c214eed6d9e6)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 145.24 542.96 0)
+      (at 484.92 513.88 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23654,15 +23480,15 @@
     )
   )
   (symbol
-    (lib_id "Device:D_Schottky")
-    (at 209.05 542.96 0)
+    (lib_id "Switch:SW_Push")
+    (at 75.08 540.42 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 968c0804-c985-562e-ae67-1ecc6763564b)
-    (property "Reference" "D11"
-      (at 209.05 540.96 0)
+    (uuid 6963bebe-d432-52eb-b90c-0c6421f37e60)
+    (property "Reference" "SW1"
+      (at 75.08 538.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23670,8 +23496,8 @@
         (justify left)
       )
     )
-    (property "Value" "B5819W"
-      (at 209.05 544.96 0)
+    (property "Value" "RESET"
+      (at 75.08 542.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23679,8 +23505,8 @@
         (justify left)
       )
     )
-    (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 209.05 542.96 0)
+    (property "Footprint" "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A"
+      (at 75.08 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23689,7 +23515,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 209.05 542.96 0)
+      (at 75.08 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23706,15 +23532,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D11")
+          (reference "SW1")
           (unit 1)
         )
       )
     )
   )
-  (global_label "VSYS_B"
+  (global_label "nRST"
     (shape bidirectional)
-    (at 205.24 542.96 180)
+    (at 70 540.42 180)
     (fields_autoplaced)
     (effects
       (font
@@ -23724,7 +23550,7 @@
     )
     (uuid 430ef409-fe53-5ff5-880c-f68a4f252d46)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 205.24 542.96 0)
+      (at 70 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23733,9 +23559,9 @@
       )
     )
   )
-  (global_label "+5V"
+  (global_label "GND"
     (shape bidirectional)
-    (at 212.86 542.96 0)
+    (at 80.16 540.42 0)
     (fields_autoplaced)
     (effects
       (font
@@ -23745,7 +23571,7 @@
     )
     (uuid e8ebce15-ae4b-5f55-9ddf-95293553c536)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 212.86 542.96 0)
+      (at 80.16 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23756,14 +23582,14 @@
   )
   (symbol
     (lib_id "Device:D_Schottky")
-    (at 276.67 542.96 0)
+    (at 143.97 540.42 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 13d90f5d-0675-5058-834a-948dc30c7903)
-    (property "Reference" "D12"
-      (at 276.67 540.96 0)
+    (uuid 5dbd216e-9e42-5ea8-b319-da0039533789)
+    (property "Reference" "D10"
+      (at 143.97 538.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23772,7 +23598,7 @@
       )
     )
     (property "Value" "B5819W"
-      (at 276.67 544.96 0)
+      (at 143.97 542.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23781,7 +23607,7 @@
       )
     )
     (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 276.67 542.96 0)
+      (at 143.97 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23790,7 +23616,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 276.67 542.96 0)
+      (at 143.97 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23807,15 +23633,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D12")
+          (reference "D10")
           (unit 1)
         )
       )
     )
   )
-  (global_label "V5_C"
+  (global_label "VSYS_A"
     (shape bidirectional)
-    (at 272.86 542.96 180)
+    (at 140.16 540.42 180)
     (fields_autoplaced)
     (effects
       (font
@@ -23825,7 +23651,7 @@
     )
     (uuid 44855819-3678-5d9e-ba61-010dc2e42042)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 272.86 542.96 0)
+      (at 140.16 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23836,7 +23662,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 280.48 542.96 0)
+    (at 147.78 540.42 0)
     (fields_autoplaced)
     (effects
       (font
@@ -23846,7 +23672,7 @@
     )
     (uuid 7b4bf829-6d15-56c3-ab1f-4b33af5025f5)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 280.48 542.96 0)
+      (at 147.78 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23857,14 +23683,14 @@
   )
   (symbol
     (lib_id "Device:D_Schottky")
-    (at 344.29 542.96 0)
+    (at 211.59 540.42 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 35bc0278-e8d5-56b5-9817-82726a4ac05a)
-    (property "Reference" "D13"
-      (at 344.29 540.96 0)
+    (uuid 968c0804-c985-562e-ae67-1ecc6763564b)
+    (property "Reference" "D11"
+      (at 211.59 538.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23873,7 +23699,7 @@
       )
     )
     (property "Value" "B5819W"
-      (at 344.29 544.96 0)
+      (at 211.59 542.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23882,7 +23708,7 @@
       )
     )
     (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 344.29 542.96 0)
+      (at 211.59 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23891,7 +23717,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 344.29 542.96 0)
+      (at 211.59 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23908,15 +23734,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D13")
+          (reference "D11")
           (unit 1)
         )
       )
     )
   )
-  (global_label "VSYS_D"
+  (global_label "VSYS_B"
     (shape bidirectional)
-    (at 340.48 542.96 180)
+    (at 207.78 540.42 180)
     (fields_autoplaced)
     (effects
       (font
@@ -23926,7 +23752,7 @@
     )
     (uuid fd90b02a-08f0-56e5-9098-4b2ea2aad9e3)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 340.48 542.96 0)
+      (at 207.78 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23937,7 +23763,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 348.1 542.96 0)
+    (at 215.4 540.42 0)
     (fields_autoplaced)
     (effects
       (font
@@ -23947,7 +23773,7 @@
     )
     (uuid 15d9316d-1737-5672-aa1a-a0f80a67796a)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 348.1 542.96 0)
+      (at 215.4 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23958,14 +23784,14 @@
   )
   (symbol
     (lib_id "Device:D_Schottky")
-    (at 411.91 542.96 0)
+    (at 279.21 540.42 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 36aa4c77-3b8a-5ef9-9b80-3e1f9db9c0dc)
-    (property "Reference" "D14"
-      (at 411.91 540.96 0)
+    (uuid 13d90f5d-0675-5058-834a-948dc30c7903)
+    (property "Reference" "D12"
+      (at 279.21 538.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23974,7 +23800,7 @@
       )
     )
     (property "Value" "B5819W"
-      (at 411.91 544.96 0)
+      (at 279.21 542.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23983,7 +23809,7 @@
       )
     )
     (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 411.91 542.96 0)
+      (at 279.21 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -23992,7 +23818,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 411.91 542.96 0)
+      (at 279.21 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24009,15 +23835,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D14")
+          (reference "D12")
           (unit 1)
         )
       )
     )
   )
-  (global_label "VSYS_E"
+  (global_label "V5_C"
     (shape bidirectional)
-    (at 408.1 542.96 180)
+    (at 275.4 540.42 180)
     (fields_autoplaced)
     (effects
       (font
@@ -24027,7 +23853,7 @@
     )
     (uuid 64e6dcbe-ce65-5b49-bd02-fe04a363235f)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 408.1 542.96 0)
+      (at 275.4 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24038,7 +23864,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 415.72 542.96 0)
+    (at 283.02 540.42 0)
     (fields_autoplaced)
     (effects
       (font
@@ -24048,7 +23874,7 @@
     )
     (uuid 5999fa61-9c4f-57c4-b459-d5f50d52b2d9)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 415.72 542.96 0)
+      (at 283.02 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24059,14 +23885,14 @@
   )
   (symbol
     (lib_id "Device:D_Schottky")
-    (at 479.53 542.96 0)
+    (at 346.83 540.42 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid 2ea91e5f-d8cd-552c-bd62-604b9f5f7882)
-    (property "Reference" "D15"
-      (at 479.53 540.96 0)
+    (uuid 35bc0278-e8d5-56b5-9817-82726a4ac05a)
+    (property "Reference" "D13"
+      (at 346.83 538.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24075,7 +23901,7 @@
       )
     )
     (property "Value" "B5819W"
-      (at 479.53 544.96 0)
+      (at 346.83 542.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24084,7 +23910,7 @@
       )
     )
     (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 479.53 542.96 0)
+      (at 346.83 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24093,7 +23919,7 @@
       )
     )
     (property "Datasheet" "~"
-      (at 479.53 542.96 0)
+      (at 346.83 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24110,15 +23936,15 @@
     (instances
       (project "famicart"
         (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
-          (reference "D15")
+          (reference "D13")
           (unit 1)
         )
       )
     )
   )
-  (global_label "V5_F"
+  (global_label "VSYS_D"
     (shape bidirectional)
-    (at 475.72 542.96 180)
+    (at 343.02 540.42 180)
     (fields_autoplaced)
     (effects
       (font
@@ -24128,7 +23954,7 @@
     )
     (uuid 8b890691-08c3-537c-b2e6-9e787c7f4db9)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 475.72 542.96 0)
+      (at 343.02 540.42 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -24139,7 +23965,7 @@
   )
   (global_label "+5V"
     (shape bidirectional)
-    (at 483.34 542.96 0)
+    (at 350.64 540.42 0)
     (fields_autoplaced)
     (effects
       (font
@@ -24149,7 +23975,209 @@
     )
     (uuid b38654b7-aee8-5c69-8f07-03cf0dd7c267)
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
-      (at 483.34 542.96 0)
+      (at 350.64 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (symbol
+    (lib_id "Device:D_Schottky")
+    (at 414.45 540.42 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid 36aa4c77-3b8a-5ef9-9b80-3e1f9db9c0dc)
+    (property "Reference" "D14"
+      (at 414.45 538.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Value" "B5819W"
+      (at 414.45 542.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Footprint" "Diode_SMD:D_SOD-123"
+      (at 414.45 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "Datasheet" "~"
+      (at 414.45 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (pin "1"
+      (uuid 822c195b-9dfd-573b-b427-e8ad06b7280c)
+    )
+    (pin "2"
+      (uuid 17728f22-a319-52fd-b7c5-71f57d54ef97)
+    )
+    (instances
+      (project "famicart"
+        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
+          (reference "D14")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (global_label "VSYS_E"
+    (shape bidirectional)
+    (at 410.64 540.42 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify right)
+    )
+    (uuid ab074455-524c-56a5-94d7-eab392220b64)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 410.64 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (global_label "+5V"
+    (shape bidirectional)
+    (at 418.26 540.42 0)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
+    (uuid ca083f8e-4896-5a4b-acc5-079330cf671d)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 418.26 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (symbol
+    (lib_id "Device:D_Schottky")
+    (at 482.07 540.42 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid 2ea91e5f-d8cd-552c-bd62-604b9f5f7882)
+    (property "Reference" "D15"
+      (at 482.07 538.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Value" "B5819W"
+      (at 482.07 542.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left)
+      )
+    )
+    (property "Footprint" "Diode_SMD:D_SOD-123"
+      (at 482.07 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "Datasheet" "~"
+      (at 482.07 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (pin "1"
+      (uuid a4eb4bcc-5e56-5398-9bd4-888cec5e87ce)
+    )
+    (pin "2"
+      (uuid c64997bb-fc95-5952-b6de-5c9350d627c4)
+    )
+    (instances
+      (project "famicart"
+        (path "/8e7c1580-4b4b-59e1-9722-29cf444c0001"
+          (reference "D15")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (global_label "V5_F"
+    (shape bidirectional)
+    (at 478.26 540.42 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify right)
+    )
+    (uuid 30717074-6a93-5d45-96ca-565adbfff15c)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 478.26 540.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+  )
+  (global_label "+5V"
+    (shape bidirectional)
+    (at 485.88 540.42 0)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
+    (uuid 75a63d0a-c1f3-521a-95b3-831834d0ff02)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 485.88 540.42 0)
       (effects
         (font
           (size 1.27 1.27)

@@ -1,8 +1,8 @@
-Part,LCSC,JLCPCB library footprint,KiCad footprint,Rotation offsets that fit (deg),Worst pad distance (mm)
+Part,LCSC,JLCPCB library footprint,KiCad footprint,Rotation offsets that fit (deg),Worst pad distance on the board (mm)
 10n,C57112,C0603,C_0603_1608Metric,0 180,0.07
 10u,C15850,C0805,C_0805_2012Metric,0 180,0.05
-B5819W,C8598,SOD-123_L2.7-W1.6-LS3.7-RD-1,D_SOD-123,0,0.05
 BAV99,C2500,SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR,SOT-23,180,0.30
+B5819W,C8598,SOD-123_L2.7-W1.6-LS3.7-RD-1,D_SOD-123,0,0.05
 2N7002,C8545,SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR,SOT-23,180,0.06
 2.2k,C4190,R0603,R_0603_1608Metric,0 180,0.07
 100k,C25803,R0603,R_0603_1608Metric,0 180,0.07

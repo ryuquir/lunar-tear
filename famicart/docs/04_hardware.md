@@ -48,7 +48,7 @@ rev B の追加点: **USB-C 端子**（基板上端、本体に挿したまま R
 | 板厚 | **1.2 mm**（nesdev の表が HVC-TGROM-01 の板厚として示す値。1.6 mm で使えるかは未確認） | nesdev 表 |
 | 端子ピッチ | 2.54 mm × 30、表（1–30）／裏（31–60、1 の真裏が 31） | |
 | 端子パッド | 信号は 1.6 × 5.7 mm。1 番（GND）・30 番（+5V）・31 番（未接続）は幅 2.6 × 長さ 6.7 mm。16 番（GND）は幅は信号と同じ 1.6 mm で長さだけ 6.7 mm。60 番（PPU D4）は普通の信号パッド。タブ基部から 3 mm 下にパッド上端 | HVC-TGROM-01 の KiCad フットプリント（Gumball2415） |
-| 表面処理 | 端子はハードゴールド推奨（ENIG でも可、挿抜回数が少なければ） | |
+| 表面処理 | 端子は金。抜き差しの多い用途には硬質金めっきが向くが、JLCPCB は硬質金を扱っておらず ENIG になる（[12](12_rev_g_plan.md)。挿したまま使う前提） | |
 
 KiCad 外形は nesdev がソースとして示す Gumball2415 の NES-Famicom-Cartridge-PCBs（`common_footprints.pretty/HVC-TGROM-01.kicad_mod`）。ジェネレータでは `tools/pcb/shells.py` の `hvc_small()` が上の外形・スリット・部品禁止域を持ち、余裕として切り欠き・スリットを各 0.2 mm 大きく、禁止域を 0.2 mm 広くとっている。タブ付け根の帯は `shells.TAB_BAND`（0.2 mm）として持ち、端子以外の部品・モジュール・パッドは肩より 0.2 mm 以上上に置く（`check_place.py` と `shell_fit.py` が検査する）。
 

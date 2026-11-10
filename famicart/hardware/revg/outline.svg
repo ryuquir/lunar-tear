@@ -11,7 +11,7 @@
 <line x1="388.0" y1="940.0" x2="1172.0" y2="940.0" stroke="#6b7280" stroke-width="1.0" stroke-dasharray="4 5"/>
 <line x1="780.0" y1="160.0" x2="780.0" y2="1072.0" stroke="#6b7280" stroke-width="1.0" stroke-dasharray="14 5 3 5"/>
 <text x="788.0" y="176.0" font-size="16" fill="#6b7280" text-anchor="start" font-weight="normal">中心線</text>
-<rect x="393.7" y="970.0" width="26.0" height="67.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="393.7" y="970.0" width="26.0" height="65.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="429.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="454.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="479.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
@@ -26,7 +26,7 @@
 <rect x="708.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="733.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="759.3" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
-<rect x="784.7" y="970.0" width="16.0" height="67.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="784.7" y="970.0" width="16.0" height="65.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="810.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="835.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="860.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
@@ -40,7 +40,7 @@
 <rect x="1064.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="1089.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <rect x="1114.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
-<rect x="1140.3" y="970.0" width="26.0" height="67.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1140.3" y="970.0" width="26.0" height="65.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
 <text x="420.0" y="962.0" font-size="17" fill="#1c2530" text-anchor="middle" font-weight="normal">1</text>
 <text x="1140.0" y="962.0" font-size="17" fill="#1c2530" text-anchor="middle" font-weight="normal">30</text>
 <rect x="520.0" y="943.0" width="520" height="24" fill="#e3f0e6"/>

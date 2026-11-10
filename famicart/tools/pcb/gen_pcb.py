@@ -111,6 +111,8 @@ def add_rule_area(board, name, pts, layers, tracks=True, vias=True, pour=True, f
 FINGER_KEEP = 4.0       # below (tab base + this) the tab carries nothing but the fingers: no tracks, no vias, no mask
 FINGER_TOP = 3.0        # the finger pads start this far below the tab base (Famicom_CardEdge_60)
 FINGER_HOLE = 1.0       # JLCPCB: no plated holes within 1.0 mm of the gold fingers
+FINGER_SETBACK = 1.2    # finger copper ends this far before the tab edge. JLCPCB's bevel drawing: copper cutback 1.15 mm
+                        # for boards up to 1.6 mm (30 degree bevel); the four long fingers of the footprint end at 1.0 mm
 
 def add_finger_mask(board):
     """JLCPCB gold-finger rule: 'The gold finger area must have the solder mask fully opened' (mask left between the
@@ -195,6 +197,12 @@ def main():
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
                     elif 'CardEdge' not in fpname:
                         pad.SetZoneConnection(pcbnew.ZONE_CONNECTION_THERMAL); pad.SetThermalSpokeWidth(FromMM(0.4)); pad.SetThermalGap(FromMM(0.3))
+        if JLC and 'CardEdge' in fpname:    # shorten the fingers that reach into JLCPCB's bevel cutback (footprint at 0, 0)
+            for pad in fp.Pads():
+                over = ToMM(pad.GetPosition().y) + ToMM(pad.GetSize().y) / 2 - (TAB_H - FINGER_SETBACK)
+                if over > 1e-6:
+                    pad.SetSize(VECTOR2I(pad.GetSize().x, pad.GetSize().y - FromMM(over)))
+                    np_ = VECTOR2I(pad.GetPosition().x, pad.GetPosition().y - FromMM(over / 2)); pad.SetPosition(np_); pad.SetPos0(np_)
         board.Add(fp)
         fp.SetPosition(mm(x, y)); fp.SetOrientationDegrees(rot)
         if side == 'B': fp.Flip(fp.GetPosition(), False)

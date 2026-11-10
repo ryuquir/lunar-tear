@@ -5,14 +5,20 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
 (2026-11-10): 2-layer FR-4, 1 oz.
   tracks            width >= 0.10 mm (the design rule itself is 0.15 mm; KiCad DRC checks the clearances)
   vias              hole >= 0.30 mm (smaller holes cost extra), diameter >= hole + 0.10 mm, hole to hole >= 0.20 mm
-  copper to edge    >= 0.20 mm to a routed edge, >= 0.40 mm to the left / right edges (edge rails, V-cut)
+  copper to edge    >= 0.40 mm to the left / right edges (edge rails; a V-cut edge needs 0.4 mm) is measured here;
+                    >= 0.20 mm to every other routed edge and >= 0.2 mm between a via hole and a foreign track are
+                    design rules of the board (0.3 mm and 0.2 mm) that KiCad's DRC checks: this tool fails when
+                    the DRC report next to the board lists an error or an unconnected pad
   slots             non-plated slot / notch width >= 1.0 mm, inner corners drawn with a radius
   silkscreen        line >= 0.15 mm, text height >= 1.0 mm
-  gold fingers      finger copper ends >= 0.6 mm before the tab edge, board >= 50 x 50 mm, solder mask fully opened
+  gold fingers      finger copper ends >= 1.15 mm before the tab edge (JLCPCB's copper cutback for a 30 degree bevel on
+                    boards up to 1.6 mm), board >= 50 x 50 mm, solder mask fully opened
                     over the finger area, no silkscreen and no plated hole within 1.0 mm of a finger
   Standard PCBA     board >= 70 x 70 mm, all assembled parts on the top side, every part number a Basic part
   paste             only on pads of parts that JLCPCB places
-  gerbers.zip       fabrication layers and drill files only
+  gerbers.zip       fabrication layers and drill files only; the drill file has as many holes as the board has vias
+  routed            a board without tracks, with open connections or with DRC errors is refused
+  edge rails        (designs with RAILS) gerbers_rails.zip exists and the railed board passed its DRC
 Exit status 1 when anything fails.   FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 check_jlc.py"""
 import os, sys, math, csv, zipfile, importlib
 import pcbnew
@@ -25,7 +31,7 @@ SH = getattr(D, 'SHELL', None)
 MIN_TRACK, MIN_DRILL, MIN_RING2, HOLE_HOLE = 0.10, 0.30, 0.10, 0.20
 EDGE_ROUTED, EDGE_VCUT, MIN_SLOT = 0.20, 0.40, 1.0
 SILK_LINE, SILK_TEXT = 0.15, 1.0
-FINGER_TO_EDGE, FINGER_HOLE = 0.6, 1.0
+FINGER_TO_EDGE, FINGER_HOLE = 1.15, 1.0
 TOL = 0.002
 
 def main():
@@ -45,7 +51,18 @@ def main():
     if tracks:
         wmin = min(ToMM(t.GetWidth()) for t in tracks); info.append('%d track segments, narrowest %.3f mm' % (len(tracks), wmin))
         need(wmin >= MIN_TRACK - TOL, 'track width %.3f mm < %.2f' % (wmin, MIN_TRACK))
-    else: info.append('no tracks (board not routed)')
+    else: bad.append('the board has no tracks: it is not routed')
+    b.BuildConnectivity(); nopen = b.GetConnectivity().GetUnconnectedCount(False)
+    need(nopen == 0, '%d connections of the board are open' % nopen)
+    rep = os.path.join(HW, 'drc_report.txt')
+    if os.path.exists(rep):
+        txt = open(rep).read(); nerr = txt.count('Severity: error')
+        need(nerr == 0, 'drc_report.txt lists %d errors' % nerr)
+        need(os.path.getmtime(rep) >= os.path.getmtime(os.path.join(HW, 'famicart.kicad_pcb')) - 2, 'drc_report.txt is older than the board file (run route_pcb.py export)')
+        info.append('KiCad DRC report: %d errors, %d warnings' % (nerr, txt.count('Severity: warning')))
+    else: bad.append('no drc_report.txt next to the board (run route_pcb.py export)')
+    marks = [d.GetText() for d in b.GetDrawings() if d.GetClass() == 'PCB_TEXT' and 'JLCJLC' in d.GetText()]
+    need(not marks, 'the silkscreen still carries the order-number marker %s (JLCPCB would print it literally)' % marks)
     if vias:
         dmin = min(ToMM(v.GetDrillValue()) for v in vias); rmin = min(ToMM(v.GetWidth(pcbnew.F_Cu) if hasattr(v, 'GetFrontWidth') else v.GetWidth()) - ToMM(v.GetDrillValue()) for v in vias)
         info.append('%d vias, smallest hole %.2f mm, smallest (diameter - hole) %.2f mm' % (len(vias), dmin, rmin))
@@ -166,6 +183,10 @@ def main():
         for k in ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl'):
             need(any(n.endswith(k) for n in names), 'gerbers.zip lacks %s' % k)
         info.append('gerbers.zip: %d files' % len(names))
+        drl = [n for n in names if n.endswith('PTH.drl') and 'NPTH' not in n]
+        hits = sum(1 for n in drl for line in zipfile.ZipFile(z).read(n).decode('ascii', 'replace').splitlines() if line.startswith('X'))
+        need(hits == len(vias), 'the plated drill file in gerbers.zip has %d holes, the board has %d vias' % (hits, len(vias)))
+        need(os.path.getmtime(z) >= os.path.getmtime(os.path.join(HW, 'famicart.kicad_pcb')) - 2, 'gerbers.zip is older than the board file')
         cpl = list(csv.DictReader(open(os.path.join(HW, 'jlcpcb', 'cpl_jlc.csv'))))
         need({r['Designator'] for r in cpl} == placed, 'CPL designators differ from the parts JLCPCB places: %s' % sorted({r['Designator'] for r in cpl} ^ placed)[:8])
         need(all(r['Layer'] == 'Top' for r in cpl), 'CPL has bottom-side placements')
@@ -175,6 +196,23 @@ def main():
             need(all(r['Library'] == 'Basic' and r['Result'] == 'OK' for r in rows), 'parts_check.csv: not every part is a Basic part in stock')
             info.append('parts_check.csv: %d part numbers, all Basic' % len(rows))
     else: info.append('no jlcpcb/gerbers.zip yet (run gen_jlc.py)')
+    # ---- board with edge rails (make_rails.py)
+    RA = getattr(D, 'RAILS', None)
+    if RA and os.path.exists(z):
+        zr = os.path.join(HW, 'jlcpcb', 'gerbers_rails.zip'); rr = os.path.join(HW, 'drc_report_rails.txt'); rb = os.path.join(HW, 'famicart_rails.kicad_pcb')
+        if not (os.path.exists(zr) and os.path.exists(rr) and os.path.exists(rb)): bad.append('no board with edge rails yet (run make_rails.py)')
+        else:
+            need(os.path.getmtime(rb) >= os.path.getmtime(os.path.join(HW, 'famicart.kicad_pcb')) - 2, 'famicart_rails.kicad_pcb is older than the board file (run make_rails.py)')
+            nerr = open(rr).read().count('Severity: error'); need(nerr == 0, 'drc_report_rails.txt lists %d errors' % nerr)
+            br = pcbnew.LoadBoard(rb); rbb = br.GetBoardEdgesBoundingBox(); pw, ph = ToMM(rbb.GetWidth()) - 0.1, ToMM(rbb.GetHeight()) - 0.1
+            wantw = bw + 2 * (RA['gap'] + RA['width'])
+            need(abs(pw - wantw) < 0.01 and abs(ph - bh) < 0.01, 'panel with rails is %.2f x %.2f mm, expected %.2f x %.2f' % (pw, ph, wantw, bh))
+            nfid = sum(1 for f in br.GetFootprints() if f.GetReference().startswith('FID')); nmb = sum(1 for f in br.GetFootprints() if f.GetReference().startswith('MB'))
+            need(nfid == len(RA['fiducials']), '%d fiducials on the rails, %d expected' % (nfid, len(RA['fiducials'])))
+            need(nmb == RA['holes'] * sum(len(v) for v in RA['tabs'].values()), '%d break-off holes, expected %d' % (nmb, RA['holes'] * sum(len(v) for v in RA['tabs'].values())))
+            same = all((t.GetStart().x, t.GetStart().y, t.GetEnd().x, t.GetEnd().y) == (u.GetStart().x, u.GetStart().y, u.GetEnd().x, u.GetEnd().y) for t, u in zip(b.GetTracks(), br.GetTracks())) and len(b.GetTracks()) == len(br.GetTracks())
+            need(same, 'the tracks of the railed board differ from the board')
+            info.append('with edge rails: panel %.1f x %.1f mm, %d fiducials, %d break-off holes, DRC errors %d, gerbers_rails.zip present' % (pw, ph, nfid, nmb, nerr))
 
     print('JLCPCB check:', 'OK' if not bad else '%d problems' % len(bad))
     for x in info: print('   ', x)

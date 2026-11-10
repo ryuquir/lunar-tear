@@ -41,8 +41,8 @@ Changes against rev F (design_revf.py), from the 2026-11 design review:
   * J1 pin 31 is tied to +5V (on some consoles it is the "cartridge present" input of the RF modulator).
   * The eight 100 k "park" pulls on D0-D7 and the 100 k from /A13 to CIRAM /CE are gone (they could not do their job
     against the pad pull-downs of an RP2350 in reset); firmware switches the pad pulls off.
-  * RUN of each Pico reaches the reset switch through its own Schottky, so an unpowered module cannot hold the
-    others in reset.
+  * RUN of each Pico reaches the reset switch through its own diode (one half of a BAV99), so an unpowered module
+    cannot hold the others in reset.
   * Flash and card chip selects have 2.2k pull-ups (a 100k cannot hold them high against the pad pull-down of a
     XIAO in reset). U6 reads the console's +5V through 100k / 100k on ADC2 (console on or off, power failing).
   * J4: three wire pads with a spare U6 pin (ADC0, behind 2.2k), 3.3 V and GND, for a hand-wired input (microphone,
@@ -94,8 +94,13 @@ def schottky(xp, h, a, k):
 def clamp(xp, h, net):
     """BAV99 (two diodes in series: pin 1 anode, pin 3 common, pin 2 cathode) as a clamp of `net` to GND and +5V.
     The 2N7002 of JLCPCB's Basic list has no gate protection, and these nets end on card-edge fingers that people
-    touch: without the clamp a few hundred volts of static would be enough to break a gate. 1.5 pF per line."""
+    touch: without the clamp a few hundred volts of static would be enough to break a gate. Up to 3 pF per line
+    (two diodes of at most 1.5 pF each)."""
     d = nxt('D'); P(d, 'Diode', 'BAV99', 'BAV99', SOT23, xp, h, 0); c(d, 1, 'GND'); c(d, 2, '+5V'); c(d, 3, net); return d
+def iso(xp, h, a, k):
+    """One diode of a BAV99 (pin 1 anode, pin 3 cathode; pin 2 stays open) where the reverse leakage of a Schottky
+    diode would matter: a B5819W leaks about 5 uA at 25 C and ten times that at 75 C, a BAV99 a few nA."""
+    d = nxt('D'); P(d, 'Diode', 'BAV99', 'BAV99', SOT23, xp, h, 0); c(d, 1, a); c(d, 3, k); c(d, 2, None); return d
 
 # ------------------------------------------------------------------ card edge
 P('J1', 'famicart', 'Famicom_CardEdge_60', 'Famicom 60-pin edge', 'famicart:Famicom_CardEdge_60', 0.0, 0.0)
@@ -181,7 +186,12 @@ nfet(-22.2, HB, 'nROMSEL', 'RSEL_D'); res('2.2k', -19.2, HB, 'nROMSEL', '+5V')  
 res('100k', -16.8, HB, 'CPU_RW', '+5V')                                                # R/W reads "read" while the CPU pins float (console reset)
 # RUN: each Pico through its own Schottky to the reset switch
 HC = 16.3
-for x, run in zip((-34.2, -26.2, -18.3, -15.5), ('RUN_A', 'RUN_B', 'RUN_D', 'RUN_E')): schottky(x, HC, run, 'nRST')
+# (BAV99, not Schottky: with one Pico 2 powered alone over USB, the diodes of the unpowered ones are reverse biased and
+# their leakage flows through the 50k RUN pull-up of the powered one; three leaking Schottkys can pull it below 2.0 V.
+# Pressed, RUN sits one silicon diode drop above GND: about 0.5 V at the 66 uA of the pull-up, limit 0.8 V.)
+# They sit in the open middle band, not in the row above the arrays: seven SOT-23 side by side there leave one track
+# between neighbours, a wall across the CPU bus on its way from the arrays to U1 / U4.
+for x, run in zip((-15.0, -11.0, -7.0, -3.0), ('RUN_A', 'RUN_B', 'RUN_D', 'RUN_E')): iso(x, 43.0, run, 'nRST')
 # static-discharge clamps on the three console lines that end on a bare FET gate (each above its FET)
 clamp(-38.2, HC, 'M2'); clamp(-30.2, HC, 'CPU_RW'); clamp(-22.2, HC, 'nROMSEL')
 
@@ -253,8 +263,20 @@ SOLID_PADS = {('J3', '11')}
 
 # firmware of each hand-soldered module, printed on the silk under it
 ROLE = {'U1': 'cpu', 'U2': 'ppu', 'U3': 'x', 'U4': 'cpu-ext', 'U5': 'ppu-ext', 'U6': 'hub'}
-SILK_TEXT = [('famicart rev G', 45.0 - 12.0, H - 33.5, 'F', 1.5), ('famicart rev G (back)', 45.0 - 22.0, H - 37.0, 'B', 1.5),
-             ('JLCJLCJLCJLC', 45.0 + 26.0, H - 62.0, 'B', 1.0)]          # JLCPCB prints the order number here ("Specify Position")
+SILK_TEXT = [('famicart rev G', 45.0 - 12.0, H - 33.5, 'F', 1.5), ('famicart rev G (back)', 45.0 - 22.0, H - 37.0, 'B', 1.5)]
+# (No "JLCJLCJLCJLC" marker: JLCPCB stopped printing order numbers in May 2026 and would print the marker itself.)
+
+# Edge rails for JLCPCB's assembly line, drawn by make_rails.py into a second board file (the cartridge board itself
+# does not change). JLCPCB's order form puts the rails it adds itself on the LONGER sides, here the top edge and the
+# gold-finger edge, and fingers that are not on the outer edge cannot be bevelled. These rails sit on the left and right
+# edges, 2 mm away, held by three break-off tabs each. Every tab has a row of 0.6 mm holes whose centres lie 0.3 mm
+# OUTSIDE the board's edge line: the holes touch the edge but do not enter the board, so the board needs no copper-free
+# strip for them (such strips closed the routing channel between the edge and the module pads). After snapping the
+# rails off, a ridge of at most 0.3 mm is left at each tab and is filed down to the edge.
+# 'tabs': y of each tab centre (mm from the top edge).
+RAILS = dict(width=5.0, gap=2.0, tab=4.2, hole=0.6, hole_out=0.3, pitch=1.0, holes=5,
+             tabs={'L': (7.0, 36.0, 60.0), 'R': (9.5, 32.1, 60.0)},
+             fiducials=(('L', 5.0), ('L', 80.7), ('R', 5.0)), fid_inset=3.5)
 
 # LCSC part numbers -- all JLCPCB Basic parts (checked by gen_jlc.py against the parts API); modules and J3 are hand-soldered
 LCSC = {
