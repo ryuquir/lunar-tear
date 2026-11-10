@@ -94,3 +94,87 @@ RP2350 は PIO ブロック 3 個×SM 4 個＝12 SM、各 SM は 1 クロック 
 - アナログ RGB 方式: v2.0 回路図（Date 2026-03-09、Rev 2.0）で各色 4 ビットの重み付け抵抗 DAC。R0=3.9 kΩ、R1=1.8 kΩ、R2=910 Ω、R3=470 Ω（G/B も同値。R11/R1/R7/R18 ほか 12 本）を GPIO から出力ノードへ並列接続。HSYNC/VSYNC は各 47 Ω 直列（R28/R23）。5 V ホストとの間は 74HC245（データ、5 V 給電）、74AHC126（出力、5 V 給電）、74LVC245（入力、3.3 V 給電、"3.3V ← 5V"）でバッファ — https://github.com/visrealm/pico9918/blob/main/pcb/v2.0/pico9918_v2_0_schematic.pdf （PDF を画像化して目視確認）
 - VGA: 640×480@60 Hz、25.175 MHz、"12-bit RGB (4 bits per channel, 4096 colors)" — https://github.com/visrealm/pico9918/wiki/VGA-Dongle
 - SCART (15 kHz): "Both modes use interlaced output at 13.5 MHz pixel clock"、PAL 720×576i ライン周波数 15,625 Hz／NTSC 720×480i 15,734 Hz、システムクロック 270 MHz または 324 MHz（13.5 MHz の整数倍）。"Composite sync is driven on pin 8"（HSYNC ピンから CSync を出す）、"The RGB outputs are held at 0 V for the whole sync pulse and back porch … The firmware does this itself."、電圧レベル: RGB ピーク 0.7 V、Sync 0 V／Black 0.3 V、全線 75 Ω 終端。SCART ドングルは HSYNC–VSYNC 間 1 kΩ のみの受動品（ブート時に導通で検出）— https://github.com/visrealm/pico9918/wiki/SCART-Output-Reference ／ https://github.com/visrealm/pico9918/wiki/SCART-RGB-AV-Dongle ／ https://github.com/visrealm/pico9918/wiki/Display-Output
+
+**pico-extras scanvideo と 15 kHz**
+- pico-extras README: "pico_scanvideo_dpi | Highly functional and stable support for parallel RGB output and VSYNC/HSYNC/DEN/CLOCK for VGA/DPI." — https://github.com/raspberrypi/pico-extras （2026-11-10 取得）
+- 定義済みモード（`src/common/pico_scanvideo/vga_modes.c`）は全て 24 MHz/768 以上の水平レート（例 640×480: clock 24 MHz・h_total 800、512×576: 24 MHz・h_total 768 ≒ 31.25 kHz）で、**15 kHz のプリセットは無い**。`scanvideo_timing_t` のフィールドは clock_freq, h_active, v_active, h_front_porch, h_pulse, h_total, h_sync_polarity, v_front_porch, v_pulse, v_total, v_sync_polarity, enable_clock, clock_polarity, enable_den のみで、**CSync・インターレースの設定項目は無い** — https://raw.githubusercontent.com/raspberrypi/pico-extras/master/src/common/pico_scanvideo/vga_modes.c ／ https://raw.githubusercontent.com/raspberrypi/pico-extras/master/src/common/pico_scanvideo/include/pico/scanvideo/scanvideo_base.h
+- 代替: PicoVGA（codaris/picovga-cmake フォーク）は "Now supports both RP2040 and RP2350"、出力 "TV: PAL/NTSC interlaced up to 1024×576 or 848×480"、色 "8-bit R3G3B2"、配線例 "take 8 resistors and connect them to outputs GP0 to GP7 and the RGB connector of a VGA or SCART TV. Then, connect HSync (CSync) to GP8" — https://github.com/codaris/picovga-cmake （240p プログレッシブの記載は無し）
+
+### 推論（§5）
+- 「Pico 用 NES エミュレータ＋15 kHz RGB」の既製品はやはり見つからない（第 1 パスと同結論）。必要部品は揃っている: エミュレータ核（pico-infonesPlus、GPL-3.0）、15 kHz CSync 生成の実例（PICO9918 SCART: HSYNC ピンから CSync、RGB は 4 ビット重み付け抵抗 3.9k/1.8k/910/470 Ω）。scanvideo を使う場合は timing 構造体を 15.7 kHz（例: clock 6 MHz 前後、h_total ≈ 381、v_total 262）で自作し、CSync は PIO 側で HSYNC/VSYNC を合成する改造が要る。pico-infonesPlus は HSTX/DVI 前提なので、映像出力部は差し替えになる。
+- JAMMA 向け（1 Vp-p 前後ではなく 3 Vp-p 程度を要求するモニタもある）のレベル合わせは jamma_electrical_details.md の議論に従う。PICO9918 の抵抗値は 75 Ω 終端で 0.7 V を狙った値であり、そのままでは JAMMA 用には低い（推論）。
+
+## 6. 出力駆動しきい値（§3 の内容）
+
+### Cited Findings
+| 受け側 | VIH（High と認識される最小入力） | 出典 |
+|---|---|---|
+| RP2350 出力（送り側） | VOH min 2.62 V（IOVDD=3.3 V、IOH=2/4/8/12 mA 設定値で）、VOL max 0.5 V | RP2350 Datasheet Table 1683, p.1336 |
+| 74HC595 / 74HC165（TI SN74HC595, SCLS041J Rev. Oct 2021） | VCC=4.5 V で 3.15 V、VCC=6 V で 4.2 V（VCC=5 V の値は表に無く、0.7×VCC 換算で 3.5 V） | https://www.ti.com/lit/ds/symlink/sn74hc595.pdf §6.3 |
+| 74HCT245（TI SN74HCT245） | "VCC = 4.5 V to 5.5 V … 2 V"、VIL 0.8 V | https://www.ti.com/lit/ds/symlink/sn74hct245.pdf |
+| 2A03 / 2C02（NMOS） | 公式データなし。NESdev の lidnariq: "Approximately TTL thresholds."、3.3 V CPLD 駆動実験（skrasms 2009）、TinyNES が CLK を 3.3 V 駆動 | 既存ノート famicom_electrical_and_pitfalls.md §2（https://forums.nesdev.org/viewtopic.php?f=9&p=269268 ほか） |
+| 74HC595 出力 → 送り側として | VOH(4.5 V, −6 mA) min 3.84 V(85 °C)… つまり 5 V 給電の 74HC は 5 V 振幅を出す | TI SN74HC595 §6.5 |
+| 74HC595 の最大クロック | fclock 4.5 V で 25 MHz（−40〜85 °C, SN74HC595 列）、74HC165 は 4.5 V で 21〜31 MHz（列による） | TI SN74HC595 / SN74HC165 |
+
+### 推論
+- RP2350 の 3.3 V 出力は **TTL しきい値（VIH 2.0 V）の入力**（2A03/2C02 推定、74HCT/AHCT/LS、マスク ROM の多く）なら VOH min 2.62 V で 0.6 V 余裕があり確実に駆動できる。
+- **5 V 給電の 74HC 入力**（VIH 3.15 V@4.5 V、≈3.5 V@5 V）は 3.3 V 出力では**保証外**。VOH が無負荷で 3.3 V 近くまで上がっても 5.0 V 給電時の 3.5 V に届かない。→ 3.3 V 側から 5 V ロジックへ渡す場所は 74HCT（または 74AHCT）にするか、74HC595 自体を 3.3 V 給電にする（その場合 74HC595 の出力は 3.3 V 振幅になり、カート側入力が TTL しきい値なら駆動可）。
+- 参考: PICO9918 v2.0 は 3.3 V→5 V データ方向に 5 V 給電の 74HC245（VIH 3.5 V 相当）を使っている。実働品だが規格上はマージン外（推論）。
+- カートリッジ側のマッパー IC（MMC1/MMC3 等、CMOS か NMOS か）の入力しきい値は一次資料未確認。ディスクリートマッパー板（UNROM: "74xx161 / 74xx32"、nesdir の Chip Type 表記）は LS/HC の区別が表記上不明 → 3.3 V 直結は保証できない（未確認）。安全側は「Pico→カートの全出力を 5 V 給電 74HCT 系経由」。
+
+## 7. 日本版ファミコン・カートのマッパー別本数とメモリ規模
+
+### データ源と限界
+- NES Directory（nesdir.github.io、各タイトルに "Region / Class: Licensed / Catalog / Board / PCB / Mapper / PRG・CHR サイズ・CRC32・SHA1" を持つ NesCartDB 形式の静的サイト）の索引ページを 2026-11-10 に取得し、Region=Japan の 881 タイトルを集計。各タイトルの個別ページ 881 件も取得し、最初の基板バリアントの PRG/CHR サイズを抽出（3 件は 404 のため Mesen DB で補完）— https://nesdir.github.io/ ／ 例 https://nesdir.github.io/D0DF726E_Japan.html
+- サイズの検証: Mesen2 の `MesenNesDB.txt`（"Generated on 2022-07-21 using: NewRisingSun's NES 2.0 header database (2021-12-25), NesCartDB (dated 2017-08-21), Nestopia UE's latest DB"）と CRC で突合し、881 件中 871 件で PRG/CHR サイズ一致、7 件不一致（版違いと推定）— https://raw.githubusercontent.com/SourMesen/Mesen2/master/UI/Dependencies/MesenNesDB.txt
+- nescartdb.com は Cloudflare によりアクセス拒否（2026-11-10、curl/Playwright とも "Sorry, you have been blocked"）。
+- 国内市販 ROM カセットの総数は「市販のファミコンカセット全1053本」（ねとらぼ 2021-07-20） — https://nlab.itmedia.co.jp/cont/articles/3322975/ 。よって集計は全体の約 84%（881/1053）の標本で、未収録の約 170 本の分布は不明。
+
+### マッパー別本数（日本、ライセンス品 881 本中、多い順・累積）
+| iNES mapper | 主な基板 | 本数 | 割合 | 累積 |
+|---|---|---|---|---|
+| 1 | MMC1 (HVC-S*ROM) | 236 | 26.8% | 26.8% |
+| 4 | MMC3 (HVC-T*ROM) | 142 | 16.1% | 42.9% |
+| 0 | NROM | 110 | 12.5% | 55.4% |
+| 2 | UNROM | 83 | 9.4% | 64.8% |
+| 3 | CNROM | 57 | 6.5% | 71.3% |
+| 206 | Namco 108 系 | 30 | 3.4% | 74.7% |
+| 19 | Namco 163（拡張音源あり） | 20 | 2.3% | 77.0% |
+| 16 | Bandai FCG / LZ93D50(+24C02) | 15 | 1.7% | 78.7% |
+| 18 | Jaleco SS88006 | 15 | 1.7% | 80.4% |
+| 5 | MMC5 | 14 | 1.6% | 82.0% |
+| 210 | Namco 175/340 | 12 | 1.4% | 83.3% |
+| 23 | Konami VRC2/VRC4 | 10 | 1.1% | 84.4% |
+| 87 | Jaleco/Konami 簡易 | 10 | 1.1% | 85.6% |
+| 33 | Taito TC0190 | 9 | 1.0% | 86.6% |
+| 69 | Sunsoft FME-7 / 5A / 5B | 9 | 1.0% | 87.6% |
+| 185 | CNROM+保護 | 7 | 0.8% | 88.4% |
+| 25, 66, 75, 32, 80 | VRC4/GxROM/VRC1/Irem G-101/Taito X1-005 | 各 6 | 各 0.7% | 91.8% |
+| 152, 159, 82 | — | 各 4 | — | 93.2% |
+| 68, 184, 7, 140, 65, 88, 10, 72 | — | 各 3 | — | 95.9% |
+| 118, 48, 26, 70, 93, 67, 21, 22, 78, 85 | — | 各 2 | — | 98.2% |
+| 24, 180, 154, 95, 207, 97, 34, 76, 9, 86, 92, 77, 96, 73, 94, 89 | — | 各 1 | — | 100% |
+（全 58 種のマッパー。上位 5 種=71.3%、10 種=82.0%、15 種=87.6%、20 種=91.8%。）
+
+- 上記 58 種は**すべて pico-infonesPlus の MapperTable に登録あり**（突合結果、85 は RP2350 ビルドのみ）。ただし登録＝完全動作ではない（§5）。
+
+### 拡張音源・特殊マッパーを使う主な日本タイトル（nesdir より）
+| 種別 | mapper | タイトル（基板） |
+|---|---|---|
+| Konami VRC6 音源 | 24 / 26 | 悪魔城伝説 Akumajou Densetsu (KONAMI-VRC-6, 24)、魍魎戦記MADARA、エスパードリーム2 (26) |
+| Konami VRC7 FM 音源 | 85 | Lagrange Point（VRC7 音源使用）、Tiny Toon Adventures 2（同チップ。音源使用の有無は未確認） |
+| Namco 163（音源内蔵チップ） | 19 | 20 本（NAMCOT-163、Star Wars のみ NAMCOT-129）: Megami Tensei II、Famista '90、King of Kings、Youkai Douchuuki、Rolling Thunder、Final Lap、Kaijuu Monogatari、Sangokushi II: Haou no Tairiku 等。各タイトルが実際に拡張音源を鳴らすかは本調査では未確認 |
+| Sunsoft 5B 音源 | 69 | Gimmick!（SUNSOFT-5B）。同 mapper の他 8 本は FME-7/5A で音源なし |
+| MMC5 | 5 | 14 本（光栄の歴史 SLG 多数、Just Breed、Metal Slader Glory 等） |
+| EEPROM セーブ（24C01/24C02） | 16 / 159 | Bandai: ドラゴンボールZ 系、SDガンダム外伝 ナイトガンダム物語 1〜3、ロクでなしBLUES 等 |
+| バッテリーバックアップ（Mesen DB の Battery フラグ） | 各種 | 881 本中 217 本（SaveRam 8 KB: 187、32 KB: 5、2 KB: 3、4 KB: 1、0（EEPROM 等）: 21） |
+
+### PRG+CHR 容量分布（日本 881 本、Mesen DB 突合値）
+| PRG+CHR 合計 | 本数（累積） | 累積割合 |
+|---|---|---|
+| ≤256 KB | 759 | 86.2% |
+| ≤384 KB | 826 | 93.8% |
+| ≤512 KB | 873 | 99.1% |
+| ≤768 KB | 880 | 99.9% |
+| ≤1024 KB | 881 | 100% |
+- PRG 単体は 8 KB〜512 KB（最多 128 KB: 496 本）、CHR は 0（CHR-RAM、208 本）〜256 KB。最大は Metal Slader Glory（MMC5 / HVC-ELROM、PRG 512 KB + CHR 512 KB = 1 MB）。768 KB 級: 青き狼と白き牝鹿 元朝秘史、星のカービィ 夢の泉の物語、Just Breed、信長の野望 武将風雲録（各 512+256）。

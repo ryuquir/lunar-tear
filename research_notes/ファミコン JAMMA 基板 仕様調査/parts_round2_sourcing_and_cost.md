@@ -96,3 +96,146 @@ JLCPCB 公式の能力表では Economic PCBA は「Gold Fingers/Castellated Hol
 - PCBA 込みの実見積 (部品 BOM を入れた Economic/Standard の総額) は BOM 未確定のため未取得。§6 で料金表から計算。
 - Gerber 審査後の追加料金 (特殊ケース) は実注文しないと確定しない。
 - PCB の HS コード別関税率・UPS/OCS の通関手数料額: 未確認。
+
+---
+
+## 3. 秋月電子 (akizukidenshi.com) の手はんだ代替品 (2026-11-10 取得)
+
+取得方法: 検索ページ `https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=<語>&search=search` を curl で取得し、商品ブロック (商品名・型番・販売コード・単位・税込価格・在庫表示・通販購入可能数) を解析。仕様欄は各商品ページ `https://akizukidenshi.com/catalog/g/g<販売コード>/` の「主な仕様」から。価格は税込、在庫数は「通販購入可能数」。
+
+### Takeaway
+74HC の DIP 品は 00/04/U04/08/14/32/74/125/138/157/165/244/245/373/573/595 が全て在庫あり (¥20-160)。秋月に無いのは 74HC139・74HC368・74HC574 (DIP)・CD4021・74HCT 系 DIP、および DIP の並列 SRAM (6116/6264/62256 系は 0 件)。5V 並列 SRAM で唯一在庫があるのは M68AF127B (1Mbit, 5V, 55ns) だが SOP32 の表面実装品。21.47727MHz の水晶・発振器は 0 件で、代替は Si5351A モジュール (在庫 10 セットのみ) か、14.31818MHz/3.579545MHz 品。高速コンパレータは DIP なら TL712CP (25ns, 5V, ¥210)。
+
+### 3.1 SRAM (2KB ワーク RAM / VRAM 用)
+
+| 品名 | 型番 | 販売コード | 価格 | 在庫 | 仕様 (商品ページ) |
+|---|---|---|---|---|---|
+| SRAM 1Mb | M68AF127B | 101083 (1個) / 101634 (5個入) | ¥70 / ¥250 | 639個 / 128パック | 1Mbit, 4.5-5.5V, 読出 55ns, SOP32 表面実装, STMicro |
+| SRAM 512Kb (SPI シリアル) | 23LC512-I/P | 114062 | ¥250 | 565個 | シリアル。Famicom バスには直結不可 (推論) |
+| (参考) 4Mbit DRAM | M11B416256A-35J | 101451 | ¥100 | 3,898個 | DRAM (リフレッシュ要、不適: 推論) |
+- 検索語 6116 / 6264 / 62256 / HM62256 / CY62256 / AS6C / スタティックRAM: 該当 SRAM 0 件 (6116・6264 はヒットしても型番の一部一致の無関係品) — 各検索 URL (keyword=6116 等)
+- 推論: M68AF127B を使うなら SOP32 なので PCBA 不可 (Basic でない) かつ手はんだ (1.27mm ピッチ SOP) になる。DIP 化には秋月の SOP 変換基板が必要。PCBA 側で LCSC の IS62C256AL (ext, 第1パス §2.2) を使う方が現実的。あるいは CPU 内蔵 RAM 相当をドナー Famicom の 2KB SRAM (CPU 用 / PPU 用の 2 個) から流用する (famicom_hardware.md 参照; 本パスでは未確認)。
+
+### 3.2 74HC / CMOS ロジック (DIP 中心)
+
+| 機能 | 型番 | 販売コード | 価格 | 在庫 | パッケージ |
+|---|---|---|---|---|---|
+| 74HC00 | TC74HC00AP / U74HC00L-D14 | 110856 / 114052 | ¥30 / ¥20 | 4,063 / 11,777 | DIP14 (114052 は商品ページで DIP, 伝播遅延 max 90ns) |
+| 74HC02 | TC74HC02AP | 111489 | ¥30 | 672 | DIP |
+| 74HC04 | TC74HC04AP(F) | 114058 | ¥30 | 1,120 | DIP (TC74HC04AF 111490 は SOP 2個入 ¥100) |
+| 74HCU04 | TC74HCU04AP | 111328 | ¥30 | 157 | DIP |
+| 74HC08 | TC74HC08AP | 114059 | ¥30 | 3,144 | DIP |
+| 74HC14 | TC74HC14AP / U74HC14L-D14 | 110923 / 114054 | ¥40 / ¥30 | 2,945 / 2,857 | DIP14 |
+| 74HC32 | TC74HC32AP(F) | 112877 | ¥30 | 323 (在庫僅少表示) | DIP |
+| 74HC74 | TC74HC74AP | 110879 | ¥25 | 4,249 | DIP |
+| 74HC125 | TC74HC125AP(F) | 131766 | ¥40 | 1,378 | DIP |
+| 74AC125 | TC74AC125P | 111487 | ¥30 | 1,000 | DIP |
+| 74HC138 | TC74HC138AP(F) | 110013 | ¥40 | 5,782 | DIP |
+| 74ACT138 (TTL 入力) | TC74ACT138P | 110920 | ¥50 | 101 | DIP |
+| 74LS138 | HD74LS138P | 107204 | ¥60 | 2,000 | DIP |
+| 74HC139 | (該当なし) | - | - | 0 件 | - |
+| 74HC157 | TC74HC157AP(F) | 131765 | ¥80 | 1,138 | DIP |
+| 74HC165 | TC74HC165AP(F) | 114679 | ¥100 | 1,010 | DIP |
+| 74HC244 | TC74HC244AP(F) / HD74HC244FPEL | 131762 / 111398 | ¥120 / ¥100(4個入) | 1,480 / 19パック | DIP / SOP |
+| 74HC245 | TC74HC245AP(F) | 131761 | ¥120 | 1,405 | DIP |
+| 74HC368 | (該当なし) | - | - | 0 件 | - |
+| 74HC373 | TC74HC373AP(F) | 131768 | ¥130 | 1,522 | DIP |
+| 74F373 | 74F373PC | 113348 | ¥100 (10個入) | 11パック | DIP |
+| 74HC541 | TC74HC541AP | 103632 | ¥50 | 12,608 | DIP (244 の代替に使える 8bit バッファ: 推論) |
+| 74HC573 | TC74HC573AP(F) | 131763 | ¥160 | 1,465 | DIP |
+| 74HC574 | (DIP 該当なし) / 74LCX574FT (3.3V 系 TSSOP) | 114114 | ¥100 (5個入) | 829パック | TSSOP |
+| 74HC273 (8bit D-FF, 574 の代替候補) | TC74HC273AP | 115412 | ¥70 | 1,856 | DIP |
+| 74HC595 | TC74HC595AP(F) / U74HC595AG-D16 / TC74HC595AF | 131760 / 114053 / 110077 | ¥110 / ¥40 / ¥50 | 748 / 500 (「2月中旬入荷予定」併記) / 2,540 | DIP / DIP / SOP |
+| CD4021 (Famicom パッドのシフトレジスタ) | (該当なし) | - | - | 0 件 (TC4021, 4021B でも 0) | - |
+| 74HC161 | TC74HC161AF | 110857 | ¥30 | 3,230 | SOP |
+| 74HC4040 | TC74HC4040AP(F) | 131767 | ¥110 | 1,245 | DIP |
+| 74HCT 系 DIP | (該当なし) | - | - | 「74HCT」検索 0 件。TC74VHCT04AFT (109522, ¥100/5個, SOP) と TC74VHCT540AF (100659, ¥100/5個, SOP) のみ | SOP |
+- 出典: 各検索ページ (keyword=74HC00 … 74HC595, 4021, 74HCT, 74AC, ロジックIC p=1-3)、例 [74HC245 検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=74HC245&search=search)、[ロジックIC 検索 (142 件)](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%83%AD%E3%82%B8%E3%83%83%E3%82%AFIC&search=search)
+- 推論: 74HC368 (反転 3 ステートバッファ, Famicom のコントローラ入力用) は 74HC240 系や 74HC125+インバータで代替が必要。74HC139 は 74HC138 1 個 (または 2 個) で代替可能。CD4021 はコントローラ側 (パッド内) の部品なので本基板では MCU で模擬するか 74HC165 で代替可能 (動作差は要検証)。
+
+### 3.3 スピーカー用パワーアンプ
+
+| 品名 | 型番 | 販売コード | 価格 | 在庫 | 仕様 (商品ページ) |
+|---|---|---|---|---|---|
+| LM386 (DIP8) | LM386G-D08 (UTC) | 114548 | ¥40 | 11,965 | 700mW (9V 8Ω THD10%), 4-12V, 利得 46dB 固定 |
+| LM386 (SOP8) | LM386G-S08 | 114549 | ¥30 | 12,469 | SOP8 |
+| LM386 アンプキット | AE-KIT45-386AMP | 115540 | ¥500 | 314セット | キット |
+| 2回路 (BTL 可) | M2073G-D08 (UTC, NJM2073 互換) | 117431 | ¥40 | 4,992 | 1.8-15V, BTL 2.0W (9V 16Ω), DIP8 |
+| 2回路 (BTL 可) | TDA2822L-D08 | 109720 | ¥50 | 27,759 | 1.8-12V, 0.65Wx2 / BTL 1.35W, DIP8 |
+| TA7368P 互換 | TA7368PG (UTC) | 106662 | ¥60 | 6,456 | 1.1W, max 14V, SIP9 |
+| TDA2030 | TDA2030L-TB51 | 109719 | ¥60 | 6,361 | (検索一覧より、仕様未取得) |
+| LM1875 | LM1875G-TB5 | 115954 | ¥90 | 15,598 | 20W 級 (一覧の品名より) |
+| D級モジュール | AE-PAM8012 | 108217 | ¥300 | 692 | 2.5-5.5V, 8Ω で最大 1.0W / 4Ω 2.0W @5V, 短絡・過熱保護, 10.5x11mm, スルーホール端子 |
+| D級 IC | PAM8302AADCR | 114187 | ¥40 | 2,378 | SMD |
+| D級 IC | PAM8304ASR | 113716 | ¥45 | 1,520 | SMD |
+| ステレオ D級モジュール | AE-PAM8403-AMP | 115698 | ¥750 | 32 (在庫僅少) | - |
+| μPC2002H | uPC2002H | 117725 | ¥200 | 84 | 8-18V |
+| 10W BTL | LA4902 | 101571 | ¥300 (2個入) | 37パック | 8-18V |
+- 出典: [オーディオアンプ 検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%82%AA%E3%83%BC%E3%83%87%E3%82%A3%E3%82%AA%E3%82%A2%E3%83%B3%E3%83%97&search=search)、[LM386G-D08](https://akizukidenshi.com/catalog/g/g114548/)、[M2073](https://akizukidenshi.com/catalog/g/g117431/)、[TDA2822L](https://akizukidenshi.com/catalog/g/g109720/)、[TA7368P](https://akizukidenshi.com/catalog/g/g106662/)、[AE-PAM8012](https://akizukidenshi.com/catalog/g/g108217/)
+- 推論: JAMMA は +12V が供給されるので、LM386 (max 12V) は 12V 直結だと定格上限ぎりぎり。M2073 (max 15V) を 12V で BTL 動作させるのが手はんだ部品で最も単純。5V で動かすなら AE-PAM8012 (8Ω 1.0W) モジュールを載せるのが最小部品数。
+
+### 3.4 コンパレータ (同期分離・ビデオ処理用)
+
+| 品名 | 型番 | 販売コード | 価格 | 在庫 | 応答時間・電源・パッケージ (商品ページ) |
+|---|---|---|---|---|---|
+| 高速 (プッシュプル) | TL712CP | 113885 | ¥210 | 730 | 25ns, 5V, 17mA, DIP8 |
+| 高速 | ADCMP600BRJZ-R2 | 130362 | ¥830 | 220 | 4ns, 2.5-5.5V, SOT23-5 |
+| 高速 | LTC6752HS5#TRMPBF | 130361 | ¥750 | 129 | 1.2ns, 2.45-3.5V (5V 不可), TSOT23-5 |
+| ハイスピード 2回路 | LM319M | 101270 | ¥50 (5個入) | 1,051パック | 80ns, オープンコレクタ, SOP14 |
+| 汎用 2回路 | LM393GN | 116987 | ¥30 | 7,427 | (一覧) |
+| 汎用 4回路 | LM339 | 100436 | ¥30 | 23,038 | (一覧) |
+| 汎用 2回路 | NJM2903D | 113486 | ¥40 | 8,201 | (一覧) |
+| 汎用 4回路 | μPC339C | 112556 | ¥20 | 328 | (一覧) |
+| LM311 / TLV3501 / LT1016 | - | - | - | 0 件 | - |
+- 出典: [コンパレーター検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%82%B3%E3%83%B3%E3%83%91%E3%83%AC%E3%83%BC%E3%82%BF%E3%83%BC&search=search)、[TL712CP](https://akizukidenshi.com/catalog/g/g113885/)、[ADCMP600](https://akizukidenshi.com/catalog/g/g130362/)、[LTC6752](https://akizukidenshi.com/catalog/g/g130361/)、[LM319M](https://akizukidenshi.com/catalog/g/g101270/)
+
+### 3.5 クロック源
+
+| 品名 | 型番 | 販売コード | 価格 | 在庫 | 備考 |
+|---|---|---|---|---|---|
+| 21.47727MHz 水晶/発振器 | - | - | - | 0 件 (keyword=21.477) | 取扱なし |
+| Si5351A 3ch プログラマブル周波数ジェネレーターモジュール | AE-Si5351A-B | 110679 | ¥650 | **10 セット** | 2.5kHz-200MHz, 3 出力 (PLL 2 系統), I2C 設定 |
+| Si5351A IC 単体 | Si5351A-B | 110141 | ¥320 | 入荷未定 | |
+| 14.31818MHz 水晶 | HUSG-14.31818-20 | 108670 | ¥30 | 4,310 | HC-49 系 |
+| 14.31818MHz 発振器 5V | SG8002DC-14.31818MHz-PHB | 104534 | ¥300 | 196 | |
+| 14.31818MHz 分周付発振器 | EXO3 14.31818MHz (キンセキ) | 101685 | ¥120 | 2,000 | DIP8, 5V, 1/2-1/256 分周出力 (3.579545MHz 等), ±100ppm |
+| 3.579545MHz 水晶 | HUSG-3.579545-20 | 108664 | ¥30 | 269 | |
+| 3.579545MHz 発振器 | TCO-711A 3.579545MHz | 101567 | ¥100 | 2,652 | |
+| MEMS 発振器 (書込用ブランク) | SIT2001BI-S1-XXX / SIT8208AI-21-XXX | 113512 / 113513 | ¥130 / ¥140 | 922 / 1,277 | 「専用のプログラマーで書き込むことで任意の周波数」(プログラマー Time Machine II 113514 が別途必要) |
+| 26.601712MHz (PAL) | - | - | - | 0 件 | |
+- 出典: [クリスタル検索 (114 件)](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%82%AF%E3%83%AA%E3%82%B9%E3%82%BF%E3%83%AB&search=search)、[14.318 検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=14.318&search=search)、[AE-Si5351A-B](https://akizukidenshi.com/catalog/g/g110679/)、[EXO3](https://akizukidenshi.com/catalog/g/g101685/)、[SiT2001B blank](https://akizukidenshi.com/catalog/g/g113512/)
+
+### 3.6 レベル変換・USB・ヒートシンク・ヒューズ・電解コンデンサ
+
+| 分類 | 品名 / 型番 | 販売コード | 価格 | 在庫 | 備考 |
+|---|---|---|---|---|---|
+| レベル変換 8bit | AE-LLCNV8 (FXMA108) | 104522 | ¥350 | 398 | 1.65-5.5V 双方向, 自動方向検出, DIP20 相当 |
+| レベル変換 8bit (Sbkit) | AE-LLCNV8-DIP20 (FXMA108) | 117062 | ¥250 | 154セット | 同上 |
+| レベル変換 16bit | AE-LLCNV-LVCH16T245 | 115696 | ¥300 | 315セット | 方向ピン制御型, 1.65-5.5V |
+| レベル変換 4bit | AE-TXS0104E-BO | 129507 | ¥350 | 498 | 24Mbps |
+| レベル変換 4bit (MOSFET) | AE-LCNV4-MOSFET(BSS138) | 113837 | ¥200 | 2,456 | |
+| USB Type-C (USB2.0 16P) | 5077CR-16-SMC2-BK-TR | 114356 | ¥110 | 209 (在庫僅少) | |
+| USB Type-C 電源用 | A295-CTRPB-1 / UJC-HP-3-SMT-TR | 116895 / 116438 | ¥40 / ¥90 | 19,835 / 3,727 | |
+| USB Type-C DIP 化 (シンプル) | AE-USB2.0-TYPE-C | 113080 | ¥350 | 695 | |
+| USB Type-C 電源用 DIP 化キット | AE-USB2.0-TYPE-C-CTRPB-1 | 117123 | ¥130 | 1,246セット | |
+| USB microB 電源用 DIP 化キット | AE-MRUSB-DIP | 110972 | ¥130 | 186セット | |
+| USB-シリアル (Type-C) | AE-CH340E-TYPEC | 114745 | ¥550 | 1,287 | |
+| ヒートシンク TO-220 | 30PC030-01030 (30x30x30) | 100429 | ¥110 | 772 | |
+| ヒートシンク | 16PB017-01025 / 20PB020-01025 | 105053 / 105054 | ¥60 / ¥80 | 2,437 / 2,054 | |
+| ポリスイッチ (リード) | MF-R300 (3A, trip 6A, 30V) | 112630 | ¥40 | 2,766 | |
+| ポリスイッチ (リード) | MF-RX110 (1.1A, trip 2.2A, 72V) | 113585 | ¥50 | 4,732 | |
+| ポリスイッチ (リード) | RGEF300 (3A, trip 5.1A, 16V) | 100769 | ¥30 | 5,947 | |
+| ポリスイッチ (SMD) | PICOSMDC110S-2 (1.1A, 6V) | 113955 | ¥40 | 19,591 | |
+| ガラス管ヒューズ 20mm | MF51NR 250V 2A / 5A | 107130 / 107131 | ¥40 | 536 / 1,961 | |
+| 電解 470µF16V | 16WXA470MEFC8X9 / 16PX470MEFC8X11.5 | 108426 / 110273 | ¥10 | 25,462 / 11,016 | |
+| 電解 1000µF25V | 25PX1000MEFC10X16 | 117885 | ¥40 | 30,594 | |
+| 電解 1000µF10V | 10WXA1000MEFC10X9 | 108424 | ¥20 | 5,164 | |
+| 電解 220µF16V / 25V | 16PX220MEFC6.3X11 / 25PX220MEFC6.3X11 | 110272 / 117879 | ¥10 / ¥20 | 13,434 / 21,767 | |
+| 電解 47µF35V | 35PX47MEFC5X11 | 117887 | ¥10 | 75,188 | |
+| 電解 10µF50V | 50PX10MEFC5X11 | 117897 | ¥10 | 135,778 | |
+| 電解 100µF16V (第1パス) | 16PX100MEFC5X11 | 110271 | ¥10 | 67,744 | |
+- 出典: [レベル変換検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%83%AC%E3%83%99%E3%83%AB%E5%A4%89%E6%8F%9B&search=search)、[USBコネクター検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=USB%E3%82%B3%E3%83%8D%E3%82%AF%E3%82%BF%E3%83%BC&search=search)、[ポリスイッチ検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%83%9D%E3%83%AA%E3%82%B9%E3%82%A4%E3%83%83%E3%83%81&search=search)、電解コンデンサー各容量検索、[ヒートシンク検索](https://akizukidenshi.com/catalog/goods/search.aspx?search=x&keyword=%E3%83%92%E3%83%BC%E3%83%88%E3%82%B7%E3%83%B3%E3%82%AF&search=search)、[AE-LLCNV8](https://akizukidenshi.com/catalog/g/g104522/)、[AE-TXS0104E-BO](https://akizukidenshi.com/catalog/g/g129507/)
+
+### Gaps (§3)
+- 秋月の DIP 並列 SRAM は 0 件 (検索で確認)。他店 (共立・千石・マルツ・aitendo) の 62256 系在庫は本パスでは未確認。
+- 74HC139 / 74HC368 / 74HC574 / CD4021 / 74HCT DIP: 秋月では入手不可 (0 件)。
