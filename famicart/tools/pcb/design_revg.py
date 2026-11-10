@@ -48,6 +48,8 @@ Changes against rev F (design_revf.py), from the 2026-11 design review:
   * J4: three wire pads with a spare U6 pin (ADC0, behind 2.2k), 3.3 V and GND, for a hand-wired input (microphone,
     button).
   * BAV99 clamps to GND / +5V on the console lines that end on a FET (M2, R/W, /ROMSEL, the /WE gate, /IRQ).
+  * PPU data lines D0-D7: 500 ohm (two array elements in parallel) to U2 and to U5 instead of 1k. The console's
+    74LS373 latch inputs on these lines source current when low, which made the worst-case read too slow through 1k.
 2-layer; parts: 1k x4 array, 2.2k, 100k, 10n, 10u, 2N7002, B5819W, BAV99, W25Q128JVSIQ, push switch."""
 import shells
 
@@ -142,19 +144,32 @@ xiao('U6', 18.75, 63.4, 0, 'F', {1: 'EXT', 2: 'PWM2', 3: 'V5S', 4: 'C_M2', 5: 'S
                                 9: 'SPI_SCK', 10: 'SPI_MISO', 11: 'SPI_MOSI', 12: '3V3_F', 13: 'GND', 14: 'V5_F'})    # body h 52.9-73.9: USB-C at the top edge
 
 # ------------------------------------------------------------------ 1k series arrays (console side | MCU side), front, by the card edge
+# The arrays stand in the order of the fingers below them, and the elements of each array in the order in which the
+# finger tracks arrive (finger further left = pad nearer the top). Grouping them by bit number, as up to rev F2, runs
+# against the finger order on both buses (A11 .. A0 from left to right): every address line then has to cross all the
+# others in the 5 mm between the fingers and the arrays, and the autorouter left ten connections open there.
+# Finger positions x' (front | back):  CPU  A11 -34.3 .. A0 -6.4 | M2 -34.3, A12, A13, A14 -26.7, D7 -24.1 .. D0 -6.4
+#                                      PPU  /RD 3.8, CIRAM A10 6.4, A6 8.9 .. A0 24.1, D0 26.7 .. D3 34.3
+#                                         | /WE 3.8, CIRAM /CE 6.4, A7 11.4 .. A13 26.7, D7 29.2 .. D4 37.3
 HA = 5.0
-cpu_x = [-38.0 + 3.6 * i for i in range(8)]
-for i in range(4):
-    bits = list(range(4 * i, 4 * i + 4))
-    rarr(cpu_x[i], HA, [(f'CPU_A{b}', f'CA{b}') if b < 15 else ('M2', 'C_M2') for b in bits])
-for i in range(2): rarr(cpu_x[4 + i], HA, [(f'CPU_D{4 * i + k}', f'CD{4 * i + k}') for k in range(4)])
+XA = {1: -13.1, 2: -23.9, 3: -32.3, 4: -28.7, 5: -9.5, 6: -20.3, 13: -5.9, 14: -16.7}       # RN number -> x' (CPU side)
+rarr(XA[1], HA, [(f'CPU_A{b}', f'CA{b}') for b in (3, 2, 1, 0)])                                       # RN1
+rarr(XA[2], HA, [(f'CPU_A{b}', f'CA{b}') for b in (7, 6, 5, 4)])                                       # RN2
+rarr(XA[3], HA, [(f'CPU_A{b}', f'CA{b}') for b in (11, 10, 9, 8)])                                     # RN3
+rarr(XA[4], HA, [('M2', 'C_M2'), ('CPU_A12', 'CA12'), ('CPU_A13', 'CA13'), ('CPU_A14', 'CA14')])      # RN4
+rarr(XA[5], HA, [(f'CPU_D{b}', f'CD{b}') for b in (3, 2, 1, 0)])                                       # RN5: U1 data
+rarr(XA[6], HA, [(f'CPU_D{b}', f'CD{b}') for b in (7, 6, 5, 4)])                                       # RN6
 ppu_x = [12.0 + 3.6 * i for i in range(8)]
-for i in range(3): rarr(ppu_x[i], HA, [(f'PPU_A{4 * i + k}', f'PA{4 * i + k}') for k in range(4)])
-rarr(ppu_x[3], HA, [('PPU_A12', 'PA12'), ('PPU_A13', 'PA13'), ('PPU_nRD', 'RD_D'), ('PPU_nWE', 'PWE_G')])   # 4th: /WE to the gate of Q6
-for i in range(2): rarr(ppu_x[4 + i], HA, [(f'PPU_D{4 * i + k}', f'PD{4 * i + k}') for k in range(4)])
-for i in range(2): rarr(cpu_x[6 + i], HA, [(f'CPU_D{4 * i + k}', f'XD{4 * i + k}') for k in range(4)])     # RN13, RN14: U4 data
+rarr(ppu_x[0], HA, [('CIRAM_nCE', 'NCE_D'), ('CIRAM_nCE', 'NCE_D'), ('PPU_A6', 'PA6'), ('PPU_A5', 'PA5')])     # RN7: /CE through 500 ohm, from U3
+rarr(ppu_x[1], HA, [('PPU_A7', 'PA7'), ('PPU_A4', 'PA4'), ('PPU_A8', 'PA8'), ('PPU_A3', 'PA3')])              # RN8
+rarr(ppu_x[2], HA, [('PPU_A9', 'PA9'), ('PPU_A2', 'PA2'), ('PPU_A10', 'PA10'), ('PPU_A1', 'PA1')])            # RN9
+rarr(ppu_x[3], HA, [('PPU_A11', 'PA11'), ('PPU_A0', 'PA0'), ('PPU_A12', 'PA12'), ('PPU_A13', 'PA13')])        # RN10
+for i in range(2): rarr(ppu_x[4 + i], HA, [(f'PPU_D{4 * i + k}', f'PD{4 * i + k}') for k in range(4)])     # RN11, RN12: U2 data
+rarr(XA[13], HA, [(f'CPU_D{b}', f'XD{b}') for b in (3, 2, 1, 0)])                                      # RN13: U4 data
+rarr(XA[14], HA, [(f'CPU_D{b}', f'XD{b}') for b in (7, 6, 5, 4)])                                      # RN14
 for i in range(2): rarr(ppu_x[6 + i], HA, [(f'PPU_D{4 * i + k}', f'YD{4 * i + k}') for k in range(4)])     # RN15, RN16: U5 data
-rarr(8.4, HA, [('CIRAM_nCE', 'NCE_D'), ('CIRAM_nCE', 'NCE_D'), ('CIRAM_A10', 'NA10_D'), ('CIRAM_A10', 'NA10_D')])   # RN17: 500 ohm each, from U3
+rarr(8.4, HA, [('PPU_nRD', 'RD_D'), ('PPU_nWE', 'PWE_G'), ('CIRAM_A10', 'NA10_D'), ('CIRAM_A10', 'NA10_D')])   # RN17: /RD, /WE to the gate of Q6,
+                                                                                                        # CIRAM A10 through 500 ohm, from U3
 
 # ------------------------------------------------------------------ CPU-side glue (front, left, row h 10.8)
 HB = 10.8
@@ -180,7 +195,7 @@ clamp(-5.8, 15.6, 'nIRQ')                                                       
 # ------------------------------------------------------------------ PPU-side glue and power (front, right)
 nfet(15.6, HB, 'PWE_G', 'PWS_D'); res('2.2k', 18.6, HB, 'PWS_D', '3V3_B'); res('2.2k', 20.2, HB, 'PWS_D', '3V3_B')   # Q6: PWS_D = NOT PPU /WE,
                                                                                         # 1.1k pull-up: the /WE pulse is only 186 ns long
-clamp(23.6, HB, 'PWE_G')                                                                # gate of Q6 (behind the 1k of RN10)
+clamp(23.6, HB, 'PWE_G')                                                                # gate of Q6 (behind the 1k of RN17)
 for i, k in enumerate(('VSYS_A', 'VSYS_B', 'V5_C', 'VSYS_D', 'VSYS_E', 'V5_F')): schottky(12.0 + 2.8 * i, HC, '+5V', k)
 cap('10u', C0805, 28.8, HC, '+5V'); cap('10u', C0805, 31.4, HC, '+5V')
 
@@ -193,6 +208,15 @@ res('2.2k', -32.6, 48.6, 'LINK', 'LINK_PU'); res('2.2k', -30.9, 48.6, 'LINK_PU',
 link(9.0, 18.6, 'LINK_B')                                                              # over U2 pin 34
 link(26.9, 49.9, 'LINK_E'); link(31.0, 49.7, 'LINK_C'); link(10.6, 50.4, 'LINK_F')
 rarr(14.0, 50.4, [('PLINK_F', 'PLINK_B'), ('PLINK_F', 'PLINK_B'), ('PLINK_F', 'PLINK_E'), ('PLINK_F', 'PLINK_E')])   # 500 ohm per receiver
+
+# ------------------------------------------------------------------ PPU data lines: a second array in parallel (500 ohm)
+# Each PPU data line also feeds an input of the console's 74LS373 address latch, and an LS input sources up to 0.4 mA
+# when it is held low. Through 1 k that lifts the low level to 0.45 V and slows the falling edge: worst case 240 ns from
+# /RD falling to settled data, against a /RD window of 186 ns (typical 85 ns). With two elements in parallel the worst
+# case is 158 ns and the low level 0.25 V. RN27-RN30 sit above RN11, RN12, RN15, RN16; their elements are listed in
+# reverse so that the pads that face each other carry the same net.
+for i in range(2): rarr(27.2 + 3.6 * i, HB, [(f'PPU_D{4 * i + k}', f'PD{4 * i + k}') for k in (3, 2, 1, 0)])      # RN27, RN28: U2
+for i in range(2): rarr(34.4 + 3.6 * i, HB, [(f'PPU_D{4 * i + k}', f'YD{4 * i + k}') for k in (3, 2, 1, 0)])      # RN29, RN30: U5
 
 # ------------------------------------------------------------------ storage on U6 (front, top right)
 P('U7', 'Memory_Flash', 'W25Q128JVS', 'W25Q128JVSIQ', 'Package_SO:SOIC-8_5.23x5.23mm_P1.27mm', 38.5, 53.5, 0)
@@ -216,6 +240,10 @@ P('J2', 'famicart', 'WirePads_1x3', 'RST/GND/LINK pads', 'famicart:WirePads_1x3'
 res('2.2k', -26.0, 40.0, 'LINK', 'LINK_T')                                             # the test pad sees LINK through 2.2k
 P('J4', 'famicart', 'WirePads_1x3', 'EXT/GND/3V3 pads', 'famicart:WirePads_1x3', -22.0, 38.0, 90); c('J4', 1, 'EXT_P'); c('J4', 2, 'GND'); c('J4', 3, '3V3_F')
 res('2.2k', -19.4, 38.0, 'EXT_P', 'EXT')                                               # a hand-wired lead is where 5 V or static arrives
+# Pin 31 (back, left end) feeds the RF modulator on some main boards, and the cartridge is what joins it to pin 30
+# (front, right end). The two 10u of the power row sit at pin 30; this one sits at pin 31, 75 mm of track away, so
+# that the ripple of up to six module regulators does not ride on the modulator's supply. (Defined last: C8.)
+cap('10u', C0805, -41.2, 5.7, '+5V')
 
 POWER_NETS = {'+5V', 'GND'}
 

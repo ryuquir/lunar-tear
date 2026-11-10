@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1630" height="1377" viewBox="0 0 1630 1377" font-family="IPAGothic, 'IPAexGothic', 'Noto Sans CJK JP', 'Yu Gothic', sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40.0" y="52.0" font-size="34" fill="#1c2530" text-anchor="start" font-weight="bold">famicart rev G　基板外形図</text>
+<text x="40.0" y="92.0" font-size="21" fill="#6b7280" text-anchor="start" font-weight="normal">表（ラベル面・1〜30 番端子の面）から見た図　単位 mm　設計値（製造公差: ルーター加工 ±0.2 mm）</text>
+<rect x="282.0" y="190.0" width="50.0" height="857.0" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="314.0" y="530.0" font-size="17" fill="#6b7280" text-anchor="middle" font-weight="normal" transform="rotate(-90 314.0 530.0)">捨て基板（JLCPCB が付け、実装後に外す）</text>
+<rect x="1228.0" y="190.0" width="50.0" height="857.0" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="1260.0" y="530.0" font-size="17" fill="#6b7280" text-anchor="middle" font-weight="normal" transform="rotate(-90 1260.0 530.0)">捨て基板（JLCPCB が付け、実装後に外す）</text>
+<path d="M388.00,940.00 L346.00,940.00 L346.00,872.00 A5.00,5.00 0 0 0 341.00,867.00 L332.00,867.00 L332.00,712.00 L378.50,712.00 A5.00,5.00 0 0 0 383.50,707.00 L383.50,693.00 A5.00,5.00 0 0 0 378.50,688.00 L332.00,688.00 L332.00,190.00 L1228.00,190.00 L1228.00,688.00 L1181.50,688.00 A5.00,5.00 0 0 0 1176.50,693.00 L1176.50,707.00 A5.00,5.00 0 0 0 1181.50,712.00 L1228.00,712.00 L1228.00,867.00 L1219.00,867.00 A5.00,5.00 0 0 0 1214.00,872.00 L1214.00,940.00 L1172.00,940.00 L1172.00,1037.00 L1162.00,1047.00 L398.00,1047.00 L388.00,1037.00 Z" fill="#e3f0e6" stroke="#14532d" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M797.50,693.00 A5.00,5.00 0 0 1 802.50,688.00 L858.50,688.00 A5.00,5.00 0 0 1 863.50,693.00 L863.50,707.00 A5.00,5.00 0 0 1 858.50,712.00 L802.50,712.00 A5.00,5.00 0 0 1 797.50,707.00 Z" fill="#ffffff" stroke="#14532d" stroke-width="2.6"/>
+<line x1="388.0" y1="940.0" x2="1172.0" y2="940.0" stroke="#6b7280" stroke-width="1.0" stroke-dasharray="4 5"/>
+<line x1="780.0" y1="160.0" x2="780.0" y2="1072.0" stroke="#6b7280" stroke-width="1.0" stroke-dasharray="14 5 3 5"/>
+<text x="788.0" y="176.0" font-size="16" fill="#6b7280" text-anchor="start" font-weight="normal">中心線</text>
+<rect x="393.7" y="970.0" width="26.0" height="67.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="429.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="454.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="479.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="505.3" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="530.7" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="556.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="581.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="606.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="632.3" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="657.7" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="683.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="708.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="733.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="759.3" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="784.7" y="970.0" width="16.0" height="67.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="810.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="835.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="860.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="886.3" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="911.7" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="937.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="962.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="987.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1013.3" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1038.7" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1064.1" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1089.5" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1114.9" y="970.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1140.3" y="970.0" width="26.0" height="67.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<text x="420.0" y="962.0" font-size="17" fill="#1c2530" text-anchor="middle" font-weight="normal">1</text>
+<text x="1140.0" y="962.0" font-size="17" fill="#1c2530" text-anchor="middle" font-weight="normal">30</text>
+<rect x="520.0" y="943.0" width="520" height="24" fill="#e3f0e6"/>
+<text x="780.0" y="962.0" font-size="18" fill="#1c2530" text-anchor="middle" font-weight="normal">金フィンガー 表 1〜30 番（裏 31〜60 番）　2.54 mm ピッチ</text>
+<line x1="332.0" y1="190.0" x2="332.0" y2="122.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1228.0" y1="190.0" x2="1228.0" y2="122.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="332.0" y1="128.0" x2="1228.0" y2="128.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="332.0,128.0 343.0,124.4 343.0,131.6" fill="#2f5f9e"/>
+<polygon points="1228.0,128.0 1217.0,131.6 1217.0,124.4" fill="#2f5f9e"/>
+<text x="780.0" y="121.0" font-size="20" fill="#2f5f9e" text-anchor="middle" font-weight="normal">89.6（全幅）</text>
+<line x1="1228.0" y1="190.0" x2="1334.0" y2="190.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1228.0" y1="940.0" x2="1334.0" y2="940.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1328.0" y1="190.0" x2="1328.0" y2="940.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="1328.0,190.0 1331.6,201.0 1324.4,201.0" fill="#2f5f9e"/>
+<polygon points="1328.0,940.0 1324.4,929.0 1331.6,929.0" fill="#2f5f9e"/>
+<text x="1336.0" y="572.0" font-size="20" fill="#2f5f9e" text-anchor="start" font-weight="normal">75.0（本体）</text>
+<line x1="1228.0" y1="190.0" x2="1484.0" y2="190.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1228.0" y1="1047.0" x2="1484.0" y2="1047.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1478.0" y1="190.0" x2="1478.0" y2="1047.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="1478.0,190.0 1481.6,201.0 1474.4,201.0" fill="#2f5f9e"/>
+<polygon points="1478.0,1047.0 1474.4,1036.0 1481.6,1036.0" fill="#2f5f9e"/>
+<text x="1486.0" y="625.5" font-size="20" fill="#2f5f9e" text-anchor="start" font-weight="normal">85.7（全高）</text>
+<line x1="1172.0" y1="1047.0" x2="1484.0" y2="1047.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="388.0" y1="1047.0" x2="388.0" y2="1115.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1172.0" y1="1047.0" x2="1172.0" y2="1115.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="388.0" y1="1109.0" x2="1172.0" y2="1109.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="388.0,1109.0 399.0,1105.4 399.0,1112.6" fill="#2f5f9e"/>
+<polygon points="1172.0,1109.0 1161.0,1112.6 1161.0,1105.4" fill="#2f5f9e"/>
+<text x="780.0" y="1133.0" font-size="20" fill="#2f5f9e" text-anchor="middle" font-weight="normal">78.4（端子タブの幅）</text>
+<line x1="346.0" y1="940.0" x2="346.0" y2="1181.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1214.0" y1="940.0" x2="1214.0" y2="1181.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="346.0" y1="1175.0" x2="1214.0" y2="1175.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="346.0,1175.0 357.0,1171.4 357.0,1178.6" fill="#2f5f9e"/>
+<polygon points="1214.0,1175.0 1203.0,1178.6 1203.0,1171.4" fill="#2f5f9e"/>
+<text x="780.0" y="1199.0" font-size="20" fill="#2f5f9e" text-anchor="middle" font-weight="normal">86.8（下段の幅。左右とも 1.4 内側）</text>
+<line x1="278.0" y1="190.0" x2="221.0" y2="190.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="278.0" y1="688.0" x2="221.0" y2="688.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="227.0" y1="190.0" x2="227.0" y2="688.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="227.0,190.0 230.6,201.0 223.4,201.0" fill="#2f5f9e"/>
+<polygon points="227.0,688.0 223.4,677.0 230.6,677.0" fill="#2f5f9e"/>
+<text x="219.0" y="446.0" font-size="20" fill="#2f5f9e" text-anchor="end" font-weight="normal">49.8</text>
+<line x1="278.0" y1="688.0" x2="221.0" y2="688.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="278.0" y1="712.0" x2="221.0" y2="712.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="227.0" y1="688.0" x2="227.0" y2="712.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="227.0,688.0 230.6,699.0 223.4,699.0" fill="#2f5f9e"/>
+<polygon points="227.0,712.0 223.4,701.0 230.6,701.0" fill="#2f5f9e"/>
+<text x="219.0" y="707.0" font-size="20" fill="#2f5f9e" text-anchor="end" font-weight="normal">2.4（切り欠き）</text>
+<line x1="278.0" y1="712.0" x2="221.0" y2="712.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="278.0" y1="867.0" x2="221.0" y2="867.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="227.0" y1="712.0" x2="227.0" y2="867.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="227.0,712.0 230.6,723.0 223.4,723.0" fill="#2f5f9e"/>
+<polygon points="227.0,867.0 223.4,856.0 230.6,856.0" fill="#2f5f9e"/>
+<text x="219.0" y="796.5" font-size="20" fill="#2f5f9e" text-anchor="end" font-weight="normal">15.5</text>
+<line x1="278.0" y1="867.0" x2="221.0" y2="867.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="278.0" y1="940.0" x2="221.0" y2="940.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="227.0" y1="867.0" x2="227.0" y2="940.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="227.0,867.0 230.6,878.0 223.4,878.0" fill="#2f5f9e"/>
+<polygon points="227.0,940.0 223.4,929.0 230.6,929.0" fill="#2f5f9e"/>
+<text x="219.0" y="910.5" font-size="20" fill="#2f5f9e" text-anchor="end" font-weight="normal">7.3（下段）</text>
+<line x1="278.0" y1="940.0" x2="221.0" y2="940.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="278.0" y1="1047.0" x2="221.0" y2="1047.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="227.0" y1="940.0" x2="227.0" y2="1047.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="227.0,940.0 230.6,951.0 223.4,951.0" fill="#2f5f9e"/>
+<polygon points="227.0,1047.0 223.4,1036.0 230.6,1036.0" fill="#2f5f9e"/>
+<text x="219.0" y="1000.5" font-size="20" fill="#2f5f9e" text-anchor="end" font-weight="normal">10.7（端子タブ）</text>
+<line x1="278.0" y1="1047.0" x2="388.0" y2="1047.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="332.0" y1="688.0" x2="332.0" y2="656.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="383.5" y1="688.0" x2="383.5" y2="656.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="332.0" y1="662.0" x2="383.5" y2="662.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="332.0,662.0 343.0,658.4 343.0,665.6" fill="#2f5f9e"/>
+<polygon points="383.5,662.0 372.5,665.6 372.5,658.4" fill="#2f5f9e"/>
+<text x="357.8" y="655.0" font-size="18" fill="#2f5f9e" text-anchor="middle" font-weight="normal">5.15</text>
+<text x="393.5" y="706.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">左右の切り欠き（奥行き 5.15 × 高さ 2.4）</text>
+<line x1="797.5" y1="688.0" x2="797.5" y2="656.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="863.5" y1="688.0" x2="863.5" y2="656.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="797.5" y1="662.0" x2="863.5" y2="662.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="797.5,662.0 808.5,658.4 808.5,665.6" fill="#2f5f9e"/>
+<polygon points="863.5,662.0 852.5,665.6 852.5,658.4" fill="#2f5f9e"/>
+<text x="830.5" y="655.0" font-size="18" fill="#2f5f9e" text-anchor="middle" font-weight="normal">6.6</text>
+<text x="1158.0" y="742.0" font-size="18" fill="#1c2530" text-anchor="end" font-weight="normal">スリット 6.6 × 2.4（中心線から右へ 1.75〜8.35）</text>
+<line x1="350.0" y1="863.0" x2="392.0" y2="827.0" stroke="#1c2530" stroke-width="1.0"/>
+<text x="396.0" y="823.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">内側の角は R0.5（切り欠き・スリット・下段、計 10 か所）</text>
+<line x1="1170.0" y1="1045.0" x2="1206.0" y2="1077.0" stroke="#1c2530" stroke-width="1.0"/>
+<text x="1210.0" y="1085.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">C1.0</text>
+<text x="40.0" y="1237.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・板厚 1.2 mm・2 層・FR-4。表面処理 ENIG（端子は金、先端 30° 面取り）。端子の銅は基板端の 1.0 mm 手前まで。</text>
+<text x="40.0" y="1269.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・任天堂の大型シェル（HVC-ExROM 系）用。左右の端は基準より 0.2 mm 内側の直線、切り欠きとスリットは角の丸みの分だけ 0.6 mm 広げてある。</text>
+<text x="40.0" y="1301.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・シェルの実物では未確認（最初はモジュールを付ける前に、基板だけをシェルに入れて確かめる）。</text>
+</svg>

@@ -83,7 +83,9 @@ def main():
 def report_and_export(board=None, inner=True):
     """DRC report + fab outputs (gerbers, drill, PDFs/PNGs) for the board at PCB. Also used after finish_route.py."""
     if board is None:
-        board = pcbnew.LoadBoard(PCB); pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
+        board = pcbnew.LoadBoard(PCB)
+        if gen_pcb.JLC and gen_pcb.add_finger_mask(board): print('added the solder mask window over the card-edge fingers')
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones()); board.BuildConnectivity()
         pcbnew.SaveBoard(PCB, board)                # the exports below read the file: it must carry the fills
     drc = os.path.join(HW, 'drc_report.txt')
     pcbnew.WriteDRCReport(board, drc, pcbnew.EDA_UNITS_MILLIMETRES, True)

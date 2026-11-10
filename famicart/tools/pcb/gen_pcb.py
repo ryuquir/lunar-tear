@@ -108,6 +108,27 @@ def add_rule_area(board, name, pts, layers, tracks=True, vias=True, pour=True, f
     for x, y in pts: ol.Append(FromMM(x), FromMM(y))
     board.Add(z); return z
 
+FINGER_KEEP = 4.0       # below (tab base + this) the tab carries nothing but the fingers: no tracks, no vias, no mask
+FINGER_TOP = 3.0        # the finger pads start this far below the tab base (Famicom_CardEdge_60)
+FINGER_HOLE = 1.0       # JLCPCB: no plated holes within 1.0 mm of the gold fingers
+
+def add_finger_mask(board):
+    """JLCPCB gold-finger rule: 'The gold finger area must have the solder mask fully opened' (mask left between the
+    fingers wears off when the card is inserted). One mask window per side over the part of the tab that is reserved
+    for the fingers, reaching past the board edge. The window belongs to J1, and J1 gets the 'allow solder mask
+    bridges' attribute, so the DRC accepts one aperture over pads of different nets. Returns the number of windows
+    added (0 when they are already there)."""
+    fp = board.FindFootprintByReference('J1')
+    if fp is None: return 0
+    if any(g.GetLayer() in (pcbnew.F_Mask, pcbnew.B_Mask) for g in fp.GraphicalItems()): return 0
+    x0, x1 = TAB_X0, TAB_X0 + TAB_W
+    for layer in (pcbnew.F_Mask, pcbnew.B_Mask):
+        s = pcbnew.FP_SHAPE(fp); s.SetShape(pcbnew.SHAPE_T_RECT); s.SetLayer(layer); s.SetFilled(True); s.SetWidth(0)
+        s.SetStart(mm(x0 - 0.5, BODY_H + FINGER_KEEP)); s.SetEnd(mm(x1 + 0.5, TOTAL_H + 0.5)); s.SetLocalCoord()
+        fp.Add(s)
+    fp.SetAttributes(fp.GetAttributes() | pcbnew.FP_ALLOW_SOLDERMASK_BRIDGES)
+    return 2
+
 def add_zone(board, net, layer, pts, clearance=0.25):
     z = pcbnew.ZONE(board); z.SetLayer(layer); z.SetNetCode(net.GetNetCode())
     ol = z.Outline(); ol.NewOutline()
@@ -376,7 +397,7 @@ def main():
         pad.SetLayerSet(pcbnew.LSET.AllCuMask()); pad.SetNumber('')
         fp.Add(pad); board.Add(fp)
     # soldermask keepout line (fab note): 4 mm below the tab base nothing but fingers
-    add_seg(board, x0, H + 4.0, x1, H + 4.0, layer=pcbnew.F_Fab, w=0.1)
+    add_seg(board, x0, H + FINGER_KEEP, x1, H + FINGER_KEEP, layer=pcbnew.F_Fab, w=0.1)
     add_text(board, ('FAB: %.1f mm FR4, ENIG, gold fingers with 30 deg bevel, vias tented' if JLC else 'FAB: %.1f mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented') % THICKNESS, 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
     # board-level silk text: D.SILK_TEXT = [(text, x, y, 'F'|'B', size_mm), ...] (must sit clear of pads: check the DRC
     # report for silk_over_copper); default = the revision on the back, top centre
@@ -386,9 +407,14 @@ def main():
     # rule areas: no tracks/vias/pour on the card-edge tab (fingers only; traces may enter the top 1.1 mm of a pad).
     # Under the modules nothing is needed here: the Pico footprints carry no-net pads under the module's exposed test
     # points (TP1-TP7) and USB shell legs, which keep tracks and vias of other nets away; all other vias are tented.
-    KEEP_Y = H + 4.0            # = solder-mask boundary: fingers only below this line
+    KEEP_Y = H + FINGER_KEEP    # = solder-mask boundary: fingers only below this line
+    if JLC: add_finger_mask(board)
     CU = [pcbnew.F_Cu, pcbnew.B_Cu] + [pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu][:NL - 2]
     add_rule_area(board, 'card_edge_keepout', [(x0 - 0.5, KEEP_Y), (x1 + 0.5, KEEP_Y), (x1 + 0.5, T + 0.5), (x0 - 0.5, T + 0.5)], CU)
+    if JLC:     # vias stay FINGER_HOLE above the finger tops (tracks may still run down to the fingers)
+        vy = H + FINGER_TOP - FINGER_HOLE
+        add_rule_area(board, 'finger_via_keepout', [(x0 - 0.5, vy), (x1 + 0.5, vy), (x1 + 0.5, KEEP_Y), (x0 - 0.5, KEEP_Y)], CU,
+                      tracks=False, vias=True, pour=False)
     if SHELL:
         for i, poly in enumerate(SHELL['route_keepouts']):      # notches, corner cuts, slot (+ edge clearance): no copper
             add_rule_area(board, 'shell_cut_%d' % i, poly, CU)

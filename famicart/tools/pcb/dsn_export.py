@@ -150,13 +150,19 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
             out.append(f'    (plane {q(z.GetNetname())} (polygon {lname_of(zl)} 0 {pts}))')
     out.extend(npth_keepouts)
     # rule areas -> Specctra keepouts (all signal layers)
-    for z in board.Zones():
+    # ... and the rule areas that footprints carry themselves (microSD socket: no copper under its switch contacts);
+    # those name the copper layers they apply to
+    fpz = [(z, f'{fp.GetReference()}_{k}') for fp in board.GetFootprints() for k, z in enumerate(fp.Zones())]
+    for z, zname in [(z, z.GetZoneName()) for z in board.Zones()] + fpz:
         if not z.GetIsRuleArea(): continue
         if not z.GetDoNotAllowTracks() and not z.GetDoNotAllowVias(): continue      # component-only keep-out (shell rib)
         ol = z.Outline().Outline(0)
         pts = ' '.join(f'{U(ToMM(ol.CPoint(i).x))} {-U(ToMM(ol.CPoint(i).y))}' for i in range(ol.PointCount()))
         kind = 'keepout' if z.GetDoNotAllowTracks() else 'via_keepout'
-        out.append(f'    ({kind} {q(z.GetZoneName())} (polygon signal 0 {pts}))')
+        on = [lname_of(l) for l in z.GetLayerSet().Seq() if pcbnew.IsCopperLayer(l)]
+        every = len(on) >= board.GetCopperLayerCount() or kind == 'via_keepout'       # a via touches every layer
+        for lay in (['signal'] if every else on):
+            out.append(f'    ({kind} {q(zname)} (polygon {lay} 0 {pts}))')
     out.append('  )')
     out.append('  (placement')
     by_img = {}

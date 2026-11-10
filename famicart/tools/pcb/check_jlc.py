@@ -8,7 +8,8 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
   copper to edge    >= 0.20 mm to a routed edge, >= 0.40 mm to the left / right edges (edge rails, V-cut)
   slots             non-plated slot / notch width >= 1.0 mm, inner corners drawn with a radius
   silkscreen        line >= 0.15 mm, text height >= 1.0 mm
-  gold fingers      finger copper ends >= 0.6 mm before the tab edge, board >= 50 x 50 mm
+  gold fingers      finger copper ends >= 0.6 mm before the tab edge, board >= 50 x 50 mm, solder mask fully opened
+                    over the finger area, no silkscreen and no plated hole within 1.0 mm of a finger
   Standard PCBA     board >= 70 x 70 mm, all assembled parts on the top side, every part number a Basic part
   paste             only on pads of parts that JLCPCB places
   gerbers.zip       fabrication layers and drill files only
@@ -24,7 +25,7 @@ SH = getattr(D, 'SHELL', None)
 MIN_TRACK, MIN_DRILL, MIN_RING2, HOLE_HOLE = 0.10, 0.30, 0.10, 0.20
 EDGE_ROUTED, EDGE_VCUT, MIN_SLOT = 0.20, 0.40, 1.0
 SILK_LINE, SILK_TEXT = 0.15, 1.0
-FINGER_TO_EDGE = 0.6
+FINGER_TO_EDGE, FINGER_HOLE = 0.6, 1.0
 TOL = 0.002
 
 def main():
@@ -128,6 +129,33 @@ def main():
         info.append('finger copper ends %.2f mm before the tab edge' % gap)
         need(gap >= FINGER_TO_EDGE - TOL, 'finger copper %.2f mm from the tab edge < %.1f (bevel)' % (gap, FINGER_TO_EDGE))
         need(bw >= 50 and bh >= 50, 'gold-finger boards must be at least 50 x 50 mm')
+        rects = [(ToMM(r.GetX()), ToMM(r.GetY()), ToMM(r.GetRight()), ToMM(r.GetBottom())) for r in (p.GetBoundingBox() for p in j1.Pads())]
+        fx0, fy0, fx1 = min(r[0] for r in rects), min(r[1] for r in rects), max(r[2] for r in rects)
+        # solder mask: one window per side over everything below the track keep-out line (JLCPCB: "fully opened")
+        import gen_pcb
+        ytop = gen_pcb.BODY_H + gen_pcb.FINGER_KEEP
+        for layer, name in ((pcbnew.F_Mask, 'front'), (pcbnew.B_Mask, 'back')):
+            win = [g.GetBoundingBox() for g in j1.GraphicalItems() if g.GetLayer() == layer and g.IsFilled()]
+            ok = any(ToMM(w.GetX()) <= fx0 + TOL and ToMM(w.GetRight()) >= fx1 - TOL and ToMM(w.GetY()) <= ytop + TOL and ToMM(w.GetBottom()) >= bottom - TOL for w in win)
+            if getattr(D, 'JLC_RULES', False): need(ok, 'no solder mask window over the %s fingers (JLCPCB: the finger area must be fully opened)' % name)
+        if getattr(D, 'JLC_RULES', False):
+            need(bool(j1.GetAttributes() & pcbnew.FP_ALLOW_SOLDERMASK_BRIDGES), 'J1 lacks the "allow solder mask bridges" attribute')
+            low = [t for t in tracks + vias if max(ToMM(t.GetStart().y), ToMM(t.GetEnd().y)) > ytop + TOL]
+            need(not low, '%d tracks / vias inside the finger window' % len(low))
+        # plated holes and silkscreen keep 1.0 mm from the fingers
+        def gap(x, y, r):
+            return min(math.hypot(max(a - x, 0.0, x - c), max(b - y, 0.0, y - d)) for (a, b, c, d) in rects) - r
+        if vias:
+            g = min(gap(ToMM(v.GetPosition().x), ToMM(v.GetPosition().y), ToMM(v.GetWidth()) / 2) for v in vias)
+            info.append('closest via to a finger: %.2f mm' % g)
+            need(g >= FINGER_HOLE - TOL, 'a via sits %.2f mm from a gold finger (< %.1f mm)' % (g, FINGER_HOLE))
+        near = []
+        for it in items:
+            if it.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS): continue
+            if 'TEXT' in it.GetClass() and not it.IsVisible(): continue
+            ib = it.GetBoundingBox()
+            if ToMM(ib.GetBottom()) > fy0 - FINGER_HOLE and ToMM(ib.GetRight()) > fx0 - FINGER_HOLE and ToMM(ib.GetX()) < fx1 + FINGER_HOLE: near.append(it)
+        need(not near, '%d silkscreen items within %.1f mm of the gold fingers' % (len(near), FINGER_HOLE))
 
     # ---- order package (present only after gen_jlc.py)
     z = os.path.join(HW, 'jlcpcb', 'gerbers.zip')

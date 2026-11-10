@@ -26,6 +26,7 @@ _D = _il.import_module(os.environ.get('FC_DESIGN', 'design'))
 def _rule(arg, attr, old): return arg if arg is not None else float(getattr(_D, attr, old))
 G = args.grid; W = _rule(args.track, 'TRACK', 0.1); C = _rule(args.clear, 'CLEAR', 0.1); VR = _rule(args.via, 'VIA_DIA', 0.5) / 2; DR = _rule(args.drill, 'VIA_DRILL', 0.2) / 2
 BW, BH = 90.0, float(getattr(_D, 'BODY_H', 35.4))   # routable body
+TAB_X0, TAB_X1 = (90.0 - 78.4) / 2, (90.0 + 78.4) / 2  # card-edge tab (gen_pcb.py)
 NX, NY = int(round(BW / G)) + 1, int(round((BH + 10.8) / G)) + 1   # the grid also covers the card-edge tab so finger tracks are representable
 PLANES = {'GND': 'In1.Cu', '+3V3': None}   # +3V3 layer filled in from the board
 
@@ -169,7 +170,8 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
     for (hx, hy, hr) in holes: raster(hard_via, 'circ', (hx, hy, hr), 0.25 + DR + 0.01)
     # rule areas that forbid tracks / vias (card-edge tab, shell notches and slot): hard obstacles. All of them are
     # axis-aligned rectangles in this project, so the bounding box is the area itself.
-    for z in board.Zones():
+    # Footprints can carry rule areas of their own (the microSD socket: no copper under its switch contacts).
+    for z in list(board.Zones()) + [z for fp in board.GetFootprints() for z in fp.Zones()]:
         if not z.GetIsRuleArea(): continue
         zb = z.GetBoundingBox(); zbox = (ToMM(zb.GetX()), ToMM(zb.GetY()), ToMM(zb.GetRight()), ToMM(zb.GetBottom()))
         if z.GetDoNotAllowTracks():
@@ -195,10 +197,14 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
         if rippable: soft_via.flat[vfl] = np.maximum(soft_via.flat[vfl], cost)
         else: hard_via.flat[vfl] = True
         soft_items.append((t, cells, vfl))
+    # Board edge. Below the body only the card-edge tab exists (TAB_X0 .. TAB_X1); on the tab, tracks may run down
+    # to the finger keep-out and vias to the finger via keep-out (both are rule areas, handled above).
     edge = np.zeros((NY, NX), bool); m = int(math.ceil((0.3 + W / 2) / G))
-    edge[:m, :] = True; edge[:, :m] = True; edge[:, -m:] = True; edge[int((BH - 0.3 - W / 2) / G):, :] = True
+    edge[:m, :] = True; edge[:, :m] = True; edge[:, -m:] = True
+    jb = int((BH - 0.3 - W / 2) / G); edge[jb:, :int(math.ceil((TAB_X0 + 0.3 + W / 2) / G))] = True; edge[jb:, int((TAB_X1 - 0.3 - W / 2) / G) + 1:] = True
     hard |= edge[None]
-    vm = int(math.ceil((0.3 + VR) / G)); hard_via[:vm, :] = True; hard_via[:, :vm] = True; hard_via[:, -vm:] = True; hard_via[int((BH - 0.3 - VR) / G):, :] = True
+    vm = int(math.ceil((0.3 + VR) / G)); hard_via[:vm, :] = True; hard_via[:, :vm] = True; hard_via[:, -vm:] = True
+    jv = int((BH - 0.3 - VR) / G); hard_via[jv:, :int(math.ceil((TAB_X0 + 0.3 + VR) / G))] = True; hard_via[jv:, int((TAB_X1 - 0.3 - VR) / G) + 1:] = True
     def cells_of(items, shrink):
         out = set()
         for it in items:
