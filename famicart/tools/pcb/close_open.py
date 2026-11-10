@@ -7,13 +7,15 @@ transaction on a copy of the board:
   1. route one open connection, removing what is in the way (finish_route.py --only NET, tracks of the nets in the
      protect list stay),
   2. route everything that this opened, using free room only (finish_route.py --no-rip),
-  3. keep the copy if it has fewer open connections than before and no rule error; otherwise throw it away, protect
-     the nets that could not be routed again, and try the connection once more (up to --tries times).
-    FC_DESIGN=design_revg python3 close_open.py board.kicad_pcb [--tries 6]"""
+  3. keep the copy if it has fewer open connections than before and no rule error. A copy with the same number, but
+     with another connection open, is kept as a sideways step once per such state (the next try starts from there).
+     Otherwise the copy is thrown away, the nets that could not be routed again are protected, and the connection is
+     tried once more. --tries limits the number of steps in total.
+    FC_DESIGN=design_revg python3 close_open.py board.kicad_pcb [--tries 12]"""
 import os, sys, re, shutil, subprocess, argparse, tempfile
 import pcbnew
 HERE = os.path.dirname(os.path.abspath(__file__))
-ap = argparse.ArgumentParser(); ap.add_argument('pcb'); ap.add_argument('--tries', type=int, default=6)
+ap = argparse.ArgumentParser(); ap.add_argument('pcb'); ap.add_argument('--tries', type=int, default=12)
 args = ap.parse_args()
 
 def state(path):
@@ -37,27 +39,28 @@ def main():
     opens, errors = state(args.pcb)
     print('open connections:', len(opens), sorted(set(opens)), '| rule errors:', errors)
     work = tempfile.mkdtemp(prefix='close_open_')
-    for net in sorted(set(opens)):
-        protect = set()
-        for attempt in range(args.tries):
-            base, _ = state(args.pcb)
-            if net not in base: break
-            trial = os.path.join(work, 'famicart.kicad_pcb')
-            for ext in ('.kicad_pcb', '.kicad_pro'):
-                src = os.path.splitext(args.pcb)[0] + ext
-                if os.path.exists(src): shutil.copy(src, os.path.splitext(trial)[0] + ext)
-            for f in os.listdir(work):
-                if f.endswith('.riphistory.json'): os.remove(os.path.join(work, f))
-            log = run(trial, '--only', net, '--rounds', '1', '--protect', ','.join(sorted(protect)))
-            ripped = sorted(set(re.findall(r"'([^']+)'", ' '.join(re.findall(r'ripping up \d+ items of (\[[^\]]*\])', log)))))
-            log2 = run(trial, '--no-rip', '--rounds', '3')
-            now, err = state(trial)
-            print('  %s, try %d: removed tracks of %s -> open %d (was %d), rule errors %d' % (net, attempt + 1, ripped or 'nothing', len(now), len(base), err))
-            if len(now) < len(base) and err == 0:
-                shutil.copy(trial, args.pcb); print('    kept'); break
-            stuck = set(now) - {net}
-            if not ripped or not (stuck | set(ripped)) - protect: print('    no further way for', net); break
-            protect |= stuck if stuck else set(ripped)
+    seen = {frozenset(opens)}; protect = {}; tries = 0
+    while opens and tries < args.tries:
+        net = sorted(set(opens), key=lambda n: len(protect.get(n, ())))[0]; tries += 1
+        trial = os.path.join(work, 'famicart.kicad_pcb')
+        for ext in ('.kicad_pcb', '.kicad_pro'):
+            src = os.path.splitext(args.pcb)[0] + ext
+            if os.path.exists(src): shutil.copy(src, os.path.splitext(trial)[0] + ext)
+        for f in os.listdir(work):
+            if f.endswith('.riphistory.json'): os.remove(os.path.join(work, f))
+        log = run(trial, '--only', net, '--rounds', '1', '--protect', ','.join(sorted(protect.get(net, ()))))
+        ripped = sorted(set(re.findall(r"'([^']+)'", ' '.join(re.findall(r'ripping up \d+ items of (\[[^\]]*\])', log)))))
+        run(trial, '--no-rip', '--rounds', '3')
+        now, err = state(trial)
+        better = len(now) < len(opens) and err == 0
+        sideways = len(now) == len(opens) and err == 0 and frozenset(now) not in seen       # another connection is open instead: a new position to try from
+        print('  try %d, %s: removed tracks of %s -> open %d %s (was %d), rule errors %d%s' % (tries, net, ripped or 'nothing', len(now), sorted(set(now)), len(opens), err,
+              ' - kept' if better else ' - kept as a sideways step' if sideways else ''), flush=True)
+        if better or sideways:
+            shutil.copy(trial, args.pcb); opens = now; seen.add(frozenset(now)); continue
+        stuck = set(now) - {net}
+        protect.setdefault(net, set()).update(stuck if stuck else ripped)
+        if not ripped and 'no path' in log: protect.setdefault(net, set()).add('?')        # nothing to try differently for this net
     opens, errors = state(args.pcb)
     print('open connections now:', len(opens), sorted(set(opens)), '| rule errors:', errors)
     sys.exit(1 if opens or errors else 0)
