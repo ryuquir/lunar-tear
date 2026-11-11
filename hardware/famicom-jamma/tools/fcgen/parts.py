@@ -22,6 +22,7 @@ FP_TANT_B = "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
 FP_CP_6x8 = "Capacitor_SMD:CP_Elec_6.3x7.7"
 FP_SOT23 = "Package_TO_SOT_SMD:SOT-23"
 FP_SOT23_5 = "Package_TO_SOT_SMD:SOT-23-5"
+FP_SOT23_6 = "Package_TO_SOT_SMD:SOT-23-6"
 FP_SOD123 = "Diode_SMD:D_SOD-123"
 FP_SMA = "Diode_SMD:D_SMA"
 FP_SMB = "Diode_SMD:D_SMB"
@@ -62,13 +63,12 @@ TANT = {"10u/16V": ("C7171", "10uF", FP_TANT_A), "100u/6.3V": ("C16133", "100uF"
 # name -> (LCSC number, KiCad symbol, footprint, text that must appear in JLCPCB's part number)
 SEMI = {
     "MMBT3904": ("C20526", "Transistor_BJT:MMBT3904", FP_SOT23, "MMBT3904"),
+    "S8550": ("C105432", "Transistor_BJT:MMBT3906", FP_SOT23, "S8550"),     # PNP; SOT-23 pins as the MMBT3906: 1 B, 2 E, 3 C
     "AO3400A": ("C20917", "Transistor_FET:AO3400A", FP_SOT23, "AO3400A"),
-    "AO3401A": ("C15127", "Transistor_FET:AO3401A", FP_SOT23, "AO3401A"),
     "1N4148W": ("C81598", "Diode:1N4148W", FP_SOD123, "1N4148W"),
     "SS14": ("C2480", "Diode:SS14", FP_SMA, "SS14"),
     "SS54": ("C22452", "Device:D_Schottky", FP_SMA, "SS54"),
     "SMBJ6.5CA": ("C7420377", "Device:D_TVS", FP_SMB, "SMBJ6.5CA"),
-    "PSM712": ("C32677", "Device:D_TVS_Dual_AAC", FP_SOT23, "PSM712"),
     "AMS1117-3.3": ("C6186", "Regulator_Linear:AMS1117-3.3", FP_SOT223, "AMS1117-3.3"),
     "LED-R": ("C2286", "Device:LED", FP_LED, "KT-0603R"),
     "TS-1187A": ("C318884", "Switch:SW_Push", FP_SW_TACT, "TS-1187A"),
@@ -89,7 +89,9 @@ EXT = {
     "74HCT595": ("C282339", "74HCT595D", "SOIC-16"),
     "comparator": ("C283912", "LMV7219M5X", "SOT-23-5"),
     "amp": ("C113367", "PAM8302AASCR", "MSOP-8"),
-    "usbc": ("C393939", "TYPE-C16PIN", ""),
+    "usbc": ("C165948", "TYPE-C-31-M-12", ""),
+    "loadswitch": ("C55266", "TPS2553DBVR", "SOT-23-6"),
+    "tvs15": ("C86819", "SMAJ15A", "SMA"),
     "polyfuse": ("C262042", "TLC-LSMD300D", "2920"),
     "cap470u": ("C46550400", "JVJ16V470M6x8", "6.3"),
     "dipsw4": ("C92645", "DS-04RP", "2.54mm"),
@@ -160,8 +162,8 @@ def nfet(sh, g, d, s, note=""):
     return semi(sh, "Q", "AO3400A", {1: g, 2: s, 3: d}, note=note)
 
 
-def pfet(sh, g, d, s, note=""):
-    return semi(sh, "Q", "AO3401A", {1: g, 2: s, 3: d}, note=note)
+def pnp(sh, b, c, e, note=""):
+    return semi(sh, "Q", "S8550", {1: b, 2: e, 3: c}, note=note, value="S8550")
 
 
 def diode(sh, name, anode, cathode, dnp=False, note=""):
@@ -172,9 +174,9 @@ def tvs(sh, a, b, note=""):
     return semi(sh, "D", "SMBJ6.5CA", {1: a, 2: b}, note=note)
 
 
-def tvs2(sh, line1, line2, common, note=""):
-    """PSM712: pins 1 and 2 are the two lines, pin 3 is the common (ground) pin."""
-    return semi(sh, "D", "PSM712", {1: line1, 2: line2, 3: common}, note=note)
+def tvs15(sh, line, gnd, note=""):
+    """SMAJ15A, one direction: nothing flows up to 15 V, it clamps between 16.7 V and 24.4 V.  Pin 1 is the cathode."""
+    return sh.lib("D", "Device:D_Zener", "SMAJ15A", FP_SMA, JLCX, usex("tvs15"), {1: line, 2: gnd}, False, note, horizontal=True)
 
 
 def led(sh, anode, cathode, note=""):

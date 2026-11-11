@@ -1,89 +1,93 @@
 source,code,value,maker's part number,footprint,qty,dnp,references,assembled by,stock,unit price USD (1 piece),note
-JLC,C22775,100,0603WAF1000T5E,Resistor_SMD:R_0603_1608Metric,36,,R21 R22 R23 R24 R25 R26 R27 R28 R29 R30 R31 R32 R33 R34 R35 R36 R52 R54 R55 R58 R59 R60 R61 R62 R63 R65 R66 R95 R96 R97 R104 R119 R120 R121 R122 R123,JLCPCB (SMT Assembly),8867504,0.0021,
-JLC,C14663,100n,CC0603KRX7R9BB104,Capacitor_SMD:C_0603_1608Metric,30,,C3 C6 C7 C8 C11 C12 C14 C15 C16 C17 C19 C22 C23 C25 C27 C28 C29 C30 C31 C32 C33 C34 C36 C45 C76 C77 C78 C79 C80 C81,JLCPCB (SMT Assembly),36313706,0.0102,
-JLC,C16133,100u/6.3V,TAJB107K006RNJ,Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B,1,,C5,JLCPCB (SMT Assembly),626367,0.2515,the regulator needs a tantalum capacitor of 22 uF or more at its output
-JLC,C25804,10k,0603WAF1002T5E,Resistor_SMD:R_0603_1608Metric,15,,R2 R5 R37 R50 R51 R56 R67 R93 R106 R109 R111 R112 R114 R116 R118,JLCPCB (SMT Assembly),45422722,0.0022,
-JLC,C29718,10k,4D03WGJ0103T5E,Resistor_SMD:R_Array_Convex_4x0603,15,,RN2 RN3 RN8 RN10 RN11 RN12 RN13 RN14 RN15 RN16 RN17 RN18 RN19 RN34 RN35,JLCPCB (SMT Assembly),1132412,0.0075,"defined levels while the CPU is in reset or absent: read, and M2 low so that nothing is selected"
-JLC,C57112,10n,0603B103K500NT,Capacitor_SMD:C_0603_1608Metric,27,,C40 C41 C51 C52 C53 C54 C55 C56 C57 C58 C59 C60 C61 C62 C63 C64 C65 C66 C67 C68 C69 C70 C71 C72 C73 C74 C75,JLCPCB (SMT Assembly),5578930,0.0103,
-JLC,C19702,10u,CL10A106KP8NNNC,Capacitor_SMD:C_0603_1608Metric,10,,C2 C4 C9 C10 C26 C38 C47 C82 C83 C84,JLCPCB (SMT Assembly),9761276,0.0233,
-JLC,C7171,10u/16V,TAJA106K016RNJ,Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A,3,,C13 C18 C48,JLCPCB (SMT Assembly),888477,0.177,
+JLC,C22775,100,0603WAF1000T5E,Resistor_SMD:R_0603_1608Metric,29,,R30 R31 R32 R33 R34 R35 R36 R37 R38 R39 R40 R41 R42 R43 R44 R45 R76 R82 R98 R105 R134 R135 R136 R143 R158 R159 R160 R161 R162,JLCPCB (SMT Assembly),8867504,0.0021,
+JLC,C14663,100n,CC0603KRX7R9BB104,Capacitor_SMD:C_0603_1608Metric,29,,C3 C4 C7 C8 C11 C12 C14 C15 C16 C17 C19 C22 C24 C26 C28 C29 C30 C31 C32 C33 C34 C35 C37 C46 C77 C78 C79 C80 C81,JLCPCB (SMT Assembly),36313706,0.0102,
+JLC,C16133,100u/6.3V,TAJB107K006RNJ,Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B,1,,C6,JLCPCB (SMT Assembly),626367,0.2515,the regulator needs a tantalum capacitor of 22 uF or more at its output
+JLC,C25804,10k,0603WAF1002T5E,Resistor_SMD:R_0603_1608Metric,14,,R1 R3 R46 R64 R83 R84 R96 R97 R132 R145 R148 R151 R153 R155,JLCPCB (SMT Assembly),45422722,0.0022,keeps the socket's supply pin near 0 V while no cable is plugged in (the diode leaks a little)
+JLC,C29718,10k,4D03WGJ0103T5E,Resistor_SMD:R_Array_Convex_4x0603,9,,RN2 RN3 RN9 RN15 RN16 RN17 RN18 RN33 RN34,JLCPCB (SMT Assembly),1132412,0.0075,defined levels while the CPU is in reset or absent
+JLC,C57112,10n,0603B103K500NT,Capacitor_SMD:C_0603_1608Metric,27,,C41 C42 C52 C53 C54 C55 C56 C57 C58 C59 C60 C61 C62 C63 C64 C65 C66 C67 C68 C69 C70 C71 C72 C73 C74 C75 C76,JLCPCB (SMT Assembly),5578930,0.0103,
+JLC,C19702,10u,CL10A106KP8NNNC,Capacitor_SMD:C_0603_1608Metric,10,,C2 C5 C9 C10 C27 C39 C48 C82 C83 C84,JLCPCB (SMT Assembly),9761276,0.0233,
+JLC,C7171,10u/16V,TAJA106K016RNJ,Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A,3,,C13 C18 C49,JLCPCB (SMT Assembly),888477,0.177,
 JLC,C14709,120R@100MHz 2A,BLM18PG121SN1D,Inductor_SMD:L_0603_1608Metric,2,,FB1 FB2,JLCPCB (SMT Assembly),1859597,0.0124,
-JLC,C22790,12k,0603WAF1202T5E,Resistor_SMD:R_0603_1608Metric,3,,R10 R99 R102,JLCPCB (SMT Assembly),1094110,0.0031,
-JLC,C20197,1k,4D03WGJ0102T5E,Resistor_SMD:R_Array_Convex_4x0603,12,,RN6 RN7 RN9 RN20 RN21 RN22 RN23 RN24 RN25 RN26 RN36 RN37,JLCPCB (SMT Assembly),542341,0.0095,
-JLC,C21190,1k,0603WAF1001T5E,Resistor_SMD:R_0603_1608Metric,18,,R3 R6 R7 R8 R49 R53 R57 R64 R74 R81 R82 R83 R90 R92 R103 R107 R108 R110,JLCPCB (SMT Assembly),25407888,0.0017,
-JLC,C1588,1n,CL10B102KB8NNNC,Capacitor_SMD:C_0603_1608Metric,2,,C49 C50,JLCPCB (SMT Assembly),5712302,0.0082,
-JLC,C15849,1u,CL10A105KB8NNNC,Capacitor_SMD:C_0603_1608Metric,7,,C24 C35 C39 C42 C43 C44 C46,JLCPCB (SMT Assembly),12458144,0.0113,next to pin 4
-JLC,C4184,20k,0603WAF2002T5E,Resistor_SMD:R_0603_1608Metric,8,,R9 R38 R68 R98 R101 R113 R115 R117,JLCPCB (SMT Assembly),5202283,0.0021,
+JLC,C22790,12k,0603WAF1202T5E,Resistor_SMD:R_0603_1608Metric,4,,R10 R47 R138 R141,JLCPCB (SMT Assembly),1094110,0.0031,
+JLC,C20197,1k,4D03WGJ0102T5E,Resistor_SMD:R_Array_Convex_4x0603,15,,RN6 RN7 RN8 RN10 RN11 RN12 RN13 RN19 RN20 RN21 RN22 RN23 RN24 RN25 RN35,JLCPCB (SMT Assembly),542341,0.0095,
+JLC,C21190,1k,0603WAF1001T5E,Resistor_SMD:R_0603_1608Metric,19,,R4 R6 R7 R8 R62 R80 R81 R85 R99 R104 R113 R120 R121 R122 R129 R131 R142 R150 R157,JLCPCB (SMT Assembly),25407888,0.0017,
+JLC,C1588,1n,CL10B102KB8NNNC,Capacitor_SMD:C_0603_1608Metric,2,,C50 C51,JLCPCB (SMT Assembly),5712302,0.0082,
+JLC,C15849,1u,CL10A105KB8NNNC,Capacitor_SMD:C_0603_1608Metric,7,,C25 C36 C40 C43 C44 C45 C47,JLCPCB (SMT Assembly),12458144,0.0113,next to pin 4
+JLC,C4184,20k,0603WAF2002T5E,Resistor_SMD:R_0603_1608Metric,5,,R5 R9 R137 R140 R156,JLCPCB (SMT Assembly),5202283,0.0021,sets the current limit (1.3 A typical); keep the track short and away from signals
 JLC,C1603,220p,CL10B221KB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,DNP,C21,JLCPCB (SMT Assembly),731779,0.0067,not fitted: early Famicoms have 330 pF + 30 pF here
-JLC,C1603,220p,CL10B221KB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,,C37,JLCPCB (SMT Assembly),731779,0.0067,15 kHz low-pass
-JLC,C23140,33,0603WAF330JT5E,Resistor_SMD:R_0603_1608Metric,10,,R11 R39 R41 R42 R43 R44 R45 R46 R47 R48,JLCPCB (SMT Assembly),3542343,0.0024,"21.5 MHz from Pico A, 3.3 V square wave, DC coupled"
-JLC,C1980,4.7k,4D03WGJ0472T5E,Resistor_SMD:R_Array_Convex_4x0603,8,,RN1 RN27 RN28 RN29 RN30 RN31 RN32 RN33,JLCPCB (SMT Assembly),1753865,0.0068,both resets are held low until Pico A releases them
+JLC,C1603,220p,CL10B221KB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,,C38,JLCPCB (SMT Assembly),731779,0.0067,15 kHz low-pass
+JLC,C23140,33,0603WAF330JT5E,Resistor_SMD:R_0603_1608Metric,11,,R11 R21 R48 R50 R51 R52 R53 R54 R55 R56 R57,JLCPCB (SMT Assembly),3542343,0.0024,"21.5 MHz from Pico A, 3.3 V square wave, DC coupled"
+JLC,C1980,4.7k,4D03WGJ0472T5E,Resistor_SMD:R_Array_Convex_4x0603,10,,RN1 RN14 RN26 RN27 RN28 RN29 RN30 RN31 RN32 RN36,JLCPCB (SMT Assembly),1753865,0.0068,both resets are held low until Pico A releases them
 JLC,C1980,4.7k,4D03WGJ0472T5E,Resistor_SMD:R_Array_Convex_4x0603,2,DNP,RN4 RN5,JLCPCB (SMT Assembly),1753865,0.0068,not fitted: pull-downs that some Disk System RAM adapters need
-JLC,C23179,470,0603WAF4700T5E,Resistor_SMD:R_0603_1608Metric,29,,R12 R13 R14 R15 R16 R17 R18 R19 R20 R40 R69 R70 R71 R72 R73 R75 R76 R77 R78 R79 R80 R84 R85 R86 R87 R88 R89 R91 R94,JLCPCB (SMT Assembly),3886472,0.0023,
-JLC,C25819,47k,0603WAF4702T5E,Resistor_SMD:R_0603_1608Metric,3,,R4 R100 R105,JLCPCB (SMT Assembly),3004447,0.0016,
+JLC,C23179,470,0603WAF4700T5E,Resistor_SMD:R_0603_1608Metric,52,,R12 R13 R22 R23 R24 R25 R26 R27 R28 R29 R49 R77 R78 R79 R86 R87 R88 R89 R90 R91 R92 R93 R94 R95 R100 R101 R102 R103 R108 R109 R110 R111 R112 R114 R115 R116 R117 R118 R119 R123 R124 R125 R126 R127 R128 R130 R133 R146 R147 R149 R163 R164,JLCPCB (SMT Assembly),3886472,0.0023,limits the current into the gate's inputs while +5V_SW is off
+JLC,C25819,47k,0603WAF4702T5E,Resistor_SMD:R_0603_1608Metric,29,,R14 R15 R16 R17 R18 R19 R20 R58 R59 R60 R61 R63 R65 R66 R67 R68 R69 R70 R71 R72 R73 R74 R75 R106 R107 R139 R144 R152 R154,JLCPCB (SMT Assembly),3004447,0.0016,"read while the CPU is in reset or absent; weak, as the Famicom has no pull-up here"
 JLC,C1671,47p,CL10C470JB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,DNP,C20,JLCPCB (SMT Assembly),869438,0.0063,not fitted: the Famicom has 68 pF here
-JLC,C23186,5.1k,0603WAF5101T5E,Resistor_SMD:R_0603_1608Metric,3,,R1 R124 R125,JLCPCB (SMT Assembly),19928266,0.0015,
+JLC,C23186,5.1k,0603WAF5101T5E,Resistor_SMD:R_0603_1608Metric,3,,R2 R165 R166,JLCPCB (SMT Assembly),19928266,0.0015,
 JLC,C5947,74HC595 (JAMMA outputs),"74HC595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U24,JLCPCB (SMT Assembly),404126,0.1018,
 JLC,C6186,AMS1117-3.3,AMS1117-3.3,Package_TO_SOT_SMD:SOT-223-3_TabPin2,1,,U28,JLCPCB (SMT Assembly),1538727,0.1939,
-JLC,C20917,AO3400A,AO3400A,Package_TO_SOT_SMD:SOT-23,5,,Q2 Q5 Q6 Q7 Q8,JLCPCB (SMT Assembly),992710,0.0869,
-JLC,C15127,AO3401A,AO3401A,Package_TO_SOT_SMD:SOT-23,1,,Q1,JLCPCB (SMT Assembly),1638278,0.0941,"AO3401A: source +5V, drain +5V_SW"
+JLC,C20917,AO3400A,AO3400A,Package_TO_SOT_SMD:SOT-23,6,,Q2 Q3 Q5 Q6 Q7 Q8,JLCPCB (SMT Assembly),992710,0.0869,source on DIP switch 1: with the switch off (real chips) the source is not grounded and the outputs stay off
 JLC,C3113,CJ431,CJ431,Package_TO_SOT_SMD:SOT-23,1,,U2,JLCPCB (SMT Assembly),607107,0.0365,clamps +3V3 at about 3.8 V = 2.5 V x (1 + 5.1k/10k)
 JLC,C2286,LED-R,KT-0603R,LED_SMD:LED_0603_1608Metric,2,,D5 D6,JLCPCB (SMT Assembly),6268083,0.0077,lit while the board logic rail is up
 JLC,C7950,LM358,LM358DR2G,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,1,,U18,JLCPCB (SMT Assembly),521642,0.054,"A: inverting mixer amplifier.  B: spare, wired as a follower of the bias voltage so that it stays quiet"
-JLC,C20526,MMBT3904,MMBT3904(RANGE:100-300),Package_TO_SOT_SMD:SOT-23,2,,Q3 Q4,JLCPCB (SMT Assembly),4313904,0.0103,"emitter follower: VBUF = VOUT - 0.65 V, so the PPU pin sees almost no load"
-JLC,C32677,PSM712,PSM712-LF-T7,Package_TO_SOT_SMD:SOT-23,2,,D11 D12,JLCPCB (SMT Assembly),117440,0.3445,"second clamp (13 V to 19 V), for a cabinet that feeds its coils from +5 V and leaves +12 V open"
+JLC,C20526,MMBT3904,MMBT3904(RANGE:100-300),Package_TO_SOT_SMD:SOT-23,1,,Q4,JLCPCB (SMT Assembly),4313904,0.0103,inverts: Pico A outputs the sync pulses high
+JLC,C105432,S8550,S8550(RANGE:120-200),Package_TO_SOT_SMD:SOT-23,1,,Q1,JLCPCB (SMT Assembly),618390,0.0176,"emitter follower as in the Famicom: VBUF = VOUT + 0.65 V (sync tip about 0.8 V, black 1.3 V, white 2.7 V)"
 JLC,C7420377,SMBJ6.5CA,SMBJ6.5CA,Diode_SMD:D_SMB,1,,D1,JLCPCB (SMT Assembly),1139871,0.0423,absorbs spikes only: it starts to conduct above 7.2 V and does not protect against a steady over-voltage
-JLC,C2480,SS14,SS14,Diode_SMD:D_SMA,6,,D3 D4 D7 D8 D9 D10,JLCPCB (SMT Assembly),1610469,0.0192,
+JLC,C2480,SS14,SS14,Diode_SMD:D_SMA,2,,D3 D4,JLCPCB (SMT Assembly),1610469,0.0192,
 JLC,C22452,SS54,SS54,Diode_SMD:D_SMA,1,,D2,JLCPCB (SMT Assembly),1735691,0.0446,conducts and trips F1 if the supply is connected the wrong way round
 JLC,C318884,TS-1187A,TS-1187A-B-A-B,Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A,4,,SW1 SW2 SW4 SW5,JLCPCB (SMT Assembly),848744,0.0215,"TEST, same as JAMMA finger 15"
-JLCX,C118956,10k (volume),3362P-1-103,fcjamma:Trimmer_Bourns_3362P,1,,RV1,JLCPCB (Wave Soldering),33608,0.1725,3362P: pin 2 is the wiper
-JLCX,C46550400,470u/16V,JVJ16V470M6x8,Capacitor_SMD:CP_Elec_6.3x7.7,1,,C1,JLCPCB (SMT Assembly),126918,0.1079,
-JLCX,C5613,74HC165 (1P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U20,JLCPCB (SMT Assembly),210550,0.1022,
-JLCX,C5613,74HC165 (2P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U21,JLCPCB (SMT Assembly),210550,0.1022,
-JLCX,C5613,74HC165 (cartridge CPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U16,JLCPCB (SMT Assembly),210550,0.1022,
-JLCX,C5613,74HC165 (cartridge PPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U17,JLCPCB (SMT Assembly),210550,0.1022,
-JLCX,C5613,"74HC165 (start, coin, service)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U22,JLCPCB (SMT Assembly),210550,0.1022,
-JLCX,C5613,"74HC165 (switches, status)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U23,JLCPCB (SMT Assembly),210550,0.1022,
-JLCX,C6764,74HCT00,SN74HCT00DR,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,1,,U5,JLCPCB (SMT Assembly),1874,0.4038,"/ROMSEL = NAND(M2, A15); /PA13 for the cartridge"
+JLCX,C118956,10k (volume),3362P-1-103,fcjamma:Trimmer_Bourns_3362P,1,,RV1,JLCPCB (Wave Soldering),33603,0.1725,"3362P: pin 2 is the wiper; clockwise moves it towards pin 3, so clockwise is louder"
+JLCX,C46550400,470u/16V,JVJ16V470M6x8,Capacitor_SMD:CP_Elec_6.3x7.7,2,,C1 C23,JLCPCB (SMT Assembly),126833,0.1079,
+JLCX,C5613,74HC165 (1P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U20,JLCPCB (SMT Assembly),210649,0.1022,
+JLCX,C5613,74HC165 (2P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U21,JLCPCB (SMT Assembly),210649,0.1022,
+JLCX,C5613,74HC165 (cartridge CPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U16,JLCPCB (SMT Assembly),210649,0.1022,
+JLCX,C5613,74HC165 (cartridge PPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U17,JLCPCB (SMT Assembly),210649,0.1022,
+JLCX,C5613,"74HC165 (start, coin, service)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U22,JLCPCB (SMT Assembly),210649,0.1022,
+JLCX,C5613,"74HC165 (switches, status)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U23,JLCPCB (SMT Assembly),210649,0.1022,
+JLCX,C6764,74HCT00,SN74HCT00DR,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,1,,U5,JLCPCB (SMT Assembly),1874,0.4038,"1: /ROMSEL = NAND(M2, A15); 2: /PA13 for the cartridge; 3: receives OUT0 at TTL levels; 4: optional 5 V clock buffer (JP3)"
 JLCX,C5965,74HCT138,"74HCT138D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U4,JLCPCB (SMT Assembly),3033,0.2716,"M2 high and A15 low: Y0 = 0000-1FFF (RAM), Y1 = 2000-3FFF (PPU), Y2 = 4000-5FFF, Y3 = 6000-7FFF"
 JLCX,C5209384,74HCT573,"74HCT573D,653",Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm,1,,U7,JLCPCB (SMT Assembly),34451,0.37,does the job of the Famicom's 74LS373: holds PA0-7 while the bus carries data
 JLCX,C282339,74HCT595 (CPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U10,JLCPCB (SMT Assembly),10081,0.2385,
-JLCX,C282339,74HCT595 (CPU A8-15),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U11,JLCPCB (SMT Assembly),10081,0.2385,
+JLCX,C282339,74HCT595 (CPU A8-15),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U11,JLCPCB (SMT Assembly),10081,0.2385,the CPU address lines are driven directly: some cartridges load them with several 74LS inputs
 JLCX,C282339,74HCT595 (PPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U12,JLCPCB (SMT Assembly),10081,0.2385,
 JLCX,C282339,74HCT595 (PPU A8-13),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U13,JLCPCB (SMT Assembly),10081,0.2385,
-JLCX,C282339,74HCT595 (control),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U14,JLCPCB (SMT Assembly),10081,0.2385,"QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE pull-up source for M2"
+JLCX,C282339,74HCT595 (control),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U14,JLCPCB (SMT Assembly),10081,0.2385,"QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE M2, QF low = U15 drives the data bus"
 JLCX,C282339,74HCT595 (data to cartridge),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U15,JLCPCB (SMT Assembly),10081,0.2385,drives the data bus only while a mapper register is being written
-JLCX,C92645,DS-04RP (DIP switch 4),DS-04RP,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,JLCPCB (Wave Soldering),15201,0.3623,"1: off = CPU and PPU chips fitted, on = emulation; 2-4: for the firmware"
+JLCX,C92645,DS-04RP (DIP switch 4),DS-04RP,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,JLCPCB (Wave Soldering),15031,0.3623,"1: off = CPU and PPU chips fitted, on = emulation (it also unlocks the dump drivers); 2-4: for the firmware"
 JLCX,C5173310,"ED60BGFBK (60-pin card edge, 2.54 mm)",ED60BGFBK,fcjamma:Famicom_Cart_60,1,,J8,JLCPCB (Wave Soldering),299,1.3568,made for 1.57 mm cards; its fit with Famicom cartridges has to be tried with a sample before the order
 JLCX,C47143,IS62C256AL (video RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U8,JLCPCB (SMT Assembly),2021,3.3248,
 JLCX,C47143,IS62C256AL (work RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U3,JLCPCB (SMT Assembly),2021,3.3248,
-JLCX,C283912,LMV7219,LMV7219M5X/NOPB,Package_TO_SOT_SMD:SOT-23-5,1,,U9,JLCPCB (SMT Assembly),6820,0.7569,"high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns"
-JLCX,C113367,PAM8302A,PAM8302AASCR,Package_SO:MSOP-8_3x3mm_P0.65mm,1,,U19,JLCPCB (SMT Assembly),20643,0.4103,"class D, gain 15 (23.5 dB), up to 1.5 W into 8 ohm; powered from +5V, not through the +5V_SW switch"
-JLCX,C41407547,Pico 2 A (video),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U25,JLCPCB (SMT Assembly),56,9.2829,
-JLCX,C41407547,Pico 2 B (bus),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U26,JLCPCB (SMT Assembly),56,9.2829,
-JLCX,C41407547,"Pico 2 C (I/O, management)",Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U27,JLCPCB (SMT Assembly),56,9.2829,
+JLCX,C283912,LMV7219,LMV7219M5X/NOPB,Package_TO_SOT_SMD:SOT-23-5,1,,U9,JLCPCB (SMT Assembly),2220,0.7569,"high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns; on +3V3, so its output suits the Pico"
+JLCX,C113367,PAM8302A,PAM8302AASCR,Package_SO:MSOP-8_3x3mm_P0.65mm,1,,U19,JLCPCB (SMT Assembly),20636,0.4103,"class D, gain 15 (23.5 dB), up to 1.5 W into 8 ohm; powered from +5V, not through the +5V_SW switch"
+JLCX,C41407547,Pico 2 A (video),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U25,JLCPCB (SMT Assembly),55,9.2829,
+JLCX,C41407547,Pico 2 B (bus),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U26,JLCPCB (SMT Assembly),55,9.2829,
+JLCX,C41407547,"Pico 2 C (I/O, management)",Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U27,JLCPCB (SMT Assembly),55,9.2829,
+JLCX,C86819,SMAJ15A,SMAJ15A/TR13,Diode_SMD:D_SMA,4,,D7 D8 D9 D10,JLCPCB (SMT Assembly),88933,0.0475,"takes the coil's turn-off current: nothing flows up to 15 V, the drain stays below 25 V (the transistor stands 30 V)"
 JLCX,C262042,TLC-LSMD300D (3 A hold),TLC-LSMD300D,Fuse:Fuse_2920_7451Metric,1,,F1,JLCPCB (SMT Assembly),11284,0.1526,"resettable fuse: holds 3 A, trips at 6 A"
-JLCX,C393939,USB Type-C socket (TYPE-C16PIN),TYPE-C16PIN,Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12,1,,J10,JLCPCB (SMT Assembly),335691,0.069,
+JLCX,C55266,TPS2553,TPS2553DBVR,Package_TO_SOT_SMD:SOT-23-6,1,,U29,JLCPCB (SMT Assembly),54487,0.5525,off while EN is low or +5V is below 2.4 V; limits the current to 1.2-1.4 A; nothing flows back from +5V_SW to +5V; /FAULT pulls the I_5VSW bit low on over-current or over-temperature
+JLCX,C165948,USB Type-C socket (TYPE-C-31-M-12),TYPE-C-31-M-12,Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12,1,,J10,JLCPCB (SMT Assembly),283271,0.1867,
 DONOR,,RP2A03 (donor),,Package_DIP:DIP-40_W15.24mm_Socket,1,,U1,plugged in by hand,,,plugged into the 40-pin socket that JLCPCB solders at this position
 DONOR,,RP2C02 (donor),,Package_DIP:DIP-40_W15.24mm_Socket,1,,U6,plugged in by hand,,,plugged into the 40-pin socket that JLCPCB solders at this position
-PCB,,+12V_JAMMA,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP14,part of the board,,,
 PCB,,+3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP3,part of the board,,,
 PCB,,+5V,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP1,part of the board,,,
 PCB,,+5V_SW,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP2,part of the board,,,
-PCB,,AMP_IN,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP13,part of the board,,,
-PCB,,AUD_PRE,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP12,part of the board,,,
+PCB,,AMP_IN,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP14,part of the board,,,
+PCB,,AUD_PRE,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP13,part of the board,,,
 PCB,,A_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP15,part of the board,,,
 PCB,,B_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP16,part of the board,,,
 PCB,,CLK,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP8,part of the board,,,
-PCB,,CMP_OUT,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP11,part of the board,,,
+PCB,,CLK 5V,,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,1,,JP3,part of the board,,,"as made: Pico A's 3.3 V clock goes straight to the chips.  Cut 1-2 and bridge 2-3: the clock passes through a gate of U5 and swings 5 V (inverted, about 10 ns later), in case a donor chip does not accept 3.3 V"
+PCB,,CLK_SEL,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP9,part of the board,,,
+PCB,,CMP_OUT,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP12,part of the board,,,
 PCB,,C_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP17,part of the board,,,
+PCB,,C_SPARE,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP20,part of the board,,,
 PCB,,GND,,TestPoint:TestPoint_Pad_D1.5mm,2,,TP5 TP6,part of the board,,,
 PCB,,JAMMA edge (gold fingers),,fcjamma:JAMMA_Edge_56,1,,J1,part of the board,,,
 PCB,,M2,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP7,part of the board,,,
 PCB,,RST=5V,,Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm,1,,JP1,part of the board,,,"normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom"
-PCB,,SPR src,,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,1,,JP2,part of the board,,,as made: comparator.  Cut 1-2 and bridge 2-3: buffered VOUT straight to the Pico input (experiment)
-PCB,,VBUF,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP9,part of the board,,,
-PCB,,VREF,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP10,part of the board,,,
+PCB,,RUN_A,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP18,part of the board,,,
+PCB,,RUN_B,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP19,part of the board,,,
+PCB,,VBUF,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP10,part of the board,,,
+PCB,,VREF,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP11,part of the board,,,
 PCB,,VSYS,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP4,part of the board,,,
 AKI,,CPU bus (option),,Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical,1,DNP,J3,not fitted,,,
 AKI,,PPU bus (option),,Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical,1,DNP,J7,not fitted,,,

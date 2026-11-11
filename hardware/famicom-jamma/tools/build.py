@@ -153,7 +153,7 @@ def check_design_rules(design, problems):
         if not isinstance(part.sym, SymDef):
             return None
         for num, net in part.conn.items():
-            if pin_name(part, num) in ("VCC", "VDD", "V+", "VSYS"):
+            if pin_name(part, num) in ("VCC", "VDD", "V+", "VSYS", "IN"):
                 return net
         return None
 

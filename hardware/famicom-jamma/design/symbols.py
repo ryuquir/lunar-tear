@@ -79,6 +79,8 @@ def define(d):
              + [("D2", "GND_D2", "pwr"), ("TP1", "GND_TP1", "pas")],
              "Raspberry Pi Pico 2 (RP2350A) soldered flat on the board as a module.  1-40: the edge pads; D1-D3: the debug pads; "
              "TP1-TP6: the test pads on its underside (TP2/TP3 USB, TP6 BOOTSEL; TP4 and TP5 must not be used).  "
+             "The Pico 2 has a seventh test pad, TP7 (1.1 V, do not use): the footprint has no pad there and the board "
+             "must show bare solder mask under it.  "
              "GP0-GP22 tolerate 5 V only while the module is powered, GP26-GP28 never do")
 
     # ------------------------------------------------------------------ logic (the same pin numbers for 74HC and 74HCT, DIP and SOIC)
@@ -138,6 +140,11 @@ def define(d):
     d.symdef("LMV7219", "U", [(3, "+IN", "in"), (4, "-IN", "in")],
              [(5, "V+", "pwr"), (2, "V-", "pwr"), None, (1, "OUT", "out")],
              "TI LMV7219 comparator, 7 ns, 2.7-5 V, push-pull rail-to-rail output, SOT-23-5; inputs work from -0.2 V to V+ - 1.2 V")
+
+    d.symdef("TPS2553", "U", [(1, "IN", "pwr"), None, (3, "EN", "in"), (5, "ILIM", "pas")],
+             [(6, "OUT", "pwo"), None, (4, "/FAULT", "oc"), (2, "GND", "pwr")],
+             "TI TPS2553DBV power switch with adjustable current limit, SOT-23-6, 2.5-6.5 V (7 V maximum), 85 milliohm; "
+             "EN high = on; /FAULT is an open-drain output that goes low on over-current, over-temperature or reverse voltage")
 
     d.symdef("PAM8302A", "U", [(3, "IN+", "in"), (4, "IN-", "in"), None, (1, "/SD", "in")],
              [(6, "VDD", "pwr"), (7, "GND", "pwr"), None, (5, "VO+", "out"), (8, "VO-", "out"), None, (2, "NC", "pas")],

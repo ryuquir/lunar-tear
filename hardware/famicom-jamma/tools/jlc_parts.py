@@ -5,8 +5,10 @@
     python3 tools/jlc_parts.py C2332 ...  # only look, print to the screen
 
 For every part number it records what decides whether JLCPCB can assemble the part:
-library class, stock in JLCPCB's assembly library, price, and the "Assembly Type" and
-"PCBA Type" shown on the part's page (for example "Wave Soldering", "Economic and Standard").
+library class, stock in JLCPCB's assembly library, price, and the "Assembly Type",
+"PCBA Type" and "X-ray Inspection" lines of the part's page (for example "Wave Soldering",
+"Economic and Standard", "Required").  JLCPCB charges an inspection fee for every piece of a part
+whose page says that X-ray inspection is required.
 Run it again right before an order: stock and prices change daily.
 
 Sources: JLCPCB's parts-library search (the JSON the web page itself uses) and the part
@@ -28,7 +30,7 @@ API = "https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectS
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 OUT = os.path.join(ROOT, "data", "jlcpcb_extended_parts.csv")
 FIELDS = ["lcsc", "class", "mpn", "brand", "package", "description", "stock", "price_1", "price_10", "price_100",
-          "assembly_type", "pcba_type", "checked"]
+          "assembly_type", "pcba_type", "xray", "checked"]
 
 
 class _Text(html.parser.HTMLParser):
@@ -82,12 +84,12 @@ def page_labels(code):
     lines = [re.sub(r"\s+", " ", x).strip() for x in "".join(parser.out).split("\n")]
     lines = [x for x in lines if x]
     found = {}
-    for label in ("Assembly Type", "PCBA Type"):
+    for label in ("Assembly Type", "PCBA Type", "X-ray Inspection"):
         for i, line in enumerate(lines[:-1]):
             if line == label:
                 found[label] = lines[i + 1]
                 break
-    return found.get("Assembly Type", ""), found.get("PCBA Type", "")
+    return found.get("Assembly Type", ""), found.get("PCBA Type", ""), found.get("X-ray Inspection", "")
 
 
 def lookup(code):
@@ -100,11 +102,11 @@ def lookup(code):
         cls = "Preferred Extended"
     else:
         cls = "Extended"
-    assembly, pcba = page_labels(code)
+    assembly, pcba, xray = page_labels(code)
     return {"lcsc": code, "class": cls, "mpn": row.get("componentModelEn") or "", "brand": row.get("componentBrandEn") or "",
             "package": row.get("componentSpecificationEn") or "", "description": row.get("describe") or "",
             "stock": row.get("stockCount") or 0, "price_1": price(row, 1), "price_10": price(row, 10), "price_100": price(row, 100),
-            "assembly_type": assembly, "pcba_type": pcba,
+            "assembly_type": assembly, "pcba_type": pcba, "xray": xray,
             "checked": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")}
 
 
@@ -128,7 +130,7 @@ def main():
             print(f"{code}: not found in JLCPCB's parts library")
             continue
         rows.append(row)
-        print(f"{code:11s} {row['class']:18s} stock {row['stock']:>7}  ${row['price_1']}  {row['assembly_type']:15s} {row['pcba_type']:22s} {row['mpn']}")
+        print(f"{code:11s} {row['class']:18s} stock {row['stock']:>7}  ${row['price_1']}  {row['assembly_type']:15s} {row['pcba_type']:22s} {('X-ray ' + row['xray']) if row['xray'] else '':15s} {row['mpn']}")
         time.sleep(0.5)
     if not only_look:
         with open(OUT, "w", newline="", encoding="utf-8") as f:

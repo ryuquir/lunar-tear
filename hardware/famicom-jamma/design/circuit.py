@@ -1,4 +1,4 @@
-"""Circuit of the Famicom JAMMA board, revision 0.2: every part is assembled by JLCPCB.
+"""Circuit of the Famicom JAMMA board, revision 0.3: every part is assembled by JLCPCB.
 
 The circuit is written as Python so that it can be checked by program:
 tools/build.py turns it into a KiCad project, runs KiCad's electrical rule check,
@@ -10,7 +10,9 @@ into sockets).
 Read README.md first: it explains the three microcontrollers, the two operating
 modes, the power domains and the assumptions that still have to be proven on the bench.
 Revision 0.1 (JLCPCB assembles only Basic parts, the rest is soldered by hand with parts
-from Akizuki) is commit 35126bd.
+from Akizuki) is commit 35126bd.  Revision 0.2 (the first all-JLCPCB version, before the
+independent review) is commit ae6575b.  Revision 0.3 is revision 0.2 with the findings of
+that review worked in; README.md chapter 6 lists them.
 
 Net naming
   CA0-15  CPU address          CD0-7   CPU data at the CPU pins
@@ -18,6 +20,7 @@ Net naming
   CART_D0-7  CPU data at the cartridge (behind the 100 ohm resistors)
   PA0-13  PPU address (PA0-7 from the latch)      PD0-7   PPU multiplexed address/data bus
   A_xxx / B_xxx / C_xxx   the microcontroller side of a series resistor
+  D_xxx   the dump circuit's shift registers       DQ_xxx  a shift-register output before its series resistor
   J_xxx   a JAMMA finger       I_xxx   an input of the shift-register chain
   xxx_N   active low
 """
@@ -28,7 +31,6 @@ import symbols
 V5 = "+5V"          # after the fuse, always on while the cabinet is on
 VSW = "+5V_SW"      # switched: CPU, PPU, memories, 5 V logic, cartridge
 V33 = "+3V3"        # board logic rail (input shift registers, pull-ups)
-V12 = "+12V_JAMMA"  # only takes the turn-off current of the coin counter and lock-out coils
 GND = "GND"
 
 
@@ -71,9 +73,10 @@ def sram(s, ref, value, addr, data, ce_n, oe_n, we_n):
 # ====================================================================== power
 def sheet_power(d):
     s = d.sheet("power", "Power: +5V entry, switched +5V_SW, +3V3, supply of the Pico modules")
-    s.note("+5V_IN comes from the JAMMA fingers 3, 4, C, D.  -5 V is not used; +12 V only takes the turn-off current of the coils (sheet jamma).")
-    s.note("+5V_SW feeds the CPU, the PPU, the memories, the 5 V logic and the cartridge.  It is off until Pico C raises EN_5VSW,")
-    s.note("so that no 5 V signal reaches a Pico pin before that Pico is powered (the RP2350 pins tolerate 5 V only while powered).")
+    s.note("+5V_IN comes from the JAMMA fingers 3, 4, C, D.  -5 V and +12 V are not used.  Supply range at the fingers: 4.75 V to 5.25 V.")
+    s.note("+5V_SW feeds the CPU, the PPU, the memories, the 5 V logic and the cartridge through the power switch U29.  It is off until")
+    s.note("Pico C raises EN_5VSW, so that no 5 V signal reaches a Pico pin before that Pico is powered (the RP2350 pins tolerate 5 V only")
+    s.note("while powered).  U29 limits the current to about 1.3 A: a short circuit in a cartridge cannot draw the cabinet supply's full current.")
     s.note("VSYS feeds the three Pico modules and the +3V3 regulator from +5V or from the USB socket, whichever is present.")
 
     s.lib("F", "Device:Polyfuse", "TLC-LSMD300D (3 A hold)", P.FP_FUSE2920, JLCX, P.usex("polyfuse"),
@@ -88,6 +91,8 @@ def sheet_power(d):
     # supply of the Pico modules and of the 3.3 V regulator
     P.diode(s, "SS14", V5, "VSYS")
     P.diode(s, "SS14", "VBUS_USB", "VSYS", note="lets the USB socket power the three Pico modules for a firmware update on the bench")
+    P.R(s, "10k", "VBUS_USB", GND, note="keeps the socket's supply pin near 0 V while no cable is plugged in (the diode leaks a little)")
+    P.C(s, "100n", "VBUS_USB", GND)
     P.C(s, "10u", "VSYS", GND)
     P.semi(s, "U", "AMS1117-3.3", {1: GND, 2: V33, 3: "VSYS"}, ref="U28")
     P.CT(s, "100u/6.3V", V33, GND, note="the regulator needs a tantalum capacitor of 22 uF or more at its output")
@@ -100,16 +105,16 @@ def sheet_power(d):
     P.R(s, "1k", V33, "LED_3V3")
     P.led(s, "LED_3V3", GND, note="lit while the board logic rail is up")
 
-    # high-side switch for the Famicom half of the board, slow turn-on through the gate-drain capacitor
-    P.pfet(s, "SW_GATE", VSW, V5, note="AO3401A: source +5V, drain +5V_SW")
-    P.R(s, "47k", V5, "SW_GATE")
-    P.C(s, "100n", "SW_GATE", VSW, note="gate-drain capacitor: +5V_SW rises in a few milliseconds, which limits the inrush current")
-    P.R(s, "10k", "SW_GATE", "SW_GATE_L", note="on: gate at 5 V x 10k/57k = 0.9 V, so the gate-source voltage is -4.1 V")
-    P.nfet(s, "SW_EN_G", "SW_GATE_L", GND)
-    P.R(s, "1k", "EN_5VSW", "SW_EN_G")
+    # power switch for the Famicom half of the board, with current limit
+    s.ic("U29", "TPS2553", "TPS2553", P.FP_SOT23_6, JLCX, P.usex("loadswitch"), pins={
+        "IN": V5, "OUT": VSW, "EN": "SW_EN", "ILIM": "SW_ILIM", "/FAULT": "I_5VSW", "GND": GND},
+        note="off while EN is low or +5V is below 2.4 V; limits the current to 1.2-1.4 A; nothing flows back from +5V_SW to +5V; "
+             "/FAULT pulls the I_5VSW bit low on over-current or over-temperature")
+    P.C(s, "100n", V5, GND, note="directly at pin 1 of U29")
+    P.R(s, "20k", "SW_ILIM", GND, note="sets the current limit (1.3 A typical); keep the track short and away from signals")
+    P.R(s, "1k", "EN_5VSW", "SW_EN")
     P.R(s, "1k", "EN_5VSW", GND, note="keeps +5V_SW off while Pico C is unpowered, in reset or being programmed; "
         "1 k is low enough to hold the line low against the pad leakage of early RP2350 chips (erratum E9)")
-    P.C(s, "100n", "SW_EN_G", GND)
     P.C(s, "10u", VSW, GND)
     P.C(s, "10u", VSW, GND)
     P.R(s, "1k", VSW, "LED_5VSW")
@@ -144,12 +149,21 @@ def sheet_cpu(d):
     P.CT(s, "10u/16V", VSW, GND)
 
     # clock and reset from Pico A
-    P.R(s, "33", "CLK", "CPU_CLK", note="21.5 MHz from Pico A, 3.3 V square wave, DC coupled")
+    P.solder_jumper3(s, "JP3", "CLK 5V", "CLK", "CLK_SEL", "CLK_BUF",
+                     note="as made: Pico A's 3.3 V clock goes straight to the chips.  Cut 1-2 and bridge 2-3: the clock passes through "
+                          "a gate of U5 and swings 5 V (inverted, about 10 ns later), in case a donor chip does not accept 3.3 V")
+    P.R(s, "33", "CLK_SEL", "CPU_CLK", note="21.5 MHz from Pico A, 3.3 V square wave, DC coupled")
+    P.R(s, "470", "CLK", "CLK_G", note="limits the current into the gate's inputs while +5V_SW is off")
     P.R(s, "470", "A_CPU_RST", "CPU_RST_N")
     P.RA(s, "4.7k", [("CPU_RST_N", GND), ("PPU_RST_N", GND)],
          note="both resets are held low until Pico A releases them")
-    P.RA(s, "10k", [("IRQ_N", VSW), ("NMI_N", VSW), ("CPU_RW", VSW), ("M2", GND)],
-         note="defined levels while the CPU is in reset or absent: read, and M2 low so that nothing is selected")
+    P.RA(s, "10k", [("IRQ_N", VSW), ("NMI_N", VSW), ("OE1_N", VSW), ("OE2_N", VSW)],
+         note="defined levels while the CPU is in reset or absent")
+    P.R(s, "47k", "CPU_RW", VSW, note="read while the CPU is in reset or absent; weak, as the Famicom has no pull-up here")
+    P.R(s, "47k", "M2", GND, note="M2 low, so that nothing is selected, while the CPU is in reset or absent; a light load for the CPU's output")
+    P.R(s, "47k", "OUT0", GND)
+    for n in ("CA13", "CA14", "CA15", "PA13"):
+        P.R(s, "47k", n, VSW, note="the inputs of U4 and U5 do not float while nothing drives these lines")
 
     # work RAM: 2K used, as in the Famicom (mirrored four times in 0000-1FFF)
     sram(s, "U3", "IS62C256AL (work RAM)", bits("CA", 11) + bits("WRAM_A", 4, 11), bits("CD", 8), "WRAM_CS_N", GND, "CPU_RW")
@@ -158,15 +172,18 @@ def sheet_cpu(d):
     # address decoder (the Famicom's 74LS139 rebuilt from a 74HCT138 and a NAND gate)
     s.ic("U4", "74x138", "74HCT138", P.FP_SOIC16, JLCX, P.usex("74HCT138"), pins={
         "A": "CA13", "B": "CA14", "C": GND, "G1": "M2", "/G2A": "CA15", "/G2B": GND,
-        "/Y0": "WRAM_CS_N", "/Y1": "PPU_CS_N", "/Y2": "DEC_4000_N", "/Y3": "DEC_6000_N",
+        "/Y0": "WRAM_CS_N", "/Y1": "DEC_2000_N", "/Y2": "DEC_4000_N", "/Y3": "DEC_6000_N",
         "/Y4": NC, "/Y5": NC, "/Y6": NC, "/Y7": NC, "VCC": VSW, "GND": GND},
         note="M2 high and A15 low: Y0 = 0000-1FFF (RAM), Y1 = 2000-3FFF (PPU), Y2 = 4000-5FFF, Y3 = 6000-7FFF")
     P.C(s, "100n", VSW, GND)
+    P.R(s, "33", "DEC_2000_N", "PPU_CS_N",
+        note="33 ohm changes nothing; with a larger value and the capacitor on PPU_CS_N the chip select can be delayed towards "
+             "the timing of the Famicom's slower 74LS139")
     s.ic("U5", "74x00", "74HCT00", P.FP_SOIC14, JLCX, P.usex("74HCT00"), pins={
         "1A": "M2", "1B": "CA15", "1Y": "ROMSEL_N",
         "2A": "PA13", "2B": "PA13", "2Y": "PA13_N",
-        "3A": GND, "3B": GND, "3Y": NC, "4A": GND, "4B": GND, "4Y": NC, "VCC": VSW, "GND": GND},
-        note="/ROMSEL = NAND(M2, A15); /PA13 for the cartridge")
+        "3A": "OUT0", "3B": "OUT0", "3Y": "OUT0_N", "4A": "CLK_G", "4B": "CLK_G", "4Y": "CLK_BUF", "VCC": VSW, "GND": GND},
+        note="1: /ROMSEL = NAND(M2, A15); 2: /PA13 for the cartridge; 3: receives OUT0 at TTL levels; 4: optional 5 V clock buffer (JP3)")
     P.C(s, "100n", VSW, GND)
 
     # data bus: CPU side -> PPU side, cartridge, Pico B
@@ -182,8 +199,8 @@ def sheet_cpu(d):
     # taps for Pico B (address, read/write, pad read strobes)
     P.RA(s, "1k", [("CA0", "B_CA0"), ("CA1", "B_CA1"), ("CA2", "B_CA2"), ("CPU_RW", "B_RW")])
     P.RA(s, "1k", [("PPU_CS_N", "B_PPUCS"), ("OE1_N", "B_OE1"), ("OE2_N", "B_OE2")])
-    P.R(s, "10k", "OUT0", "B_OUT0")
-    P.R(s, "20k", "B_OUT0", GND, note="divider: this Pico pin is not 5 V tolerant")
+    P.R(s, "10k", "OUT0_N", "B_OUT0", note="OUT0 (the controller strobe), inverted by U5: a full 5 V swing whatever the CPU's high level is")
+    P.R(s, "12k", "B_OUT0", GND, note="divider to 2.7 V: this Pico pin is not 5 V tolerant")
 
     # expansion headers, not fitted
     hdr = {1: VSW, 2: GND, 40: GND}
@@ -195,7 +212,7 @@ def sheet_cpu(d):
     P.header(s, "J4", 2, 5, "RAM A11-A14 (option)", {
         1: "WRAM_A11", 3: "WRAM_A12", 5: "WRAM_A13", 7: "WRAM_A14",
         2: "VRAM_A11", 4: "VRAM_A12", 6: "VRAM_A13", 8: "VRAM_A14", 9: VSW, 10: GND})
-    for n in ("M2", "CLK"):
+    for n in ("M2", "CLK", "CLK_SEL"):
         P.testpoint(s, n)
 
 
@@ -205,6 +222,7 @@ def sheet_ppu(d):
     s.note("U6 is the donor's RP2C02, plugged into a 40-pin socket.  EXT0-3 give the lower four bits of the palette index of every pixel once")
     s.note("Pico B has forced bit 6 of register 2000 high.  The fifth bit (sprite or background) is read from the brightness of VOUT:")
     s.note("Pico B makes the PPU store a dark colour in every background entry and a bright one in every sprite entry.")
+    s.note("EXT shows entry 0 of the current background palette (4, 8 or 12) on transparent pixels, and 0 while rendering is off: the firmware maps these.")
 
     ppu = {"CLK": "PPU_CLK", "/RST": "PPU_RST_N", "/CS": "PPU_CS_N", "R/W": "CPU_RW",
            "A0": "CA0", "A1": "CA1", "A2": "CA2", "/INT": "NMI_N", "VOUT": "VOUT",
@@ -218,7 +236,7 @@ def sheet_ppu(d):
     P.C(s, "100n", VSW, GND)
     P.CT(s, "10u/16V", VSW, GND, note="place directly across pins 40 and 20: reduces the vertical bars in the picture")
 
-    P.R(s, "33", "CLK", "PPU_CLK")
+    P.R(s, "33", "CLK_SEL", "PPU_CLK")
     P.R(s, "470", "A_PPU_RST", "PPU_RST_N")
     P.solder_jumper2(s, "JP1", "RST=5V", "PPU_RST_N", VSW,
                      note="normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom")
@@ -228,10 +246,11 @@ def sheet_ppu(d):
         P.R(s, "33", f"PPD{i}", f"B_OVR{i}")
 
     # palette index outputs to Pico A
-    P.RA(s, "10k", [(f"EXT{i}", GND) for i in range(4)], note="pulled low, never tied to ground: the pins become outputs")
+    for i in range(4):
+        P.R(s, "47k", f"EXT{i}", GND, note="pulled low, never tied to ground: the pins become outputs; a light load for them")
     P.RA(s, "1k", [(f"EXT{i}", f"A_EXT{i}") for i in range(4)])
     P.R(s, "1k", "ALE", "A_ALE")
-    P.R(s, "10k", "ALE", GND)
+    P.R(s, "47k", "ALE", GND)
 
     # low address latch
     latch = {"/OE": "LATCH_OE_N", "LE": "ALE", "VCC": VSW, "GND": GND}
@@ -241,8 +260,10 @@ def sheet_ppu(d):
          note="does the job of the Famicom's 74LS373: holds PA0-7 while the bus carries data")
     P.C(s, "100n", VSW, GND)
     P.R(s, "10k", "LATCH_OE_N", GND, note="latch outputs on, unless the dump circuit turns them off")
-    P.RA_many(s, "10k", [(f"PD{i}", VSW) for i in range(8)], note="defined level while nothing drives the bus")
-    P.RA(s, "10k", [("PPU_RD_N", VSW), ("PPU_WR_N", VSW), ("CIRAM_CE_N", VSW)])
+    for i in range(8):
+        P.R(s, "47k", f"PD{i}", VSW, note="defined level while nothing drives the bus; weak, as the Famicom has no pull-ups here")
+    for n in ("PPU_RD_N", "PPU_WR_N", "CIRAM_CE_N"):
+        P.R(s, "47k", n, VSW, note="inactive while the PPU is absent and the dump circuit is off")
     P.C(s, "47p", "PPU_RD_N", GND, dnp=True, note="not fitted: the Famicom has 68 pF here")
     P.C(s, "220p", "PPU_CS_N", GND, dnp=True, note="not fitted: early Famicoms have 330 pF + 30 pF here")
 
@@ -251,22 +272,26 @@ def sheet_ppu(d):
          "CIRAM_CE_N", "PPU_RD_N", "PPU_WR_N")
     P.RA(s, "10k", [(f"VRAM_A{i}", GND) for i in range(11, 15)])
 
-    # VOUT buffer, sprite comparator
+    # VOUT buffer (a PNP emitter follower, as in the Famicom), sprite comparator, composite test output
     P.R(s, "100", "VOUT", "VBUF_B")
-    P.npn(s, "VBUF_B", VSW, "VBUF", note="emitter follower: VBUF = VOUT - 0.65 V, so the PPU pin sees almost no load")
-    P.R(s, "1k", "VBUF", GND)
-    P.R(s, "100", "VBUF", "CVBS", note="composite picture for bring-up on a television; not used in the cabinet")
+    P.pnp(s, "VBUF_B", GND, "VBUF",
+          note="emitter follower as in the Famicom: VBUF = VOUT + 0.65 V (sync tip about 0.8 V, black 1.3 V, white 2.7 V)")
+    for _ in range(3):
+        P.R(s, "470", VSW, "VBUF", note="three in parallel: 157 ohm, enough current for a television on the test output")
+    P.R(s, "1k", "VBUF", "CMP_INP")
+    P.R(s, "1k", "CMP_INP", GND, note="halves the signal: black 0.65 V, white 1.4 V, inside the comparator's input range on 3.3 V")
+    s.lib("C", "Device:C_Polarized", "470u/16V", P.FP_CP_6x8, JLCX, P.usex("cap470u"), {1: "VBUF", 2: "CVBS_C"}, horizontal=True,
+          note="blocks the DC level of the composite test output")
+    P.R(s, "100", "CVBS_C", "CVBS", note="composite picture for bring-up on a television (black and white: the clock is not exactly NTSC); not used in the cabinet")
+    P.R(s, "10k", "CVBS", GND)
     P.header(s, "J5", 1, 2, "composite video (test)", {1: "CVBS", 2: GND})
-    P.R(s, "100", "VBUF", "CMP_INP")
     s.ic("U9", "LMV7219", "LMV7219", P.FP_SOT23_5, JLCX, P.usex("comparator"), pins={
-        "+IN": "CMP_INP", "-IN": "VREF", "OUT": "CMP_OUT", "V+": VSW, "V-": GND},
-        note="high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns")
-    P.C(s, "100n", VSW, GND)
-    P.R(s, "10k", "VREF_PWM", "VREF", note="threshold: Pico A's PWM output, averaged")
+        "+IN": "CMP_INP", "-IN": "VREF", "OUT": "CMP_OUT", "V+": V33, "V-": GND},
+        note="high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns; on +3V3, so its output suits the Pico")
+    P.C(s, "100n", V33, GND)
+    P.R(s, "10k", "VREF_PWM", "VREF", note="threshold (about 1.0 V): Pico A's PWM output, averaged")
     P.C(s, "1u", "VREF", GND, note="next to pin 4")
-    P.solder_jumper3(s, "JP2", "SPR src", "CMP_OUT", "SPR_SEL", "VBUF",
-                     note="as made: comparator.  Cut 1-2 and bridge 2-3: buffered VOUT straight to the Pico input (experiment)")
-    P.R(s, "1k", "SPR_SEL", "A_SPR")
+    P.R(s, "1k", "CMP_OUT", "A_SPR")
 
     hdr = {1: VSW, 2: GND, 40: GND}
     names = bits("PA", 14) + bits("PD", 8) + ["PPU_RD_N", "PPU_WR_N", "ALE", "PPU_CS_N", "PPU_RST_N", "NMI_N",
@@ -283,9 +308,11 @@ def sheet_cart(d):
     s = d.sheet("cart", "Cartridge connector and the dump circuit for emulation mode")
     s.note("J8 is a new 60-pin card-edge connector.  Pin 45 carries the board's sound to the cartridge, pin 46 brings it back.")
     s.note("Dump circuit: with the CPU and PPU sockets empty, Pico C reads the cartridge through shift registers and hands the data to Pico A.")
-    s.note("The six 74HCT595 run from +5V_SW and take the 3.3 V signals of Pico C directly (through 100 ohm).")
-    s.note("In real-chip mode D_OE_ADDR_N and D_OE_DATA_N stay high (pull-ups) and every 74HCT595 output is switched off.")
-    s.note("Pico C must hold its six lines to the 74HCT595 low or released whenever +5V_SW is off.")
+    s.note("The six 74HCT595 run from +5V_SW and take the 3.3 V signals of Pico C through 470 ohm.")
+    s.note("Their outputs can be switched on only while DIP switch 1 is set to emulation AND Pico C raises C_DUMP_EN (Q with its source on the switch).")
+    s.note("C_DUMP_EN also holds the CPU in reset (all its bus pins are released then).  A PPU cannot be switched off its bus, so every driver that")
+    s.note("meets a PPU output has 1 k in series: a PPU left in its socket by mistake sees at most 5 mA per pin.  The firmware checks for chips first.")
+    s.note("Pico C must hold its four lines to the 74HCT595 low whenever +5V_SW is off.")
 
     cart = {1: GND, 16: GND, 30: VSW, 31: VSW, 14: "CPU_RW", 15: "IRQ_N", 17: "PPU_RD_N", 18: "CIRAM_A10",
             32: "M2", 44: "ROMSEL_N", 45: "CART_AUD_OUT", 46: "CART_AUD_RET", 47: "PPU_WR_N", 48: "CIRAM_CE_N", 49: "PA13_N"}
@@ -303,24 +330,38 @@ def sheet_cart(d):
     P.C(s, "10u", VSW, GND)
 
     # address and control drivers
-    oe, rck = "D_OE_ADDR_N", "D_RCLK"
+    oe, rck = "D_OE_N", "D_RCLK"
     sr595(s, "U10", "74HCT595 (CPU A0-7)", VSW, "D_SER", "D_SRCLK_F", rck, oe, bits("CA", 8), "D_CA_Q7S")
-    sr595(s, "U11", "74HCT595 (CPU A8-15)", VSW, "D_CA_Q7S", "D_SRCLK_F", rck, oe, bits("CA", 8, 8))
-    sr595(s, "U12", "74HCT595 (PPU A0-7)", VSW, "D_SER", "D_SRCLK_F", rck, oe, bits("PA", 8), "D_PA_Q7S")
-    sr595(s, "U13", "74HCT595 (PPU A8-13)", VSW, "D_PA_Q7S", "D_SRCLK_F", rck, oe, bits("PA", 6, 8) + [NC, NC])
+    sr595(s, "U11", "74HCT595 (CPU A8-15)", VSW, "D_CA_Q7S", "D_SRCLK_F", rck, oe, bits("CA", 8, 8),
+          note="the CPU address lines are driven directly: some cartridges load them with several 74LS inputs")
+    sr595(s, "U12", "74HCT595 (PPU A0-7)", VSW, "D_SER", "D_SRCLK_F", rck, oe, bits("DQ_PA", 8), "D_PA_Q7S")
+    sr595(s, "U13", "74HCT595 (PPU A8-13)", VSW, "D_PA_Q7S", "D_SRCLK_F", rck, oe, bits("DQ_PA", 6, 8) + [NC, NC])
     sr595(s, "U14", "74HCT595 (control)", VSW, "D_SER", "D_SRCLK_S", rck, oe,
-          ["CPU_RW", "PPU_RD_N", "PPU_WR_N", "LATCH_OE_N", "EMU_PU", NC, NC, NC], "D_CTL_Q7S",
-          note="QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE pull-up source for M2")
-    sr595(s, "U15", "74HCT595 (data to cartridge)", VSW, "D_CTL_Q7S", "D_SRCLK_S", rck, "D_OE_DATA_N", bits("CART_D", 8),
+          ["DQ_CPU_RW", "DQ_PPU_RD_N", "DQ_PPU_WR_N", "LATCH_OE_N", "DQ_M2", "D_OE_DATA_N", NC, NC], "D_CTL_Q7S",
+          note="QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE M2, QF low = U15 drives the data bus")
+    sr595(s, "U15", "74HCT595 (data to cartridge)", VSW, "D_CTL_Q7S", "D_SRCLK_S", rck, "D_OE_DATA_N", bits("DQ_D", 8),
           note="drives the data bus only while a mapper register is being written")
-    for n in ("SER", "SRCLK_F", "SRCLK_S", "RCLK", "OE_ADDR_N", "OE_DATA_N"):
-        P.R(s, "100", f"C_{n}", f"D_{n}", note="limits the current if Pico C drives the line while +5V_SW is off")
-    P.RA(s, "10k", [("D_SER", GND), ("D_SRCLK_F", GND), ("D_SRCLK_S", GND), ("D_RCLK", GND)],
+    P.RA_many(s, "1k", [(f"DQ_PA{i}", f"PA{i}") for i in range(14)] + [("DQ_PPU_RD_N", "PPU_RD_N"), ("DQ_PPU_WR_N", "PPU_WR_N")],
+              note="every dump driver that meets an output of the PPU: at most 5 mA if a PPU is in its socket by mistake")
+    P.R(s, "470", "DQ_CPU_RW", "CPU_RW")
+    P.R(s, "470", "DQ_M2", "M2", note="M2 for the cartridge in emulation mode, a full 5 V swing")
+    for i in range(8):
+        P.R(s, "470", f"DQ_D{i}", f"CART_D{i}", note="a cartridge ROM that drives the bus at the same time wins, and at most 10 mA flows")
+    P.R(s, "10k", "D_OE_DATA_N", VSW, note="U15 off whenever U14 is off")
+
+    # the drivers can be switched on only while DIP switch 1 says emulation and Pico C asks for it
+    P.R(s, "10k", "D_OE_N", V33, note="outputs off unless the transistor pulls the line low; 3.3 V is a valid high level for a 74HCT input")
+    P.nfet(s, "DUMP_EN_G", "D_OE_N", "I_DIP1",
+           note="source on DIP switch 1: with the switch off (real chips) the source is not grounded and the outputs stay off")
+    P.nfet(s, "DUMP_EN_G", "CPU_RST_N", GND,
+           note="holds the CPU in reset whenever Pico C enables the dump drivers: in reset the 2A03 releases all of its bus pins")
+    P.R(s, "100", "C_DUMP_EN", "DUMP_EN_G")
+    P.R(s, "1k", "DUMP_EN_G", GND, note="off while Pico C is in reset; low enough against the pad leakage of early RP2350 chips")
+    for n in ("SER", "SRCLK_F", "SRCLK_S", "RCLK"):
+        P.R(s, "470", f"C_{n}", f"D_{n}", note="limits the current if Pico C drives the line while +5V_SW is off")
+    P.RA(s, "4.7k", [("D_SER", GND), ("D_SRCLK_F", GND), ("D_SRCLK_S", GND), ("D_RCLK", GND)],
          note="defined levels while Pico C is in reset")
-    P.RA(s, "10k", [("D_OE_ADDR_N", V33), ("D_OE_DATA_N", V33)],
-         note="outputs off while Pico C is in reset; 3.3 V is a valid high level for a 74HCT input")
-    P.R(s, "1k", "M2", "EMU_PU", note="pull-up for M2 that exists only while the dump circuit is enabled")
-    P.R(s, "100", "M2", "C_M2")
+    P.R(s, "1k", "M2", "C_M2", note="Pico C only reads M2: a CPU that is fitted and out of reset makes it toggle")
 
     # data read-back, on the 3.3 V input chain (first two registers read by Pico C)
     P.RA_many(s, "10k", [(f"CART_D{i}", f"DI_CD{i}") for i in range(8)],
@@ -331,8 +372,8 @@ def sheet_cart(d):
     P.R(s, "100", "IN_Q6", "IN_DATA")
 
     # mirroring sense for Pico C
-    P.R(s, "10k", "CIRAM_A10", "C_CIRAM_A10")
-    P.R(s, "20k", "C_CIRAM_A10", GND)
+    P.R(s, "47k", "CIRAM_A10", "C_CIRAM_A10")
+    P.R(s, "47k", "C_CIRAM_A10", GND, note="half the level, read with Pico C's converter (the high level depends on what drives the line in the cartridge)")
 
 
 # ====================================================================== video
@@ -398,14 +439,15 @@ def sheet_audio(d):
     P.R(s, "47k", "CART_AUD_RET", GND, note="defined level while no cartridge is inserted")
     P.C(s, "1u", "CART_AUD_RET", "AUD_RET_AC")
     P.R(s, "10k", "AUD_RET_AC", "AUD_SUM")
-    P.R(s, "1k", "AUD_PWM", "AUD_PWM_F1")
+    P.R(s, "470", "AUD_PWM", "AUD_PWM_F1")
     P.C(s, "10n", "AUD_PWM_F1", GND)
-    P.R(s, "1k", "AUD_PWM_F1", "AUD_PWM_F2")
-    P.C(s, "10n", "AUD_PWM_F2", GND)
+    P.R(s, "470", "AUD_PWM_F1", "AUD_PWM_F2")
+    P.C(s, "10n", "AUD_PWM_F2", GND, note="two stages, -3 dB at 12.7 kHz; run the PWM at 300 kHz or more")
     P.C(s, "1u", "AUD_PWM_F2", "AUD_PWM_AC")
     P.R(s, "10k", "AUD_PWM_AC", "AUD_SUM")
     s.lib("RV", "Device:R_Potentiometer_Trim", "10k (volume)", "fcjamma:Trimmer_Bourns_3362P", JLCX, P.usex("trimmer10k"),
-          {1: "AUD_SUM", 2: "AMP_IN", 3: GND}, ref="RV1", note="3362P: pin 2 is the wiper")
+          {1: GND, 2: "AMP_IN", 3: "AUD_SUM"}, ref="RV1",
+          note="3362P: pin 2 is the wiper; clockwise moves it towards pin 3, so clockwise is louder")
 
     P.C(s, "1u", "AMP_IN", "AMP_INP", note="with the amplifier's own 10 k input resistor: 16 Hz high-pass")
     P.C(s, "1u", "AMP_INN", GND, note="the unused input gets the same capacitor so that both inputs settle alike")
@@ -417,8 +459,9 @@ def sheet_audio(d):
     P.C(s, "1u", V5, GND, note="directly at pin 6")
     P.C(s, "10u", V5, GND)
     P.CT(s, "10u/16V", V5, GND)
-    P.R(s, "1k", "C_AMP_EN", "AMP_EN")
-    P.R(s, "10k", "AMP_EN", GND, note="amplifier off while Pico C is in reset; the firmware switches it on after the supply has settled")
+    P.R(s, "470", "C_AMP_EN", "AMP_EN")
+    P.R(s, "1k", "AMP_EN", GND, note="amplifier off while Pico C is in reset (also against the pad leakage of early RP2350 chips); "
+        "on: 2.2 V, the amplifier needs 1.2 V.  The firmware switches it on after the supply has settled")
     P.ferrite(s, "SPK_P", "J_SPK_P")
     P.ferrite(s, "SPK_N", "J_SPK_N")
     P.C(s, "1n", "J_SPK_P", GND)
@@ -443,11 +486,12 @@ def sheet_jamma(d):
     s.note("Every input: 1 k pull-up to +3V3 (3.3 mA through the switch), 4.7 k in series, 10 nF to ground, then a 74HC165 on +3V3.")
     s.note("Pico C reads the chain: after a low pulse on IO_LATCH the first bit on IN_DATA is input H of U17, the last is input A of U20.")
     s.note("The same pulse copies the 74HC595's shift register to its outputs, so one cycle reads the inputs and writes the outputs.")
-    s.note("Fingers 5/E (-5 V) and 11/M are not connected.  6/F (+12 V) only take the turn-off current of the coils.  7/H is the key slot.")
+    s.note("Fingers 5/E (-5 V), 6/F (+12 V) and 11/M are not connected.  7/H is the key slot.")
+    s.note("Coin counter and lock-out coils: 5 V or 12 V types, switched to ground; each output has its own clamp, so the board needs no +12 V.")
 
     j = {"1": GND, "2": GND, "A": GND, "B": GND, "27": GND, "28": GND, "e": GND, "f": GND, "14": GND,
          "3": "+5V_IN", "4": "+5V_IN", "C": "+5V_IN", "D": "+5V_IN",
-         "5": NC, "E": NC, "6": V12, "F": V12, "11": NC, "M": NC,
+         "5": NC, "E": NC, "6": NC, "F": NC, "11": NC, "M": NC,
          "8": "J_CNT1", "J": "J_CNT2", "9": "J_LOCK1", "K": "J_LOCK2",
          "10": "J_SPK_P", "L": "J_SPK_N",
          "12": "VID_R", "N": "VID_G", "13": "VID_B", "P": "VID_SYNC"}
@@ -466,18 +510,20 @@ def sheet_jamma(d):
     P.tact(s, "SW1", "J_TEST", GND, note="TEST, same as JAMMA finger 15")
     P.tact(s, "SW2", "J_SERVICE", GND, note="SERVICE, same as JAMMA finger R")
 
-    # DIP switch: 1 = chip mode (off: real CPU and PPU, on: emulation); 2-4 are read by the firmware
+    # DIP switch: 1 = chip mode (off: real CPU and PPU, on: emulation); 2-4 are read by the firmware.
+    # Switch 1 is also the ground return of the transistor that enables the dump drivers (sheet cart).
     s.lib("SW", "Switch:SW_DIP_x04", "DS-04RP (DIP switch 4)", P.FP_DIPSW4, JLCX, P.usex("dipsw4"),
           {1: "I_DIP1", 2: "I_DIP2", 3: "I_DIP3", 4: "I_DIP4", 5: GND, 6: GND, 7: GND, 8: GND}, ref="SW3",
-          note="1: off = CPU and PPU chips fitted, on = emulation; 2-4: for the firmware")
+          note="1: off = CPU and PPU chips fitted, on = emulation (it also unlocks the dump drivers); 2-4: for the firmware")
     P.RA(s, "10k", [(f"I_DIP{i}", V33) for i in range(1, 5)])
 
     # signals from the Famicom half that Pico C reads slowly
     for n in ("OUT1", "OUT2"):
         P.R(s, "10k", n, f"I_{n}")
-        P.R(s, "20k", f"I_{n}", GND, note="divider from 5 V logic; a game can signal the board through these two CPU outputs")
+        P.R(s, "47k", f"I_{n}", GND, note="a game can signal the board through these two CPU outputs; the divider keeps 0.8 of the CPU's "
+            "high level, and the 74HC165's input diode takes what exceeds 3.3 V")
     P.R(s, "10k", VSW, "I_5VSW")
-    P.R(s, "20k", "I_5VSW", GND, note="lets Pico C check that +5V_SW really is on or off")
+    P.R(s, "20k", "I_5VSW", GND, note="lets Pico C check that +5V_SW really is on; the power switch pulls this bit low when it limits the current")
 
     sr165(s, "U20", "74HC165 (1P)", GND, "IN_Q1", [f"I_{n}" for n in names[0:8]])
     sr165(s, "U21", "74HC165 (2P)", "IN_Q1", "IN_Q2", [f"I_{n}" for n in names[8:16]])
@@ -489,16 +535,11 @@ def sheet_jamma(d):
     # outputs: coin counters and coin lock-outs
     sr595(s, "U24", "74HC595 (JAMMA outputs)", V33, "OUT_SER", "IO_CLK", "IO_LATCH", "OUT_OE_N",
           ["CNT1_G", "CNT2_G", "LOCK1_G", "LOCK2_G", "GPO4", "GPO5", "GPO6", "GPO7"])
-    P.R(s, "10k", "OUT_OE_N", V33, note="outputs stay off until Pico C has loaded the register")
+    P.R(s, "1k", "OUT_OE_N", V33, note="outputs stay off until Pico C has loaded the register; 1 k wins safely against the Pico pad's pull-down in reset")
     P.RA(s, "10k", [("CNT1_G", GND), ("CNT2_G", GND), ("LOCK1_G", GND), ("LOCK2_G", GND)])
     for g, drain in (("CNT1_G", "J_CNT1"), ("CNT2_G", "J_CNT2"), ("LOCK1_G", "J_LOCK1"), ("LOCK2_G", "J_LOCK2")):
         P.nfet(s, g, drain, GND, note="low-side switch for a 5 V or 12 V coil in the cabinet")
-        P.diode(s, "SS14", drain, V12, note="returns the coil's turn-off current to the +12 V rail")
-    P.tvs2(s, "J_CNT1", "J_CNT2", GND,
-           note="second clamp (13 V to 19 V), for a cabinet that feeds its coils from +5 V and leaves +12 V open")
-    P.tvs2(s, "J_LOCK1", "J_LOCK2", GND)
-    P.C(s, "100n", V12, GND)
-    P.testpoint(s, V12)
+        P.tvs15(s, drain, GND, note="takes the coil's turn-off current: nothing flows up to 15 V, the drain stays below 25 V (the transistor stands 30 V)")
     P.header(s, "J2", 1, 6, "spare outputs (option)", {1: "GPO4", 2: "GPO5", 3: "GPO6", 4: "GPO7", 5: V33, 6: GND})
 
 
@@ -531,7 +572,7 @@ def sheet_mcu(d):
     b = {**{i: f"B_CD{i}" for i in range(8)}, **{8 + i: f"B_OVR{i}" for i in range(8)},
          16: "B_CA0", 17: "B_CA1", 18: "B_CA2", 19: "B_RW", 20: "B_PPUCS", 21: "B_OE1", 22: "B_OE2",
          26: "B_OUT0", 27: "LINK_CB", 28: "B_TX"}
-    c = {0: "C_SER", 1: "C_SRCLK_F", 2: "C_SRCLK_S", 3: "C_RCLK", 4: "C_OE_ADDR_N", 5: "C_OE_DATA_N", 6: "C_M2",
+    c = {0: "C_SER", 1: "C_SRCLK_F", 2: "C_SRCLK_S", 3: "C_RCLK", 4: "C_DUMP_EN", 5: "C_SPARE", 6: "C_M2",
          7: "OUT_OE_N", 8: "IN_DATA", 9: "IO_LATCH", 10: "IO_CLK", 11: "OUT_SER",
          12: "C_SWCLK_A", 13: "C_SWDIO_A", 14: "C_SWCLK_B", 15: "C_SWDIO_B",
          16: "C_TX", 17: "C_RUN_A", 18: "C_SCK_O", 19: "C_MOSI_O", 20: "C_MISO", 21: "C_RUN_B", 22: "EN_5VSW",
@@ -550,14 +591,20 @@ def sheet_mcu(d):
 
     # Pico C programs and resets the other two
     P.RA(s, "1k", [("C_SWCLK_A", "SWCLK_A"), ("C_SWDIO_A", "SWDIO_A"), ("C_SWCLK_B", "SWCLK_B"), ("C_SWDIO_B", "SWDIO_B")])
-    P.RA(s, "1k", [("C_RUN_A", "RUN_A"), ("C_RUN_B", "RUN_B")])
+    P.R(s, "470", "C_RUN_A", "RUN_A")
+    P.R(s, "470", "C_RUN_B", "RUN_B")
+    P.RA(s, "4.7k", [("RUN_A", GND), ("RUN_B", GND)],
+         note="Pico A and Pico B stay in reset (all pins released) unless Pico C holds their RUN lines high: "
+              "they cannot drive the Famicom half while Pico C is in reset, being programmed, or keeps +5V_SW off")
+    for n in ("RUN_A", "RUN_B", "C_SPARE"):
+        P.testpoint(s, n)
     P.header(s, "J16", 1, 3, "debug probe for Pico C (option)", {1: "SWCLK_C", 2: GND, 3: "SWDIO_C"})
     P.tact(s, "SW4", "RUN_C", GND, note="RESET: restarts Pico C, which then restarts the whole board")
     P.tact(s, "SW5", "BOOTSEL_C", GND,
            note="BOOT: held down while RESET is pressed, it makes Pico C appear as a USB drive for a firmware update; keep the track short")
 
     # USB Type-C socket for firmware updates
-    s.ic("J10", "USB_C_16P", "USB Type-C socket (TYPE-C16PIN)", P.FP_USBC, JLCX, P.usex("usbc"), pins={
+    s.ic("J10", "USB_C_16P", "USB Type-C socket (TYPE-C-31-M-12)", P.FP_USBC, JLCX, P.usex("usbc"), pins={
         "VBUS_A4": "VBUS_USB", "VBUS_A9": "VBUS_USB", "VBUS_B4": "VBUS_USB", "VBUS_B9": "VBUS_USB",
         "CC1": "USB_CC1", "CC2": "USB_CC2", "DP_A6": "USB_DP", "DP_B6": "USB_DP", "DN_A7": "USB_DM", "DN_B7": "USB_DM",
         "SBU1": NC, "SBU2": NC, "GND_A1": GND, "GND_A12": GND, "GND_B1": GND, "GND_B12": GND, "SHIELD": GND})
@@ -568,7 +615,7 @@ def sheet_mcu(d):
 
 
 def build():
-    d = Design("fcjamma", "Famicom JAMMA board", rev="0.2")
+    d = Design("fcjamma", "Famicom JAMMA board", rev="0.3")
     symbols.define(d)
     sheet_power(d)
     sheet_cpu(d)
@@ -582,4 +629,4 @@ def build():
     # parts that JLCPCB fits and that are not schematic parts
     d.extra(JLCX, P.usex("dip40_socket"), "40-pin IC socket, round pins", 2,
             "soldered by JLCPCB; the donor's CPU and PPU are plugged in afterwards", refs="U1 U6")
-    return d, ["GND", "+5V", "+5V_SW", "VSYS"]
+    return d, ["GND", "+5V", "VSYS"]

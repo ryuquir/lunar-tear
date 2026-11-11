@@ -6,7 +6,7 @@
 	(paper "A3")
 	(title_block
 		(title "Famicom JAMMA board")
-		(rev "0.2")
+		(rev "0.3")
 	)
 	(lib_symbols
 		(symbol "power:PWR_FLAG"
@@ -125,61 +125,6 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "Three Raspberry Pi Pico 2 modules, USB Type-C socket, links"
-		(exclude_from_sim no)
-		(at 215.9 109.2 0)
-		(effects
-			(font
-				(size 1.6 1.6)
-			)
-			(justify left bottom)
-		)
-		(uuid "52b3ed0f-0206-5fbf-a85a-598112de303f")
-	)
-	(text "Power: +5V entry, switched +5V_SW, +3V3, supply of the Pico modules"
-		(exclude_from_sim no)
-		(at 25.4 71.1 0)
-		(effects
-			(font
-				(size 1.6 1.6)
-			)
-			(justify left bottom)
-		)
-		(uuid "5f090d8b-dcf4-5516-a11e-705e11ee6113")
-	)
-	(text "Audio: mixer, loop through the cartridge, power amplifier"
-		(exclude_from_sim no)
-		(at 88.9 109.2 0)
-		(effects
-			(font
-				(size 1.6 1.6)
-			)
-			(justify left bottom)
-		)
-		(uuid "68c4be36-8833-5125-9759-67cbbd279fcb")
-	)
-	(text "Video: RGB resistor DAC and composite sync"
-		(exclude_from_sim no)
-		(at 25.4 109.2 0)
-		(effects
-			(font
-				(size 1.6 1.6)
-			)
-			(justify left bottom)
-		)
-		(uuid "3e339457-53f9-524b-90b9-e0dd15656277")
-	)
-	(text "CPU: RP2A03, work RAM, address decoder, data-bus resistors"
-		(exclude_from_sim no)
-		(at 88.9 71.1 0)
-		(effects
-			(font
-				(size 1.6 1.6)
-			)
-			(justify left bottom)
-		)
-		(uuid "2bc207d2-635a-5dd8-afd1-90fc66649862")
-	)
 	(text "Famicom JAMMA board"
 		(exclude_from_sim no)
 		(at 20 20 0)
@@ -189,18 +134,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "db607b4f-bb4e-54ef-8907-697c8933145a")
-	)
-	(text "JAMMA edge connector, inputs, coin counter and lock-out drivers"
-		(exclude_from_sim no)
-		(at 152.4 109.2 0)
-		(effects
-			(font
-				(size 1.6 1.6)
-			)
-			(justify left bottom)
-		)
-		(uuid "49e25c1e-58fd-558e-88da-61a3045a44f4")
+		(uuid "c2cc5621-3e79-5454-a4eb-9f686170902e")
 	)
 	(text "PPU: RP2C02, address latch, video RAM, sprite detector"
 		(exclude_from_sim no)
@@ -211,7 +145,29 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "61bbfcf7-857b-54c4-b446-54b02613fc27")
+		(uuid "51d2bf94-4a53-59aa-8f78-7357461120c3")
+	)
+	(text "Three Raspberry Pi Pico 2 modules, USB Type-C socket, links"
+		(exclude_from_sim no)
+		(at 215.9 109.2 0)
+		(effects
+			(font
+				(size 1.6 1.6)
+			)
+			(justify left bottom)
+		)
+		(uuid "982ed4a5-5eaa-5ea2-a95f-2b1d8a883745")
+	)
+	(text "Audio: mixer, loop through the cartridge, power amplifier"
+		(exclude_from_sim no)
+		(at 88.9 109.2 0)
+		(effects
+			(font
+				(size 1.6 1.6)
+			)
+			(justify left bottom)
+		)
+		(uuid "b7614241-cefd-5efa-8c46-daa96c9043d2")
 	)
 	(text "Cartridge connector and the dump circuit for emulation mode"
 		(exclude_from_sim no)
@@ -222,53 +178,53 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4879f5b4-77d8-5dd3-84af-00a36371c698")
+		(uuid "aa3939f6-01b3-5382-9744-ad714b95b946")
 	)
-	(global_label "GND"
-		(shape passive)
-		(at 30.48 170.18 270)
+	(text "Video: RGB resistor DAC and composite sync"
+		(exclude_from_sim no)
+		(at 25.4 109.2 0)
 		(effects
 			(font
-				(size 1.27 1.27)
+				(size 1.6 1.6)
 			)
-			(justify right)
+			(justify left bottom)
 		)
-		(uuid "258f6a6a-3129-5833-9d01-a15a1c7c4e78")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
+		(uuid "8a49db49-e038-54b7-86a2-e2368afefaab")
+	)
+	(text "CPU: RP2A03, work RAM, address decoder, data-bus resistors"
+		(exclude_from_sim no)
+		(at 88.9 71.1 0)
+		(effects
+			(font
+				(size 1.6 1.6)
 			)
+			(justify left bottom)
 		)
+		(uuid "2f49ad9e-c3ca-53b2-beb0-5e1acea3cec0")
+	)
+	(text "JAMMA edge connector, inputs, coin counter and lock-out drivers"
+		(exclude_from_sim no)
+		(at 152.4 109.2 0)
+		(effects
+			(font
+				(size 1.6 1.6)
+			)
+			(justify left bottom)
+		)
+		(uuid "93b6829a-f77a-52a4-8b48-21734fdf7838")
+	)
+	(text "Power: +5V entry, switched +5V_SW, +3V3, supply of the Pico modules"
+		(exclude_from_sim no)
+		(at 25.4 71.1 0)
+		(effects
+			(font
+				(size 1.6 1.6)
+			)
+			(justify left bottom)
+		)
+		(uuid "a3957dce-3d13-5b26-99f2-00c71cbef0d1")
 	)
 	(global_label "VSYS"
-		(shape passive)
-		(at 106.68 170.18 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "72de1f6b-d11f-59aa-b919-2434a5b5ff6c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "+5V_SW"
 		(shape passive)
 		(at 81.28 170.18 270)
 		(effects
@@ -277,7 +233,7 @@
 			)
 			(justify right)
 		)
-		(uuid "56c23a59-489f-55d3-a472-3b360971caf1")
+		(uuid "f8495b77-f31b-5c0e-9ad3-65138f9c0edd")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -299,7 +255,29 @@
 			)
 			(justify right)
 		)
-		(uuid "b45c3587-7dc3-5df7-a4ce-e7ff85d6bfcd")
+		(uuid "e8603817-2019-5bcf-a4b2-60ac070aa22f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 30.48 170.18 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1f97dbb7-7ffd-5fa8-b847-109872b48fb6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -314,231 +292,6 @@
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
-		(at 81.28 170.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "e6569ba7-71c5-58d6-9095-188e28145268")
-		(property "Reference" "#FLG03"
-			(at 81.28 172.085 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 81.28 165.1 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 81.28 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 81.28 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 81.28 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "2b0f866f-fcfc-55f6-a18a-b4f3a6bd4429")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(reference "#FLG03")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:PWR_FLAG")
-		(at 106.68 170.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "6ff4fd4b-8bac-5c10-9736-7df4b3d4beef")
-		(property "Reference" "#FLG04"
-			(at 106.68 172.085 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 106.68 165.1 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 106.68 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 106.68 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 106.68 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "ea1c23ed-f8c8-5537-a0d4-2eba848abb76")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(reference "#FLG04")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:PWR_FLAG")
-		(at 30.48 170.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "f374cfc3-65a6-585f-abe4-ca86edfccae3")
-		(property "Reference" "#FLG01"
-			(at 30.48 172.085 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 30.48 165.1 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 30.48 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 30.48 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 30.48 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "6347e513-978e-5b44-bc40-dc107ce1a200")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(reference "#FLG01")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:PWR_FLAG")
 		(at 55.88 170.18 0)
 		(unit 1)
 		(body_style 1)
@@ -547,7 +300,7 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "3fbe483f-458f-5c55-8ffd-ca6a20829790")
+		(uuid "e9fd2515-f60d-5289-98de-6dbaf94e888c")
 		(property "Reference" "#FLG02"
 			(at 55.88 172.085 0)
 			(hide yes)
@@ -601,7 +354,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "e85e8e04-8d41-52c5-a7fa-6d5bb7bb10d1")
+			(uuid "6a4b9ce6-0434-553b-abc5-2cd28818b29c")
 		)
 		(instances
 			(project "fcjamma"
@@ -612,48 +365,152 @@
 			)
 		)
 	)
-	(sheet
-		(at 152.4 38.1)
-		(size 50.8 25.4)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 81.28 170.18 0)
+		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "1433faf1-ac52-5086-8651-4861df96c0d9")
-		(property "Sheetname" "ppu"
-			(at 152.4 37.3884 0)
+		(uuid "43dd3bdf-3a74-5cee-bd1b-274d33a266c8")
+		(property "Reference" "#FLG03"
+			(at 81.28 172.085 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify left)
 			)
 		)
-		(property "Sheetfile" "ppu.kicad_sch"
-			(at 152.4 64.0846 0)
+		(property "Value" "PWR_FLAG"
+			(at 81.28 165.1 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left top)
 			)
+		)
+		(property "Footprint" ""
+			(at 81.28 170.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 81.28 170.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 81.28 170.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4f943c76-c7f3-5325-81a4-f03dab4ca4f4")
 		)
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(page "4")
+					(reference "#FLG03")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 30.48 170.18 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "52d403e2-f4f5-5e08-a904-e33961579b95")
+		(property "Reference" "#FLG01"
+			(at 30.48 172.085 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 30.48 165.1 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 30.48 170.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 30.48 170.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 30.48 170.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4e602bde-2fd6-5a62-a45d-d07373c5152c")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
+					(reference "#FLG01")
+					(unit 1)
 				)
 			)
 		)
@@ -673,7 +530,7 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "287cc9a5-794c-52ee-9986-53ef0d133ecb")
+		(uuid "79c085a7-ccd1-5a11-9e42-7f3c05aba5f7")
 		(property "Sheetname" "power"
 			(at 25.4 37.3884 0)
 			(show_name no)
@@ -700,144 +557,6 @@
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
 					(page "2")
-				)
-			)
-		)
-	)
-	(sheet
-		(at 152.4 76.2)
-		(size 50.8 25.4)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "b4497dea-7b49-57ca-b261-e9d9fbcfec7e")
-		(property "Sheetname" "jamma"
-			(at 152.4 75.4884 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "jamma.kicad_sch"
-			(at 152.4 102.1846 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(page "8")
-				)
-			)
-		)
-	)
-	(sheet
-		(at 25.4 76.2)
-		(size 50.8 25.4)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "6d97270b-90fd-5432-9ec7-6c2333eed47c")
-		(property "Sheetname" "video"
-			(at 25.4 75.4884 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "video.kicad_sch"
-			(at 25.4 102.1846 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(page "6")
-				)
-			)
-		)
-	)
-	(sheet
-		(at 88.9 38.1)
-		(size 50.8 25.4)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "534cb1be-7fa5-5a64-ab6c-05a0be61b656")
-		(property "Sheetname" "cpu"
-			(at 88.9 37.3884 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "cpu.kicad_sch"
-			(at 88.9 64.0846 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
-					(page "3")
 				)
 			)
 		)
@@ -889,6 +608,98 @@
 		)
 	)
 	(sheet
+		(at 152.4 38.1)
+		(size 50.8 25.4)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "476bfa99-37c2-5456-9eec-9d3f66ef95d1")
+		(property "Sheetname" "ppu"
+			(at 152.4 37.3884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "ppu.kicad_sch"
+			(at 152.4 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 25.4 76.2)
+		(size 50.8 25.4)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "9a9fff1d-50ca-5cbb-8063-b3cd53e77de6")
+		(property "Sheetname" "video"
+			(at 25.4 75.4884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "video.kicad_sch"
+			(at 25.4 102.1846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 215.9 38.1)
 		(size 50.8 25.4)
 		(exclude_from_sim no)
@@ -903,7 +714,7 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "4f2e8845-bb74-513a-a650-9bfc941dc04a")
+		(uuid "a2febbcc-ce92-5a5a-b25c-0fff99f30201")
 		(property "Sheetname" "cart"
 			(at 215.9 37.3884 0)
 			(show_name no)
@@ -935,6 +746,52 @@
 		)
 	)
 	(sheet
+		(at 88.9 38.1)
+		(size 50.8 25.4)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "94457c90-7290-5a14-ade4-8363c207a02e")
+		(property "Sheetname" "cpu"
+			(at 88.9 37.3884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "cpu.kicad_sch"
+			(at 88.9 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 215.9 76.2)
 		(size 50.8 25.4)
 		(exclude_from_sim no)
@@ -949,7 +806,7 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "5c50c35a-30d7-5db8-a0a7-e6fb23e0814c")
+		(uuid "2d070424-da45-55ba-b078-a1a8c1adb101")
 		(property "Sheetname" "mcu"
 			(at 215.9 75.4884 0)
 			(show_name no)
@@ -976,6 +833,52 @@
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
 					(page "9")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 152.4 76.2)
+		(size 50.8 25.4)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "012f97b0-91f3-5a24-afee-df008b9df93c")
+		(property "Sheetname" "jamma"
+			(at 152.4 75.4884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "jamma.kicad_sch"
+			(at 152.4 102.1846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48"
+					(page "8")
 				)
 			)
 		)
