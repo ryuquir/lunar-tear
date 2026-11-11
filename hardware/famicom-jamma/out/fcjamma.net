@@ -8050,13 +8050,13 @@
 		)
 		(comp
 			(ref "JP1")
-			(value "PPU /RST = +5V (Famicom wiring)")
+			(value "RST=5V")
 			(footprint "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm")
 			(fields
 				(field
 					(name "Source") "PCB")
 				(field
-					(name "Note") "normally open; bridged, it ties the PPU reset high as in the Famicom")
+					(name "Note") "normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom")
 				(field
 					(name "hierarchy_path") "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/1433faf1-ac52-5086-8651-4861df96c0d9")
 				(field
@@ -8079,7 +8079,7 @@
 			)
 			(property
 				(name "Note")
-				(value "normally open; bridged, it ties the PPU reset high as in the Famicom")
+				(value "normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom")
 			)
 			(property
 				(name "hierarchy_path")
@@ -8122,7 +8122,7 @@
 		)
 		(comp
 			(ref "JP2")
-			(value "sprite bit source")
+			(value "SPR src")
 			(footprint "Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm")
 			(fields
 				(field

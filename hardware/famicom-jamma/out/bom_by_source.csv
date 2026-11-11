@@ -80,11 +80,11 @@ PCB,,C_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP17,part of the board,,,
 PCB,,GND,,TestPoint:TestPoint_Pad_D1.5mm,2,,TP5 TP6,part of the board,,,
 PCB,,JAMMA edge (gold fingers),,fcjamma:JAMMA_Edge_56,1,,J1,part of the board,,,
 PCB,,M2,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP7,part of the board,,,
-PCB,,PPU /RST = +5V (Famicom wiring),,Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm,1,,JP1,part of the board,,,"normally open; bridged, it ties the PPU reset high as in the Famicom"
+PCB,,RST=5V,,Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm,1,,JP1,part of the board,,,"normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom"
+PCB,,SPR src,,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,1,,JP2,part of the board,,,as made: comparator.  Cut 1-2 and bridge 2-3: buffered VOUT straight to the Pico input (experiment)
 PCB,,VBUF,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP9,part of the board,,,
 PCB,,VREF,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP10,part of the board,,,
 PCB,,VSYS,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP4,part of the board,,,
-PCB,,sprite bit source,,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,1,,JP2,part of the board,,,as made: comparator.  Cut 1-2 and bridge 2-3: buffered VOUT straight to the Pico input (experiment)
 AKI,,CPU bus (option),,Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical,1,DNP,J3,not fitted,,,
 AKI,,PPU bus (option),,Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical,1,DNP,J7,not fitted,,,
 AKI,,RAM A11-A14 (option),,Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical,1,DNP,J4,not fitted,,,

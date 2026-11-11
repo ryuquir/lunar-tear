@@ -10535,7 +10535,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "sprite bit source"
+		(property "Value" "SPR src"
 			(at 414.02 63.754 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11435,7 +11435,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "PPU /RST = +5V (Famicom wiring)"
+		(property "Value" "RST=5V"
 			(at 96.52 60.96 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11489,7 +11489,7 @@
 				(justify left)
 			)
 		)
-		(property "Note" "normally open; bridged, it ties the PPU reset high as in the Famicom"
+		(property "Note" "normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom"
 			(at 99.06 68.5799 0)
 			(hide yes)
 			(show_name no)

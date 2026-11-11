@@ -220,8 +220,8 @@ def sheet_ppu(d):
 
     P.R(s, "33", "CLK", "PPU_CLK")
     P.R(s, "470", "A_PPU_RST", "PPU_RST_N")
-    P.solder_jumper2(s, "JP1", "PPU /RST = +5V (Famicom wiring)", "PPU_RST_N", VSW,
-                     note="normally open; bridged, it ties the PPU reset high as in the Famicom")
+    P.solder_jumper2(s, "JP1", "RST=5V", "PPU_RST_N", VSW,
+                     note="normally open; bridged, it ties the PPU reset to +5V_SW as in the Famicom")
 
     # Pico B's substitution drivers on the PPU side of the data bus
     for i in range(8):
@@ -264,7 +264,7 @@ def sheet_ppu(d):
     P.C(s, "100n", VSW, GND)
     P.R(s, "10k", "VREF_PWM", "VREF", note="threshold: Pico A's PWM output, averaged")
     P.C(s, "1u", "VREF", GND, note="next to pin 4")
-    P.solder_jumper3(s, "JP2", "sprite bit source", "CMP_OUT", "SPR_SEL", "VBUF",
+    P.solder_jumper3(s, "JP2", "SPR src", "CMP_OUT", "SPR_SEL", "VBUF",
                      note="as made: comparator.  Cut 1-2 and bridge 2-3: buffered VOUT straight to the Pico input (experiment)")
     P.R(s, "1k", "SPR_SEL", "A_SPR")
 

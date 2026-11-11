@@ -393,8 +393,8 @@ ppu,R39,33,1,,CLK
 ppu,R39,33,2,,PPU_CLK
 ppu,R40,470,1,,A_PPU_RST
 ppu,R40,470,2,,PPU_RST_N
-ppu,JP1,PPU /RST = +5V (Famicom wiring),1,,PPU_RST_N
-ppu,JP1,PPU /RST = +5V (Famicom wiring),2,,+5V_SW
+ppu,JP1,RST=5V,1,,PPU_RST_N
+ppu,JP1,RST=5V,2,,+5V_SW
 ppu,R41,33,1,,PPD0
 ppu,R41,33,2,,B_OVR0
 ppu,R42,33,1,,PPD1
@@ -545,9 +545,9 @@ ppu,R56,10k,1,,VREF_PWM
 ppu,R56,10k,2,,VREF
 ppu,C24,1u,1,,VREF
 ppu,C24,1u,2,,GND
-ppu,JP2,sprite bit source,1,,CMP_OUT
-ppu,JP2,sprite bit source,2,,SPR_SEL
-ppu,JP2,sprite bit source,3,,VBUF
+ppu,JP2,SPR src,1,,CMP_OUT
+ppu,JP2,SPR src,2,,SPR_SEL
+ppu,JP2,SPR src,3,,VBUF
 ppu,R57,1k,1,,SPR_SEL
 ppu,R57,1k,2,,A_SPR
 ppu,J7,PPU bus (option),1,,+5V_SW
