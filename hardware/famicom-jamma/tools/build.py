@@ -10,13 +10,16 @@ Steps
     against data/jlcpcb_basic_parts_*.csv, Extended parts against data/jlcpcb_extended_parts.csv,
     which tools/jlc_parts.py refreshes), is the part the circuit means, can be assembled on a
     Standard PCBA order and is in stock
- 3. check that every standard footprint exists in the KiCad library
+ 3. check that every standard footprint exists in the KiCad library, has a pad for every pin of
+    its symbol and is the package JLCPCB supplies; check the board's own design rules and the
+    datasheet facts written down in design/circuit.py (selfcheck)
  4. write kicad/ (symbol library, schematic sheets, project file)
  5. kicad-cli: upgrade to the KiCad 10 format, ERC, netlist, PDF
  6. compare KiCad's netlist with the model, pin by pin
  7. write out/ (BOM with sourcing, net list, reports, cost estimate)
 """
 import csv
+import datetime
 import os
 import re
 import shutil
@@ -126,7 +129,29 @@ def check_rule(design, problems, warnings):
             problems.append(f"parts rule: extra item '{value}' is not a JLCPCB part of the tables")
 
 
+# KiCad footprint (name, or the start of the name when it ends with "_") -> text of JLCPCB's package column, and whether
+# the package column must be exactly that text.  A part on the wrong footprint passes every netlist check, hence this table.
+PACKAGE_OF_FOOTPRINT = [
+    ("R_0603_", "0603", True), ("C_0603_", "0603", True), ("L_0603_", "0603", True), ("LED_0603_", "0603", True),
+    ("R_Array_Convex_4x0603", "0603x4", True), ("D_SMA", "SMA", False), ("D_SMB", "SMB", False),
+    ("SOT-23", "SOT-23", True), ("SOT-23-5", "SOT-23-5", True), ("SOT-23-6", "SOT-23-6", True), ("SOT-223-3_TabPin2", "SOT-223", True),
+    ("SOIC-8_", "SOIC-8", True), ("SOIC-14_", "SOIC-14", True), ("SOIC-16_", "SOIC-16", True), ("SOIC-20W_", "SOIC-20", True),
+    ("MSOP-8_", "MSOP-8", True), ("TSOP-I-28_", "TSOPI-28", True),
+    ("CP_EIA-3216-18_", "3216", False), ("CP_EIA-3528-21_", "3528", False), ("CP_Elec_6.3x7.7", "6.3", False), ("Fuse_2920_", "2920", True),
+]
+
+
+def expected_package(fp_name):
+    for key, text, exact in PACKAGE_OF_FOOTPRINT:
+        if fp_name == key or (key.endswith("_") and fp_name.startswith(key)):
+            return text, exact
+    return None, False
+
+
 def check_footprints(design, problems, custom):
+    """Every standard footprint exists, has a pad for every pin of its symbol, and is the package JLCPCB supplies."""
+    basic, ext = load_basic(), load_extended()
+    pads_of = {}
     for p in design.parts.values():
         if not p.footprint:
             problems.append(f"footprint: {p.ref} has none")
@@ -134,19 +159,42 @@ def check_footprints(design, problems, custom):
         lib, name = p.footprint.split(":")
         if lib == "fcjamma":
             custom.add(p.footprint)
-        elif not os.path.exists(os.path.join(KICAD_FP, f"{lib}.pretty", f"{name}.kicad_mod")):
+            continue
+        path = os.path.join(KICAD_FP, f"{lib}.pretty", f"{name}.kicad_mod")
+        if not os.path.exists(path):
             problems.append(f"footprint: {p.ref} -> {p.footprint} not found in the KiCad library")
+            continue
+        if path not in pads_of:
+            pads_of[path] = set(re.findall(r'\(pad "([^"]*)"', open(path, encoding="utf-8").read()))
+        missing = sorted(n for n in p.conn if n not in pads_of[path])
+        if missing:
+            problems.append(f"footprint: {p.ref} ({p.value}) has pins {missing} that {name} has no pad for")
+        row = basic.get(p.code) or ext.get(p.code)
+        text, exact = expected_package(name)
+        if row and text and not p.dnp:
+            package = row["package"]
+            if (package != text) if exact else (text not in package):
+                problems.append(f"footprint: {p.ref} ({p.value}) sits on {name}, but JLCPCB supplies {p.code} in '{package}'")
 
 
 PASSIVE_LIBS = ("Device:R", "Device:C", "Device:C_Polarized", "Device:R_Pack04", "Device:FerriteBead", "Device:R_Potentiometer_Trim",
                 "Connector:TestPoint", "Connector_Generic:", "Switch:", "Jumper:")
+RAILS_5V = ("+5V", "+5V_SW", "+5V_IN")
+UNIFORM_BUSES = ("CD", "PPD", "CART_D", "PD", "DQ_PA", "DQ_D", "DI_CD", "DI_PD", "B_CD", "B_OVR")
 
 
 def check_design_rules(design, problems):
     """Electrical rules of this board that can be checked from the netlist alone."""
+    import collections
+
     def pin_name(part, num):
         if isinstance(part.sym, SymDef):
             return next(x[1] for x in part.sym.pins() if str(x[0]) == num)
+        return ""
+
+    def pin_type(part, num):
+        if isinstance(part.sym, SymDef):
+            return next(x[2] for x in part.sym.pins() if str(x[0]) == num)
         return ""
 
     def supply(part):
@@ -160,43 +208,116 @@ def check_design_rules(design, problems):
     def passive(part):
         return (not isinstance(part.sym, SymDef)) and part.lib_id.startswith(PASSIVE_LIBS)
 
+    def is_pico(part):
+        return isinstance(part.sym, SymDef) and part.sym.name == "PICO2"
+
     nets = design.nets()
-    # 1. a part outside the 3.3 V domain reaches a Pico GPIO only through a resistor
-    for net, pins in nets.items():
-        picos = [(r, n) for r, n in pins if isinstance(design.parts[r].sym, SymDef) and design.parts[r].sym.name == "PICO2"]
-        gp = [pin_name(design.parts[r], n) for r, n in picos if pin_name(design.parts[r], n).startswith("GP")]
+
+    # 0. a net with a single pin is a typing mistake in a net name
+    for net, pins in sorted(nets.items()):
+        if len(pins) == 1:
+            problems.append(f"design rule: net {net} has a single pin ({pins[0][0]}.{pins[0][1]}); check the spelling of the net name")
+
+    # 1. a part outside the 3.3 V domain reaches a Pico GPIO only through a resistor.
+    #    Pads 1 and 2 of a solder jumper that is made closed count as one net.
+    joined = {}
+    for part in design.parts.values():
+        if part.lib_id == "Jumper:SolderJumper_3_Bridged12":
+            a, b = part.conn["1"], part.conn["2"]
+            group = joined.get(a, {a}) | joined.get(b, {b})
+            for n in group:
+                joined[n] = group
+    done = set()
+    for net in nets:
+        group = frozenset(joined.get(net, {net}))
+        if group in done:
+            continue
+        done.add(group)
+        pins = [x for n in group for x in nets[n]]
+        gp = [pin_name(design.parts[r], n) for r, n in pins if is_pico(design.parts[r]) and pin_name(design.parts[r], n).startswith("GP")]
         if not gp:
             continue
         for r, n in pins:
             part = design.parts[r]
-            if (r, n) in picos or passive(part) or supply(part) in ("+3V3", "VSYS"):
+            if is_pico(part) or passive(part) or supply(part) in ("+3V3", "VSYS"):
                 continue
-            problems.append(f"design rule: net {net} joins Pico pin {'/'.join(gp)} directly to {r}.{n} ({pin_name(part, n)}), a part outside the 3.3 V domain")
-    # 2. one 100 nF capacitor per IC on its supply net, counted per sheet
-    need, have = {}, {}
+            problems.append(f"design rule: net {'/'.join(sorted(group))} joins Pico pin {'/'.join(gp)} directly to {r}.{n} "
+                            f"({pin_name(part, n)}), a part outside the 3.3 V domain")
+
+    # 2. every IC has its own 100 nF capacitor between its supply net and ground
+    caps = collections.defaultdict(list)
+    for part in design.parts.values():
+        if part.at:
+            if part.at not in design.parts:
+                problems.append(f"design rule: capacitor {part.ref} is marked for {part.at}, which does not exist")
+            caps[part.at].append(part)
     for part in design.parts.values():
         if isinstance(part.sym, SymDef) and part.ref.startswith("U") and part.sym.name not in ("PICO2", "CJ431"):
-            need[(part.sheet, supply(part))] = need.get((part.sheet, supply(part)), 0) + 1
-        if part.lib_id == "Device:C" and part.value == "100n" and not part.dnp:
-            a, b = part.conn.get("1"), part.conn.get("2")
-            rail = a if b == "GND" else b
-            have[(part.sheet, rail)] = have.get((part.sheet, rail), 0) + 1
-    for key, n in need.items():
-        if have.get(key, 0) < n:
-            problems.append(f"design rule: sheet {key[0]} has {n} ICs on {key[1]} but only {have.get(key, 0)} 100 nF capacitors there")
-    # 3. every numbered bus bit has the same kinds of connections as its neighbours
-    import collections
+            rail = supply(part)
+            own = [c for c in caps.get(part.ref, []) if c.value == "100n" and not c.dnp and {c.conn.get("1"), c.conn.get("2")} == {rail, "GND"}]
+            if not own:
+                problems.append(f"design rule: {part.ref} ({part.value}) has no 100 nF capacitor of its own between {rail} and GND")
+
+    # 3. every bit of a bus has the same kinds of connections as its neighbours, and no bit is missing
     fam = collections.defaultdict(dict)
     for net, pins in nets.items():
         m = re.fullmatch(r"([A-Z_]+?)(\d+)", net)
-        if m and m.group(1) in ("CD", "PPD", "CART_D", "PD"):
+        if m and m.group(1) in UNIFORM_BUSES:
             fam[m.group(1)][int(m.group(2))] = sorted(re.sub(r"\d+$", "", r) + ":" + type(design.parts[r].sym).__name__ for r, _ in pins)
-    for name, bits_ in fam.items():
+    for name in UNIFORM_BUSES:
+        bits_ = fam.get(name, {})
+        if not bits_:
+            problems.append(f"design rule: bus {name} is missing")
+            continue
+        gaps = sorted(set(range(max(bits_) + 1)) - set(bits_))
+        if gaps:
+            problems.append(f"design rule: bus {name} has no bit {gaps}")
         shapes = collections.Counter(tuple(v) for v in bits_.values())
+        # PA8-13 come from another register than PA0-7, but through the same kind of parts, so one shape is expected everywhere
         if len(shapes) > 1:
             common = shapes.most_common(1)[0][0]
             odd = [f"{name}{i}" for i, v in sorted(bits_.items()) if tuple(v) != common]
             problems.append(f"design rule: bus {name} is not uniform; check {odd}")
+
+    # 4. no net carries two outputs of the same IC
+    for net, pins in nets.items():
+        outs = collections.Counter(r for r, n in pins if pin_type(design.parts[r], n) in ("out", "tri"))
+        for r, count in outs.items():
+            if count > 1:
+                problems.append(f"design rule: net {net} carries {count} outputs of {r}")
+
+    # 5. GP26-GP28 never tolerate 5 V: a resistor from such a pin to anything that can carry 5 V needs a second resistor to ground
+    def can_carry_5v(net):
+        if net in RAILS_5V:
+            return True
+        for r, n in nets.get(net, []):
+            part = design.parts[r]
+            if part.src == DONOR and pin_type(part, n) != "in":
+                return True
+            if isinstance(part.sym, SymDef) and part.sym.name == "FC_CART60":
+                return True
+            if supply(part) in RAILS_5V and pin_type(part, n) in ("out", "tri", "bi", "oc"):
+                return True
+        return False
+
+    for part in design.parts.values():
+        if not is_pico(part):
+            continue
+        for num, net in part.conn.items():
+            if pin_name(part, num) not in ("GP26", "GP27", "GP28") or net is None:
+                continue
+            far = []
+            for r, n in nets[net]:
+                other = design.parts[r]
+                if other.lib_id in ("Device:R", "Device:R_Pack04"):
+                    if other.lib_id == "Device:R":
+                        far.append(other.conn["2" if n == "1" else "1"])
+                    else:
+                        far.append(other.conn[str(9 - int(n))])
+            hot = [f for f in far if f and can_carry_5v(f)]
+            if hot and "GND" not in far:
+                problems.append(f"design rule: {part.ref} {pin_name(part, num)} (net {net}) reaches {hot[0]}, which can carry 5 V, "
+                                "through a resistor but has no resistor to ground")
 
 
 UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
@@ -246,7 +367,7 @@ def unit_price(row, pieces):
     if "unit_price_usd_qty1" in row:
         return float(row["unit_price_usd_qty1"] or 0)
     key = "price_100" if pieces >= 100 else "price_10" if pieces >= 10 else "price_1"
-    return float(row[key] or row["price_1"] or 0)
+    return float(row.get(key) or row.get("price_1") or 0)
 
 
 # JLCPCB's fees for a Standard PCBA order, single-sided, in USD.
@@ -348,7 +469,12 @@ def main():
     check_rule(design, problems, warnings)
     check_footprints(design, problems, custom)
     check_design_rules(design, problems)
-    single = sorted(n for n, pins in design.nets().items() if len(pins) == 1)
+    problems += [f"datasheet fact does not hold: {text}" for text in design.failed_facts]
+    for row in load_extended().values():      # stock and prices change daily
+        age = (datetime.date.today() - datetime.date.fromisoformat(row["checked"])).days
+        if age > 7:
+            warnings.append(f"data/jlcpcb_extended_parts.csv was fetched {age} days ago ({row['checked']}); run tools/jlc_parts.py before relying on stock or prices")
+            break
     kdir, odir = os.path.join(ROOT, "kicad"), os.path.join(ROOT, "out")
     for f in os.listdir(kdir) if os.path.isdir(kdir) else []:
         if f.endswith(".kicad_sch"):
@@ -384,7 +510,10 @@ def main():
     rc, out = run(["kicad-cli", "sch", "export", "pdf", "-o", os.path.join(odir, f"{design.name}_schematic.pdf"), root], env, kdir)
     if rc:
         problems.append("kicad-cli pdf export failed: " + out[-200:])
-    write_outputs(design, odir)
+    try:
+        write_outputs(design, odir)
+    except Exception as e:      # for example a part that is missing from the data files; the list below says which
+        problems.append(f"writing out/ failed: {type(e).__name__}: {e}")
 
     by = {}
     for p in design.parts.values():
@@ -399,18 +528,17 @@ def main():
         extra = sum(e[3] for e in design.extras if e[0] == s)
         kinds += len(set(e[1] for e in design.extras if e[0] == s) - set(p.code for p in fitted))
         print(f"  {label[s]:24s}: {len(fitted) + extra:4d} fitted, {kinds:3d} kinds" + (f", {len(ps) - len(fitted)} positions left empty" if len(ps) > len(fitted) else ""))
-    for boards in (5, 10):
+    for boards in (5, 10) if not problems else ():
         c = cost(design, boards)
         print(f"  one board when {boards:2d} are ordered: parts {c['parts']:.2f} + joints {c['joints']:.2f} + X-ray {c['X-ray']:.2f} "
               f"+ share of the fees per order {c['fixed share']:.2f} ({c['fixed per order']:.2f} / {boards}) = {c['one board']:.2f} USD")
-    c = cost(design, 5)
-    print(f"  ({c['kinds']} kinds of parts, {c['SMT kinds']} of them SMT; {c['SMT joints']} SMT joints, {c['hand-soldered joints']} hand-soldered joints; "
+    c = cost(design, 5) if not problems else None
+    if c:
+        print(f"  ({c['kinds']} kinds of parts, {c['SMT kinds']} of them SMT; {c['SMT joints']} SMT joints, {c['hand-soldered joints']} hand-soldered joints; "
           "not counted: see out/cost_estimate.csv)")
     print("ERC:", erc_line)
     if custom:
         print("custom footprints still to be drawn:", ", ".join(sorted(custom)))
-    if single:
-        print(f"nets with a single pin ({len(single)}):", ", ".join(single[:40]))
     for w in warnings:
         print("WARNING:", w)
     if problems:

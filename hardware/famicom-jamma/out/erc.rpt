@@ -10,7 +10,7 @@ Report includes: Errors, Warnings, Exclusions
     @(40.64 mm, 93.98 mm): Symbol J1 [JAMMA56]
 [footprint_link_issues]: The current configuration does not include the footprint library 'fcjamma'
     ; warning
-    @(38.10 mm, 106.68 mm): Symbol J8 [FC_CART60]
+    @(38.10 mm, 111.76 mm): Symbol J8 [FC_CART60]
 
 ***** Sheet /power/
 

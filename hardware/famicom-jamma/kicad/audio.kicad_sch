@@ -3424,7 +3424,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "6a10bafe-a94c-560c-868c-75db168baa9f")
-		(property "Reference" "C36"
+		(property "Reference" "C37"
 			(at 172.72 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3520,7 +3520,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C36")
+					(reference "C37")
 					(unit 1)
 				)
 			)
@@ -3650,7 +3650,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "4dcf9306-f50e-57e8-8b80-31b033417c2f")
-		(property "Reference" "C43"
+		(property "Reference" "C44"
 			(at 119.38 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3746,7 +3746,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C43")
+					(reference "C44")
 					(unit 1)
 				)
 			)
@@ -3893,7 +3893,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "55e7d161-156b-5ed6-8a1c-936be18314b3")
-		(property "Reference" "R140"
+		(property "Reference" "R143"
 			(at 373.38 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3989,7 +3989,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R140")
+					(reference "R143")
 					(unit 1)
 				)
 			)
@@ -4006,7 +4006,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "c59b208c-6f3c-56af-acd5-3557e64ba815")
-		(property "Reference" "C37"
+		(property "Reference" "C38"
 			(at 264.16 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4081,6 +4081,18 @@
 				(justify left)
 			)
 		)
+		(property "Note" "at U18"
+			(at 266.7 99.0599 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
 			(at 266.7 99.0599 0)
 			(hide yes)
@@ -4102,7 +4114,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C37")
+					(reference "C38")
 					(unit 1)
 				)
 			)
@@ -4196,7 +4208,7 @@
 				(justify left)
 			)
 		)
-		(property "Note" "class D, gain 15 (23.5 dB), up to 1.5 W into 8 ohm; powered from +5V, not through the +5V_SW switch"
+		(property "Note" "class D, gain 15 (23.5 dB), 1.3 W into 8 ohm at 1 % distortion (1.5 W at 10 %); powered from +5V, not through the +5V_SW switch"
 			(at 86.36 63.4999 0)
 			(hide yes)
 			(show_name no)
@@ -4264,7 +4276,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "fa9ca86c-1c64-5104-bf7e-f839c6444697")
-		(property "Reference" "R144"
+		(property "Reference" "R147"
 			(at 195.58 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4372,7 +4384,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R144")
+					(reference "R147")
 					(unit 1)
 				)
 			)
@@ -4489,7 +4501,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "dfdcd57f-a55d-581d-8c06-d68533d6b2d3")
-		(property "Reference" "R149"
+		(property "Reference" "R152"
 			(at 381 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4585,7 +4597,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R149")
+					(reference "R152")
 					(unit 1)
 				)
 			)
@@ -4602,7 +4614,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "6eab47bb-92ac-5cd9-98ed-6b9a385eba78")
-		(property "Reference" "C39"
+		(property "Reference" "C40"
 			(at 68.58 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4698,7 +4710,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C39")
+					(reference "C40")
 					(unit 1)
 				)
 			)
@@ -4860,7 +4872,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "02b32f85-8cda-5b13-a494-5d9b90d72976")
-		(property "Reference" "R136"
+		(property "Reference" "R139"
 			(at 66.04 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4956,7 +4968,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R136")
+					(reference "R139")
 					(unit 1)
 				)
 			)
@@ -4973,7 +4985,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "aa94f4d3-f096-5ea1-a08f-7a974d802af5")
-		(property "Reference" "R148"
+		(property "Reference" "R151"
 			(at 162.56 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5069,7 +5081,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R148")
+					(reference "R151")
 					(unit 1)
 				)
 			)
@@ -5086,7 +5098,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "1d95992d-b7af-5709-8f1a-6c6c79228457")
-		(property "Reference" "R146"
+		(property "Reference" "R149"
 			(at 330.2 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5182,7 +5194,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R146")
+					(reference "R149")
 					(unit 1)
 				)
 			)
@@ -5199,7 +5211,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "deb38a67-d9f8-59a7-932c-df0211c44cf8")
-		(property "Reference" "C38"
+		(property "Reference" "C39"
 			(at 335.28 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5307,7 +5319,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C38")
+					(reference "C39")
 					(unit 1)
 				)
 			)
@@ -5324,7 +5336,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "2cd517cd-8d45-50ea-bcb5-d0f9ea97b6fc")
-		(property "Reference" "R142"
+		(property "Reference" "R145"
 			(at 106.68 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5432,7 +5444,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R142")
+					(reference "R145")
 					(unit 1)
 				)
 			)
@@ -5449,7 +5461,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "48464e62-dfbe-540e-a40a-066c53415249")
-		(property "Reference" "C40"
+		(property "Reference" "C41"
 			(at 243.84 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5545,7 +5557,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C40")
+					(reference "C41")
 					(unit 1)
 				)
 			)
@@ -5562,7 +5574,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "3c4beef1-f8be-50aa-be72-387d3487897a")
-		(property "Reference" "R135"
+		(property "Reference" "R138"
 			(at 27.94 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5658,7 +5670,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R135")
+					(reference "R138")
 					(unit 1)
 				)
 			)
@@ -5675,7 +5687,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "54629963-8925-5162-bbc8-c65d1ab87f3b")
-		(property "Reference" "C49"
+		(property "Reference" "C50"
 			(at 350.52 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5771,7 +5783,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C49")
+					(reference "C50")
 					(unit 1)
 				)
 			)
@@ -5788,7 +5800,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "6ee36f2f-34c5-5237-90d9-968ddb537133")
-		(property "Reference" "C47"
+		(property "Reference" "C48"
 			(at 294.64 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5896,7 +5908,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C47")
+					(reference "C48")
 					(unit 1)
 				)
 			)
@@ -5913,7 +5925,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "d9f2687a-ac14-504f-ab1b-9d5612e52cb4")
-		(property "Reference" "R143"
+		(property "Reference" "R146"
 			(at 147.32 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6009,7 +6021,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R143")
+					(reference "R146")
 					(unit 1)
 				)
 			)
@@ -6139,7 +6151,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "4e69d6b4-a06f-58d4-b88a-19fb00b7d13f")
-		(property "Reference" "C48"
+		(property "Reference" "C49"
 			(at 322.58 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6235,7 +6247,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C48")
+					(reference "C49")
 					(unit 1)
 				)
 			)
@@ -6252,7 +6264,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "fdf786a5-1a7b-55a4-8923-8b656122a332")
-		(property "Reference" "R145"
+		(property "Reference" "R148"
 			(at 287.02 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6348,7 +6360,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R145")
+					(reference "R148")
 					(unit 1)
 				)
 			)
@@ -6365,7 +6377,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b0e01a16-23ae-56d1-a99c-72705b3c3bc9")
-		(property "Reference" "R139"
+		(property "Reference" "R142"
 			(at 299.72 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6461,7 +6473,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R139")
+					(reference "R142")
 					(unit 1)
 				)
 			)
@@ -6478,7 +6490,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5b21bc14-1f46-5a73-b593-73b03f2f787f")
-		(property "Reference" "C46"
+		(property "Reference" "C47"
 			(at 269.24 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6553,6 +6565,18 @@
 				(justify left)
 			)
 		)
+		(property "Note" "at U19"
+			(at 271.78 152.3999 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
 			(at 271.78 152.3999 0)
 			(hide yes)
@@ -6574,7 +6598,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C46")
+					(reference "C47")
 					(unit 1)
 				)
 			)
@@ -6591,7 +6615,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "89a1a556-4317-50a4-8daa-6c05f2ab62c9")
-		(property "Reference" "R147"
+		(property "Reference" "R150"
 			(at 33.02 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6687,7 +6711,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R147")
+					(reference "R150")
 					(unit 1)
 				)
 			)
@@ -6704,7 +6728,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "58899496-11bd-5bfc-adca-6826ab18891d")
-		(property "Reference" "R137"
+		(property "Reference" "R140"
 			(at 101.6 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6812,7 +6836,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R137")
+					(reference "R140")
 					(unit 1)
 				)
 			)
@@ -6829,7 +6853,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "d720a5d1-e4e7-52de-954a-a0a555842c33")
-		(property "Reference" "R150"
+		(property "Reference" "R153"
 			(at 27.94 157.72 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6937,7 +6961,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R150")
+					(reference "R153")
 					(unit 1)
 				)
 			)
@@ -6954,7 +6978,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "e9c3cc67-458b-5c4e-b167-96fc634ef7b9")
-		(property "Reference" "C50"
+		(property "Reference" "C51"
 			(at 134.62 157.72 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7050,7 +7074,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C50")
+					(reference "C51")
 					(unit 1)
 				)
 			)
@@ -7067,7 +7091,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "23be6dd2-7466-5f92-b936-5baecd26e653")
-		(property "Reference" "C45"
+		(property "Reference" "C46"
 			(at 236.22 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7175,7 +7199,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C45")
+					(reference "C46")
 					(unit 1)
 				)
 			)
@@ -7192,7 +7216,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b1efbb3e-3428-5326-8c12-bb4ee4e5a5c6")
-		(property "Reference" "R141"
+		(property "Reference" "R144"
 			(at 30.48 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7300,7 +7324,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R141")
+					(reference "R144")
 					(unit 1)
 				)
 			)
@@ -7417,7 +7441,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "23b7de11-1de4-563f-a197-2a59f3da5492")
-		(property "Reference" "C42"
+		(property "Reference" "C43"
 			(at 76.2 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7492,7 +7516,7 @@
 				(justify left)
 			)
 		)
-		(property "Note" "two stages, -3 dB at 12.7 kHz; run the PWM at 300 kHz or more"
+		(property "Note" "two stages, -3 dB at 12.7 kHz.  Keep the PWM frequency away from the amplifier's own 200-300 kHz and its double (for example 350 kHz, or 650 kHz and above), or the two beat audibly"
 			(at 78.74 152.3999 0)
 			(hide yes)
 			(show_name no)
@@ -7525,7 +7549,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C42")
+					(reference "C43")
 					(unit 1)
 				)
 			)
@@ -7542,7 +7566,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "aa6b97ba-5270-545e-a1c6-1c5b5dc5ece4")
-		(property "Reference" "C44"
+		(property "Reference" "C45"
 			(at 200.66 145.02 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7650,7 +7674,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C44")
+					(reference "C45")
 					(unit 1)
 				)
 			)
@@ -7667,7 +7691,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "8f34f395-5385-54fa-acd1-6291a2e08e3d")
-		(property "Reference" "C41"
+		(property "Reference" "C42"
 			(at 373.38 129.78 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7763,7 +7787,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C41")
+					(reference "C42")
 					(unit 1)
 				)
 			)
@@ -7780,7 +7804,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "8f349546-e9e8-5dcc-9093-440994479997")
-		(property "Reference" "C51"
+		(property "Reference" "C52"
 			(at 170.18 157.72 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7876,7 +7900,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "C51")
+					(reference "C52")
 					(unit 1)
 				)
 			)
@@ -7893,7 +7917,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "87f33448-b1af-5bae-81d7-11fdea97c216")
-		(property "Reference" "R138"
+		(property "Reference" "R141"
 			(at 137.16 91.68 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8001,7 +8025,7 @@
 		(instances
 			(project "fcjamma"
 				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/509e6716-a655-503c-a353-55e84d8e9803"
-					(reference "R138")
+					(reference "R141")
 					(unit 1)
 				)
 			)

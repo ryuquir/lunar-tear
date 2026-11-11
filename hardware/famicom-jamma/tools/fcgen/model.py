@@ -60,6 +60,7 @@ class Part:
     note: str = ""
     sheet: str = ""
     horizontal: bool = False    # library two-pin parts are drawn lying down
+    at: str = ""                # for a decoupling capacitor: the reference of the IC it belongs to
 
     @property
     def lib_id(self):
@@ -77,6 +78,7 @@ class Design:
         self._auto = {}
         self.notes = {}           # sheet key -> list of text notes
         self.extras = []          # items of the parts list that are not schematic parts (the sockets under the donor chips)
+        self.failed_facts = []    # datasheet facts that the finished circuit does not meet (filled by design/circuit.py)
 
     def extra(self, src, code, value, qty, note="", refs=""):
         """An item for the parts list that is not a schematic part.  refs: the positions where it is fitted."""
@@ -148,7 +150,7 @@ class Sheet:
         return self.d.add(Part(ref, sd, value, fp, conn, src, code, dnp, note, self.key))
 
     # ---- KiCad library symbols, connected by pin number ----
-    def lib(self, prefix, lib_id, value, fp, src, code, conn, dnp=False, note="", ref=None, horizontal=False):
+    def lib(self, prefix, lib_id, value, fp, src, code, conn, dnp=False, note="", ref=None, horizontal=False, at=""):
         ref = ref or self.d.autoref(prefix)
         conn = {str(k): v for k, v in conn.items()}
-        return self.d.add(Part(ref, lib_id, value, fp, conn, src, code, dnp, note, self.key, horizontal))
+        return self.d.add(Part(ref, lib_id, value, fp, conn, src, code, dnp, note, self.key, horizontal, at))

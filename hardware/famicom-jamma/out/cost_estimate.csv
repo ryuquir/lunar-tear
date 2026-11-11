@@ -1,13 +1,13 @@
 item (USD),5 boards ordered,10 boards ordered
-kinds,51,51
-SMT kinds,47,47
-SMT joints,1337,1337
+kinds,50,50
+SMT kinds,46,46
+SMT joints,1345,1345
 hand-soldered joints,151,151
-parts for one board,42.06,41.42
-"soldering by the joint, one board",4.62,4.62
+parts for one board,42.15,41.51
+"soldering by the joint, one board",4.63,4.63
 "X-ray inspection, one board",2.46,2.46
-"fees per order (set-up, stencil, loading, labour, packing, placement check)",110.21,110.21
-"fees per order, share of one board",22.04,11.02
-parts and assembly of one board,71.17,59.51
+"fees per order (set-up, stencil, loading, labour, packing, placement check)",108.68,108.68
+"fees per order, share of one board",21.74,10.87
+parts and assembly of one board,70.97,59.46
 not counted,"the bare boards, shipping and import tax; a soldering fixture (16.42 USD per order) and placing the Pico modules by hand (0.016 USD per joint, about 2.35 USD per board) if JLCPCB charges them; the spare pieces JLCPCB bills for losses"
 fees,"setup 25.56; stencil 8.21; loading per kind of SMT part 1.53; SMT joint 0.0016; hand-soldered joint 0.0164; hand-soldering labour per order 3.58; packing 0.5; confirm parts placement 0.45; X-ray per piece by quantity <=10: 1.64, <=50: 0.82, <=200: 0.49"

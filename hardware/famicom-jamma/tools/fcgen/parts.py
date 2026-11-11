@@ -51,7 +51,6 @@ R0603 = {
     "33": ("C23140", "33Ω"), "100": ("C22775", "100Ω"), "470": ("C23179", "470Ω"),
     "1k": ("C21190", "1kΩ"), "5.1k": ("C23186", "5.1kΩ"), "10k": ("C25804", "10kΩ"),
     "12k": ("C22790", "12kΩ"), "20k": ("C4184", "20kΩ"), "47k": ("C25819", "47kΩ"),
-    "100k": ("C25803", "100kΩ"),
 }
 RARRAY = {"1k": ("C20197", "1kΩ"), "4.7k": ("C1980", "4.7kΩ"), "10k": ("C29718", "10kΩ")}
 C0603 = {
@@ -62,10 +61,8 @@ C0603 = {
 TANT = {"10u/16V": ("C7171", "10uF", FP_TANT_A), "100u/6.3V": ("C16133", "100uF", FP_TANT_B)}
 # name -> (LCSC number, KiCad symbol, footprint, text that must appear in JLCPCB's part number)
 SEMI = {
-    "MMBT3904": ("C20526", "Transistor_BJT:MMBT3904", FP_SOT23, "MMBT3904"),
     "S8550": ("C105432", "Transistor_BJT:MMBT3906", FP_SOT23, "S8550"),     # PNP; SOT-23 pins as the MMBT3906: 1 B, 2 E, 3 C
     "AO3400A": ("C20917", "Transistor_FET:AO3400A", FP_SOT23, "AO3400A"),
-    "1N4148W": ("C81598", "Diode:1N4148W", FP_SOD123, "1N4148W"),
     "SS14": ("C2480", "Diode:SS14", FP_SMA, "SS14"),
     "SS54": ("C22452", "Device:D_Schottky", FP_SMA, "SS54"),
     "SMBJ6.5CA": ("C7420377", "Device:D_TVS", FP_SMB, "SMBJ6.5CA"),
@@ -116,9 +113,14 @@ def R(sh, value, a, b, dnp=False, note=""):
     return sh.lib("R", "Device:R", value, FP_R, JLC, use(code, text), {1: a, 2: b}, dnp, note, horizontal=True)
 
 
-def C(sh, value, a, b, dnp=False, note=""):
+def C(sh, value, a, b, dnp=False, note="", at=""):
     code, text = C0603[value]
-    return sh.lib("C", "Device:C", value, FP_C, JLC, use(code, text), {1: a, 2: b}, dnp, note, horizontal=True)
+    return sh.lib("C", "Device:C", value, FP_C, JLC, use(code, text), {1: a, 2: b}, dnp, note, horizontal=True, at=at)
+
+
+def decouple(sh, ref, rail, note=""):
+    """The 100 nF capacitor of one IC, between its supply rail and ground.  The build checks that every IC has its own."""
+    return C(sh, "100n", rail, "GND", note=note or f"at {ref}", at=ref)
 
 
 def CT(sh, value, plus, minus, note=""):
@@ -152,10 +154,6 @@ def semi(sh, prefix, name, conn, dnp=False, note="", value=None, horizontal=None
     if horizontal is None:
         horizontal = len(conn) == 2
     return sh.lib(prefix, lib_id, value or name, fp, JLC, use(code, text), conn, dnp, note, ref=ref, horizontal=horizontal)
-
-
-def npn(sh, b, c, e, note=""):
-    return semi(sh, "Q", "MMBT3904", {1: b, 2: e, 3: c}, note=note)
 
 
 def nfet(sh, g, d, s, note=""):
