@@ -1,0 +1,14 @@
+I am preparing a Standard PCBA order of 5 to 10 boards and would like to confirm a few points before I finish the layout. The board is 2 layers, 1.6 mm, ENIG, about 200 x 150 mm, with gold fingers on one edge (a JAMMA edge connector: 28 positions on each side at 3.96 mm pitch, one position is a key slot) and a 30 degree bevel on that edge. All parts are on the top side.
+
+1) Raspberry Pi Pico 2 module, JLCPCB part C41407547 (marked "SMT Assembly", "Standard Only"). Each board carries three of them, soldered flat on the top side by their castellated edge pads.
+1a) Can you assemble this module by reflow in a normal Standard PCBA order? Is there any extra charge for it, for example X-ray inspection, a special component fee or a fixture?
+1b) Which land pattern should I use? Is the official Raspberry Pi footprint (40 edge pads plus the 3 debug pads) acceptable?
+1c) The module has six round test pads on its underside (TP1 to TP6). If my footprint has matching pads with solder paste, will they be soldered in the same reflow, and is that acceptable to you?
+1d) Your stock shows 56 pieces. If I need 30, do I have to pre-order them?
+
+2) Through-hole parts on the same board, all marked "Wave Soldering" in your parts library: two 40-pin DIP IC sockets (C2332 or C2874018), one 60-position card-edge connector (C5173310, 15.6 mm high) and, as an option, six 1x20 female headers (C2905423).
+2a) Can these be assembled on a board that has bevelled gold fingers? How are the gold fingers protected during soldering?
+2b) Is there a minimum distance you need between these through-hole parts and the gold-finger edge, the board edge or the edge rails?
+2c) Are these parts soldered by hand or by wave? Is flux residue kept out of the socket contacts or cleaned?
+
+3) Does anything above require assembly on both sides, or add to the lead time?
