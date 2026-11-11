@@ -32,7 +32,7 @@ AKI_CODE = {
     "74HC138": "110013", "74HC00": "110856", "74HC373": "131768", "74HC165": "114679",
     "sram": "101083", "tl712": "113885", "pam8012": "108217", "usbc": "113080",
     "polyfuse": "100769", "cap470u": "108426",
-    "dip8_socket": "", "socket_strip": "", "dipsw4": "", "trimmer10k": "", "jumper": "",
+    "dip8_socket": "100035", "socket_1x3": "110098", "dipsw4": "116584", "trimmer10k": "103277", "jumper": "103692",
 }
 
 
@@ -400,7 +400,7 @@ def sheet_audio(d):
     P.C(s, "10n", "AUD_PWM_F2", GND)
     P.C(s, "1u", "AUD_PWM_F2", "AUD_PWM_AC")
     P.R(s, "10k", "AUD_PWM_AC", "AUD_SUM")
-    s.lib("RV", "Device:R_Potentiometer_Trim", "10k (volume)", "fcjamma:Trimmer_10k", AKI, AKI_CODE["trimmer10k"],
+    s.lib("RV", "Device:R_Potentiometer_Trim", "10k (volume)", "fcjamma:Trimmer_Bourns_3362P", AKI, AKI_CODE["trimmer10k"],
           {1: "AUD_SUM", 2: "AMP_IN", 3: GND}, ref="RV1")
 
     s.ic("U19", "AE_PAM8012", "AE-PAM8012", "fcjamma:AE-PAM8012", AKI, AKI_CODE["pam8012"], pins={
@@ -532,10 +532,10 @@ def sheet_mcu(d):
     # Pico C programs and resets the other two
     P.RA(s, "1k", [("C_SWCLK_A", "SWCLK_A"), ("C_SWDIO_A", "SWDIO_A"), ("C_SWCLK_B", "SWCLK_B"), ("C_SWDIO_B", "SWDIO_B")])
     P.RA(s, "1k", [("C_RUN_A", "RUN_A"), ("C_RUN_B", "RUN_B")])
-    P.socket(s, "J13", 3, "debug pins of Pico A", {1: "SWCLK_A", 2: GND, 3: "SWDIO_A"}, code=AKI_CODE["socket_strip"],
+    P.socket(s, "J13", 3, "debug pins of Pico A", {1: "SWCLK_A", 2: GND, 3: "SWDIO_A"}, code=AKI_CODE["socket_1x3"],
              note="meets a 3-pin header soldered downwards into the Pico's debug pads")
-    P.socket(s, "J14", 3, "debug pins of Pico B", {1: "SWCLK_B", 2: GND, 3: "SWDIO_B"}, code=AKI_CODE["socket_strip"])
-    P.socket(s, "J15", 3, "debug pins of Pico C", {1: "SWCLK_C", 2: GND, 3: "SWDIO_C"}, code=AKI_CODE["socket_strip"])
+    P.socket(s, "J14", 3, "debug pins of Pico B", {1: "SWCLK_B", 2: GND, 3: "SWDIO_B"}, code=AKI_CODE["socket_1x3"])
+    P.socket(s, "J15", 3, "debug pins of Pico C", {1: "SWCLK_C", 2: GND, 3: "SWDIO_C"}, code=AKI_CODE["socket_1x3"])
     P.header(s, "J16", 1, 3, "debug probe for Pico C (option)", {1: "SWCLK_C", 2: GND, 3: "SWDIO_C"}, dnp=True)
     P.tact(s, "SW4", "RUN_C", GND, note="resets Pico C, which then restarts the whole board")
 
@@ -566,5 +566,5 @@ def build():
     d.extra(AKI, AKI_CODE["dip8_socket"], "8-pin IC socket", 1, "for U9 (TL712CP)")
     d.extra(AKI, AKI_CODE["pico_socket"], "pin sockets for a Pico, pair of 1x20", 3, "for U25, U26, U27")
     d.extra(AKI, AKI_CODE["header_1x40"], "pin header 1x40", 4, "the Pico modules are sold without pins: 2 x 20 + 3 debug pins each")
-    d.extra(AKI, AKI_CODE["jumper"], "jumper plug 2.54 mm", 2, "J6 (and JP1 if the Famicom reset wiring is wanted)")
+    d.extra(AKI, AKI_CODE["jumper"], "jumper plugs 2.54 mm, pack of 25", 1, "J6 (and JP1 if the Famicom reset wiring is wanted)")
     return d, ["GND", "+5V", "+5V_SW", "VSYS"]

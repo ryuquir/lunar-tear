@@ -18354,17 +18354,16 @@
 		(comp
 			(ref "RV1")
 			(value "10k (volume)")
-			(footprint "fcjamma:Trimmer_10k")
+			(footprint "fcjamma:Trimmer_Bourns_3362P")
 			(fields
 				(field
 					(name "Source") "AKI")
 				(field
-					(name "Akizuki")
-				)
+					(name "Akizuki") "103277")
 				(field
 					(name "hierarchy_path") "/81ae1ad7-c430-5c4b-89a8-9d6448988046/39b95d84-7f7d-5bd1-9509-afa06d903bc0")
 				(field
-					(name "Footprint") "fcjamma:Trimmer_10k")
+					(name "Footprint") "fcjamma:Trimmer_Bourns_3362P")
 				(field
 					(name "Datasheet")
 				)
@@ -18383,7 +18382,7 @@
 			)
 			(property
 				(name "Akizuki")
-				(value "")
+				(value "103277")
 			)
 			(property
 				(name "hierarchy_path")
@@ -23787,8 +23786,7 @@
 				(field
 					(name "Source") "AKI")
 				(field
-					(name "Akizuki")
-				)
+					(name "Akizuki") "116584")
 				(field
 					(name "Note") "1: off = CPU and PPU chips fitted, on = emulation; 2-4: for the firmware")
 				(field
@@ -23813,7 +23811,7 @@
 			)
 			(property
 				(name "Akizuki")
-				(value "")
+				(value "116584")
 			)
 			(property
 				(name "Note")
@@ -24793,8 +24791,7 @@
 				(field
 					(name "Source") "AKI")
 				(field
-					(name "Akizuki")
-				)
+					(name "Akizuki") "110098")
 				(field
 					(name "Note") "meets a 3-pin header soldered downwards into the Pico's debug pads")
 				(field
@@ -24819,7 +24816,7 @@
 			)
 			(property
 				(name "Akizuki")
-				(value "")
+				(value "110098")
 			)
 			(property
 				(name "Note")
@@ -24875,8 +24872,7 @@
 				(field
 					(name "Source") "AKI")
 				(field
-					(name "Akizuki")
-				)
+					(name "Akizuki") "110098")
 				(field
 					(name "hierarchy_path") "/81ae1ad7-c430-5c4b-89a8-9d6448988046/db607b4f-bb4e-54ef-8907-697c8933145a")
 				(field
@@ -24899,7 +24895,7 @@
 			)
 			(property
 				(name "Akizuki")
-				(value "")
+				(value "110098")
 			)
 			(property
 				(name "hierarchy_path")
@@ -24951,8 +24947,7 @@
 				(field
 					(name "Source") "AKI")
 				(field
-					(name "Akizuki")
-				)
+					(name "Akizuki") "110098")
 				(field
 					(name "hierarchy_path") "/81ae1ad7-c430-5c4b-89a8-9d6448988046/db607b4f-bb4e-54ef-8907-697c8933145a")
 				(field
@@ -24975,7 +24970,7 @@
 			)
 			(property
 				(name "Akizuki")
-				(value "")
+				(value "110098")
 			)
 			(property
 				(name "hierarchy_path")

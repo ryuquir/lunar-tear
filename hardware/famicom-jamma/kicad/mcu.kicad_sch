@@ -6352,7 +6352,7 @@
 				(justify left)
 			)
 		)
-		(property "Akizuki" ""
+		(property "Akizuki" "110098"
 			(at 375.92 200.6599 0)
 			(hide yes)
 			(show_name no)
@@ -7374,7 +7374,7 @@
 				(justify left)
 			)
 		)
-		(property "Akizuki" ""
+		(property "Akizuki" "110098"
 			(at 337.82 200.6599 0)
 			(hide yes)
 			(show_name no)
@@ -8688,7 +8688,7 @@
 				(justify left)
 			)
 		)
-		(property "Akizuki" ""
+		(property "Akizuki" "110098"
 			(at 299.72 200.6599 0)
 			(hide yes)
 			(show_name no)

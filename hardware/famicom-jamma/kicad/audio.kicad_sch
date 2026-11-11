@@ -5014,7 +5014,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "fcjamma:Trimmer_10k"
+		(property "Footprint" "fcjamma:Trimmer_Bourns_3362P"
 			(at 33.02 60.96 0)
 			(hide yes)
 			(show_name no)
@@ -5057,7 +5057,7 @@
 				(justify left)
 			)
 		)
-		(property "Akizuki" ""
+		(property "Akizuki" "103277"
 			(at 35.56 66.0399 0)
 			(hide yes)
 			(show_name no)

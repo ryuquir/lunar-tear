@@ -42,7 +42,7 @@ JLC,C7420377,SMBJ6.5CA,Diode_SMD:D_SMB,1,,D1,absorbs spikes only: it starts to c
 JLC,C2480,SS14,Diode_SMD:D_SMA,2,,D3 D4,
 JLC,C22452,SS54,Diode_SMD:D_SMA,1,,D2,conducts and trips F1 if the supply is connected the wrong way round
 JLC,C318884,TS-1187A,Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A,3,,SW1 SW2 SW4,"TEST, same as JAMMA finger 15"
-AKI,,10k (volume),fcjamma:Trimmer_10k,1,,RV1,
+AKI,103277,10k (volume),fcjamma:Trimmer_Bourns_3362P,1,,RV1,
 AKI,108426,470u/16V,Capacitor_THT:CP_Radial_D8.0mm_P3.50mm,1,,C1,
 AKI,110856,74HC00,Package_DIP:DIP-14_W7.62mm,1,,U5,"/ROMSEL = NAND(M2, A15); /PA13 for the cartridge"
 AKI,110013,74HC138,Package_DIP:DIP-16_W7.62mm,1,,U4,"M2 high and A15 low: Y0 = 0000-1FFF (RAM), Y1 = 2000-3FFF (PPU), Y2 = 4000-5FFF, Y3 = 6000-7FFF"
@@ -56,7 +56,7 @@ AKI,131768,74HC373,Package_DIP:DIP-20_W7.62mm,1,,U7,same pin use as the Famicom'
 AKI,108217,AE-PAM8012,fcjamma:AE-PAM8012,1,,U19,"input coupling capacitors are on the module; powered from +5V, not through the +5V_SW switch"
 AKI,113080,AE-USB2.0-TYPE-C,fcjamma:AE-USB2.0-TYPE-C,1,,J10,
 AKI,,CPU bus (option),Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical,1,DNP,J3,
-AKI,,DIP switch 4,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,"1: off = CPU and PPU chips fitted, on = emulation; 2-4: for the firmware"
+AKI,116584,DIP switch 4,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,"1: off = CPU and PPU chips fitted, on = emulation; 2-4: for the firmware"
 AKI,101083,M68AF127B (video RAM),Package_SO:SOP-32_11.305x20.495mm_P1.27mm,1,,U8,
 AKI,101083,M68AF127B (work RAM),Package_SO:SOP-32_11.305x20.495mm_P1.27mm,1,,U3,
 AKI,100167,PPU /RST = +5V (Famicom wiring),Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,1,,JP1,normally open; a jumper plug ties the PPU reset high as in the Famicom
@@ -70,9 +70,9 @@ AKI,100769,RGEF300 (3 A hold),Fuse:Fuse_Bourns_MF-RG300,1,,F1,
 AKI,113885,TL712CP,Package_DIP:DIP-8_W7.62mm_Socket,1,,U9,in an 8-pin socket so that a faster comparator on an adapter can replace it
 AKI,100167,USB to Pico C,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,1,,J11,"a short Micro-B lead to Pico C's USB socket, or two wires to its test points TP2 (D-) and TP3 (D+)"
 AKI,100167,composite video (test),Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,1,,J5,
-AKI,,debug pins of Pico A,Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical,1,,J13,meets a 3-pin header soldered downwards into the Pico's debug pads
-AKI,,debug pins of Pico B,Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical,1,,J14,
-AKI,,debug pins of Pico C,Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical,1,,J15,
+AKI,110098,debug pins of Pico A,Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical,1,,J13,meets a 3-pin header soldered downwards into the Pico's debug pads
+AKI,110098,debug pins of Pico B,Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical,1,,J14,
+AKI,110098,debug pins of Pico C,Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical,1,,J15,
 AKI,,debug probe for Pico C (option),Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,1,DNP,J16,
 AKI,,spare outputs (option),Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,1,DNP,J2,
 AKI,100167,sprite bit source,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,1,,J6,jumper 1-2: comparator (default); 2-3: buffered VOUT straight to the Pico input (experiment)
@@ -97,7 +97,7 @@ PCB,,VBUF,TestPoint:TestPoint_Pad_D1.5mm,1,,TP9,
 PCB,,VREF,TestPoint:TestPoint_Pad_D1.5mm,1,,TP10,
 PCB,,VSYS,TestPoint:TestPoint_Pad_D1.5mm,1,,TP4,
 AKI,100034,40-pin round-pin IC socket,(no footprint),2,,,for U1 (RP2A03) and U6 (RP2C02)
-AKI,,8-pin IC socket,(no footprint),1,,,for U9 (TL712CP)
+AKI,100035,8-pin IC socket,(no footprint),1,,,for U9 (TL712CP)
 AKI,117584,"pin sockets for a Pico, pair of 1x20",(no footprint),3,,,"for U25, U26, U27"
 AKI,100167,pin header 1x40,(no footprint),4,,,the Pico modules are sold without pins: 2 x 20 + 3 debug pins each
-AKI,,jumper plug 2.54 mm,(no footprint),2,,,J6 (and JP1 if the Famicom reset wiring is wanted)
+AKI,103692,"jumper plugs 2.54 mm, pack of 25",(no footprint),1,,,J6 (and JP1 if the Famicom reset wiring is wanted)

@@ -14533,7 +14533,7 @@
 				(justify left)
 			)
 		)
-		(property "Akizuki" ""
+		(property "Akizuki" "116584"
 			(at 439.42 226.0599 0)
 			(hide yes)
 			(show_name no)
