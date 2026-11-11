@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+kicad/*.kicad_prl
+kicad/*-backups/
+kicad/fp-info-cache
+out/*.png
