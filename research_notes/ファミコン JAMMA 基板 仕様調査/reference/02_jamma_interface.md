@@ -36,11 +36,11 @@
 | 8 | Coin Meter 1（コインカウンタ1） | J | Coin Meter 2 | 確認済 | 日本の筐体では J が無配線のことが多い（1.8 節） |
 | 9 | Coin Lockout 1 | K | Coin Lockout 2 | 確認済 | 日本の筐体（Astro City、Egret II、Windy）では無配線（図面読み取り） |
 | 10 | Speaker +（アンプ後） | L | Speaker −（アンプ後） | 確認済 | モノラル。L は GND ではない（1.6 節） |
-| 11 | Audio +（プリアンプ出力、ほぼ未使用） | M | Audio GND | 単一出典の食い違いあり | ブログ1件は 11/M を "No connection" とする。MVS 配線の筐体は 10/L と 11/M でステレオ |
+| 11 | Audio +（プリアンプ出力、ほぼ未使用） | M | Audio GND | 単一出典の食い違いあり | ブログ1件は 11/M を "No connection" とする。Neo Geo の 1スロット基板の JAMMA 配置では 11 = Unused、M = Audio GND。マルチスロット MVS の「MVS pinout」では 10 = Right speaker、L = Left speaker、11 = Mono audio、**M = Test button** |
 | 12 | Video Red | N | Video Green | 確認済 | |
 | 13 | Video Blue | P | Video Sync（負極性コンポジット） | 確認済 | |
 | 14 | Video GND | R | Service Switch | 確認済 | Service はクレジット +1（カウンタは増えない） |
-| 15 | Test Switch | S | Tilt（Slam）Switch | 確認済 | Test でテストモード。Tilt は多くのゲームで未実装 |
+| 15 | Test Switch | S | Tilt（Slam）Switch | 確認済 | Test でテストモード。Tilt は多くのゲームで未実装。マルチスロット MVS の「MVS pinout」では 15 = Coin switch #3 P1、S = Coin switch #4 P2（Test は M） |
 | 16 | Coin 1 | T | Coin 2 | 確認済 | GND へのパルス |
 | 17 | 1P Start | U | 2P Start | 確認済 | |
 | 18 | 1P Up | V | 2P Up | 確認済 | |
@@ -50,8 +50,8 @@
 | 22 | 1P Button 1 | Z | 2P Button 1 | 確認済 | |
 | 23 | 1P Button 2 | a | 2P Button 2 | 確認済 | |
 | 24 | 1P Button 3 | b | 2P Button 3 | 確認済 | |
-| 25 | (1P Button 4) 非公式 JAMMA+ | c | (2P Button 4) 非公式 | 確認済（入力として使われること） | Astro City は "1P SW 4 / 2P SW 4"、Egret II と Windy は "1P SPARE 1 / 2P SPARE 1" として配線。Neo Geo MVS は Select 系、CPS2 などは 4人目用に流用 |
-| 26 | (1P Button 5) 非公式／未使用 | d | (2P Button 5) 非公式／未使用 | 食い違いあり | Hardware Book 版は "Not used"、pinouts.ru 版は Button5。Astro City は "1P SW 5 / 2P SW 5"、Egret II と Windy は "1P SPARE 2 / 2P SPARE 2" |
+| 25 | (1P Button 4) 非公式 JAMMA+ | c | (2P Button 4) 非公式 | 確認済（入力として使われること） | Astro City は "1P SW 4 / 2P SW 4"、Egret II と Windy は "1P SPARE 1 / 2P SPARE 1" として配線。Neo Geo は 1スロット・MVS pinout とも "P1 button D / P2 button D"、CPS2 などは 4人目用に流用 |
+| 26 | (1P Button 5) 非公式／未使用 | d | (2P Button 5) 非公式／未使用 | 食い違いあり | Hardware Book 版は "Not used"、pinouts.ru 版は Button5。Astro City は "1P SW 5 / 2P SW 5"、Egret II と Windy は "1P SPARE 2 / 2P SPARE 2"。Neo Geo は 1スロットの JAMMA 配置で Unused、MVS pinout で 26 = "Select up"、d = "Select down" |
 | 27 | GND | e | GND | 確認済（多数派） | pinouts.ru 版のみ 27/e = Button6。Hardware Book 版と Arcade Otaku は GND |
 | 28 | GND | f | GND | 確認済 | |
 
@@ -60,8 +60,9 @@
 | 箇所 | 食い違いの内容 | 本シートの扱い |
 |---|---|---|
 | 5/E（−5V） | 規格書原本で −5V が規定かは未確認。国内の配線表はすべて −5V。供給しない筐体もある | 本基板では無接続 |
-| 11/M | Audio +/GND（Arcade Otaku 等）と "No connection"（ブログ）。MVS 配線の筐体ではステレオの片チャンネル | 無接続（ハイインピーダンス） |
-| 25/c、26/d | Button4/5、"Not used"、SPARE1/2、MVS の Select 流用と各種 | 入力専用（プルアップ付き）にする。出力・電源・GND に使わない |
+| 11/M | Audio +/GND（Arcade Otaku 等）と "No connection"（ブログ）。MVS pinout では 11 = Mono audio、M = Test button（ステレオは 10 = 右、L = 左） | 無接続（ハイインピーダンス） |
+| 25/c、26/d | Button4/5、"Not used"、SPARE1/2、MVS pinout の 25/c = button D・26/d = Select up/down と各種 | 入力専用（プルアップ付き）にする。出力・電源・GND に使わない |
+| 15/S（MVS pinout） | JAMMA の Test/Tilt に対し、MVS pinout は Coin #3/#4 | JAMMA 配置として扱う。MVS 配線の筐体では Test が M に来る（4.4 節） |
 | 27/e | pinouts.ru 版のみ Button6 | GND として扱う |
 | 20/21（X/Y） | 旧 ArcadeControls wiki で Left/Right が逆との指摘 | 20 = Left、21 = Right（多数派） |
 | 制定年 | 英語版 Wikipedia は 1985 年、日本語 Wikipedia と wdic は 1986（昭和61）年 | 設計に影響しない。未解決 |
@@ -215,7 +216,7 @@ JLCPCB 実見積（150 × 200mm、1.6mm、ENIG 1U"、1oz、2026-11-10、Gerber �
 
 日本への送料は OCS Express $8.66（5枚、0.64kg）／$10.09（10枚、1.17kg）、UPS $9.79 / $9.88 です（確認済）。
 
-PCBA の料金（確認済、2026-11-10）: Setup fee は Economic $8.18、Standard $25.56（片面）／$51.12（両面）。ステンシルは $1.53 / $8.21（片面）・$16.42（両面）。装填料は「$3.07 Extend / $1.53 Basic/Extend」で、Standard では "all basic and extended components require feeder loading"。Economic では Basic と Preferred（UI 表記は Promotional Extended）が無料です。装填料の単位は料金表には書かれていませんが、JLCPCB の公式ブログは "The charge applies per part number, per order, regardless of quantity."、"Standard PCBA charges a loading fee on every unique part, Basic or Extended." と書いています（単一出典の公式ブログ）。手はんだ人件費は公式内で $3.50（プロトタイプページ）と $3.58（料金記事）が不一致です。両方が該当する注文では Standard の総額が Economic より $14.93 以上高くなければ差額が handling fee として加算されます。
+PCBA の料金（確認済、2026-11-10）: Setup fee は Economic $8.18、Standard $25.56（片面）／$51.12（両面）。ステンシルは $1.53 / $8.21（片面）・$16.42（両面）。装填料は「$3.07 Extend / $1.53 Basic/Extend」で、Standard では "all basic and extended components require feeder loading"。Economic では Basic と Preferred が無料です（UI の Promotional Extended が同じ扱いであることは、フラグは同一だが JLCPCB の明文は未確認）。装填料の単位は料金表には書かれていませんが、JLCPCB の公式ブログは "The charge applies per part number, per order, regardless of quantity."、"Standard PCBA charges a loading fee on every unique part, Basic or Extended." と書いています（単一出典の公式ブログ）。手はんだ人件費は公式内で $3.50（プロトタイプページ）と $3.58（料金記事）が不一致です。両方が該当する注文では Standard の総額が Economic より $14.93 以上高くなければ差額が handling fee として加算されます。
 
 その他（確認済／単一出典）:
 - JLCPCB の別ブログには "bevel the board down to about 1/3 to 1/2 of its thickness" や「フィンガと外形の距離 0.5mm」「1.0mm 以上」の併記があり、ヘルプ記事と食い違います。2026-11-10 更新のヘルプ記事（1.13 / 0.74mm）を優先します。
@@ -332,7 +333,7 @@ JAMMA 規格は映像レベルを標準化していません。レベルの違�
 | スピーカー端子 | 10（Speaker +）と L（Speaker −）。モノラル、アンプ後の出力で、筐体側にアンプは不要（基板側にパワーアンプが必要） | 確認済 |
 | L は GND ではない | "On mono JAMMA boards, the speaker- pin is not connected (this isn't ground)."。"ALL jamma boards use bridged amplifiers where sp- is never ground"、片側を接地するとアンプが壊れる（言い過ぎを含み、反対意見もある） | 確認済（複数出典、ただし表現の強さは単一出典） |
 | 筐体の配線 | 配線図の 10/L はどれも GND に接続されていない | 確認済（配線図） |
-| 11/M | Audio +（プリアンプ出力、ほぼ未使用）/ Audio GND。MVS 配線の筐体は 10/L と 11/M でステレオで、JAMMA 基板を MVS 配線の筐体に入れるとアンプが焼けたという報告がある（二次） | 確認済（ピン名）／単一出典（事故報告） |
+| 11/M | Audio +（プリアンプ出力、ほぼ未使用）/ Audio GND。マルチスロット MVS の「MVS pinout」は 10 = Right speaker、L = Left speaker でステレオにし、11 = Mono audio、M = Test button とする（1スロット MVS は JAMMA 配置で、ステレオは基板上のピンヘッダ）。JAMMA 基板を MVS 配線の筐体に入れるとアンプが焼けたという報告がある（二次） | 確認済（ピン名、NeoGeo Dev Wiki の表を本シートで確認）／単一出典（事故報告） |
 
 **筐体のスピーカーと音量**
 
@@ -455,7 +456,7 @@ JAMMA 規格は映像レベルを標準化していません。レベルの違�
 
 #### 1.9.2 参照回路に使える部品の JLCPCB 分類（2026-11-10、JLCPCB API）
 
-JLCPCB の Basic は 351 件です（JLCPCB API と CDFER CSV と jlcparts で C 番号集合が完全一致）。Basic にあるのは抵抗 182、抵抗アレイ 3、MLCC 88、タンタル 2 などで、**アルミ電解・ヒューズ/ポリスイッチ・オーディオアンプ IC・ビデオアンプ・74HC86/74HCT/74LVC・BAT54 系は Basic に1件も無い**（確認済）。74 系ロジックで Basic なのは 74HC14（C5605）と 74HC595（C5947）だけです。UI の「Promotional Extended」フィルタは API の `preferredComponentFlag:true`（旧称 Preferred Extended）で、部品行のバッジは単に「Extended」と表示されます。
+JLCPCB の Basic は 351 件です（JLCPCB API と CDFER CSV と jlcparts で C 番号集合が完全一致）。Basic にあるのは抵抗 182、抵抗アレイ 3、MLCC 88、タンタル 2 などで、**アルミ電解・ヒューズ/ポリスイッチ・オーディオアンプ IC・ビデオアンプ・74HC86/74HCT/74LVC・BAT54 系は Basic に1件も無い**（確認済）。74 系ロジックで Basic なのは 74HC14（C5605）と 74HC595（C5947）だけです。UI の「Promotional Extended」フィルタは API の `preferredComponentFlag:true`（FAQ などの呼び名は Preferred Extended）で、部品行のバッジは単に「Extended」と表示されます。フラグが同一であることは確認済みですが、名称変更の時期と、料金上の扱いが旧 Preferred Extended と同じであることの JLCPCB の明文は未確認です。
 
 | 用途 | 部品 | C 番号 | クラス | JLCPCB 在庫 | 確度 |
 |---|---|---|---|---|---|
@@ -566,6 +567,7 @@ LM386 の動作電源は 4〜12V（TI データシート）です。+5V では�
 | 25 | ゴールドフィンガー付き基板は Economic PCBA が使えず Standard 必須 | 正しい（実画面で確認）。ただし「エッジパッドはあるが Gold Fingers: No」では見積システム上 Economic が選べた（審査で再分類されるかは未確認） | 調達・コスト第2パス |
 | 26 | BAT54S/C は Preferred | C7420333（BAT54S）と BAT54C 系は Preferred で正しいが、jammanator-pi が使う BAT54S,215（C47546）は Extended（非 Preferred）。品番が同じでも C 番号でクラスが違う | オープン回路 |
 | 27 | 映像の推論「各 ch 75〜330Ω 直列」のうち 75Ω 直列（Blast City の 75Ω 入力とは無関係） | 不要（#13 と同じ内容の再掲） | 電気的実装 |
+| 28 | Neo Geo MVS は 25/c/26/d を Select 系に流用し、11/M 等を使う独自派生（ピン対応は未確認）。第2パスの電気的実装ノートも「MVS 配線の筐体は 10/L と 11/M でステレオ」 | NeoGeo Dev Wiki の表では、1スロット基板は JAMMA 配置（5/E・11・26/d は Unused、M は Audio GND、25/c は button D）。マルチスロットの MVS pinout は 10 = Right speaker、L = Left speaker、11 = Mono audio、M = Test button、15/S = Coin #3/#4、25/c = button D、26/d = Select up/down。Select は 26/d で 25/c ではなく、ステレオは 10/L で 11/M ではない | 本シート（NeoGeo Dev Wiki の原文を確認） |
 
 第2パスのノート同士の食い違い（本シートで解決したもの）:
 - **ピッチとタング幅**: エッジ寸法ノート（Hirose/Sullins 基準、3.9624mm・114.6mm）と電気的実装ノート（JST GEC、106.92 ± 0.05・114.6 +0/−0.2）。どちらもメーカー図面で証拠の強さは同じです。両方の公差を満たす 3.96mm・114.4mm を採用しました（1.2.1 節）。
@@ -617,6 +619,7 @@ LM386 の動作電源は 4〜12V（TI データシート）です。+5V では�
 27. 旭精工のブロッカー（QL-102）と VM81-M の極性（通電で阻止か受付か）。
 28. Service / Test / Tilt の電気的詳細。
 29. AO3400A の RDS(on) と、3.3V ゲート駆動での飽和（データシートの確認）。
+30. 設置先の筐体がマルチスロット MVS の配線（10/L が左右スピーカー、M が Test、15/S が Coin #3/#4）になっていないか。**実機: 設置先ごとにハーネスの 11/M/15/S の配線を確かめる。**
 
 ---
 
@@ -665,6 +668,7 @@ LM386 の動作電源は 4〜12V（TI データシート）です。+5V では�
 - **デバウンスとコインの整形**: レバーとボタンは 2〜5ms、コインは Low ≥ 10ms で確定・High ≥ 10ms で解除、1パルスを1枚と数えます。通常方式のデフォルト形式（コイン → SELECT）と特殊形式（コイン → 上下同時）では、ユーザー要求の 3.7 節のとおり、ゲームに渡すパルスを一定幅（任天堂 VS. システムの実機は 2.5〜4 フレーム）に整形し、連続投入は待ち行列にして間隔を空けて出します。これは JAMMA の入力側の事実（パルス幅 25〜100ms、投入間隔 ≥ 0.5 秒）とも両立します。
 - **タイマー方式のコイン**: コイン1・コイン2のどちらでも時間を加算し、ゲームには渡しません。Service（R）は「時間を加算するがカウンタは進めない」と扱うのが慣習に合います。
 - **タイマー方式の入力の割り当て**: 1P スタート（17）は I コンの START、2P スタート（U）は I コンの SELECT になり、ボタン3・4（24・25・b・c）は使いません（ユーザー要求 3.3 節。「セレクトが2Pボタン」を 2P スタートと読んだのはユーザー未確認の前提）。どれも同じ入力回路なので、JAMMA 側の回路は方式・形式によらず共通で、割り当てはファームウェアだけで変わります（推論）。時間切れ後の扱いと残り時間の表示手段はユーザー要求で未定・要検討とされており、JAMMA 側には表示用の信号が無いので、映像に重ねて描くなどの方法が必要です（推論）。
+- **通常方式の入力の割り当て**: デフォルト形式は、レバーとボタン1・2をそのパッドの上下左右・A・B、スタート（17 / U）を START、コイン（16 / T）を SELECT にし、ボタン3・4は使いません。2P 側の START・SELECT もゲームから読めるようにします（ユーザー要求 3.4 節）。特殊形式は、ボタン3（24 / b）を SELECT、ボタン4（25 / c）を START、スタート（17 / U）を左右同時押し、コイン（16 / T）を上下同時押しにします（ユーザー要求 3.5 節）。特殊形式では JAMMA の 25/c（非公式のボタン4）が必須になり、コインのパルス中はその軸の上下が、スタート押下中は左右が読めなくなります（ユーザー要求 3.7 節）。どの形式も JAMMA 側の回路は同じで、違いはファームウェアの割り当てだけです（推論）。
 - **コインカウンタ**: コイン1枚ごとに 8（J は日本の筐体では無配線が多いが、同じ回路を付ける）を ON 100〜120ms / OFF ≥ 100ms で駆動し、連続投入は待ち行列にします。駆動素子は次のとおり選びます。
   - 選択肢1: ULN2003ADR（C7512、Basic）。MVS で量産実績があり、1個で7チャンネル、クランプダイオード内蔵です。ただし VCE(sat) が 100mA で typ 0.9 / max 1.1V あるので、日本の主流の +5V カウンタには約 4V しかかかりません。
   - 選択肢2: AO3400A（C20917、Basic）のローサイド駆動。飽和電圧が小さく、+5V と +12V のどちらのコイルにも使えます。部品は1チャンネル1個です。
@@ -676,11 +680,11 @@ LM386 の動作電源は 4〜12V（TI データシート）です。+5V では�
 
 **事実**: Test（15）は JAMMA の正式な入力で、筐体のテストスイッチにつながっています。Service（R）も同様です。
 
-**推奨（推論）**: 方式と形式（タイマー方式／通常方式、デフォルト形式／特殊形式、1コインあたりの時間など）はファームウェアの設定値として不揮発メモリに保存します（ユーザー要求 4.2 節）。設定画面は、Test スイッチで開きます。追加の部品は要りません。ユーザー要求 4.2 節は、ほかに USB（ファームウェア更新と同じ Type-C 端子）からの書き換えと、新規開発カートリッジからの切り替え（$4016 の OUT1・OUT2 で指示し、$4016 の D1 と $4017 の D1〜D4 で返す。手順は未設計）も挙げています。後者はファミコン側の信号だけで完結し、JAMMA 端子は関係しません。市販ソフトは基板に指示を出せないので、市販ソフトを動かすときは担当者が Test スイッチの設定画面でタイマー方式にします。JAMMA 側の入力回路は他の入力と同じで、Test と Service もプルアップ・フィルタ・クランプを付けます。方式・形式用の物理 DIP スイッチは置かないことで、部品点数を減らせます（DIP スイッチは JLCPCB では Extended の C319050 / C99418 しかありません）。設定画面を描くには、映像をマイコンが作り直す構成が必要です（映像経路は別シート）。
+**推奨（推論）**: 方式と形式（タイマー方式／通常方式、デフォルト形式／特殊形式、1コインあたりの時間など）はファームウェアの設定値として不揮発メモリに保存します（ユーザー要求 4.2 節）。設定画面は、Test スイッチで開きます。追加の部品は要りません。ユーザー要求 4.2 節は、ほかに USB（ファームウェア更新と同じ Type-C 端子）からの書き換えと、新規開発カートリッジからの切り替え（$4016 の OUT1・OUT2 で指示し、$4016 の D1 と $4017 の D1〜D4 で返す。手順は未設計）も挙げています。後者はファミコン側の信号だけで完結し、JAMMA 端子は関係しません。市販ソフトは基板に指示を出せないので、市販ソフトを動かすときは担当者が Test スイッチの設定画面でタイマー方式にします。JAMMA 側の入力回路は他の入力と同じで、Test と Service もプルアップ・フィルタ・クランプを付けます。方式・形式用の物理 DIP スイッチは置かないことで、部品点数を減らせます（DIP スイッチは JLCPCB では Extended の C319050 / C99418 しかありません）。設定画面を描くには、映像をマイコンが作り直す構成が必要です（映像経路は別シート）。なお、マルチスロット MVS の配線の筐体では Test ボタンが M に、15 には Coin #3 が来ます（1.1 節）。その筐体に入れると、コイン3の投入で設定画面が開き、Test ボタンでは開かないおそれがあります（推論）。設定画面を開く操作は、15 の短い押下ではなく長押しにする、または USB からも開けるようにしておくと安全です（推論）。CPU/PPU ソケットとラズパイのどちらを挿したかの設定（製品要求 2 章の「DIP スイッチ等」）は、方式・形式の切り替えとは別の要求で、今回の指示では置き換えられていません。
 
 ### 4.5 Raspberry Pi（複数枚）と将来の CPU/PPU/メモリ更新
 
-**事実**: JAMMA 側の制約は、56 接点の固定された割り当てと、+5V 4接点（1接点 3A）の電源だけです。音声はモノラル（10/L）で、11/M でのステレオは MVS 配線の筐体との事故の元になります。25/c、26/d は筐体によってボタンが付いています。
+**事実**: JAMMA 側の制約は、56 接点の固定された割り当てと、+5V 4接点（1接点 3A）の電源だけです。音声はモノラル（10/L）です。マルチスロット MVS の配線は 10/L を左右のスピーカーに分け、11 をモノラル音声、M を Test ボタンに使うので、JAMMA の配置とは両立しません。25/c、26/d は筐体によってボタンが付いています。
 
 **推奨（推論）**
 - **JAMMA の入出力回路は、CPU/PPU 実チップの構成とエミュレーション構成で共通の1ブロックにします。** 入出力専用の Pico（または複数枚）が JAMMA の入力・コイン・カウンタ・ロックアウトを受け持てば、CPU/PPU 側をどう更新しても JAMMA 側の回路を作り直さずに済みます。
@@ -703,6 +707,7 @@ LM386 の動作電源は 4〜12V（TI データシート）です。+5V では�
 **推奨（推論）**
 - **USB の VBUS と JAMMA の +5V は、ショットキーダイオード（B5819W SL C8598、Basic）で分けます。** 筐体の電源を切った状態で USB をつないだとき、USB の 5V が基板の +5V 網を通って筐体の +5V 線（モニタ以外の筐体側負荷やカウンタのコイル）に逆流するのを防ぐためです。逆に、筐体の +5V が PC の USB ポートへ流れ込むのも防げます。
 - **Type-C 端子は、基板を筐体に取り付けたまま挿せる辺に置きます。** タング側（先端〜12mm の部品禁止域）とコネクタ本体の耳の範囲には置けません。タングの反対側の辺が適当です。
+- **マイコンを複数枚にしても、Type-C 端子は1つにまとめます**（ユーザー要求 5.2 節・6.2 節）。Raspberry Pi Pico 2 の USB 端子は Micro-B で、USB の信号線は 40 本の端子列に出ていないので、ピンソケットに挿す構成のままでは基板の Type-C に信号を渡せません（ユーザー要求 6.2 節）。RP2350 を直接実装する、Pico 2 を直付けして裏面のテストパッドから配線する、Type-C から Micro-B へ短いケーブルで中継する、のいずれかが必要で、2枚目以降は1枚目から書き換えるか USB ハブ IC を載せます（ユーザー要求 6.2 節の候補。どれを選ぶかは未決定）。これは JAMMA 端子には影響しません。
 - 筐体の中で USB ケーブルをつなぐときは、JAMMA の GND と PC の GND が共通になります。ファームウェア更新は筐体の電源を切って USB 給電だけで行う手順にすると、接地の問題を避けられます。
 
 ---
@@ -714,7 +719,9 @@ LM386 の動作電源は 4〜12V（TI データシート）です。+5V では�
 - old.pinouts.ru「JAMMA」（Hardware Book 系のピン表）: https://old.pinouts.ru/Slots/jamma.shtml
 - Hardware Book JAMMA のミラー: https://k1.spdns.de/Develop/Hardware/Infomix/Stecker%20und%20Kabel/hwbook/connector/bus/jamma.html
 - videogametesteroffer ブログ（25/26/c/d と 11/M を "No connection" とする表）: https://videogametesteroffer.blogspot.com/2020/04/understand-jamma-pcb-and-edge-connector.html
-- NeoGeo Dev Wiki「JAMMA connector pinout」（MVS 派生、ピッチ、キー、ステレオ配線の事故）: https://wiki.neogeodev.org/index.php/JAMMA_connector_pinout
+- NeoGeo Dev Wiki「JAMMA connector pinout」（MVS 派生、ピッチ、キー、ステレオ配線の事故）: https://wiki.neogeodev.org/index.php/JAMMA_connector_pinout （1スロットの JAMMA 配置とマルチスロットの MVS pinout の表は本シートで原文を確認: https://wiki.neogeodev.org/index.php?title=JAMMA_connector_pinout&action=raw ）
+- JST GEC データシート（適合基板図。フィンガ幅 2.3 ± 0.035、キー溝 3.0 × 10.0、外端フィンガ中心→側面 3.84 +0/−0.1 を本シートで図面から再確認）: https://datasheet.octopart.com/GEC-561-JST-datasheet-180492417.pdf
+- NESdev Wiki「PPU frame timing」（奇数フレームだけ1クロック短いことを本シートで原文確認）: https://www.nesdev.org/w/index.php?title=PPU_frame_timing&action=raw
 - 旧 ArcadeControls wiki「JAMMA」（20/21 が逆との指摘、検索結果経由）: https://oldwiki.arcadecontrols.com/index.php/JAMMA
 - 英語版 Wikipedia「JAMMA」（1985 年、電源用途、負極性同期、ピッチ）: https://en.wikipedia.org/wiki/JAMMA
 - 日本語版 Wikipedia「JAMMA」（1986 年、JVS）: https://ja.wikipedia.org/wiki/JAMMA
