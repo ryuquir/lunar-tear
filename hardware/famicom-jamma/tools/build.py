@@ -14,7 +14,7 @@ Steps
  4. write kicad/ (symbol library, schematic sheets, project file)
  5. kicad-cli: upgrade to the KiCad 10 format, ERC, netlist, PDF
  6. compare KiCad's netlist with the model, pin by pin
- 7. write out/ (BOM with sourcing, net list, reports)
+ 7. write out/ (BOM with sourcing, net list, reports, cost estimate)
 """
 import csv
 import os
@@ -249,6 +249,42 @@ def unit_price(row, pieces):
     return float(row[key] or row["price_1"] or 0)
 
 
+# JLCPCB's fees for a Standard PCBA order, single-sided, in USD.
+# Source: https://jlcpcb.com/help/article/pcb-assembly-price ("Last updated on Oct 22, 2026"), read on 2026-11-11.
+FEES = {"setup": 25.56, "stencil": 8.21, "loading per kind of SMT part": 1.53, "SMT joint": 0.0016, "hand-soldered joint": 0.0164,
+        "hand-soldering labour per order": 3.58, "packing": 0.50, "confirm parts placement": 0.45}
+XRAY = [(10, 1.64), (50, 0.82), (200, 0.49), (500, 0.33), (1000, 0.25), (3000, 0.16), (99999, 0.082)]   # up to n pieces: USD each
+NOT_COUNTED = ("the bare boards, shipping and import tax; a soldering fixture (16.42 USD per order) and placing the Pico modules by hand "
+               "(0.016 USD per joint, about 2.35 USD per board) if JLCPCB charges them; the spare pieces JLCPCB bills for losses")
+
+
+def cost(design, boards):
+    """Parts and assembly cost of one board when `boards` are ordered, from the data files and the fee table above."""
+    basic, ext = load_basic(), load_extended()
+    need = per_board(design)
+    parts = sum(n * unit_price(basic.get(code) or ext.get(code) or {"price_1": 0}, n * boards) for code, n in need.items())
+    tht = {code for code in need if (ext.get(code) or {}).get("assembly_type", "").startswith("Wave")}   # inserted and soldered by hand
+    socketed = {ref: code for src, code, _v, _q, _n, refs in design.extras if src in (JLC, JLCX) for ref in refs.split()}
+    smt_joints = tht_joints = 0
+    for p in design.parts.values():
+        code = p.code if p.src in (JLC, JLCX) else socketed.get(p.ref)
+        if p.dnp or not code:
+            continue
+        if code in tht:
+            tht_joints += len(p.conn)
+        else:
+            smt_joints += len(p.conn)
+    xray_pieces = sum(n for code, n in need.items() if (ext.get(code) or {}).get("xray") == "Required")
+    rate = next(r for limit, r in XRAY if xray_pieces * boards <= limit) if xray_pieces else 0.0
+    fixed = (FEES["setup"] + FEES["stencil"] + FEES["loading per kind of SMT part"] * (len(need) - len(tht))
+             + (FEES["hand-soldering labour per order"] if tht_joints else 0) + FEES["packing"] + FEES["confirm parts placement"])
+    joints = smt_joints * FEES["SMT joint"] + tht_joints * FEES["hand-soldered joint"]
+    xray = xray_pieces * rate
+    return {"boards": boards, "kinds": len(need), "SMT kinds": len(need) - len(tht), "SMT joints": smt_joints, "hand-soldered joints": tht_joints,
+            "parts": parts, "joints": joints, "X-ray": xray, "fixed per order": fixed, "fixed share": fixed / boards,
+            "one board": parts + joints + xray + fixed / boards}
+
+
 def write_outputs(design, outdir):
     os.makedirs(outdir, exist_ok=True)
     basic, ext = load_basic(), load_extended()
@@ -283,6 +319,19 @@ def write_outputs(design, outdir):
                     nm = ":" + next(x[1] for x in p.sym.pins() if str(x[0]) == num)
                 names.append(f"{ref}.{num}{nm}")
             w.writerow([net, len(pins), " ".join(names)])
+    with open(os.path.join(outdir, "cost_estimate.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        rows = [cost(design, n) for n in (5, 10)]
+        w.writerow(["item (USD)"] + [f"{r['boards']} boards ordered" for r in rows])
+        for key in ("kinds", "SMT kinds", "SMT joints", "hand-soldered joints"):
+            w.writerow([key] + [r[key] for r in rows])
+        for key in ("parts", "joints", "X-ray", "fixed per order", "fixed share", "one board"):
+            w.writerow([{"parts": "parts for one board", "joints": "soldering by the joint, one board", "X-ray": "X-ray inspection, one board",
+                         "fixed per order": "fees per order (set-up, stencil, loading, labour, packing, placement check)",
+                         "fixed share": "fees per order, share of one board", "one board": "parts and assembly of one board"}[key]]
+                       + [f"{r[key]:.2f}" for r in rows])
+        w.writerow(["not counted", NOT_COUNTED])
+        w.writerow(["fees", "; ".join(f"{k} {v}" for k, v in FEES.items()) + "; X-ray per piece by quantity " + ", ".join(f"<={a}: {b}" for a, b in XRAY[:3])])
     with open(os.path.join(outdir, "netlist_by_part.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["sheet", "ref", "value", "pin", "pin name", "net"])
@@ -350,11 +399,13 @@ def main():
         extra = sum(e[3] for e in design.extras if e[0] == s)
         kinds += len(set(e[1] for e in design.extras if e[0] == s) - set(p.code for p in fitted))
         print(f"  {label[s]:24s}: {len(fitted) + extra:4d} fitted, {kinds:3d} kinds" + (f", {len(ps) - len(fitted)} positions left empty" if len(ps) > len(fitted) else ""))
-    basic, ext = load_basic(), load_extended()
-    need = per_board(design)
     for boards in (5, 10):
-        total = sum(n * unit_price(basic.get(code) or ext.get(code) or {"price_1": 0}, n * boards) for code, n in need.items())
-        print(f"  JLCPCB parts for one board when {boards:2d} are ordered: {total:6.2f} USD ({len(need)} kinds; prices of the data files, fees not included)")
+        c = cost(design, boards)
+        print(f"  one board when {boards:2d} are ordered: parts {c['parts']:.2f} + joints {c['joints']:.2f} + X-ray {c['X-ray']:.2f} "
+              f"+ share of the fees per order {c['fixed share']:.2f} ({c['fixed per order']:.2f} / {boards}) = {c['one board']:.2f} USD")
+    c = cost(design, 5)
+    print(f"  ({c['kinds']} kinds of parts, {c['SMT kinds']} of them SMT; {c['SMT joints']} SMT joints, {c['hand-soldered joints']} hand-soldered joints; "
+          "not counted: see out/cost_estimate.csv)")
     print("ERC:", erc_line)
     if custom:
         print("custom footprints still to be drawn:", ", ".join(sorted(custom)))

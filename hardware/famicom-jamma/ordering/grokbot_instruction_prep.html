@@ -1,16 +1,16 @@
 <html>
 <head><meta charset="utf-8"></head>
 <body>
-<h1>ファミコン JAMMA 基板（rev 0.1）発注指示書　準備版</h1>
-<p>この文書は、発注を代行する GrokBOT に向けた手順書です。<b>この基板はまだ発注できません。</b>基板のデータ、部品表、部品の位置の表が完成していないためです。いま頼めるのは、下の「いま頼めること」の 2 件だけです。製造データがそろったら、この文書を発注用の版に差し替えます。「止まって確認」とある所では、必ず依頼者（このフォルダの持ち主）の返事を待ってください。</p>
-<p>版: 準備版（2026-11-11）</p>
+<h1>ファミコン JAMMA 基板（rev 0.3）発注指示書　準備版</h1>
+<p>この文書は、発注を代行する GrokBOT に向けた手順書です。<b>この基板はまだ発注できません。</b>基板のデータ、部品表、部品の位置の表が完成していないためです。いま頼めるのは、下の「いま頼めること」だけです。製造データがそろったら、この文書を発注用の版に差し替えます。「止まって確認」とある所では、必ず依頼者（このフォルダの持ち主）の返事を待ってください。</p>
+<p>版: 準備版 2（2026-11-11）。準備版 1 からの変更: 回路が rev 0.3 になった。質問文を増やした。カセット端子のサンプル購入を「設計を進める前に必要」に変えた。Pico 2 の先行確保（依頼 3）を加えた。</p>
 
 <h2>いまの状態</h2>
 <table>
 <tr><th>項目</th><th>状態</th></tr>
-<tr><td>回路設計</td><td>下書き（rev 0.1）。実物での確認はまだ無い</td></tr>
-<tr><td>設計者以外による見直し</td><td>未了</td></tr>
-<tr><td>部品の配置と配線</td><td>未着手</td></tr>
+<tr><td>回路設計</td><td>rev 0.3。実物での確認はまだ無い</td></tr>
+<tr><td>設計者以外による見直し</td><td>机上の見直しを 2 回行い、指摘を回路に反映した</td></tr>
+<tr><td>部品の配置と配線</td><td>未着手。依頼 1 の回答と依頼 2 の結果を待って始める</td></tr>
 <tr><td>製造データ（基板のデータ、部品表、部品の位置の表）</td><td>無い</td></tr>
 <tr><td>発注</td><td><b>できない</b></td></tr>
 </table>
@@ -18,13 +18,14 @@
 <h2>いま頼めること</h2>
 <ol>
 <li>JLCPCB のサポートへの事前質問（依頼 1）。支払いは発生しない。</li>
-<li>60 ピンのカセット端子のサンプル購入（依頼 2）。任意で、依頼者が頼んだ場合だけ行う。</li>
+<li>60 ピンのカセット端子のサンプル購入（依頼 2）。基板の設計を進める前に必要。支払いの前に依頼者の承認をもらう。</li>
+<li>Raspberry Pi Pico 2 の先行確保（依頼 3）。<b>任意で、依頼者が「先行確保する」と言った場合だけ行う。</b></li>
 </ol>
 
 <h2>まだやらないこと</h2>
 <ul>
 <li>JLCPCB の注文フォームに進まない。基板の注文も、部品実装の注文もしない。</li>
-<li>部品を先に買わない。JLCPCB の事前購入（Pre-order）と Global Sourcing も使わない。</li>
+<li>依頼 3 を除いて、部品を先に買わない。JLCPCB の Global Sourcing も使わない。</li>
 <li>秋月電子通商には注文しない。この基板では、秋月への注文を予定していない。</li>
 <li>下の「発注の予定」は参考として書いてあるだけで、依頼者はまだ確定していない。これをもとに注文しない。</li>
 </ul>
@@ -39,71 +40,89 @@
 </ol>
 
 <h2>依頼 1　JLCPCB のサポートへの事前質問</h2>
-<p>この基板は、ソケットと Raspberry Pi Pico 2 を含めて、部品をすべて JLCPCB に実装してもらう予定です。次の点は、設計者が確かめた範囲の JLCPCB のページ（部品ページ、実装の FAQ、料金表）からは分からず、答えによって基板の設計が変わります。そのため、設計を固める前に確かめます。</p>
+<p>この基板は、ソケットと Raspberry Pi Pico 2 を含めて、部品をすべて JLCPCB に実装してもらう予定です。次の点は、設計者が確かめた範囲の JLCPCB のページ（部品ページ、実装の FAQ、料金表、ステンシルの説明）からは分からず、答えによって基板の設計と費用が変わります。そのため、部品の配置を始める前に確かめます。</p>
 <ol>
-<li>JLCPCB のサポート（サイトのチャット、またはメール）に、下の英文を送る。同じ文が jlcpcb_support_question.txt にある。GrokBOT から送れない場合は、文面を依頼者に渡して送ってもらう。</li>
+<li>JLCPCB のサポート（サイトのチャット、またはメール）に、下の英文を送る。同じ文が <code>jlcpcb_support_question.txt</code> にある。GrokBOT から送れない場合は、文面を依頼者に渡して送ってもらう。</li>
 <li>回答の全文を依頼者に報告する。要約だけにしない。</li>
 <li>回答があいまいな質問、答えの無い質問は、その質問だけをもう一度送ってよい。</li>
 <li>2 営業日たっても回答が無い場合は、その旨を依頼者に報告する。</li>
 <li>回答を受けて、何かを注文したり、提案を承諾したりしない。</li>
 </ol>
-<p>質問文（jlcpcb_support_question.txt と同じ内容）:</p>
+<p>質問文（<code>jlcpcb_support_question.txt</code> と同じ内容）:</p>
+<blockquote>
 <p>I am preparing a Standard PCBA order of 5 to 10 boards and would like to confirm a few points before I finish the layout. The board is 2 layers, 1.6 mm, ENIG, about 200 x 150 mm, with gold fingers on one edge (a JAMMA edge connector: 28 positions on each side at 3.96 mm pitch, one position is a key slot) and a 30 degree bevel on that edge. All parts are on the top side.</p>
-<p>1) Raspberry Pi Pico 2 module, JLCPCB part C41407547 (marked "SMT Assembly", "Standard Only"). Each board carries three of them, soldered flat on the top side by their castellated edge pads.<br>
-1a) Can you assemble this module by reflow in a normal Standard PCBA order? Is there any extra charge for it, for example X-ray inspection, a special component fee or a fixture?<br>
-1b) Which land pattern should I use? Is the official Raspberry Pi footprint (40 edge pads plus the 3 debug pads) acceptable?<br>
-1c) The module has six round test pads on its underside (TP1 to TP6). If my footprint has matching pads with solder paste, will they be soldered in the same reflow, and is that acceptable to you?<br>
-1d) Your stock shows 56 pieces. If I need 30, do I have to pre-order them?</p>
-<p>2) Through-hole parts on the same board, all marked "Wave Soldering" in your parts library: two 40-pin DIP IC sockets (C2332 or C2874018), one 60-position card-edge connector (C5173310, 15.6 mm high) and, as an option, six 1x20 female headers (C2905423).<br>
-2a) Can these be assembled on a board that has bevelled gold fingers? How are the gold fingers protected during soldering?<br>
-2b) Is there a minimum distance you need between these through-hole parts and the gold-finger edge, the board edge or the edge rails?<br>
-2c) Are these parts soldered by hand or by wave? Is flux residue kept out of the socket contacts or cleaned?</p>
-<p>3) Does anything above require assembly on both sides, or add to the lead time?</p>
+<p>1) Raspberry Pi Pico 2 module, JLCPCB part C41407547 (your part page says &quot;SMT Assembly&quot;, &quot;Standard Only&quot;, &quot;X-ray Inspection: Required&quot;). Each board carries three of them, soldered flat on the top side by their castellated edge pads.</p>
+<p>1a) Is the module placed by machine and soldered by reflow, or soldered by hand? I need reflow, because pads under the module must be soldered too (see 1c).</p>
+<p>1b) Which land pattern should I use? Is the official Raspberry Pi footprint (40 edge pads, 3 debug pads at the end of the module, 6 test pads underneath) acceptable?</p>
+<p>1c) The module has round test pads on its underside. My footprint has matching pads for TP1 to TP6 with solder paste, and I use TP2, TP3 and TP6 as electrical connections. Will these pads get stencil apertures and be soldered in the same reflow?</p>
+<p>1d) Raspberry Pi&#x27;s datasheet (section 3.2, Figure 6) requires stencil apertures of 3.8 x 2.2 mm on the 40 edge pads, larger than the 3.2 x 1.6 mm pads. Do you apply this for C41407547 by default? If not, will you apply it when I ask in the order remarks?</p>
+<p>1e) What does the X-ray inspection of this part cost for 15 and for 30 modules (5 and 10 boards, three modules each)? Can you send me the X-ray images of the pads under the modules? Are there other charges for this part, for example manual placement or a fixture?</p>
+<p>1f) Your stock shows 55 pieces. If I need 30, should I pre-order them into my parts library now? Can you tell me the date code or the silicon revision (A2 or A4) of the RP2350 chip on these modules?</p>
+<p>2) Through-hole parts on the same board, all marked &quot;Wave Soldering&quot; in your parts library: two 40-pin DIP IC sockets (C2874018), one 60-position card-edge connector (C5173310, 15.6 mm high), one 4-position DIP switch (C92645) and one trimmer potentiometer (C118956).</p>
+<p>2a) Can these be assembled on a board that has bevelled gold fingers? How are the gold fingers protected during soldering (tape, fixture)? Is a fixture charged?</p>
+<p>2b) Is there a minimum distance you need between these through-hole parts and the gold-finger edge, the board edge or the edge rails? Is there a height limit for parts?</p>
+<p>2c) Are these parts soldered by hand or by wave at this quantity? Is flux residue kept out of the socket and connector contacts, or cleaned?</p>
+<p>2d) Is the feeder loading fee charged for these through-hole parts as well, or only for the SMT parts?</p>
+<p>3) Edge rails and fiducials: can the two rails be on the two sides next to the gold-finger edge, so that the bevelled edge stays an outer edge of the panel?</p>
+<p>4) Does anything above require assembly on both sides, or add to the lead time?</p>
+</blockquote>
 <p>回答で設計がどう変わるかは、次のとおりです。GrokBOT が判断する必要はありません。報告の参考にしてください。</p>
 <table>
 <tr><th>質問</th><th>回答によって変わること</th></tr>
-<tr><td>1a、1d</td><td>Pico 2 を JLCPCB に実装してもらうか、ソケットにして依頼者が挿すか。費用の見積もり</td></tr>
-<tr><td>1b、1c</td><td>基板上の Pico 2 のパッドの形。USB Type-C 端子を基板の上で Pico 2 に直結できるか</td></tr>
-<tr><td>2a、2b</td><td>ソケットと 60 ピン端子を置ける位置。金フィンガーの近くに置けるか</td></tr>
-<tr><td>2c</td><td>ソケットの種類（板ばね接点か丸ピンか）の選び方</td></tr>
-<tr><td>3</td><td>片面実装で済むか。納期</td></tr>
+<tr><td>1a、1c、1d</td><td>Pico 2 を JLCPCB に実装してもらえるか。USB Type-C 端子と BOOT ボタンは Pico 2 の裏側のパッドでつながるので、手はんだでは付かない。発注のときの備考欄に書く内容</td></tr>
+<tr><td>1b</td><td>基板上の Pico 2 のパッドの形</td></tr>
+<tr><td>1e、2a、2d</td><td>費用の見積もり（X 線検査、治具、部品の装着料）</td></tr>
+<tr><td>1f</td><td>Pico 2 を先に確保するか（依頼 3）。マイコンの版によるファームウェアの注意点</td></tr>
+<tr><td>2a、2b、3</td><td>ソケットと 60 ピン端子を置ける位置。基板の外形と捨て基板の向き</td></tr>
+<tr><td>2c</td><td>ソケットと端子の接点に、はんだ付けの汚れが残る恐れがあるか</td></tr>
+<tr><td>4</td><td>片面実装で済むか。納期</td></tr>
 </table>
 
-<h2>依頼 2　60 ピンのカセット端子のサンプル購入（任意）</h2>
-<p>新品の 60 ピン端子（WingTAT ED60BGFBK、LCSC の部品番号 C5173310）は、板厚 1.57 mm のカード用の部品です。ファミコンのカセットの基板は 1.2 mm なので、緩い恐れがあります。依頼者が実物のカセットで確かめるためのサンプルです。<b>依頼者が「サンプルを買う」と言った場合だけ</b>、次のとおりに進めます。</p>
+<h2>依頼 2　60 ピンのカセット端子のサンプル購入</h2>
+<p>新品の 60 ピン端子（WingTAT ED60BGFBK、LCSC の部品番号 C5173310）は、板厚 1.57 mm のカード用の部品です。ファミコンのカセットの基板は約 1.2 mm なので、接点の押さえが弱く、緩い恐れがあります。依頼者が実物のカセットで確かめるためのサンプルで、この結果が出るまで、端子まわりの基板設計を確定できません。JLCPCB の実装用在庫は部品だけを取り寄せられないので、LCSC の通販で買います。</p>
 <ol>
-<li><a href="https://www.lcsc.com/">LCSC の通販サイト</a>で、部品番号 C5173310 を探し、2 個をカートに入れる。</li>
+<li>LCSC の通販サイトで、部品番号 <b>C5173310</b> を探し、<b>3 個</b>をカートに入れる。</li>
 <li>メーカーが WingTAT、型番が ED60BGFBK であることを確かめる。</li>
-<li>在庫が無い場合、品名や型番が違う場合は、止まって確認する。似た部品を選ばない。</li>
+<li>在庫が無い場合、品名や型番が違う場合は、<b>止まって確認</b>する。似た部品を選ばない。</li>
 <li>配送方法の候補とそれぞれの金額を控える。配送方法は依頼者が選ぶ。</li>
-<li>注文を確定する前に止まり、内容と合計（送料、手数料、税を含む）を依頼者に見せて承認をもらう。</li>
+<li>注文を確定する前に<b>止まり</b>、内容と合計（送料、手数料、税を含む）を依頼者に見せて承認をもらう。</li>
 </ol>
-<p>部品の単価は 1 個 1.36 米ドルでした（2026-11-11 の JLCPCB の部品データ。在庫 299 個）。LCSC での価格と送料は、この文書では確かめていません。</p>
+<p>部品の単価は 1 個 1.36 米ドルでした（2026-11-11。JLCPCB の実装用在庫は 299 個）。LCSC での送料は、この文書では確かめていません。</p>
+<p>届いたあとに依頼者が確かめること（GrokBOT の作業ではありません）: 端子の樹脂部分（幅 82.5 mm、奥行き 9.25 mm）がカセットの殻の開口に入るか。カセットの基板が 6.4 mm 以上入るか。カセットを揺すっても 60 本すべての接触が保たれるか。任天堂製と他社製を含む数本で試す。</p>
+
+<h2>依頼 3　Raspberry Pi Pico 2 の先行確保（任意）</h2>
+<p>JLCPCB の実装用在庫にある Raspberry Pi Pico 2（部品番号 C41407547）は 55 個で、この基板は 1 枚に 3 個使います（10 枚で 30 個）。基板の発注までに在庫が無くなる恐れがあるので、JLCPCB の事前購入（Parts Pre-order）で先に確保する方法があります。<b>依頼者が「先行確保する」と言い、個数を指定した場合だけ</b>、次のとおりに進めます。</p>
+<ol>
+<li>JLCPCB にログインし、部品の事前購入の画面で C41407547 を探す。品名が Raspberry Pi Pico 2 であることを確かめる。</li>
+<li>依頼者が指定した個数を入れる。</li>
+<li>注文を確定する前に<b>止まり</b>、単価、合計、保管の条件（保管料の有無、使わなかった場合の返金、部品だけを送ってもらえるか）を画面の表示どおりに依頼者へ伝え、承認をもらう。</li>
+</ol>
+<p>設計者が調べた範囲では、事前購入した部品は JLCPCB での実装にだけ使え、部品だけを送ってもらうことはできません。条件は画面で確かめ直してください。</p>
 
 <h2>発注の予定（参考。まだ確定していない）</h2>
 <table>
 <tr><th>項目</th><th>予定</th></tr>
 <tr><td>注文先</td><td>JLCPCB（基板の製造と部品実装。Standard PCBA）</td></tr>
 <tr><td>枚数</td><td>5 枚または 10 枚（未定）</td></tr>
-<tr><td>JLCPCB が実装する部品</td><td>表面実装の部品すべて、CPU と PPU 用の 40 ピンソケット 2 個、Raspberry Pi Pico 2 が 3 個、60 ピンのカセット端子 1 個</td></tr>
+<tr><td>JLCPCB が実装する部品</td><td>すべて。表面実装の部品、CPU と PPU 用の 40 ピンソケット 2 個、Raspberry Pi Pico 2 が 3 個、60 ピンのカセット端子、DIP スイッチ、半固定抵抗</td></tr>
 <tr><td>依頼者が行うこと</td><td>ドナー機から外した CPU と PPU をソケットに挿す。ファームウェアを USB で書き込む</td></tr>
-<tr><td>金額の目安</td><td>10 枚で 1 枚あたり約 10,300 円、5 枚で約 13,300 円。設計者の粗い試算で、見積もり画面の値ではない</td></tr>
+<tr><td>金額の目安</td><td>10 枚で 1 枚あたり約 10,700 円、5 枚で約 13,600 円（部品と実装が約 9,400 円・約 11,200 円、残りは基板、送料、税）。設計者の試算で、見積もり画面の値ではない</td></tr>
 </table>
-<p>主な部品は次のとおりです。2026-11-11 の JLCPCB の部品データの値で、発注のときに取り直します。</p>
+<p>手で挿す部品と Pico 2 は次のとおりです。2026-11-11 の JLCPCB の部品データの値で、発注のときに取り直します。</p>
 <table>
 <tr><th>用途</th><th>部品番号</th><th>在庫</th><th>単価（米ドル）</th><th>実装方法の表示</th></tr>
-<tr><td>40 ピンソケット（板ばね接点）</td><td>C2332</td><td>9,982</td><td>0.13</td><td>Wave Soldering</td></tr>
 <tr><td>40 ピンソケット（丸ピン）</td><td>C2874018</td><td>2,913</td><td>0.93</td><td>Wave Soldering</td></tr>
-<tr><td>Pico 用ピンソケット 1×20</td><td>C2905423</td><td>7,155</td><td>0.25</td><td>Wave Soldering</td></tr>
 <tr><td>60 ピンのカセット端子</td><td>C5173310</td><td>299</td><td>1.36</td><td>Wave Soldering</td></tr>
-<tr><td>Raspberry Pi Pico 2</td><td>C41407547</td><td>56</td><td>9.28（10 個以上は 7.96）</td><td>SMT Assembly、Standard のみ</td></tr>
+<tr><td>DIP スイッチ 4 極</td><td>C92645</td><td>15,031</td><td>0.36</td><td>Wave Soldering</td></tr>
+<tr><td>半固定抵抗 10 kΩ</td><td>C118956</td><td>33,603</td><td>0.17</td><td>Wave Soldering</td></tr>
+<tr><td>Raspberry Pi Pico 2</td><td>C41407547</td><td>55</td><td>9.28（10 個以上は 7.96）</td><td>SMT Assembly、Standard のみ、X 線検査が必要</td></tr>
 </table>
 
 <h2>止まって確認する場面</h2>
 <ul>
 <li>支払いが発生する操作の直前。</li>
 <li>JLCPCB のサポートが、別のやり方や別の部品を提案してきたとき。追加料金の説明があったとき。</li>
-<li>LCSC で在庫が無い、品名や型番が違う、購入数の制限があるとき。</li>
+<li>LCSC や JLCPCB で在庫が無い、品名や型番が違う、購入数の制限があるとき。</li>
 <li>この文書に書かれていない選択が必要になったとき。</li>
 <li>このフォルダに基板のデータが置かれているのに、この文書が準備版のままのとき。発注用の版に差し替わるまで注文しない。</li>
 </ul>
@@ -111,24 +130,28 @@
 <h2>終わったら報告すること</h2>
 <ul>
 <li>依頼 1: 質問を送った日時と方法、JLCPCB の回答の全文、答えの無かった質問。</li>
-<li>依頼 2（行った場合）: 注文番号、合計金額と内訳、配送方法、到着の見込み。</li>
+<li>依頼 2: 注文番号、合計金額と内訳、配送方法、到着の見込み。</li>
+<li>依頼 3（行った場合）: 注文番号、個数、合計金額、画面に出ていた保管と返金の条件。</li>
 <li>止まって確認した点と、その結果。未解決のことがあればその内容。</li>
 </ul>
 
 <h2>この基板について知っておくこと</h2>
 <ul>
-<li>基板の名前はファミコン JAMMA 基板 rev 0.1。ファミリーコンピュータの CPU と PPU を載せ替えて、業務用筐体（JAMMA 規格）で動かす基板。同じ異能ソフトの「ファミコン基板」フォルダにある famicart rev G とは別の基板。</li>
+<li>基板の名前はファミコン JAMMA 基板 rev 0.3。ファミリーコンピュータの CPU と PPU を載せ替えて、業務用筐体（JAMMA 規格）で動かす基板。同じ異能ソフトの「ファミコン基板」フォルダにある famicart rev G とは別の基板。</li>
 <li>端に金めっきの接点（金フィンガー）があるので、部品実装は Standard PCBA になる。</li>
 <li>設計データはこのフォルダに無い。探さなくてよい。</li>
-<li>設計は机上の下書きで、設計者以外による見直しも、実物での動作確認もまだ無い。</li>
+<li>設計は机上のもので、実物での動作確認はまだ無い。</li>
 </ul>
 
 <h2>根拠にした資料</h2>
 <ul>
-<li>JLCPCB の部品ページ（区分、在庫、実装方法の表示。2026-11-11 確認）: https://jlcpcb.com/partdetail/C2332 、https://jlcpcb.com/partdetail/C2874018 、https://jlcpcb.com/partdetail/C2905423 、https://jlcpcb.com/partdetail/C5173310 、https://jlcpcb.com/partdetail/C41407547</li>
+<li>JLCPCB の部品ページ（区分、在庫、実装方法、X 線検査の表示。2026-11-11 確認）: https://jlcpcb.com/partdetail/C2874018 、https://jlcpcb.com/partdetail/C5173310 、https://jlcpcb.com/partdetail/C92645 、https://jlcpcb.com/partdetail/C118956 、https://jlcpcb.com/partdetail/C41407547</li>
+<li>JLCPCB 実装の料金表（2026-10-22 更新）: https://jlcpcb.com/help/article/pcb-assembly-price</li>
+<li>JLCPCB のステンシルの作り方（発注者のデータからは作らない。備考で指定できる）: https://jlcpcb.com/help/article/smt-stencil-data-prepared-for-smt-orders</li>
 <li>JLCPCB 実装の FAQ（スルーホール部品の実装）: https://jlcpcb.com/help/article/pcb-assembly-faqs</li>
-<li>JLCPCB 実装の料金: https://jlcpcb.com/solutions/pcb-prototype-assembly</li>
 <li>JLCPCB 実装仕様（金フィンガーは Standard PCBA のみ）: https://jlcpcb.com/capabilities/pcb-assembly-capabilities</li>
+<li>JLCPCB の部品の事前購入: https://jlcpcb.com/help/article/what-is-jlcpcb-parts-pre-order-service</li>
+<li>Raspberry Pi Pico 2 データシート（表面実装での使い方、3.2 節）: https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf</li>
 </ul>
 </body>
 </html>
