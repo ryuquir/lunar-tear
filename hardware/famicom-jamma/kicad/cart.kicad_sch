@@ -11273,7 +11273,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "b14b8704-5408-5ff7-9720-1a4b14a063e9")
 		(property "Reference" "C34"
 			(at 226.06 236.46 90)
@@ -11285,7 +11285,7 @@
 				)
 			)
 		)
-		(property "Value" "1n"
+		(property "Value" "220p"
 			(at 226.06 241.06 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11338,7 +11338,7 @@
 				(justify left)
 			)
 		)
-		(property "LCSC" "C1588"
+		(property "LCSC" "C1603"
 			(at 228.6 243.8399 0)
 			(hide yes)
 			(show_name no)
@@ -11350,7 +11350,7 @@
 				(justify left)
 			)
 		)
-		(property "Note" "with the 47 k: no edge on the gate can couple a pulse into the /OE pins; the outputs follow C_DUMP_EN after about 60 us"
+		(property "Note" "not fitted: fit 220 pF to 1 nF only if a pulse on the gate is found to reach the /OE pins; a capacitor here makes the edges at the /OE pins far slower than the 74HCT595 is specified for"
 			(at 228.6 243.8399 0)
 			(hide yes)
 			(show_name no)
@@ -11858,7 +11858,7 @@
 				(justify left)
 			)
 		)
-		(property "Note" "while +5V_SW is off the /OE pins sit one diode above 0 V; this resistor keeps that from pulling DIP switch 1's line down through the transistor's body diode"
+		(property "Note" "while +5V_SW is off the /OE pins sit one diode above 0 V; this resistor keeps that from pulling DIP switch 1's line down through the transistor's body diode.  With the pins' own capacitance it also filters what an edge on the gate couples into the line; the outputs follow C_DUMP_EN within about 5 us"
 			(at 193.04 243.8399 0)
 			(hide yes)
 			(show_name no)
@@ -14367,7 +14367,7 @@
 				(justify left)
 			)
 		)
-		(property "Note" "holds the CPU in reset whenever Pico C enables the dump drivers: in reset the 2A03 releases all of its bus pins"
+		(property "Note" "holds the CPU in reset whenever Pico C enables the dump drivers: in reset the 2A03 releases all of its bus pins.  When C_DUMP_EN falls this clamp lets go a few microseconds before the drivers switch off, so Pico A must keep its own reset output low throughout emulation mode (README 3.9)"
 			(at 38.1 193.0399 0)
 			(hide yes)
 			(show_name no)

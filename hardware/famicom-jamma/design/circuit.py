@@ -91,8 +91,8 @@ def sheet_power(d):
     # supply of the Pico modules and of the 3.3 V regulator
     P.diode(s, "SS14", V5, "VSYS")
     P.diode(s, "SS14", "VBUS_USB", "VSYS", note="lets the USB socket power the three Pico modules for a firmware update on the bench")
-    P.R(s, "1k", "VBUS_USB", GND, note="keeps the socket's supply pin below 0.3 V while no cable is plugged in, even with a diode at its "
-        "leakage limit (a Type-C host may check for 0 V before it switches its supply on); takes 5 mA from the host")
+    P.R(s, "1k", "VBUS_USB", GND, note="keeps the socket's supply pin below 0.3 V at 25 C while no cable is plugged in, even with a diode "
+        "at its leakage limit (a Type-C host may check for 0 V before it switches its supply on); takes 5 mA from the host")
     P.C(s, "100n", "VBUS_USB", GND)
     P.C(s, "10u", "VSYS", GND)
     P.semi(s, "U", "AMS1117-3.3", {1: GND, 2: V33, 3: "VSYS"}, ref="U28")
@@ -154,13 +154,16 @@ def sheet_cpu(d):
     # clock and reset from Pico A
     P.solder_jumper3(s, "JP2", "CLK 5V", "CLK", "CLK_SEL", "CLK_BUF",
                      note="as made: Pico A's 3.3 V clock goes straight to the chips.  For a 5 V clock (in case a donor chip does not "
-                          "accept 3.3 V): CUT 1-2 FIRST, then bridge 2-3; the clock then passes through a gate of U5 (inverted, about "
-                          "10 ns later).  Bridging 2-3 without cutting 1-2 sets the gate against Pico A's pin")
+                          "accept 3.3 V): 1. cut 1-2, 2. bridge 2-3, 3. bridge JP3.  The clock then passes through a gate of U5 "
+                          "(inverted, about 10 ns later)")
     P.R(s, "33", "CLK_SEL", "CPU_CLK", note="21.5 MHz from Pico A, 3.3 V square wave, DC coupled")
     P.R(s, "470", "CLK", "CLK_G")
     P.R(s, "470", "CLK", "CLK_G", note="two in parallel, 235 ohm: limit the current into the gate's input while +5V_SW is off, "
         "and are small enough to keep the clock's duty cycle (the input's 3 pF adds under 1 ns)")
-    P.R(s, "100", "CLK_BUF_O", "CLK_BUF", note="limits the current if JP2 is bridged 2-3 with 1-2 still closed; adds about 3 ns")
+    P.R(s, "470", "CLK_BUF_O", "CLK_BUF", note="if JP2 is bridged 2-3 while 1-2 is still closed, the gate works against Pico A's pin: "
+        "this resistor keeps that to 10 mA")
+    P.solder_jumper2(s, "JP3", "CLK 5V b", "CLK_BUF_O", "CLK_BUF", note="normally open; bridged as the last step of the change to a 5 V clock (see JP2): "
+                     "the gate then drives the two 33 ohm resistors directly")
     P.R(s, "470", "A_CPU_RST", "CPU_RST_N")
     P.RA(s, "4.7k", [("CPU_RST_N", GND), ("PPU_RST_N", GND), ("CLK", GND)],
          note="both resets are held low until Pico A releases them; the clock line is low while Pico A is in reset")
@@ -364,10 +367,14 @@ def sheet_cart(d):
     P.nfet(s, "DUMP_EN_G", "DUMP_OE_N", "I_DIP1",
            note="source on DIP switch 1: with the switch off (real chips) the source is not grounded and the outputs stay off")
     P.R(s, "47k", "DUMP_OE_N", "D_OE_N", note="while +5V_SW is off the /OE pins sit one diode above 0 V; this resistor keeps that from "
-        "pulling DIP switch 1's line down through the transistor's body diode")
-    P.C(s, "1n", "D_OE_N", GND, note="with the 47 k: no edge on the gate can couple a pulse into the /OE pins; the outputs follow C_DUMP_EN after about 60 us")
+        "pulling DIP switch 1's line down through the transistor's body diode.  With the pins' own capacitance it also filters "
+        "what an edge on the gate couples into the line; the outputs follow C_DUMP_EN within about 5 us")
+    P.C(s, "220p", "D_OE_N", GND, dnp=True, note="not fitted: fit 220 pF to 1 nF only if a pulse on the gate is found to reach the /OE pins; "
+        "a capacitor here makes the edges at the /OE pins far slower than the 74HCT595 is specified for")
     P.nfet(s, "DUMP_EN_G", "CPU_RST_N", GND,
-           note="holds the CPU in reset whenever Pico C enables the dump drivers: in reset the 2A03 releases all of its bus pins")
+           note="holds the CPU in reset whenever Pico C enables the dump drivers: in reset the 2A03 releases all of its bus pins.  "
+                "When C_DUMP_EN falls this clamp lets go a few microseconds before the drivers switch off, so Pico A must keep "
+                "its own reset output low throughout emulation mode (README 3.9)")
     P.R(s, "100", "C_DUMP_EN", "DUMP_EN_G")
     P.R(s, "1k", "DUMP_EN_G", GND, note="off while Pico C is in reset; low enough against the pad leakage of early RP2350 chips")
     for n in ("SER", "SRCLK_F", "SRCLK_S", "RCLK"):
@@ -629,6 +636,10 @@ def sheet_mcu(d):
              note="for a USB socket on the cabinet's panel")
 
 
+ALLOW_SINGLE = set()      # nets that are meant to have a single pin; the build treats any other single-pin net as a typing mistake
+ALLOW_PARALLEL = set()    # (reference, net) pairs where two outputs of one IC are joined on purpose
+
+
 def selfcheck(d):
     """Polarity and pin facts taken straight from the makers' datasheets.
 
@@ -646,7 +657,8 @@ def selfcheck(d):
     facts = []
     # TPS2553DBV (TI SLVS841): 1 IN, 2 GND, 3 EN, 4 /FAULT, 5 ILIM, 6 OUT
     facts += [(pin("U29", 1) == V5, "U29 pad 1 (IN) on +5V"), (pin("U29", 6) == VSW, "U29 pad 6 (OUT) on +5V_SW"),
-              (pin("U29", 2) == GND, "U29 pad 2 on GND"), (pin("U29", 3) == "SW_EN", "U29 pad 3 (EN)")]
+              (pin("U29", 2) == GND, "U29 pad 2 on GND"), (pin("U29", 3) == "SW_EN", "U29 pad 3 (EN)"),
+              (pin("U29", 4) == "I_5VSW" and pin("U29", 5) == "SW_ILIM", "U29 pad 4 (/FAULT) and pad 5 (ILIM)")]
     # SMAJ15A: pad 1 of D_SMA is the cathode (banded end); it is the pad on the coil line
     tvs = by_value("SMAJ15A")
     facts += [(len(tvs) == 4, "four coil clamps")]
@@ -654,21 +666,54 @@ def selfcheck(d):
     # S8550 in SOT-23 (JSCJ): 1 base, 2 emitter, 3 collector; the follower's collector is on GND
     facts += [(p.conn["3"] == GND and p.conn["2"] == "VBUF", f"{p.ref}: PNP follower, emitter VBUF, collector GND") for p in by_value("S8550")]
     facts += [(len(by_value("S8550")) == 1, "one PNP")]
-    # AO3400A in SOT-23: 1 gate, 2 source, 3 drain; no gate may sit on a supply rail
-    facts += [(p.conn["1"] not in (V5, VSW, V33, GND), f"{p.ref}: gate is a signal") for p in by_value("AO3400A")]
-    # 3362P trimmer: pad 2 is the wiper; pad 3 is the clockwise end (Bourns 3362 data sheet)
+    # AO3400A in SOT-23: 1 gate, 2 source, 3 drain.  Every one switches a line to ground (or to DIP switch 1): a transistor the
+    # wrong way round conducts through its body diode all the time
+    fets = by_value("AO3400A")
+    facts += [(len(fets) == 7, "seven AO3400A (four coil outputs, sync, dump enable, CPU reset clamp)")]
+    facts += [(p.conn["1"] not in (V5, VSW, V33, GND) and p.conn["2"] in (GND, "I_DIP1") and p.conn["3"] not in (GND, V5, VSW, V33, "I_DIP1"),
+               f"{p.ref}: AO3400A gate (pad 1) is a signal, source (pad 2) on GND or on DIP switch 1, drain (pad 3) on the switched line") for p in fets]
+    # 3362P trimmer: pad 2 is the wiper; pad 3 is the clockwise end (Bourns 3362 data sheet; the BOCHEN part that JLCPCB fits
+    # shows the same pin numbers but no direction, so the direction is to be confirmed on the first board)
     facts += [(pin("RV1", 2) == "AMP_IN" and pin("RV1", 1) == GND and pin("RV1", 3) == "AUD_SUM", "RV1: wiper to the amplifier, clockwise is louder")]
     # LMV7219 in SOT-23-5: 1 OUT, 2 V-, 3 +IN, 4 -IN, 5 V+; it must run from +3V3 (5.5 V is its absolute maximum)
-    facts += [(pin("U9", 5) == V33 and pin("U9", 2) == GND, "U9 supply is +3V3")]
+    facts += [(pin("U9", 5) == V33 and pin("U9", 2) == GND, "U9 supply is +3V3"),
+              (pin("U9", 1) == "CMP_OUT" and pin("U9", 3) == "CMP_INP" and pin("U9", 4) == "VREF", "U9 pad 1 OUT, pad 3 +IN, pad 4 -IN")]
     # diodes (pad 1 = cathode): SS54 clamps a reversed supply, the two SS14 feed VSYS
     facts += [(p.conn["1"] == V5 and p.conn["2"] == GND, f"{p.ref}: SS54 cathode on +5V") for p in by_value("SS54")]
     facts += [(p.conn["1"] == "VSYS", f"{p.ref}: SS14 cathode on VSYS") for p in by_value("SS14")]
     # polarised capacitors: pad 1 is the positive pad and never on GND
     facts += [(p.conn["1"] != GND, f"{p.ref}: positive pad") for p in d.parts.values() if p.lib_id == "Device:C_Polarized"]
-    # the dump drivers' enable: pull-up to +3V3 and the series resistor of the interlock are both present
+    # LEDs (pad 1 = cathode) light towards GND
+    facts += [(p.conn["1"] == GND, f"{p.ref}: LED cathode on GND") for p in d.parts.values() if p.lib_id == "Device:LED"]
+    # AMS1117-3.3 (SOT-223: 1 GND, 2 OUT, 3 IN, tab = OUT) with the tantalum capacitor its output needs
+    facts += [(pin("U28", 1) == GND and pin("U28", 2) == V33 and pin("U28", 3) == "VSYS", "U28: 1 GND, 2 +3V3, 3 VSYS"),
+              (any(p.value == "100u/6.3V" and p.conn["1"] == V33 and p.conn["2"] == GND for p in d.parts.values()), "100 uF tantalum on +3V3"),
+              (any(p.value == "100n" and p.sheet == "power" and not p.dnp and {p.conn["1"], p.conn["2"]} == {V33, GND} for p in d.parts.values()),
+               "100 nF on +3V3 next to the regulator")]
+    # clock jumper: made closed between Pico A's clock (pad 1) and the chips (pad 2); the 5 V gate is on the open pad 3
+    facts += [(pin("JP2", 1) == "CLK" and pin("JP2", 2) == "CLK_SEL" and pin("JP2", 3) == "CLK_BUF", "JP2: 1 CLK, 2 CLK_SEL, 3 CLK_BUF")]
+    # the interlock of the dump drivers, part by part
     nets = d.nets()
-    facts += [(any(r.startswith("Q") for r, _ in nets.get("DUMP_OE_N", [])) and len(nets.get("D_OE_N", [])) == 7,
-               "interlock: the transistor is on DUMP_OE_N, and D_OE_N has only the five /OE pins, the 47 k and the 1 nF")]
+
+    def r_between(a, b, value):
+        for p in d.parts.values():
+            if p.dnp or p.value != value:
+                continue
+            if p.lib_id == "Device:R" and {p.conn["1"], p.conn["2"]} == {a, b}:
+                return True
+            if p.lib_id == "Device:R_Pack04" and any({p.conn[str(k)], p.conn[str(9 - k)]} == {a, b} for k in range(1, 5)):
+                return True
+        return False
+
+    q = [p for p in fets if "DUMP_OE_N" in p.conn.values()]
+    facts += [(len(q) == 1 and q[0].conn == {"1": "DUMP_EN_G", "2": "I_DIP1", "3": "DUMP_OE_N"}, "interlock transistor: gate DUMP_EN_G, source I_DIP1, drain DUMP_OE_N"),
+              (r_between("DUMP_OE_N", V33, "10k"), "interlock: 10 k from DUMP_OE_N to +3V3"),
+              (r_between("DUMP_OE_N", "D_OE_N", "47k"), "interlock: 47 k between DUMP_OE_N and D_OE_N"),
+              (r_between("I_DIP1", V33, "10k"), "interlock: 10 k from I_DIP1 to +3V3"),
+              (r_between("DUMP_EN_G", GND, "1k"), "interlock: 1 k from the gates to GND"),
+              (len(nets.get("DUMP_OE_N", [])) == 3, "interlock: DUMP_OE_N has only the pull-up, the drain and the 47 k"),
+              (len(nets.get("D_OE_N", [])) == 7, "interlock: D_OE_N has only the five /OE pins, the 47 k and the capacitor position"),
+              (any(p.conn == {"1": "DUMP_EN_G", "2": GND, "3": "CPU_RST_N"} for p in fets), "CPU reset clamp: gate DUMP_EN_G, source GND, drain CPU_RST_N")]
     return [text for ok, text in facts if not ok]
 
 
@@ -688,4 +733,5 @@ def build():
     d.extra(JLCX, P.usex("dip40_socket"), "40-pin IC socket, round pins", 2,
             "soldered by JLCPCB; the donor's CPU and PPU are plugged in afterwards", refs="U1 U6")
     d.failed_facts = selfcheck(d)
+    d.allow_single, d.allow_parallel = ALLOW_SINGLE, ALLOW_PARALLEL
     return d, ["GND", "+5V", "VSYS"]

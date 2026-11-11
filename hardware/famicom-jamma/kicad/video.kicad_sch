@@ -2,7 +2,7 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "3b819b11-6f93-5bad-a408-1960d05ba213")
+	(uuid "e4e34372-1f2c-5c44-a03f-ea453d2c8814")
 	(paper "A3")
 	(title_block
 		(title "Famicom JAMMA board - Video: RGB resistor DAC and composite sync")
@@ -748,18 +748,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f6039c64-1a62-5c76-bf60-d8450d80a619")
-	)
-	(text "Red and blue have 3 bits, green has 4.  Only 470 ohm and 1 k are used so that the parts list stays short."
-		(exclude_from_sim no)
-		(at 12 25 0)
-		(effects
-			(font
-				(size 1.5 1.5)
-			)
-			(justify left bottom)
-		)
-		(uuid "e3e4594c-2456-5e5c-8b19-005245e06fab")
+		(uuid "74f80b9c-dc56-5ab2-ab33-893c7c25c96e")
 	)
 	(text "Pico A drives the DAC directly.  Full scale is 3.0 V open circuit, about 2.85 V into 2 k, source resistance about 125 ohm."
 		(exclude_from_sim no)
@@ -770,40 +759,29 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "403173c7-9b3c-55be-b9b6-99334d3dce28")
+		(uuid "4e15db92-fca0-5580-918e-74407d82b715")
 	)
-	(global_label "VID_B"
-		(shape passive)
-		(at 132.08 124.46 180)
+	(text "Red and blue have 3 bits, green has 4.  Only 470 ohm and 1 k are used so that the parts list stays short."
+		(exclude_from_sim no)
+		(at 12 25 0)
 		(effects
 			(font
-				(size 1.27 1.27)
+				(size 1.5 1.5)
 			)
-			(justify right)
+			(justify left bottom)
 		)
-		(uuid "ffdda4e6-2d87-55ed-84c9-3c028872c239")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
+		(uuid "aa0a7599-740f-5cbd-9e36-59e4315d4053")
 	)
-	(global_label "R_L1"
+	(global_label "SYNC_C"
 		(shape passive)
-		(at 123.19 86.36 0)
+		(at 64.77 114.3 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left)
 		)
-		(uuid "e4e34372-1f2c-5c44-a03f-ea453d2c8814")
+		(uuid "172cbc21-a54f-525a-b842-4f1de90c0008")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -825,94 +803,6 @@
 			)
 			(justify right)
 		)
-		(uuid "74f80b9c-dc56-5ab2-ab33-893c7c25c96e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SYNC_C"
-		(shape passive)
-		(at 35.56 50.8 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "4e15db92-fca0-5580-918e-74407d82b715")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_B"
-		(shape passive)
-		(at 275.59 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "aa0a7599-740f-5cbd-9e36-59e4315d4053")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "B2"
-		(shape passive)
-		(at 143.51 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "172cbc21-a54f-525a-b842-4f1de90c0008")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "GND"
-		(shape passive)
-		(at 35.56 60.96 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
 		(uuid "59b741fd-d527-533f-ba9a-7dffa0b34bf2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
@@ -926,14 +816,14 @@
 			)
 		)
 	)
-	(global_label "G3"
+	(global_label "SYNC_G"
 		(shape passive)
-		(at 270.51 86.36 180)
+		(at 369.57 101.6 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right)
+			(justify left)
 		)
 		(uuid "9f68a7cb-a56d-5d91-8d9e-1eb8846e9e16")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
@@ -948,9 +838,9 @@
 			)
 		)
 	)
-	(global_label "GND"
+	(global_label "B1"
 		(shape passive)
-		(at 132.08 129.54 180)
+		(at 207.01 101.6 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -970,9 +860,9 @@
 			)
 		)
 	)
-	(global_label "GND"
+	(global_label "VID_G"
 		(shape passive)
-		(at 336.55 101.6 0)
+		(at 59.69 101.6 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -992,9 +882,9 @@
 			)
 		)
 	)
-	(global_label "SYNC_G"
+	(global_label "CSYNC"
 		(shape passive)
-		(at 24.13 114.3 180)
+		(at 361.95 101.6 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1036,9 +926,9 @@
 			)
 		)
 	)
-	(global_label "SYNC_C"
+	(global_label "VID_B"
 		(shape passive)
-		(at 95.25 114.3 180)
+		(at 132.08 124.46 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1046,314 +936,6 @@
 			(justify right)
 		)
 		(uuid "94fd0f61-3904-5cdd-912e-6ff1b96ce69e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G3"
-		(shape passive)
-		(at 240.03 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f48d164b-1a2d-51c0-84a1-d40215ce4c83")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "R_L1"
-		(shape passive)
-		(at 146.05 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "14cb4b40-b7a5-5729-9ac6-d871cd5da601")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G1"
-		(shape passive)
-		(at 331.47 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "328b8524-4b79-5050-a817-4ea4f21a9349")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_R"
-		(shape passive)
-		(at 153.67 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "1d63ae99-7da3-54b6-ba60-42d44efcca23")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_B"
-		(shape passive)
-		(at 214.63 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "4815b54f-38b4-56bb-9270-6ffc7be4f3d0")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SYNC_C"
-		(shape passive)
-		(at 64.77 114.3 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "879e4f36-886d-55a7-849a-abe2390e9181")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_G"
-		(shape passive)
-		(at 59.69 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "8dea17d1-33d8-51b4-8bf6-18992a65166f")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_R"
-		(shape passive)
-		(at 62.23 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "386d3daa-606a-56bb-8d41-c674474a20c3")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "B1"
-		(shape passive)
-		(at 207.01 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "1fce7c70-1d6a-5bee-958c-8951efa2ee2b")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_G"
-		(shape passive)
-		(at 369.57 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "3d7620ce-fec7-523b-b230-ed4857757021")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "B_SH"
-		(shape passive)
-		(at 328.93 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "d7864f0e-ba76-5775-87f8-776a1f9171bb")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SYNC_G"
-		(shape passive)
-		(at 369.57 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "78ef0a47-b602-5625-8780-3344f3a77d50")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "GND"
-		(shape passive)
-		(at 31.75 114.3 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "fed4f69e-e731-5e7a-a829-f3a558992e18")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_B"
-		(shape passive)
-		(at 184.15 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "bc898998-53dd-5827-a9c1-16c9225c2d37")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1375,491 +957,7 @@
 			)
 			(justify left)
 		)
-		(uuid "9be39f22-e7d6-566b-a376-50f099b056ee")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_B"
-		(shape passive)
-		(at 298.45 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "42965146-f635-55a2-a1e2-e963d6f43f1a")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G_L1"
-		(shape passive)
-		(at 361.95 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "56315004-a48c-5314-a29a-e58ee0b668b0")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "R_SH"
-		(shape passive)
-		(at 209.55 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "0094ee63-0b93-563f-8048-426fe2ff6f21")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "CSYNC"
-		(shape passive)
-		(at 361.95 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "e9537f5e-12b2-5875-b22c-014ab7c2811e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G_L1"
-		(shape passive)
-		(at 339.09 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "a0d26892-b900-5ffe-a692-6637aa054164")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G_SH"
-		(shape passive)
-		(at 113.03 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "098a04f1-ba84-5c37-be5c-3eb342f28cc5")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G_L0"
-		(shape passive)
-		(at 52.07 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "b5a0a96a-8965-5800-9529-99ca81053c4c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_SYNC"
-		(shape passive)
-		(at 132.08 127 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f3aac8aa-6969-5975-bb55-733d949be215")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "R0"
-		(shape passive)
-		(at 115.57 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "46117786-ecc6-50a2-8938-c711d6415eff")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "R1"
-		(shape passive)
-		(at 85.09 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "69a28b40-b114-5018-89b2-f236137508f5")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "B_SH"
-		(shape passive)
-		(at 306.07 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "1312e659-2998-598d-9928-a1f468276213")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_G"
-		(shape passive)
-		(at 247.65 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "420af143-57e4-58b1-8026-0c4da5bf44e3")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "B0"
-		(shape passive)
-		(at 237.49 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "e90d68cd-2046-5598-af88-962d1c41db08")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_G"
-		(shape passive)
-		(at 82.55 101.6 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "9947d2ed-c64b-5de1-aaea-98df6d0004c7")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "+5V"
-		(shape passive)
-		(at 57.15 114.3 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "673c5060-bc30-5da6-b0ee-eb5a389dafb6")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SYNC_G"
-		(shape passive)
-		(at 27.94 55.88 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "e7aded8a-bc02-5f57-8977-39813dc5bc61")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "G2"
-		(shape passive)
-		(at 300.99 86.36 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f2b64a56-4918-54e0-980b-bfd48bb44d75")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_G"
-		(shape passive)
-		(at 132.08 121.92 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "5b8d47ad-1a6c-567b-86b4-9bb0199f93d4")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "B_L1"
-		(shape passive)
-		(at 245.11 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "efec7275-c610-561f-b8f0-f461f5ae587c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_G"
-		(shape passive)
-		(at 278.13 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "4f561954-521e-5977-99d6-aadae588506f")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "GND"
-		(shape passive)
-		(at 217.17 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "246bc6d3-2727-553d-8747-077512b4701e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "+5V"
-		(shape passive)
-		(at 132.08 132.08 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "db495197-4e24-5790-a1e2-445b52540352")
+		(uuid "f48d164b-1a2d-51c0-84a1-d40215ce4c83")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1881,7 +979,7 @@
 			)
 			(justify right)
 		)
-		(uuid "9af893e8-5237-51e9-b6f1-1cb88cca6ebb")
+		(uuid "14cb4b40-b7a5-5729-9ac6-d871cd5da601")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1894,16 +992,60 @@
 			)
 		)
 	)
-	(global_label "G_L0"
+	(global_label "B_SH"
 		(shape passive)
-		(at 29.21 101.6 0)
+		(at 306.07 101.6 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left)
 		)
-		(uuid "fc8f9657-425a-592e-a65c-016d2a10645a")
+		(uuid "328b8524-4b79-5050-a817-4ea4f21a9349")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "R0"
+		(shape passive)
+		(at 115.57 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1d63ae99-7da3-54b6-ba60-42d44efcca23")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SYNC_G"
+		(shape passive)
+		(at 27.94 55.88 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "4815b54f-38b4-56bb-9270-6ffc7be4f3d0")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1918,14 +1060,14 @@
 	)
 	(global_label "VID_R"
 		(shape passive)
-		(at 132.08 119.38 180)
+		(at 153.67 86.36 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right)
+			(justify left)
 		)
-		(uuid "33190b09-f659-59b0-831e-d54e113fc727")
+		(uuid "879e4f36-886d-55a7-849a-abe2390e9181")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1938,16 +1080,16 @@
 			)
 		)
 	)
-	(global_label "VID_B"
+	(global_label "VID_R"
 		(shape passive)
-		(at 151.13 101.6 0)
+		(at 62.23 86.36 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left)
 		)
-		(uuid "244761ba-1336-59f2-9cc8-b69a1ab5518f")
+		(uuid "8dea17d1-33d8-51b4-8bf6-18992a65166f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1962,14 +1104,14 @@
 	)
 	(global_label "VID_G"
 		(shape passive)
-		(at 308.61 86.36 0)
+		(at 247.65 86.36 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left)
 		)
-		(uuid "3b583444-e5f3-52ee-bff0-fb1f709d65f1")
+		(uuid "386d3daa-606a-56bb-8d41-c674474a20c3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -1982,38 +1124,16 @@
 			)
 		)
 	)
-	(global_label "R2"
+	(global_label "R1"
 		(shape passive)
-		(at 24.13 86.36 180)
+		(at 85.09 86.36 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right)
 		)
-		(uuid "95432741-98a6-59f3-ac56-753280f0b2ca")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 0 0 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "VID_R"
-		(shape passive)
-		(at 92.71 86.36 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "c23748fa-6b81-5be2-890e-a2d83b5193ae")
+		(uuid "1fce7c70-1d6a-5bee-958c-8951efa2ee2b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2028,14 +1148,14 @@
 	)
 	(global_label "B2"
 		(shape passive)
-		(at 176.53 101.6 180)
+		(at 143.51 101.6 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right)
 		)
-		(uuid "cc8729b1-d77b-5d4b-b9bd-10c6bb45a784")
+		(uuid "3d7620ce-fec7-523b-b230-ed4857757021")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2048,16 +1168,60 @@
 			)
 		)
 	)
-	(global_label "G0"
+	(global_label "GND"
 		(shape passive)
-		(at 21.59 101.6 180)
+		(at 31.75 114.3 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d7864f0e-ba76-5775-87f8-776a1f9171bb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_SYNC"
+		(shape passive)
+		(at 132.08 127 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right)
 		)
-		(uuid "178b5901-5381-551e-8fa2-deffa4cd6a10")
+		(uuid "78ef0a47-b602-5625-8780-3344f3a77d50")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G_L1"
+		(shape passive)
+		(at 361.95 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "fed4f69e-e731-5e7a-a829-f3a558992e18")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2079,7 +1243,7 @@
 			)
 			(justify left)
 		)
-		(uuid "645bd22b-6558-5e0c-8ca8-2f941b60462c")
+		(uuid "bc898998-53dd-5827-a9c1-16c9225c2d37")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2092,16 +1256,324 @@
 			)
 		)
 	)
-	(global_label "VID_R"
+	(global_label "G2"
 		(shape passive)
-		(at 179.07 86.36 180)
+		(at 300.99 86.36 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right)
 		)
-		(uuid "61d68b33-089c-592b-b6f5-85e69fc63c5a")
+		(uuid "9be39f22-e7d6-566b-a376-50f099b056ee")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "B_L1"
+		(shape passive)
+		(at 245.11 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "42965146-f635-55a2-a1e2-e963d6f43f1a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_B"
+		(shape passive)
+		(at 298.45 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "56315004-a48c-5314-a29a-e58ee0b668b0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "B_SH"
+		(shape passive)
+		(at 328.93 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "0094ee63-0b93-563f-8048-426fe2ff6f21")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_G"
+		(shape passive)
+		(at 132.08 121.92 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e9537f5e-12b2-5875-b22c-014ab7c2811e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G_SH"
+		(shape passive)
+		(at 113.03 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "a0d26892-b900-5ffe-a692-6637aa054164")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 35.56 60.96 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "098a04f1-ba84-5c37-be5c-3eb342f28cc5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_B"
+		(shape passive)
+		(at 214.63 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "b5a0a96a-8965-5800-9529-99ca81053c4c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_G"
+		(shape passive)
+		(at 278.13 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f3aac8aa-6969-5975-bb55-733d949be215")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "R_L1"
+		(shape passive)
+		(at 123.19 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "46117786-ecc6-50a2-8938-c711d6415eff")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_B"
+		(shape passive)
+		(at 275.59 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "69a28b40-b114-5018-89b2-f236137508f5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G3"
+		(shape passive)
+		(at 270.51 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1312e659-2998-598d-9928-a1f468276213")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G_L0"
+		(shape passive)
+		(at 29.21 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "420af143-57e4-58b1-8026-0c4da5bf44e3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G_L1"
+		(shape passive)
+		(at 339.09 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e90d68cd-2046-5598-af88-962d1c41db08")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SYNC_C"
+		(shape passive)
+		(at 95.25 114.3 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "9947d2ed-c64b-5de1-aaea-98df6d0004c7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2123,7 +1595,447 @@
 			)
 			(justify left)
 		)
+		(uuid "673c5060-bc30-5da6-b0ee-eb5a389dafb6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 132.08 132.08 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e7aded8a-bc02-5f57-8977-39813dc5bc61")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "B0"
+		(shape passive)
+		(at 237.49 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f2b64a56-4918-54e0-980b-bfd48bb44d75")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_R"
+		(shape passive)
+		(at 179.07 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "5b8d47ad-1a6c-567b-86b4-9bb0199f93d4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_B"
+		(shape passive)
+		(at 151.13 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "efec7275-c610-561f-b8f0-f461f5ae587c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_G"
+		(shape passive)
+		(at 369.57 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4f561954-521e-5977-99d6-aadae588506f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SYNC_G"
+		(shape passive)
+		(at 24.13 114.3 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "246bc6d3-2727-553d-8747-077512b4701e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 336.55 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "db495197-4e24-5790-a1e2-445b52540352")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 217.17 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9af893e8-5237-51e9-b6f1-1cb88cca6ebb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 57.15 114.3 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "fc8f9657-425a-592e-a65c-016d2a10645a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "B2"
+		(shape passive)
+		(at 176.53 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "33190b09-f659-59b0-831e-d54e113fc727")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "R_SH"
+		(shape passive)
+		(at 209.55 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "244761ba-1336-59f2-9cc8-b69a1ab5518f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "R_L1"
+		(shape passive)
+		(at 146.05 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3b583444-e5f3-52ee-bff0-fb1f709d65f1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 132.08 129.54 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "95432741-98a6-59f3-ac56-753280f0b2ca")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_R"
+		(shape passive)
+		(at 132.08 119.38 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "c23748fa-6b81-5be2-890e-a2d83b5193ae")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_B"
+		(shape passive)
+		(at 184.15 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "cc8729b1-d77b-5d4b-b9bd-10c6bb45a784")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G1"
+		(shape passive)
+		(at 331.47 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "178b5901-5381-551e-8fa2-deffa4cd6a10")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SYNC_C"
+		(shape passive)
+		(at 35.56 50.8 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "645bd22b-6558-5e0c-8ca8-2f941b60462c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_G"
+		(shape passive)
+		(at 82.55 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "61d68b33-089c-592b-b6f5-85e69fc63c5a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "G3"
+		(shape passive)
+		(at 240.03 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
 		(uuid "3adf8073-84e9-5a3f-9b45-ae9c94cb30a6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "R2"
+		(shape passive)
+		(at 24.13 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "8d94aee9-eb59-50fd-b48e-370031d41e0e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2145,7 +2057,7 @@
 			)
 			(justify left)
 		)
-		(uuid "8d94aee9-eb59-50fd-b48e-370031d41e0e")
+		(uuid "712df0fa-fb52-5e90-af6b-d123e7dab068")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 0 0 0)
 			(hide yes)
@@ -2158,593 +2070,90 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "Device:R")
-		(at 365.76 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "712df0fa-fb52-5e90-af6b-d123e7dab068")
-		(property "Reference" "R122"
-			(at 365.76 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
+	(global_label "VID_G"
+		(shape passive)
+		(at 308.61 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
 			)
+			(justify left)
 		)
-		(property "Value" "470"
-			(at 365.76 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 363.982 86.36 90)
+		(uuid "1ff7ce84-397f-5de7-b602-05d2a11026a2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 365.76 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 365.76 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 368.3 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 368.3 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "two in series: 940 ohm"
-			(at 368.3 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 368.3 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "1ff7ce84-397f-5de7-b602-05d2a11026a2")
-		)
-		(pin "2"
-			(uuid "3dbb909e-dd28-51af-bdd8-5b29db73abe9")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R122")
-					(unit 1)
 				)
 			)
 		)
 	)
-	(symbol
-		(lib_id "Device:R")
-		(at 60.96 114.3 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
+	(global_label "G_L0"
+		(shape passive)
+		(at 52.07 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3dbb909e-dd28-51af-bdd8-5b29db73abe9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VID_R"
+		(shape passive)
+		(at 92.71 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
 		(uuid "3c5689ea-e955-568a-9d32-b1a3c23fb013")
-		(property "Reference" "R136"
-			(at 60.96 112 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 60.96 116.6 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 59.182 114.3 90)
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 60.96 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 60.96 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 63.5 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 63.5 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 63.5 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "55a6f92e-154c-5e78-a9ba-e2586c9b6cf5")
-		)
-		(pin "2"
-			(uuid "fe8e22f7-dd68-51c2-ad77-15a64c2b740c")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R136")
-					(unit 1)
 				)
 			)
 		)
 	)
-	(symbol
-		(lib_id "Device:R")
-		(at 25.4 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "a2e60125-39c4-5498-9428-905a01d481eb")
-		(property "Reference" "R123"
-			(at 25.4 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
+	(global_label "G0"
+		(shape passive)
+		(at 21.59 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
 			)
+			(justify right)
 		)
-		(property "Value" "1k"
-			(at 25.4 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 23.622 101.6 90)
+		(uuid "55a6f92e-154c-5e78-a9ba-e2586c9b6cf5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 0 0 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 25.4 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 25.4 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 27.94 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 27.94 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 27.94 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "f2357d7a-c1c3-5b7c-84b6-4d2aead242bc")
-		)
-		(pin "2"
-			(uuid "0d56b4be-106d-5c52-9804-84b16b5d00c2")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R123")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector_Generic:Conn_01x06")
-		(at 137.16 124.46 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp yes)
-		(uuid "236d673f-cc8a-5ddf-9e9e-2340c890e520")
-		(property "Reference" "J9"
-			(at 137.16 132.08 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "RGB + sync (monitor / option)"
-			(at 137.16 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
-			(at 137.16 124.46 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 137.16 124.46 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 137.16 124.46 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "AKI"
-			(at 139.7 129.5399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 139.7 129.5399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "57aeddff-8155-5b17-8aa4-d1ba0b0d34cb")
-		)
-		(pin "2"
-			(uuid "4ed12d5f-31ed-5180-8cf5-72736eb06e38")
-		)
-		(pin "3"
-			(uuid "0d334cc4-6bad-5339-ab7c-7fc83b62f410")
-		)
-		(pin "4"
-			(uuid "08209307-b6e0-5698-b53a-164ac9dccbf4")
-		)
-		(pin "5"
-			(uuid "096e4de0-5be2-590f-a089-e6828480dacd")
-		)
-		(pin "6"
-			(uuid "bdb30c36-24e4-5e4d-b466-84a2f2f31ad5")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "J9")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 274.32 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "87be5450-09fd-574a-83a4-a15bea14bd5b")
-		(property "Reference" "R119"
-			(at 274.32 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 274.32 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 272.542 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 274.32 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 274.32 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 276.86 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 276.86 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "two in parallel: 235 ohm"
-			(at 276.86 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 276.86 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "298641f3-3afa-520b-a0c9-6ff075df6155")
-		)
-		(pin "2"
-			(uuid "bacb1ccc-f58c-508c-b915-97ed2f6db5b6")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R119")
-					(unit 1)
 				)
 			)
 		)
@@ -2759,7 +2168,7 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "1eee4b0a-e167-5cb0-8d57-3a19b228d0ce")
+		(uuid "fe8e22f7-dd68-51c2-ad77-15a64c2b740c")
 		(property "Reference" "Q4"
 			(at 38.1 57.785 0)
 			(show_name no)
@@ -2849,7 +2258,7 @@
 				(justify left)
 			)
 		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 			(at 35.56 60.9599 0)
 			(hide yes)
 			(show_name no)
@@ -2862,381 +2271,18 @@
 			)
 		)
 		(pin "1"
-			(uuid "764d0147-8eab-5905-a9e7-1a3cca6e0010")
+			(uuid "a2e60125-39c4-5498-9428-905a01d481eb")
 		)
 		(pin "2"
-			(uuid "2f969df9-3af7-520d-b127-a522a4a8bc78")
+			(uuid "f2357d7a-c1c3-5b7c-84b6-4d2aead242bc")
 		)
 		(pin "3"
-			(uuid "879d591a-e62c-5b33-a311-b533098cc242")
+			(uuid "0d56b4be-106d-5c52-9804-84b16b5d00c2")
 		)
 		(instances
 			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 					(reference "Q4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 180.34 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "c9fd3d6a-98dc-5035-aa1c-c899f3aa2231")
-		(property "Reference" "R128"
-			(at 180.34 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 180.34 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 178.562 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 180.34 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 180.34 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 182.88 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 182.88 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "two in parallel: 235 ohm"
-			(at 182.88 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 182.88 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "83e4cbf6-3b02-55e6-8d88-be78e33e9b95")
-		)
-		(pin "2"
-			(uuid "4dac6dfd-8222-5240-be91-d02a0e4e7586")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R128")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 213.36 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "bfb65155-f264-5113-a8d1-2cd877ff58c0")
-		(property "Reference" "R117"
-			(at 213.36 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 213.36 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 211.582 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 213.36 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 213.36 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 215.9 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 215.9 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "1.47 k to ground sets the 3.0 V full scale"
-			(at 215.9 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 215.9 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "f3701373-3c12-5465-af0b-c9927cdd94e9")
-		)
-		(pin "2"
-			(uuid "e8a43dae-b06c-589f-9320-c5f224e8794e")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R117")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 241.3 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "e3666df6-c00d-57cf-bd2a-e01f80e40064")
-		(property "Reference" "R130"
-			(at 241.3 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 241.3 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 239.522 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 241.3 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 241.3 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 243.84 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 243.84 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 243.84 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "f9a24d1c-339d-5dc8-9019-242770a002f6")
-		)
-		(pin "2"
-			(uuid "086e5756-e3ec-5d4b-a0e0-095bae88a287")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R130")
 					(unit 1)
 				)
 			)
@@ -3252,7 +2298,7 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "454ca876-a3eb-53ef-918f-a93ba2811c8c")
+		(uuid "236d673f-cc8a-5ddf-9e9e-2340c890e520")
 		(property "Reference" "R134"
 			(at 365.76 99.3 90)
 			(show_name no)
@@ -3328,7 +2374,7 @@
 				(justify left)
 			)
 		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 			(at 368.3 106.6799 0)
 			(hide yes)
 			(show_name no)
@@ -3341,14 +2387,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "85504f39-742b-5def-8bd3-a2b5af475712")
+			(uuid "57aeddff-8155-5b17-8aa4-d1ba0b0d34cb")
 		)
 		(pin "2"
-			(uuid "e6c4d4cc-bdfc-5e1e-a260-232b30834a82")
+			(uuid "4ed12d5f-31ed-5180-8cf5-72736eb06e38")
 		)
 		(instances
 			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 					(reference "R134")
 					(unit 1)
 				)
@@ -3357,7 +2403,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 86.36 101.6 90)
+		(at 25.4 101.6 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3365,9 +2411,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "80f678f3-aaf6-56cc-859b-9e6da6b425dc")
-		(property "Reference" "R125"
-			(at 86.36 99.3 90)
+		(uuid "0d334cc4-6bad-5339-ab7c-7fc83b62f410")
+		(property "Reference" "R123"
+			(at 25.4 99.3 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3377,7 +2423,7 @@
 			)
 		)
 		(property "Value" "1k"
-			(at 86.36 103.9 90)
+			(at 25.4 103.9 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3387,7 +2433,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 84.582 101.6 90)
+			(at 23.622 101.6 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3398,7 +2444,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 86.36 101.6 0)
+			(at 25.4 101.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3408,7 +2454,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 86.36 101.6 0)
+			(at 25.4 101.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3418,7 +2464,7 @@
 			)
 		)
 		(property "Source" "JLC"
-			(at 88.9 106.6799 0)
+			(at 27.94 106.6799 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3430,7 +2476,7 @@
 			)
 		)
 		(property "LCSC" "C21190"
-			(at 88.9 106.6799 0)
+			(at 27.94 106.6799 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3441,133 +2487,8 @@
 				(justify left)
 			)
 		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 88.9 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "03797042-e25f-50c3-adaa-595756b35f20")
-		)
-		(pin "2"
-			(uuid "319dc604-12d8-533d-8b51-b95ad599e4f6")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R125")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 55.88 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "36989e8f-8128-52c8-9180-6f2e6562101a")
-		(property "Reference" "R124"
-			(at 55.88 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1k"
-			(at 55.88 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 54.102 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 55.88 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 55.88 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 58.42 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 58.42 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "two in series: 2 k"
-			(at 58.42 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 58.42 106.6799 0)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 27.94 106.6799 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3579,1407 +2500,15 @@
 			)
 		)
 		(pin "1"
-			(uuid "f72daf2a-c616-543f-841d-fde87c7d263c")
+			(uuid "08209307-b6e0-5698-b53a-164ac9dccbf4")
 		)
 		(pin "2"
-			(uuid "29f235e6-4d33-5c94-afcc-4cb8335fdf73")
+			(uuid "096e4de0-5be2-590f-a089-e6828480dacd")
 		)
 		(instances
 			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R124")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 88.9 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "72f20099-9998-59b1-914f-dab6d2af2546")
-		(property "Reference" "R113"
-			(at 88.9 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 88.9 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 87.122 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 88.9 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 88.9 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 91.44 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 91.44 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 91.44 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "b1f6a749-db0b-51ef-86f1-8f6ebce3b925")
-		)
-		(pin "2"
-			(uuid "2f5ad736-4d2a-5c5e-b249-703984298976")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R113")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 119.38 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "9962bfd3-79ad-51f8-ae9a-eb3aa83d18e3")
-		(property "Reference" "R114"
-			(at 119.38 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 119.38 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 117.602 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 119.38 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 119.38 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 121.92 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 121.92 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 121.92 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "13ef212e-9cdb-563c-8900-01947efc4e60")
-		)
-		(pin "2"
-			(uuid "aff5d3be-9d42-5046-9912-990ef43d4c0c")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R114")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 147.32 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "a6551aa0-f7df-5450-b280-165844d4020a")
-		(property "Reference" "R127"
-			(at 147.32 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 147.32 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 145.542 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 147.32 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 147.32 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 149.86 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 149.86 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 149.86 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "e08c072a-942b-5ae3-8354-1714cbb81119")
-		)
-		(pin "2"
-			(uuid "3689f123-bd43-5e70-9f4b-7fc5828a62b9")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R127")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 302.26 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "781cd785-1425-5052-a5d0-f39b61eefaa6")
-		(property "Reference" "R132"
-			(at 302.26 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1k"
-			(at 302.26 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 300.482 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 302.26 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 302.26 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 304.8 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 304.8 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 304.8 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "72bef252-d986-5d68-a8b7-ed71862a873e")
-		)
-		(pin "2"
-			(uuid "5152d03f-6b42-54de-8aa6-fdad03b983af")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R132")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 116.84 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "ebf49f42-90bc-5bec-b970-d0a576460d2a")
-		(property "Reference" "R126"
-			(at 116.84 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 116.84 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 115.062 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 116.84 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 116.84 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 119.38 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 119.38 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "1.47 k to ground sets the 3.0 V full scale"
-			(at 119.38 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 119.38 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "ceb0d110-42d2-578f-8f81-0c36709620c5")
-		)
-		(pin "2"
-			(uuid "7e1efde8-e4b0-5b28-8488-9d3eb5420bf3")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R126")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 332.74 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "42248275-23a0-54ef-893b-67042a2f29e4")
-		(property "Reference" "R133"
-			(at 332.74 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 332.74 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 330.962 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 332.74 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 332.74 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 335.28 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 335.28 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "1.47 k to ground sets the 3.0 V full scale"
-			(at 335.28 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 335.28 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "9f965353-635a-5ee0-a3e0-40019f4492f3")
-		)
-		(pin "2"
-			(uuid "fedbb5ed-42e2-586e-9711-7f5be70cec98")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R133")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 304.8 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "7c7d99b9-27ff-58a2-bb80-f457336a9a47")
-		(property "Reference" "R120"
-			(at 304.8 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 304.8 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 303.022 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 304.8 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 304.8 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 307.34 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 307.34 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 307.34 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "f59e81b3-b295-5185-970c-e9e9ef16ea79")
-		)
-		(pin "2"
-			(uuid "0b6361f7-9b4e-5cda-b321-9fae0c1c4ff6")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R120")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 243.84 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "dd22791b-babc-58b3-a653-28dd945c46c8")
-		(property "Reference" "R118"
-			(at 243.84 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 243.84 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 242.062 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 243.84 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 243.84 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 246.38 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 246.38 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 246.38 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "e91d5721-f52d-58ab-9bbc-c093cdc7726c")
-		)
-		(pin "2"
-			(uuid "65993d48-8bf0-588a-9017-1bbe808b6394")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R118")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 99.06 114.3 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "4d888d71-c5ba-5649-bf86-69dc86c9e5c2")
-		(property "Reference" "R137"
-			(at 99.06 112 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 99.06 116.6 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 97.282 114.3 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 99.06 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 99.06 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 101.6 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C22775"
-			(at 101.6 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 101.6 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "39bb8ac7-03a2-5691-afb9-5044bee5bf5a")
-		)
-		(pin "2"
-			(uuid "9a277306-75bc-5a9e-ac81-cf935a4fb1f3")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R137")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 182.88 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "aecc97b2-cba8-5cbb-84d0-4ad47da16bf2")
-		(property "Reference" "R116"
-			(at 182.88 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1k"
-			(at 182.88 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 181.102 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 182.88 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 182.88 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 185.42 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 185.42 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 185.42 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "c884035c-71ad-51d4-a0d7-45e1484815cf")
-		)
-		(pin "2"
-			(uuid "0acde252-f24e-5804-8510-a86fb862b56f")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R116")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 335.28 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "6da7d7a5-1a05-5ddb-aec0-99abeda640a6")
-		(property "Reference" "R121"
-			(at 335.28 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 335.28 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 333.502 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 335.28 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 335.28 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 337.82 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 337.82 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 337.82 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "948e7758-520a-5822-aaa3-0d5a162cde1a")
-		)
-		(pin "2"
-			(uuid "53eac001-adf8-519d-9398-de2647697184")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R121")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 27.94 114.3 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "25be29f1-563a-5080-ba10-81f151916792")
-		(property "Reference" "R135"
-			(at 27.94 112 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1k"
-			(at 27.94 116.6 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 26.162 114.3 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 27.94 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 27.94 114.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 30.48 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 30.48 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "output high (no sync) while Pico A is in reset"
-			(at 30.48 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 30.48 119.3799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "75ae5a89-7acb-5ca9-8213-199c6917d36e")
-		)
-		(pin "2"
-			(uuid "583add55-71f1-569a-93c3-32ecd1154fe9")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R135")
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R123")
 					(unit 1)
 				)
 			)
@@ -4995,7 +2524,7 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "277880e6-2408-56e6-98e5-6212faa5fd5c")
+		(uuid "bdb30c36-24e4-5e4d-b466-84a2f2f31ad5")
 		(property "Reference" "R115"
 			(at 149.86 84.06 90)
 			(show_name no)
@@ -5083,7 +2612,7 @@
 				(justify left)
 			)
 		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 			(at 152.4 91.4399 0)
 			(hide yes)
 			(show_name no)
@@ -5096,366 +2625,15 @@
 			)
 		)
 		(pin "1"
-			(uuid "58733fa2-3db8-54b0-a686-ee94b102c3ee")
+			(uuid "87be5450-09fd-574a-83a4-a15bea14bd5b")
 		)
 		(pin "2"
-			(uuid "a5fa514b-c104-504e-8dcd-0385df6cc019")
+			(uuid "298641f3-3afa-520b-a0c9-6ff075df6155")
 		)
 		(instances
 			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 					(reference "R115")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 271.78 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "116fa776-b52b-5768-b1f6-04fea3e336e1")
-		(property "Reference" "R131"
-			(at 271.78 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 271.78 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 270.002 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 271.78 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 271.78 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 274.32 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 274.32 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Note" "two in series: 940 ohm"
-			(at 274.32 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 274.32 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "099f4963-1584-51b9-9cee-9d455a8522be")
-		)
-		(pin "2"
-			(uuid "a2b3de03-4dc6-5800-a34e-97b5e2ca7f34")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R131")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 27.94 86.36 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "3b609642-1cd7-530d-814e-61d6f19ddee0")
-		(property "Reference" "R111"
-			(at 27.94 84.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 27.94 88.66 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 26.162 86.36 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 27.94 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 27.94 86.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 30.48 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 30.48 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 30.48 91.4399 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "2ad703c4-fc7f-5e10-b4b1-821a9459bf47")
-		)
-		(pin "2"
-			(uuid "69085007-0183-5cf6-b704-907aa9f65ea5")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R111")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 210.82 101.6 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "da4375b0-81e9-5282-8e44-92e5334cf692")
-		(property "Reference" "R129"
-			(at 210.82 99.3 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "470"
-			(at 210.82 103.9 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 209.042 101.6 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 210.82 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 210.82 101.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Source" "JLC"
-			(at 213.36 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C23179"
-			(at 213.36 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-			(at 213.36 106.6799 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "aad0c97e-9b1a-516b-ac0c-1630bbcf61a2")
-		)
-		(pin "2"
-			(uuid "00c304b3-7bdc-57f3-bfe6-6b9247135a54")
-		)
-		(instances
-			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
-					(reference "R129")
 					(unit 1)
 				)
 			)
@@ -5471,7 +2649,7 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "80bfb64e-9592-5165-93f9-87b79d503225")
+		(uuid "bacb1ccc-f58c-508c-b915-97ed2f6db5b6")
 		(property "Reference" "R112"
 			(at 58.42 84.06 90)
 			(show_name no)
@@ -5559,7 +2737,7 @@
 				(justify left)
 			)
 		)
-		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 			(at 60.96 91.4399 0)
 			(hide yes)
 			(show_name no)
@@ -5572,15 +2750,2837 @@
 			)
 		)
 		(pin "1"
-			(uuid "1ec1d809-fdec-5f25-983e-646ffad81c0c")
+			(uuid "1eee4b0a-e167-5cb0-8d57-3a19b228d0ce")
 		)
 		(pin "2"
-			(uuid "beea9ea3-9d54-5665-a88c-8d1a8dbf6388")
+			(uuid "764d0147-8eab-5905-a9e7-1a3cca6e0010")
 		)
 		(instances
 			(project "fcjamma"
-				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/397c6ef7-399f-5b95-a5bd-adee50508c07"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
 					(reference "R112")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 180.34 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2f969df9-3af7-520d-b127-a522a4a8bc78")
+		(property "Reference" "R128"
+			(at 180.34 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 180.34 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 178.562 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 180.34 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 180.34 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 182.88 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 182.88 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "two in parallel: 235 ohm"
+			(at 182.88 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 182.88 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "879d591a-e62c-5b33-a311-b533098cc242")
+		)
+		(pin "2"
+			(uuid "c9fd3d6a-98dc-5035-aa1c-c899f3aa2231")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R128")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 99.06 114.3 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "83e4cbf6-3b02-55e6-8d88-be78e33e9b95")
+		(property "Reference" "R137"
+			(at 99.06 112 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 99.06 116.6 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 97.282 114.3 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 99.06 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 99.06 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 101.6 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C22775"
+			(at 101.6 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 101.6 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "4dac6dfd-8222-5240-be91-d02a0e4e7586")
+		)
+		(pin "2"
+			(uuid "bfb65155-f264-5113-a8d1-2cd877ff58c0")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R137")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 213.36 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f3701373-3c12-5465-af0b-c9927cdd94e9")
+		(property "Reference" "R117"
+			(at 213.36 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 213.36 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 211.582 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 213.36 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 213.36 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 215.9 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 215.9 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "1.47 k to ground sets the 3.0 V full scale"
+			(at 215.9 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 215.9 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "e8a43dae-b06c-589f-9320-c5f224e8794e")
+		)
+		(pin "2"
+			(uuid "e3666df6-c00d-57cf-bd2a-e01f80e40064")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R117")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 302.26 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f9a24d1c-339d-5dc8-9019-242770a002f6")
+		(property "Reference" "R132"
+			(at 302.26 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 302.26 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 300.482 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 302.26 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 302.26 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 304.8 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C21190"
+			(at 304.8 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 304.8 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "086e5756-e3ec-5d4b-a0e0-095bae88a287")
+		)
+		(pin "2"
+			(uuid "454ca876-a3eb-53ef-918f-a93ba2811c8c")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R132")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 182.88 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "85504f39-742b-5def-8bd3-a2b5af475712")
+		(property "Reference" "R116"
+			(at 182.88 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 182.88 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 181.102 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 182.88 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 182.88 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 185.42 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C21190"
+			(at 185.42 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 185.42 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "e6c4d4cc-bdfc-5e1e-a260-232b30834a82")
+		)
+		(pin "2"
+			(uuid "80f678f3-aaf6-56cc-859b-9e6da6b425dc")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R116")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 27.94 114.3 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "03797042-e25f-50c3-adaa-595756b35f20")
+		(property "Reference" "R135"
+			(at 27.94 112 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 27.94 116.6 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 26.162 114.3 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 27.94 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 27.94 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 30.48 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C21190"
+			(at 30.48 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "output high (no sync) while Pico A is in reset"
+			(at 30.48 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 30.48 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "319dc604-12d8-533d-8b51-b95ad599e4f6")
+		)
+		(pin "2"
+			(uuid "36989e8f-8128-52c8-9180-6f2e6562101a")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R135")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 116.84 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f72daf2a-c616-543f-841d-fde87c7d263c")
+		(property "Reference" "R126"
+			(at 116.84 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 116.84 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 115.062 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 116.84 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 116.84 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 119.38 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 119.38 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "1.47 k to ground sets the 3.0 V full scale"
+			(at 119.38 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 119.38 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "29f235e6-4d33-5c94-afcc-4cb8335fdf73")
+		)
+		(pin "2"
+			(uuid "72f20099-9998-59b1-914f-dab6d2af2546")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R126")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 304.8 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b1f6a749-db0b-51ef-86f1-8f6ebce3b925")
+		(property "Reference" "R120"
+			(at 304.8 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 304.8 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 303.022 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 304.8 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 304.8 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 307.34 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 307.34 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 307.34 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "2f5ad736-4d2a-5c5e-b249-703984298976")
+		)
+		(pin "2"
+			(uuid "9962bfd3-79ad-51f8-ae9a-eb3aa83d18e3")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R120")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 241.3 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "13ef212e-9cdb-563c-8900-01947efc4e60")
+		(property "Reference" "R130"
+			(at 241.3 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 241.3 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 239.522 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 241.3 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 241.3 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 243.84 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 243.84 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 243.84 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "aff5d3be-9d42-5046-9912-990ef43d4c0c")
+		)
+		(pin "2"
+			(uuid "a6551aa0-f7df-5450-b280-165844d4020a")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R130")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 119.38 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "e08c072a-942b-5ae3-8354-1714cbb81119")
+		(property "Reference" "R114"
+			(at 119.38 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 119.38 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 117.602 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 119.38 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 119.38 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 121.92 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 121.92 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 121.92 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "3689f123-bd43-5e70-9f4b-7fc5828a62b9")
+		)
+		(pin "2"
+			(uuid "781cd785-1425-5052-a5d0-f39b61eefaa6")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R114")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 27.94 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "72bef252-d986-5d68-a8b7-ed71862a873e")
+		(property "Reference" "R111"
+			(at 27.94 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 27.94 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 26.162 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 27.94 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 27.94 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 30.48 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 30.48 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 30.48 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "5152d03f-6b42-54de-8aa6-fdad03b983af")
+		)
+		(pin "2"
+			(uuid "ebf49f42-90bc-5bec-b970-d0a576460d2a")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R111")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x06")
+		(at 137.16 124.46 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "ceb0d110-42d2-578f-8f81-0c36709620c5")
+		(property "Reference" "J9"
+			(at 137.16 132.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "RGB + sync (monitor / option)"
+			(at 137.16 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
+			(at 137.16 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 137.16 124.46 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 137.16 124.46 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "AKI"
+			(at 139.7 129.5399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 139.7 129.5399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "7e1efde8-e4b0-5b28-8488-9d3eb5420bf3")
+		)
+		(pin "2"
+			(uuid "42248275-23a0-54ef-893b-67042a2f29e4")
+		)
+		(pin "3"
+			(uuid "9f965353-635a-5ee0-a3e0-40019f4492f3")
+		)
+		(pin "4"
+			(uuid "fedbb5ed-42e2-586e-9711-7f5be70cec98")
+		)
+		(pin "5"
+			(uuid "7c7d99b9-27ff-58a2-bb80-f457336a9a47")
+		)
+		(pin "6"
+			(uuid "f59e81b3-b295-5185-970c-e9e9ef16ea79")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "J9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 271.78 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0b6361f7-9b4e-5cda-b321-9fae0c1c4ff6")
+		(property "Reference" "R131"
+			(at 271.78 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 271.78 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 270.002 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 271.78 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 271.78 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 274.32 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 274.32 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "two in series: 940 ohm"
+			(at 274.32 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 274.32 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "dd22791b-babc-58b3-a653-28dd945c46c8")
+		)
+		(pin "2"
+			(uuid "e91d5721-f52d-58ab-9bbc-c093cdc7726c")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R131")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 55.88 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "65993d48-8bf0-588a-9017-1bbe808b6394")
+		(property "Reference" "R124"
+			(at 55.88 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 55.88 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 54.102 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 55.88 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 55.88 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 58.42 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C21190"
+			(at 58.42 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "two in series: 2 k"
+			(at 58.42 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 58.42 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "4d888d71-c5ba-5649-bf86-69dc86c9e5c2")
+		)
+		(pin "2"
+			(uuid "39bb8ac7-03a2-5691-afb9-5044bee5bf5a")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R124")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 147.32 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9a277306-75bc-5a9e-ac81-cf935a4fb1f3")
+		(property "Reference" "R127"
+			(at 147.32 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 147.32 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 145.542 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 147.32 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 147.32 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 149.86 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 149.86 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 149.86 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "aecc97b2-cba8-5cbb-84d0-4ad47da16bf2")
+		)
+		(pin "2"
+			(uuid "c884035c-71ad-51d4-a0d7-45e1484815cf")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R127")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 335.28 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0acde252-f24e-5804-8510-a86fb862b56f")
+		(property "Reference" "R121"
+			(at 335.28 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 335.28 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 333.502 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 335.28 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 335.28 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 337.82 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 337.82 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 337.82 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "6da7d7a5-1a05-5ddb-aec0-99abeda640a6")
+		)
+		(pin "2"
+			(uuid "948e7758-520a-5822-aaa3-0d5a162cde1a")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R121")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 60.96 114.3 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "53eac001-adf8-519d-9398-de2647697184")
+		(property "Reference" "R136"
+			(at 60.96 112 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 60.96 116.6 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 59.182 114.3 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60.96 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 60.96 114.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 63.5 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 63.5 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 63.5 119.3799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "25be29f1-563a-5080-ba10-81f151916792")
+		)
+		(pin "2"
+			(uuid "75ae5a89-7acb-5ca9-8213-199c6917d36e")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R136")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 274.32 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "583add55-71f1-569a-93c3-32ecd1154fe9")
+		(property "Reference" "R119"
+			(at 274.32 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 274.32 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 272.542 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 274.32 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 274.32 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 276.86 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 276.86 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "two in parallel: 235 ohm"
+			(at 276.86 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 276.86 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "277880e6-2408-56e6-98e5-6212faa5fd5c")
+		)
+		(pin "2"
+			(uuid "58733fa2-3db8-54b0-a686-ee94b102c3ee")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R119")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 210.82 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a5fa514b-c104-504e-8dcd-0385df6cc019")
+		(property "Reference" "R129"
+			(at 210.82 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 210.82 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 209.042 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 210.82 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 210.82 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 213.36 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 213.36 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 213.36 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "116fa776-b52b-5768-b1f6-04fea3e336e1")
+		)
+		(pin "2"
+			(uuid "099f4963-1584-51b9-9cee-9d455a8522be")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R129")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 243.84 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a2b3de03-4dc6-5800-a34e-97b5e2ca7f34")
+		(property "Reference" "R118"
+			(at 243.84 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 243.84 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 242.062 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 243.84 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 243.84 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 246.38 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 246.38 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 246.38 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "3b609642-1cd7-530d-814e-61d6f19ddee0")
+		)
+		(pin "2"
+			(uuid "2ad703c4-fc7f-5e10-b4b1-821a9459bf47")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R118")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 88.9 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "69085007-0183-5cf6-b704-907aa9f65ea5")
+		(property "Reference" "R113"
+			(at 88.9 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 88.9 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 87.122 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 88.9 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 88.9 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 91.44 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 91.44 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 91.44 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "da4375b0-81e9-5282-8e44-92e5334cf692")
+		)
+		(pin "2"
+			(uuid "aad0c97e-9b1a-516b-ac0c-1630bbcf61a2")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R113")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 86.36 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "00c304b3-7bdc-57f3-bfe6-6b9247135a54")
+		(property "Reference" "R125"
+			(at 86.36 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 86.36 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 84.582 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 86.36 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 86.36 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 88.9 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C21190"
+			(at 88.9 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 88.9 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "80bfb64e-9592-5165-93f9-87b79d503225")
+		)
+		(pin "2"
+			(uuid "1ec1d809-fdec-5f25-983e-646ffad81c0c")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R125")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 365.76 86.36 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "beea9ea3-9d54-5665-a88c-8d1a8dbf6388")
+		(property "Reference" "R122"
+			(at 365.76 84.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 365.76 88.66 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 363.982 86.36 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 365.76 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 365.76 86.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 368.3 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 368.3 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "two in series: 940 ohm"
+			(at 368.3 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 368.3 91.4399 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "5d709a4a-4428-5677-b20e-eb0ec3d155c0")
+		)
+		(pin "2"
+			(uuid "16978cf5-f854-5b37-a0d7-984a8f9306c8")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R122")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 332.74 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3f50cbcd-534a-5e9a-817d-133795bedd14")
+		(property "Reference" "R133"
+			(at 332.74 99.3 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 332.74 103.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 330.962 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 332.74 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 332.74 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Source" "JLC"
+			(at 335.28 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "LCSC" "C23179"
+			(at 335.28 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Note" "1.47 k to ground sets the 3.0 V full scale"
+			(at 335.28 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "hierarchy_path" "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+			(at 335.28 106.6799 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "bdc77c1b-6a16-51dc-9eb0-b076f796e899")
+		)
+		(pin "2"
+			(uuid "8b3882b3-0c79-594e-bb8f-28c1cff480a0")
+		)
+		(instances
+			(project "fcjamma"
+				(path "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/84666367-efa2-57b2-9a8e-fbaf69d73046"
+					(reference "R133")
 					(unit 1)
 				)
 			)

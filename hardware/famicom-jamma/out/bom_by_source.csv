@@ -1,5 +1,5 @@
 source,code,value,maker's part number,footprint,qty,dnp,references,assembled by,stock,unit price USD (1 piece),note
-JLC,C22775,100,0603WAF1000T5E,Resistor_SMD:R_0603_1608Metric,31,,R14 R32 R33 R34 R35 R36 R37 R38 R39 R40 R41 R42 R43 R44 R45 R46 R47 R78 R84 R101 R108 R134 R137 R138 R139 R146 R161 R162 R163 R164 R165,JLCPCB (SMT Assembly),8867504,0.0021,limits the current if JP2 is bridged 2-3 with 1-2 still closed; adds about 3 ns
+JLC,C22775,100,0603WAF1000T5E,Resistor_SMD:R_0603_1608Metric,30,,R32 R33 R34 R35 R36 R37 R38 R39 R40 R41 R42 R43 R44 R45 R46 R47 R78 R84 R101 R108 R134 R137 R138 R139 R146 R161 R162 R163 R164 R165,JLCPCB (SMT Assembly),8867504,0.0021,
 JLC,C14663,100n,CC0603KRX7R9BB104,Capacitor_SMD:C_0603_1608Metric,29,,C3 C4 C7 C8 C11 C12 C14 C15 C16 C17 C19 C22 C24 C26 C28 C29 C30 C31 C32 C33 C35 C36 C38 C47 C78 C79 C80 C81 C82,JLCPCB (SMT Assembly),36313706,0.0102,
 JLC,C16133,100u/6.3V,TAJB107K006RNJ,Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B,1,,C6,JLCPCB (SMT Assembly),626367,0.2515,the regulator needs a tantalum capacitor of 22 uF or more at its output
 JLC,C25804,10k,0603WAF1002T5E,Resistor_SMD:R_0603_1608Metric,12,,R3 R48 R66 R85 R86 R98 R99 R148 R151 R154 R156 R158,JLCPCB (SMT Assembly),45422722,0.0022,
@@ -10,16 +10,16 @@ JLC,C7171,10u/16V,TAJA106K016RNJ,Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A,3
 JLC,C14709,120R@100MHz 2A,BLM18PG121SN1D,Inductor_SMD:L_0603_1608Metric,2,,FB1 FB2,JLCPCB (SMT Assembly),1859597,0.0124,
 JLC,C22790,12k,0603WAF1202T5E,Resistor_SMD:R_0603_1608Metric,4,,R10 R49 R141 R144,JLCPCB (SMT Assembly),1094110,0.0031,
 JLC,C20197,1k,4D03WGJ0102T5E,Resistor_SMD:R_Array_Convex_4x0603,15,,RN6 RN7 RN8 RN10 RN11 RN12 RN13 RN19 RN20 RN21 RN22 RN23 RN24 RN25 RN35,JLCPCB (SMT Assembly),542341,0.0095,
-JLC,C21190,1k,0603WAF1001T5E,Resistor_SMD:R_0603_1608Metric,20,,R1 R4 R6 R7 R8 R64 R82 R83 R87 R102 R107 R116 R123 R124 R125 R132 R135 R145 R153 R160,JLCPCB (SMT Assembly),25407888,0.0017,"keeps the socket's supply pin below 0.3 V while no cable is plugged in, even with a diode at its leakage limit (a Type-C host may check for 0 V before it switches its supply on); takes 5 mA from the host"
-JLC,C1588,1n,CL10B102KB8NNNC,Capacitor_SMD:C_0603_1608Metric,3,,C34 C51 C52,JLCPCB (SMT Assembly),5712302,0.0082,with the 47 k: no edge on the gate can couple a pulse into the /OE pins; the outputs follow C_DUMP_EN after about 60 us
+JLC,C21190,1k,0603WAF1001T5E,Resistor_SMD:R_0603_1608Metric,20,,R1 R4 R6 R7 R8 R64 R82 R83 R87 R102 R107 R116 R123 R124 R125 R132 R135 R145 R153 R160,JLCPCB (SMT Assembly),25407888,0.0017,"keeps the socket's supply pin below 0.3 V at 25 C while no cable is plugged in, even with a diode at its leakage limit (a Type-C host may check for 0 V before it switches its supply on); takes 5 mA from the host"
+JLC,C1588,1n,CL10B102KB8NNNC,Capacitor_SMD:C_0603_1608Metric,2,,C51 C52,JLCPCB (SMT Assembly),5712302,0.0082,
 JLC,C15849,1u,CL10A105KB8NNNC,Capacitor_SMD:C_0603_1608Metric,7,,C25 C37 C41 C44 C45 C46 C48,JLCPCB (SMT Assembly),12458144,0.0113,next to pin 4
 JLC,C4184,20k,0603WAF2002T5E,Resistor_SMD:R_0603_1608Metric,5,,R5 R9 R140 R143 R159,JLCPCB (SMT Assembly),5202283,0.0021,sets the current limit (1.3 A typical); keep the track short and away from signals
-JLC,C1603,220p,CL10B221KB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,DNP,C21,JLCPCB (SMT Assembly),731779,0.0067,not fitted: early Famicoms have 330 pF + 30 pF here
+JLC,C1603,220p,CL10B221KB8NNNC,Capacitor_SMD:C_0603_1608Metric,2,DNP,C21 C34,JLCPCB (SMT Assembly),731779,0.0067,not fitted: early Famicoms have 330 pF + 30 pF here
 JLC,C1603,220p,CL10B221KB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,,C39,JLCPCB (SMT Assembly),731779,0.0067,15 kHz low-pass
 JLC,C23140,33,0603WAF330JT5E,Resistor_SMD:R_0603_1608Metric,11,,R11 R23 R50 R52 R53 R54 R55 R56 R57 R58 R59,JLCPCB (SMT Assembly),3542343,0.0024,"21.5 MHz from Pico A, 3.3 V square wave, DC coupled"
 JLC,C1980,4.7k,4D03WGJ0472T5E,Resistor_SMD:R_Array_Convex_4x0603,10,,RN1 RN14 RN26 RN27 RN28 RN29 RN30 RN31 RN32 RN36,JLCPCB (SMT Assembly),1753865,0.0068,both resets are held low until Pico A releases them; the clock line is low while Pico A is in reset
 JLC,C1980,4.7k,4D03WGJ0472T5E,Resistor_SMD:R_Array_Convex_4x0603,2,DNP,RN4 RN5,JLCPCB (SMT Assembly),1753865,0.0068,not fitted: pull-downs that some Disk System RAM adapters need
-JLC,C23179,470,0603WAF4700T5E,Resistor_SMD:R_0603_1608Metric,53,,R12 R13 R15 R24 R25 R26 R27 R28 R29 R30 R31 R51 R79 R80 R81 R88 R89 R90 R91 R92 R93 R94 R95 R96 R97 R103 R104 R105 R106 R111 R112 R113 R114 R115 R117 R118 R119 R120 R121 R122 R126 R127 R128 R129 R130 R131 R133 R136 R149 R150 R152 R166 R167,JLCPCB (SMT Assembly),3886472,0.0023,
+JLC,C23179,470,0603WAF4700T5E,Resistor_SMD:R_0603_1608Metric,54,,R12 R13 R14 R15 R24 R25 R26 R27 R28 R29 R30 R31 R51 R79 R80 R81 R88 R89 R90 R91 R92 R93 R94 R95 R96 R97 R103 R104 R105 R106 R111 R112 R113 R114 R115 R117 R118 R119 R120 R121 R122 R126 R127 R128 R129 R130 R131 R133 R136 R149 R150 R152 R166 R167,JLCPCB (SMT Assembly),3886472,0.0023,
 JLC,C25819,47k,0603WAF4702T5E,Resistor_SMD:R_0603_1608Metric,30,,R16 R17 R18 R19 R20 R21 R22 R60 R61 R62 R63 R65 R67 R68 R69 R70 R71 R72 R73 R74 R75 R76 R77 R100 R109 R110 R142 R147 R155 R157,JLCPCB (SMT Assembly),3004447,0.0016,"read while the CPU is in reset or absent; weak, as the Famicom has no pull-up here"
 JLC,C1671,47p,CL10C470JB8NNNC,Capacitor_SMD:C_0603_1608Metric,1,DNP,C20,JLCPCB (SMT Assembly),869438,0.0063,not fitted: the Famicom has 68 pF here
 JLC,C23186,5.1k,0603WAF5101T5E,Resistor_SMD:R_0603_1608Metric,3,,R2 R168 R169,JLCPCB (SMT Assembly),19928266,0.0015,
@@ -74,7 +74,8 @@ PCB,,AUD_PRE,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP13,part of the board,,,
 PCB,,A_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP15,part of the board,,,
 PCB,,B_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP16,part of the board,,,
 PCB,,CLK,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP8,part of the board,,,
-PCB,,CLK 5V,,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,1,,JP2,part of the board,,,"as made: Pico A's 3.3 V clock goes straight to the chips.  For a 5 V clock (in case a donor chip does not accept 3.3 V): CUT 1-2 FIRST, then bridge 2-3; the clock then passes through a gate of U5 (inverted, about 10 ns later).  Bridging 2-3 without cutting 1-2 sets the gate against Pico A's pin"
+PCB,,CLK 5V,,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,1,,JP2,part of the board,,,"as made: Pico A's 3.3 V clock goes straight to the chips.  For a 5 V clock (in case a donor chip does not accept 3.3 V): 1. cut 1-2, 2. bridge 2-3, 3. bridge JP3.  The clock then passes through a gate of U5 (inverted, about 10 ns later)"
+PCB,,CLK 5V b,,Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm,1,,JP3,part of the board,,,normally open; bridged as the last step of the change to a 5 V clock (see JP2): the gate then drives the two 33 ohm resistors directly
 PCB,,CLK_SEL,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP9,part of the board,,,
 PCB,,CMP_OUT,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP12,part of the board,,,
 PCB,,C_3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP17,part of the board,,,

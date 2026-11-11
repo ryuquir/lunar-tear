@@ -133,12 +133,20 @@ def check_rule(design, problems, warnings):
 # the package column must be exactly that text.  A part on the wrong footprint passes every netlist check, hence this table.
 PACKAGE_OF_FOOTPRINT = [
     ("R_0603_", "0603", True), ("C_0603_", "0603", True), ("L_0603_", "0603", True), ("LED_0603_", "0603", True),
-    ("R_Array_Convex_4x0603", "0603x4", True), ("D_SMA", "SMA", False), ("D_SMB", "SMB", False),
+    ("R_Array_Convex_4x0603", "0603x4", True), ("D_SMA", r"\bSMA\b", False), ("D_SMB", r"\bSMB\b", False),
     ("SOT-23", "SOT-23", True), ("SOT-23-5", "SOT-23-5", True), ("SOT-23-6", "SOT-23-6", True), ("SOT-223-3_TabPin2", "SOT-223", True),
     ("SOIC-8_", "SOIC-8", True), ("SOIC-14_", "SOIC-14", True), ("SOIC-16_", "SOIC-16", True), ("SOIC-20W_", "SOIC-20", True),
     ("MSOP-8_", "MSOP-8", True), ("TSOP-I-28_", "TSOPI-28", True),
     ("CP_EIA-3216-18_", "3216", False), ("CP_EIA-3528-21_", "3528", False), ("CP_Elec_6.3x7.7", "6.3", False), ("Fuse_2920_", "2920", True),
 ]
+
+
+# Footprints of JLCPCB-assembled parts whose package column is free text ("SMD", "Plugin", "-"): each was compared by hand
+# with the maker's drawing (README chapter 6).  A JLCPCB part on a footprint that is neither here nor in the table fails the build.
+HAND_CHECKED_FOOTPRINTS = {
+    "SW_Push_1P1T_XKB_TS-1187A": "C318884", "SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm": "C92645",
+    "USB_C_Receptacle_HRO_TYPE-C-31-M-12": "C165948", "RaspberryPi_Pico_SMD": "C41407547", "DIP-40_W15.24mm_Socket": "C2874018",
+}
 
 
 def expected_package(fp_name):
@@ -151,6 +159,7 @@ def expected_package(fp_name):
 def check_footprints(design, problems, custom):
     """Every standard footprint exists, has a pad for every pin of its symbol, and is the package JLCPCB supplies."""
     basic, ext = load_basic(), load_extended()
+    socketed = {ref: code for src, code, _v, _q, _n, refs in design.extras if src in (JLC, JLCX) for ref in refs.split()}
     pads_of = {}
     for p in design.parts.values():
         if not p.footprint:
@@ -169,18 +178,30 @@ def check_footprints(design, problems, custom):
         missing = sorted(n for n in p.conn if n not in pads_of[path])
         if missing:
             problems.append(f"footprint: {p.ref} ({p.value}) has pins {missing} that {name} has no pad for")
-        row = basic.get(p.code) or ext.get(p.code)
+        code = p.code if p.src in (JLC, JLCX) else socketed.get(p.ref)
+        row = basic.get(code) or ext.get(code)
         text, exact = expected_package(name)
-        if row and text and not p.dnp:
+        if not row or p.dnp:
+            continue
+        if text:
             package = row["package"]
-            if (package != text) if exact else (text not in package):
-                problems.append(f"footprint: {p.ref} ({p.value}) sits on {name}, but JLCPCB supplies {p.code} in '{package}'")
+            if (package != text) if exact else (not re.search(text, package)):
+                problems.append(f"footprint: {p.ref} ({p.value}) sits on {name}, but JLCPCB supplies {code} in '{package}'")
+        elif HAND_CHECKED_FOOTPRINTS.get(name) != code:
+            problems.append(f"footprint: {p.ref} ({p.value}, {code}) sits on {name}; this pair is neither in the package table nor in the "
+                            "list of footprints compared by hand with the maker's drawing")
 
 
 PASSIVE_LIBS = ("Device:R", "Device:C", "Device:C_Polarized", "Device:R_Pack04", "Device:FerriteBead", "Device:R_Potentiometer_Trim",
                 "Connector:TestPoint", "Connector_Generic:", "Switch:", "Jumper:")
 RAILS_5V = ("+5V", "+5V_SW", "+5V_IN")
 UNIFORM_BUSES = ("CD", "PPD", "CART_D", "PD", "DQ_PA", "DQ_D", "DI_CD", "DI_PD", "B_CD", "B_OVR")
+BUS_WIDTH = {name: 14 if name == "DQ_PA" else 8 for name in UNIFORM_BUSES}
+
+
+def ohms(value):
+    m = re.fullmatch(r"([0-9.]+)([kM]?)", value)
+    return float(m.group(1)) * {"": 1, "k": 1e3, "M": 1e6}[m.group(2)] if m else None
 
 
 def check_design_rules(design, problems):
@@ -213,9 +234,9 @@ def check_design_rules(design, problems):
 
     nets = design.nets()
 
-    # 0. a net with a single pin is a typing mistake in a net name
+    # 0. a net with a single pin is a typing mistake in a net name (unless design/circuit.py lists it in ALLOW_SINGLE)
     for net, pins in sorted(nets.items()):
-        if len(pins) == 1:
+        if len(pins) == 1 and net not in getattr(design, "allow_single", ()):
             problems.append(f"design rule: net {net} has a single pin ({pins[0][0]}.{pins[0][1]}); check the spelling of the net name")
 
     # 1. a part outside the 3.3 V domain reaches a Pico GPIO only through a resistor.
@@ -244,6 +265,22 @@ def check_design_rules(design, problems):
             problems.append(f"design rule: net {'/'.join(sorted(group))} joins Pico pin {'/'.join(gp)} directly to {r}.{n} "
                             f"({pin_name(part, n)}), a part outside the 3.3 V domain")
 
+    #    Nor may a resistor join a Pico GPIO straight to a 5 V rail (GP26-28 dividers are rule 5).
+    for part in design.parts.values():
+        if not is_pico(part):
+            continue
+        for num, net in part.conn.items():
+            name = pin_name(part, num)
+            if net is None or not name.startswith("GP"):
+                continue
+            for r, n in nets[net]:
+                other = design.parts[r]
+                if other.dnp or other.lib_id not in ("Device:R", "Device:R_Pack04"):
+                    continue
+                end = other.conn["2" if n == "1" else "1"] if other.lib_id == "Device:R" else other.conn[str(9 - int(n))]
+                if end in RAILS_5V and name not in ("GP26", "GP27", "GP28"):
+                    problems.append(f"design rule: {r} joins {part.ref} {name} (net {net}) straight to {end}")
+
     # 2. every IC has its own 100 nF capacitor between its supply net and ground
     caps = collections.defaultdict(list)
     for part in design.parts.values():
@@ -254,6 +291,10 @@ def check_design_rules(design, problems):
     for part in design.parts.values():
         if isinstance(part.sym, SymDef) and part.ref.startswith("U") and part.sym.name not in ("PICO2", "CJ431"):
             rail = supply(part)
+            if rail is None:
+                problems.append(f"design rule: {part.ref} ({part.value}) has no pin that the build recognises as its supply "
+                                "(VCC, VDD, V+, VSYS or IN); extend supply() in tools/build.py")
+                continue
             own = [c for c in caps.get(part.ref, []) if c.value == "100n" and not c.dnp and {c.conn.get("1"), c.conn.get("2")} == {rail, "GND"}]
             if not own:
                 problems.append(f"design rule: {part.ref} ({part.value}) has no 100 nF capacitor of its own between {rail} and GND")
@@ -262,14 +303,15 @@ def check_design_rules(design, problems):
     fam = collections.defaultdict(dict)
     for net, pins in nets.items():
         m = re.fullmatch(r"([A-Z_]+?)(\d+)", net)
-        if m and m.group(1) in UNIFORM_BUSES:
-            fam[m.group(1)][int(m.group(2))] = sorted(re.sub(r"\d+$", "", r) + ":" + type(design.parts[r].sym).__name__ for r, _ in pins)
+        if m and m.group(1) in UNIFORM_BUSES:      # test points and positions left empty do not count
+            fam[m.group(1)][int(m.group(2))] = sorted(re.sub(r"\d+$", "", r) + ":" + type(design.parts[r].sym).__name__ for r, _ in pins
+                                                      if not design.parts[r].dnp and design.parts[r].lib_id != "Connector:TestPoint")
     for name in UNIFORM_BUSES:
         bits_ = fam.get(name, {})
         if not bits_:
             problems.append(f"design rule: bus {name} is missing")
             continue
-        gaps = sorted(set(range(max(bits_) + 1)) - set(bits_))
+        gaps = sorted(set(range(BUS_WIDTH[name])) - set(bits_))
         if gaps:
             problems.append(f"design rule: bus {name} has no bit {gaps}")
         shapes = collections.Counter(tuple(v) for v in bits_.values())
@@ -279,24 +321,37 @@ def check_design_rules(design, problems):
             odd = [f"{name}{i}" for i, v in sorted(bits_.items()) if tuple(v) != common]
             problems.append(f"design rule: bus {name} is not uniform; check {odd}")
 
-    # 4. no net carries two outputs of the same IC
+    # 4. no net carries two driving pins of the same IC (design/circuit.py can allow a pair in ALLOW_PARALLEL)
     for net, pins in nets.items():
-        outs = collections.Counter(r for r, n in pins if pin_type(design.parts[r], n) in ("out", "tri"))
+        outs = collections.Counter(r for r, n in pins if pin_type(design.parts[r], n) in ("out", "tri", "bi", "oc"))
         for r, count in outs.items():
-            if count > 1:
-                problems.append(f"design rule: net {net} carries {count} outputs of {r}")
+            if count > 1 and (r, net) not in getattr(design, "allow_parallel", ()):
+                problems.append(f"design rule: net {net} carries {count} driving pins of {r}")
 
-    # 5. GP26-GP28 never tolerate 5 V: a resistor from such a pin to anything that can carry 5 V needs a second resistor to ground
+    # 5. GP26-GP28 never tolerate 5 V: a resistor from such a pin to anything that can carry 5 V needs a fitted resistor to
+    #    ground, and the two must leave at most 3.3 V on the pin when the other end is at 5.5 V
+    def to_5v_rail(net):
+        for r, n in nets.get(net, []):
+            other = design.parts[r]
+            if other.lib_id == "Device:R" and not other.dnp and other.conn["2" if n == "1" else "1"] in RAILS_5V:
+                return True
+            if other.lib_id == "Device:R_Pack04" and not other.dnp and other.conn[str(9 - int(n))] in RAILS_5V:
+                return True
+        return False
+
     def can_carry_5v(net):
         if net in RAILS_5V:
             return True
+        if net == "GND":
+            return False
         for r, n in nets.get(net, []):
             part = design.parts[r]
-            if part.src == DONOR and pin_type(part, n) != "in":
+            kind = pin_type(part, n)
+            if part.src == DONOR and kind not in ("in", "pwr"):
                 return True
             if isinstance(part.sym, SymDef) and part.sym.name == "FC_CART60":
                 return True
-            if supply(part) in RAILS_5V and pin_type(part, n) in ("out", "tri", "bi", "oc"):
+            if supply(part) in RAILS_5V and (kind in ("out", "tri", "bi") or (kind == "oc" and to_5v_rail(net))):
                 return True
         return False
 
@@ -309,15 +364,20 @@ def check_design_rules(design, problems):
             far = []
             for r, n in nets[net]:
                 other = design.parts[r]
-                if other.lib_id in ("Device:R", "Device:R_Pack04"):
-                    if other.lib_id == "Device:R":
-                        far.append(other.conn["2" if n == "1" else "1"])
-                    else:
-                        far.append(other.conn[str(9 - int(n))])
-            hot = [f for f in far if f and can_carry_5v(f)]
-            if hot and "GND" not in far:
-                problems.append(f"design rule: {part.ref} {pin_name(part, num)} (net {net}) reaches {hot[0]}, which can carry 5 V, "
-                                "through a resistor but has no resistor to ground")
+                if other.lib_id in ("Device:R", "Device:R_Pack04") and not other.dnp:
+                    end = other.conn["2" if n == "1" else "1"] if other.lib_id == "Device:R" else other.conn[str(9 - int(n))]
+                    far.append((end, ohms(other.value)))
+            hot = [(f, v) for f, v in far if f and can_carry_5v(f)]
+            gnd = [v for f, v in far if f == "GND"]
+            where = f"{part.ref} {pin_name(part, num)} (net {net})"
+            if hot and not gnd:
+                problems.append(f"design rule: {where} reaches {hot[0][0]}, which can carry 5 V, through a resistor but has no fitted resistor to ground")
+            elif hot:
+                rg = 1 / sum(1 / v for v in gnd)
+                rh = 1 / sum(1 / v for _f, v in hot)
+                level = 5.5 * rg / (rg + rh)
+                if level > 3.3:
+                    problems.append(f"design rule: {where} would see {level:.2f} V with 5.5 V on {hot[0][0]}")
 
 
 UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
@@ -471,7 +531,11 @@ def main():
     check_design_rules(design, problems)
     problems += [f"datasheet fact does not hold: {text}" for text in design.failed_facts]
     for row in load_extended().values():      # stock and prices change daily
-        age = (datetime.date.today() - datetime.date.fromisoformat(row["checked"])).days
+        try:
+            age = (datetime.date.today() - datetime.date.fromisoformat(row["checked"])).days
+        except ValueError:
+            problems.append(f"parts rule: {row['lcsc']} has no valid 'checked' date in data/jlcpcb_extended_parts.csv; run tools/jlc_parts.py")
+            break
         if age > 7:
             warnings.append(f"data/jlcpcb_extended_parts.csv was fetched {age} days ago ({row['checked']}); run tools/jlc_parts.py before relying on stock or prices")
             break
