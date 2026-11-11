@@ -1,6 +1,6 @@
 sheet,ref,value,pin,pin name,net
-power,F1,RGEF300 (3 A hold),1,,+5V_IN
-power,F1,RGEF300 (3 A hold),2,,+5V
+power,F1,TLC-LSMD300D (3 A hold),1,,+5V_IN
+power,F1,TLC-LSMD300D (3 A hold),2,,+5V
 power,D1,SMBJ6.5CA,1,,+5V
 power,D1,SMBJ6.5CA,2,,GND
 power,D2,SS54,1,,+5V
@@ -137,38 +137,34 @@ cpu,RN2,10k,3,,CPU_RW
 cpu,RN2,10k,6,,+5V_SW
 cpu,RN2,10k,4,,M2
 cpu,RN2,10k,5,,GND
-cpu,U3,M68AF127B (work RAM),22,/E1,WRAM_CS_N
-cpu,U3,M68AF127B (work RAM),30,E2,+5V_SW
-cpu,U3,M68AF127B (work RAM),24,/G,GND
-cpu,U3,M68AF127B (work RAM),29,/W,CPU_RW
-cpu,U3,M68AF127B (work RAM),32,VCC,+5V_SW
-cpu,U3,M68AF127B (work RAM),16,VSS,GND
-cpu,U3,M68AF127B (work RAM),1,NC,(NC)
-cpu,U3,M68AF127B (work RAM),12,A0,CA0
-cpu,U3,M68AF127B (work RAM),11,A1,CA1
-cpu,U3,M68AF127B (work RAM),10,A2,CA2
-cpu,U3,M68AF127B (work RAM),9,A3,CA3
-cpu,U3,M68AF127B (work RAM),8,A4,CA4
-cpu,U3,M68AF127B (work RAM),7,A5,CA5
-cpu,U3,M68AF127B (work RAM),6,A6,CA6
-cpu,U3,M68AF127B (work RAM),5,A7,CA7
-cpu,U3,M68AF127B (work RAM),27,A8,CA8
-cpu,U3,M68AF127B (work RAM),26,A9,CA9
-cpu,U3,M68AF127B (work RAM),23,A10,CA10
-cpu,U3,M68AF127B (work RAM),25,A11,WRAM_A11
-cpu,U3,M68AF127B (work RAM),4,A12,WRAM_A12
-cpu,U3,M68AF127B (work RAM),28,A13,WRAM_A13
-cpu,U3,M68AF127B (work RAM),3,A14,WRAM_A14
-cpu,U3,M68AF127B (work RAM),31,A15,WRAM_A15
-cpu,U3,M68AF127B (work RAM),2,A16,WRAM_A16
-cpu,U3,M68AF127B (work RAM),13,DQ0,CD0
-cpu,U3,M68AF127B (work RAM),14,DQ1,CD1
-cpu,U3,M68AF127B (work RAM),15,DQ2,CD2
-cpu,U3,M68AF127B (work RAM),17,DQ3,CD3
-cpu,U3,M68AF127B (work RAM),18,DQ4,CD4
-cpu,U3,M68AF127B (work RAM),19,DQ5,CD5
-cpu,U3,M68AF127B (work RAM),20,DQ6,CD6
-cpu,U3,M68AF127B (work RAM),21,DQ7,CD7
+cpu,U3,IS62C256AL (work RAM),27,/CE,WRAM_CS_N
+cpu,U3,IS62C256AL (work RAM),1,/OE,GND
+cpu,U3,IS62C256AL (work RAM),6,/WE,CPU_RW
+cpu,U3,IS62C256AL (work RAM),7,VDD,+5V_SW
+cpu,U3,IS62C256AL (work RAM),21,GND,GND
+cpu,U3,IS62C256AL (work RAM),17,A0,CA0
+cpu,U3,IS62C256AL (work RAM),16,A1,CA1
+cpu,U3,IS62C256AL (work RAM),15,A2,CA2
+cpu,U3,IS62C256AL (work RAM),14,A3,CA3
+cpu,U3,IS62C256AL (work RAM),13,A4,CA4
+cpu,U3,IS62C256AL (work RAM),12,A5,CA5
+cpu,U3,IS62C256AL (work RAM),11,A6,CA6
+cpu,U3,IS62C256AL (work RAM),10,A7,CA7
+cpu,U3,IS62C256AL (work RAM),4,A8,CA8
+cpu,U3,IS62C256AL (work RAM),3,A9,CA9
+cpu,U3,IS62C256AL (work RAM),28,A10,CA10
+cpu,U3,IS62C256AL (work RAM),2,A11,WRAM_A11
+cpu,U3,IS62C256AL (work RAM),9,A12,WRAM_A12
+cpu,U3,IS62C256AL (work RAM),5,A13,WRAM_A13
+cpu,U3,IS62C256AL (work RAM),8,A14,WRAM_A14
+cpu,U3,IS62C256AL (work RAM),18,IO0,CD0
+cpu,U3,IS62C256AL (work RAM),19,IO1,CD1
+cpu,U3,IS62C256AL (work RAM),20,IO2,CD2
+cpu,U3,IS62C256AL (work RAM),22,IO3,CD3
+cpu,U3,IS62C256AL (work RAM),23,IO4,CD4
+cpu,U3,IS62C256AL (work RAM),24,IO5,CD5
+cpu,U3,IS62C256AL (work RAM),25,IO6,CD6
+cpu,U3,IS62C256AL (work RAM),26,IO7,CD7
 cpu,C14,100n,1,,+5V_SW
 cpu,C14,100n,2,,GND
 cpu,RN3,10k,1,,WRAM_A11
@@ -179,46 +175,38 @@ cpu,RN3,10k,3,,WRAM_A13
 cpu,RN3,10k,6,,GND
 cpu,RN3,10k,4,,WRAM_A14
 cpu,RN3,10k,5,,GND
-cpu,RN4,10k,1,,WRAM_A15
-cpu,RN4,10k,8,,GND
-cpu,RN4,10k,2,,WRAM_A16
-cpu,RN4,10k,7,,GND
-cpu,RN4,10k,3,,(NC)
-cpu,RN4,10k,6,,(NC)
-cpu,RN4,10k,4,,(NC)
-cpu,RN4,10k,5,,(NC)
-cpu,U4,74HC138,1,A,CA13
-cpu,U4,74HC138,2,B,CA14
-cpu,U4,74HC138,3,C,GND
-cpu,U4,74HC138,6,G1,M2
-cpu,U4,74HC138,4,/G2A,CA15
-cpu,U4,74HC138,5,/G2B,GND
-cpu,U4,74HC138,15,/Y0,WRAM_CS_N
-cpu,U4,74HC138,14,/Y1,PPU_CS_N
-cpu,U4,74HC138,13,/Y2,DEC_4000_N
-cpu,U4,74HC138,12,/Y3,DEC_6000_N
-cpu,U4,74HC138,11,/Y4,(NC)
-cpu,U4,74HC138,10,/Y5,(NC)
-cpu,U4,74HC138,9,/Y6,(NC)
-cpu,U4,74HC138,7,/Y7,(NC)
-cpu,U4,74HC138,16,VCC,+5V_SW
-cpu,U4,74HC138,8,GND,GND
+cpu,U4,74HCT138,1,A,CA13
+cpu,U4,74HCT138,2,B,CA14
+cpu,U4,74HCT138,3,C,GND
+cpu,U4,74HCT138,6,G1,M2
+cpu,U4,74HCT138,4,/G2A,CA15
+cpu,U4,74HCT138,5,/G2B,GND
+cpu,U4,74HCT138,15,/Y0,WRAM_CS_N
+cpu,U4,74HCT138,14,/Y1,PPU_CS_N
+cpu,U4,74HCT138,13,/Y2,DEC_4000_N
+cpu,U4,74HCT138,12,/Y3,DEC_6000_N
+cpu,U4,74HCT138,11,/Y4,(NC)
+cpu,U4,74HCT138,10,/Y5,(NC)
+cpu,U4,74HCT138,9,/Y6,(NC)
+cpu,U4,74HCT138,7,/Y7,(NC)
+cpu,U4,74HCT138,16,VCC,+5V_SW
+cpu,U4,74HCT138,8,GND,GND
 cpu,C15,100n,1,,+5V_SW
 cpu,C15,100n,2,,GND
-cpu,U5,74HC00,1,1A,M2
-cpu,U5,74HC00,2,1B,CA15
-cpu,U5,74HC00,3,1Y,ROMSEL_N
-cpu,U5,74HC00,4,2A,PA13
-cpu,U5,74HC00,5,2B,PA13
-cpu,U5,74HC00,6,2Y,PA13_N
-cpu,U5,74HC00,9,3A,GND
-cpu,U5,74HC00,10,3B,GND
-cpu,U5,74HC00,8,3Y,(NC)
-cpu,U5,74HC00,12,4A,GND
-cpu,U5,74HC00,13,4B,GND
-cpu,U5,74HC00,11,4Y,(NC)
-cpu,U5,74HC00,14,VCC,+5V_SW
-cpu,U5,74HC00,7,GND,GND
+cpu,U5,74HCT00,1,1A,M2
+cpu,U5,74HCT00,2,1B,CA15
+cpu,U5,74HCT00,3,1Y,ROMSEL_N
+cpu,U5,74HCT00,4,2A,PA13
+cpu,U5,74HCT00,5,2B,PA13
+cpu,U5,74HCT00,6,2Y,PA13_N
+cpu,U5,74HCT00,9,3A,GND
+cpu,U5,74HCT00,10,3B,GND
+cpu,U5,74HCT00,8,3Y,(NC)
+cpu,U5,74HCT00,12,4A,GND
+cpu,U5,74HCT00,13,4B,GND
+cpu,U5,74HCT00,11,4Y,(NC)
+cpu,U5,74HCT00,14,VCC,+5V_SW
+cpu,U5,74HCT00,7,GND,GND
 cpu,C16,100n,1,,+5V_SW
 cpu,C16,100n,2,,GND
 cpu,R13,470,1,,CD0
@@ -269,38 +257,38 @@ cpu,R35,100,1,,CD6
 cpu,R35,100,2,,B_CD6
 cpu,R36,100,1,,CD7
 cpu,R36,100,2,,B_CD7
-cpu,RN5,4.7k,1,,CD0
+cpu,RN4,4.7k,1,,CD0
+cpu,RN4,4.7k,8,,GND
+cpu,RN4,4.7k,2,,CD1
+cpu,RN4,4.7k,7,,GND
+cpu,RN4,4.7k,3,,CD2
+cpu,RN4,4.7k,6,,GND
+cpu,RN4,4.7k,4,,CD3
+cpu,RN4,4.7k,5,,GND
+cpu,RN5,4.7k,1,,CD4
 cpu,RN5,4.7k,8,,GND
-cpu,RN5,4.7k,2,,CD1
+cpu,RN5,4.7k,2,,CD5
 cpu,RN5,4.7k,7,,GND
-cpu,RN5,4.7k,3,,CD2
+cpu,RN5,4.7k,3,,CD6
 cpu,RN5,4.7k,6,,GND
-cpu,RN5,4.7k,4,,CD3
+cpu,RN5,4.7k,4,,CD7
 cpu,RN5,4.7k,5,,GND
-cpu,RN6,4.7k,1,,CD4
-cpu,RN6,4.7k,8,,GND
-cpu,RN6,4.7k,2,,CD5
-cpu,RN6,4.7k,7,,GND
-cpu,RN6,4.7k,3,,CD6
-cpu,RN6,4.7k,6,,GND
-cpu,RN6,4.7k,4,,CD7
-cpu,RN6,4.7k,5,,GND
-cpu,RN7,1k,1,,CA0
-cpu,RN7,1k,8,,B_CA0
-cpu,RN7,1k,2,,CA1
-cpu,RN7,1k,7,,B_CA1
-cpu,RN7,1k,3,,CA2
-cpu,RN7,1k,6,,B_CA2
-cpu,RN7,1k,4,,CPU_RW
-cpu,RN7,1k,5,,B_RW
-cpu,RN8,1k,1,,PPU_CS_N
-cpu,RN8,1k,8,,B_PPUCS
-cpu,RN8,1k,2,,OE1_N
-cpu,RN8,1k,7,,B_OE1
-cpu,RN8,1k,3,,OE2_N
-cpu,RN8,1k,6,,B_OE2
-cpu,RN8,1k,4,,(NC)
-cpu,RN8,1k,5,,(NC)
+cpu,RN6,1k,1,,CA0
+cpu,RN6,1k,8,,B_CA0
+cpu,RN6,1k,2,,CA1
+cpu,RN6,1k,7,,B_CA1
+cpu,RN6,1k,3,,CA2
+cpu,RN6,1k,6,,B_CA2
+cpu,RN6,1k,4,,CPU_RW
+cpu,RN6,1k,5,,B_RW
+cpu,RN7,1k,1,,PPU_CS_N
+cpu,RN7,1k,8,,B_PPUCS
+cpu,RN7,1k,2,,OE1_N
+cpu,RN7,1k,7,,B_OE1
+cpu,RN7,1k,3,,OE2_N
+cpu,RN7,1k,6,,B_OE2
+cpu,RN7,1k,4,,(NC)
+cpu,RN7,1k,5,,(NC)
 cpu,R37,10k,1,,OUT0
 cpu,R37,10k,2,,B_OUT0
 cpu,R38,20k,1,,B_OUT0
@@ -345,20 +333,16 @@ cpu,J3,CPU bus (option),36,,OE1_N
 cpu,J3,CPU bus (option),37,,OE2_N
 cpu,J3,CPU bus (option),38,,DEC_4000_N
 cpu,J3,CPU bus (option),39,,DEC_6000_N
-cpu,J4,RAM A11-A16 (option),1,,WRAM_A11
-cpu,J4,RAM A11-A16 (option),3,,WRAM_A12
-cpu,J4,RAM A11-A16 (option),5,,WRAM_A13
-cpu,J4,RAM A11-A16 (option),7,,WRAM_A14
-cpu,J4,RAM A11-A16 (option),9,,WRAM_A15
-cpu,J4,RAM A11-A16 (option),11,,WRAM_A16
-cpu,J4,RAM A11-A16 (option),2,,VRAM_A11
-cpu,J4,RAM A11-A16 (option),4,,VRAM_A12
-cpu,J4,RAM A11-A16 (option),6,,VRAM_A13
-cpu,J4,RAM A11-A16 (option),8,,VRAM_A14
-cpu,J4,RAM A11-A16 (option),10,,VRAM_A15
-cpu,J4,RAM A11-A16 (option),12,,VRAM_A16
-cpu,J4,RAM A11-A16 (option),13,,+5V_SW
-cpu,J4,RAM A11-A16 (option),14,,GND
+cpu,J4,RAM A11-A14 (option),1,,WRAM_A11
+cpu,J4,RAM A11-A14 (option),3,,WRAM_A12
+cpu,J4,RAM A11-A14 (option),5,,WRAM_A13
+cpu,J4,RAM A11-A14 (option),7,,WRAM_A14
+cpu,J4,RAM A11-A14 (option),2,,VRAM_A11
+cpu,J4,RAM A11-A14 (option),4,,VRAM_A12
+cpu,J4,RAM A11-A14 (option),6,,VRAM_A13
+cpu,J4,RAM A11-A14 (option),8,,VRAM_A14
+cpu,J4,RAM A11-A14 (option),9,,+5V_SW
+cpu,J4,RAM A11-A14 (option),10,,GND
 cpu,TP7,M2,1,,M2
 cpu,TP8,CLK,1,,CLK
 ppu,U6,RP2C02 (donor),18,CLK,PPU_CLK
@@ -427,128 +411,116 @@ ppu,R47,33,1,,PPD6
 ppu,R47,33,2,,B_OVR6
 ppu,R48,33,1,,PPD7
 ppu,R48,33,2,,B_OVR7
-ppu,RN9,10k,1,,EXT0
-ppu,RN9,10k,8,,GND
-ppu,RN9,10k,2,,EXT1
-ppu,RN9,10k,7,,GND
-ppu,RN9,10k,3,,EXT2
-ppu,RN9,10k,6,,GND
-ppu,RN9,10k,4,,EXT3
-ppu,RN9,10k,5,,GND
-ppu,RN10,1k,1,,EXT0
-ppu,RN10,1k,8,,A_EXT0
-ppu,RN10,1k,2,,EXT1
-ppu,RN10,1k,7,,A_EXT1
-ppu,RN10,1k,3,,EXT2
-ppu,RN10,1k,6,,A_EXT2
-ppu,RN10,1k,4,,EXT3
-ppu,RN10,1k,5,,A_EXT3
+ppu,RN8,10k,1,,EXT0
+ppu,RN8,10k,8,,GND
+ppu,RN8,10k,2,,EXT1
+ppu,RN8,10k,7,,GND
+ppu,RN8,10k,3,,EXT2
+ppu,RN8,10k,6,,GND
+ppu,RN8,10k,4,,EXT3
+ppu,RN8,10k,5,,GND
+ppu,RN9,1k,1,,EXT0
+ppu,RN9,1k,8,,A_EXT0
+ppu,RN9,1k,2,,EXT1
+ppu,RN9,1k,7,,A_EXT1
+ppu,RN9,1k,3,,EXT2
+ppu,RN9,1k,6,,A_EXT2
+ppu,RN9,1k,4,,EXT3
+ppu,RN9,1k,5,,A_EXT3
 ppu,R49,1k,1,,ALE
 ppu,R49,1k,2,,A_ALE
 ppu,R50,10k,1,,ALE
 ppu,R50,10k,2,,GND
-ppu,U7,74HC373,1,/OE,LATCH_OE_N
-ppu,U7,74HC373,11,LE,ALE
-ppu,U7,74HC373,3,1D,PD7
-ppu,U7,74HC373,2,1Q,PA7
-ppu,U7,74HC373,4,2D,PD6
-ppu,U7,74HC373,5,2Q,PA6
-ppu,U7,74HC373,7,3D,PD5
-ppu,U7,74HC373,6,3Q,PA5
-ppu,U7,74HC373,8,4D,PD4
-ppu,U7,74HC373,9,4Q,PA4
-ppu,U7,74HC373,13,5D,PD3
-ppu,U7,74HC373,12,5Q,PA3
-ppu,U7,74HC373,14,6D,PD2
-ppu,U7,74HC373,15,6Q,PA2
-ppu,U7,74HC373,17,7D,PD1
-ppu,U7,74HC373,16,7Q,PA1
-ppu,U7,74HC373,18,8D,PD0
-ppu,U7,74HC373,19,8Q,PA0
-ppu,U7,74HC373,20,VCC,+5V_SW
-ppu,U7,74HC373,10,GND,GND
+ppu,U7,74HCT573,1,/OE,LATCH_OE_N
+ppu,U7,74HCT573,11,LE,ALE
+ppu,U7,74HCT573,20,VCC,+5V_SW
+ppu,U7,74HCT573,10,GND,GND
+ppu,U7,74HCT573,2,D0,PD0
+ppu,U7,74HCT573,3,D1,PD1
+ppu,U7,74HCT573,4,D2,PD2
+ppu,U7,74HCT573,5,D3,PD3
+ppu,U7,74HCT573,6,D4,PD4
+ppu,U7,74HCT573,7,D5,PD5
+ppu,U7,74HCT573,8,D6,PD6
+ppu,U7,74HCT573,9,D7,PD7
+ppu,U7,74HCT573,19,Q0,PA0
+ppu,U7,74HCT573,18,Q1,PA1
+ppu,U7,74HCT573,17,Q2,PA2
+ppu,U7,74HCT573,16,Q3,PA3
+ppu,U7,74HCT573,15,Q4,PA4
+ppu,U7,74HCT573,14,Q5,PA5
+ppu,U7,74HCT573,13,Q6,PA6
+ppu,U7,74HCT573,12,Q7,PA7
 ppu,C19,100n,1,,+5V_SW
 ppu,C19,100n,2,,GND
 ppu,R51,10k,1,,LATCH_OE_N
 ppu,R51,10k,2,,GND
-ppu,RN11,10k,1,,PD0
+ppu,RN10,10k,1,,PD0
+ppu,RN10,10k,8,,+5V_SW
+ppu,RN10,10k,2,,PD1
+ppu,RN10,10k,7,,+5V_SW
+ppu,RN10,10k,3,,PD2
+ppu,RN10,10k,6,,+5V_SW
+ppu,RN10,10k,4,,PD3
+ppu,RN10,10k,5,,+5V_SW
+ppu,RN11,10k,1,,PD4
 ppu,RN11,10k,8,,+5V_SW
-ppu,RN11,10k,2,,PD1
+ppu,RN11,10k,2,,PD5
 ppu,RN11,10k,7,,+5V_SW
-ppu,RN11,10k,3,,PD2
+ppu,RN11,10k,3,,PD6
 ppu,RN11,10k,6,,+5V_SW
-ppu,RN11,10k,4,,PD3
+ppu,RN11,10k,4,,PD7
 ppu,RN11,10k,5,,+5V_SW
-ppu,RN12,10k,1,,PD4
+ppu,RN12,10k,1,,PPU_RD_N
 ppu,RN12,10k,8,,+5V_SW
-ppu,RN12,10k,2,,PD5
+ppu,RN12,10k,2,,PPU_WR_N
 ppu,RN12,10k,7,,+5V_SW
-ppu,RN12,10k,3,,PD6
+ppu,RN12,10k,3,,CIRAM_CE_N
 ppu,RN12,10k,6,,+5V_SW
-ppu,RN12,10k,4,,PD7
-ppu,RN12,10k,5,,+5V_SW
-ppu,RN13,10k,1,,PPU_RD_N
-ppu,RN13,10k,8,,+5V_SW
-ppu,RN13,10k,2,,PPU_WR_N
-ppu,RN13,10k,7,,+5V_SW
-ppu,RN13,10k,3,,CIRAM_CE_N
-ppu,RN13,10k,6,,+5V_SW
-ppu,RN13,10k,4,,(NC)
-ppu,RN13,10k,5,,(NC)
+ppu,RN12,10k,4,,(NC)
+ppu,RN12,10k,5,,(NC)
 ppu,C20,47p,1,,PPU_RD_N
 ppu,C20,47p,2,,GND
 ppu,C21,220p,1,,PPU_CS_N
 ppu,C21,220p,2,,GND
-ppu,U8,M68AF127B (video RAM),27,A8,PA8
-ppu,U8,M68AF127B (video RAM),26,A9,PA9
-ppu,U8,M68AF127B (video RAM),23,A10,CIRAM_A10
-ppu,U8,M68AF127B (video RAM),22,/E1,CIRAM_CE_N
-ppu,U8,M68AF127B (video RAM),30,E2,+5V_SW
-ppu,U8,M68AF127B (video RAM),24,/G,PPU_RD_N
-ppu,U8,M68AF127B (video RAM),29,/W,PPU_WR_N
-ppu,U8,M68AF127B (video RAM),32,VCC,+5V_SW
-ppu,U8,M68AF127B (video RAM),16,VSS,GND
-ppu,U8,M68AF127B (video RAM),1,NC,(NC)
-ppu,U8,M68AF127B (video RAM),12,A0,PA0
-ppu,U8,M68AF127B (video RAM),11,A1,PA1
-ppu,U8,M68AF127B (video RAM),10,A2,PA2
-ppu,U8,M68AF127B (video RAM),9,A3,PA3
-ppu,U8,M68AF127B (video RAM),8,A4,PA4
-ppu,U8,M68AF127B (video RAM),7,A5,PA5
-ppu,U8,M68AF127B (video RAM),6,A6,PA6
-ppu,U8,M68AF127B (video RAM),5,A7,PA7
-ppu,U8,M68AF127B (video RAM),25,A11,VRAM_A11
-ppu,U8,M68AF127B (video RAM),4,A12,VRAM_A12
-ppu,U8,M68AF127B (video RAM),28,A13,VRAM_A13
-ppu,U8,M68AF127B (video RAM),3,A14,VRAM_A14
-ppu,U8,M68AF127B (video RAM),31,A15,VRAM_A15
-ppu,U8,M68AF127B (video RAM),2,A16,VRAM_A16
-ppu,U8,M68AF127B (video RAM),13,DQ0,PD0
-ppu,U8,M68AF127B (video RAM),14,DQ1,PD1
-ppu,U8,M68AF127B (video RAM),15,DQ2,PD2
-ppu,U8,M68AF127B (video RAM),17,DQ3,PD3
-ppu,U8,M68AF127B (video RAM),18,DQ4,PD4
-ppu,U8,M68AF127B (video RAM),19,DQ5,PD5
-ppu,U8,M68AF127B (video RAM),20,DQ6,PD6
-ppu,U8,M68AF127B (video RAM),21,DQ7,PD7
+ppu,U8,IS62C256AL (video RAM),27,/CE,CIRAM_CE_N
+ppu,U8,IS62C256AL (video RAM),1,/OE,PPU_RD_N
+ppu,U8,IS62C256AL (video RAM),6,/WE,PPU_WR_N
+ppu,U8,IS62C256AL (video RAM),7,VDD,+5V_SW
+ppu,U8,IS62C256AL (video RAM),21,GND,GND
+ppu,U8,IS62C256AL (video RAM),17,A0,PA0
+ppu,U8,IS62C256AL (video RAM),16,A1,PA1
+ppu,U8,IS62C256AL (video RAM),15,A2,PA2
+ppu,U8,IS62C256AL (video RAM),14,A3,PA3
+ppu,U8,IS62C256AL (video RAM),13,A4,PA4
+ppu,U8,IS62C256AL (video RAM),12,A5,PA5
+ppu,U8,IS62C256AL (video RAM),11,A6,PA6
+ppu,U8,IS62C256AL (video RAM),10,A7,PA7
+ppu,U8,IS62C256AL (video RAM),4,A8,PA8
+ppu,U8,IS62C256AL (video RAM),3,A9,PA9
+ppu,U8,IS62C256AL (video RAM),28,A10,CIRAM_A10
+ppu,U8,IS62C256AL (video RAM),2,A11,VRAM_A11
+ppu,U8,IS62C256AL (video RAM),9,A12,VRAM_A12
+ppu,U8,IS62C256AL (video RAM),5,A13,VRAM_A13
+ppu,U8,IS62C256AL (video RAM),8,A14,VRAM_A14
+ppu,U8,IS62C256AL (video RAM),18,IO0,PD0
+ppu,U8,IS62C256AL (video RAM),19,IO1,PD1
+ppu,U8,IS62C256AL (video RAM),20,IO2,PD2
+ppu,U8,IS62C256AL (video RAM),22,IO3,PD3
+ppu,U8,IS62C256AL (video RAM),23,IO4,PD4
+ppu,U8,IS62C256AL (video RAM),24,IO5,PD5
+ppu,U8,IS62C256AL (video RAM),25,IO6,PD6
+ppu,U8,IS62C256AL (video RAM),26,IO7,PD7
 ppu,C22,100n,1,,+5V_SW
 ppu,C22,100n,2,,GND
-ppu,RN14,10k,1,,VRAM_A11
-ppu,RN14,10k,8,,GND
-ppu,RN14,10k,2,,VRAM_A12
-ppu,RN14,10k,7,,GND
-ppu,RN14,10k,3,,VRAM_A13
-ppu,RN14,10k,6,,GND
-ppu,RN14,10k,4,,VRAM_A14
-ppu,RN14,10k,5,,GND
-ppu,RN15,10k,1,,VRAM_A15
-ppu,RN15,10k,8,,GND
-ppu,RN15,10k,2,,VRAM_A16
-ppu,RN15,10k,7,,GND
-ppu,RN15,10k,3,,(NC)
-ppu,RN15,10k,6,,(NC)
-ppu,RN15,10k,4,,(NC)
-ppu,RN15,10k,5,,(NC)
+ppu,RN13,10k,1,,VRAM_A11
+ppu,RN13,10k,8,,GND
+ppu,RN13,10k,2,,VRAM_A12
+ppu,RN13,10k,7,,GND
+ppu,RN13,10k,3,,VRAM_A13
+ppu,RN13,10k,6,,GND
+ppu,RN13,10k,4,,VRAM_A14
+ppu,RN13,10k,5,,GND
 ppu,R52,100,1,,VOUT
 ppu,R52,100,2,,VBUF_B
 ppu,Q3,MMBT3904,1,,VBUF_B
@@ -562,25 +534,20 @@ ppu,J5,composite video (test),1,,CVBS
 ppu,J5,composite video (test),2,,GND
 ppu,R55,100,1,,VBUF
 ppu,R55,100,2,,CMP_INP
-ppu,U9,TL712CP,3,IN+,CMP_INP
-ppu,U9,TL712CP,2,IN-,VREF
-ppu,U9,TL712CP,4,OE,+5V_SW
-ppu,U9,TL712CP,6,OUT+,CMP_OUT
-ppu,U9,TL712CP,7,OUT-,(NC)
-ppu,U9,TL712CP,1,NC,(NC)
-ppu,U9,TL712CP,8,VCC,+5V_SW
-ppu,U9,TL712CP,5,GND,GND
+ppu,U9,LMV7219,3,+IN,CMP_INP
+ppu,U9,LMV7219,4,-IN,VREF
+ppu,U9,LMV7219,1,OUT,CMP_OUT
+ppu,U9,LMV7219,5,V+,+5V_SW
+ppu,U9,LMV7219,2,V-,GND
 ppu,C23,100n,1,,+5V_SW
 ppu,C23,100n,2,,GND
-ppu,C24,10u,1,,+5V_SW
-ppu,C24,10u,2,,GND
-ppu,R56,100,1,,VREF_BUF
-ppu,R56,100,2,,VREF
-ppu,C25,100n,1,,VREF
-ppu,C25,100n,2,,GND
-ppu,J6,sprite bit source,1,,CMP_OUT
-ppu,J6,sprite bit source,2,,SPR_SEL
-ppu,J6,sprite bit source,3,,VBUF
+ppu,R56,10k,1,,VREF_PWM
+ppu,R56,10k,2,,VREF
+ppu,C24,1u,1,,VREF
+ppu,C24,1u,2,,GND
+ppu,JP2,sprite bit source,1,,CMP_OUT
+ppu,JP2,sprite bit source,2,,SPR_SEL
+ppu,JP2,sprite bit source,3,,VBUF
 ppu,R57,1k,1,,SPR_SEL
 ppu,R57,1k,2,,A_SPR
 ppu,J7,PPU bus (option),1,,+5V_SW
@@ -626,230 +593,242 @@ ppu,J7,PPU bus (option),39,,VBUF
 ppu,TP9,VBUF,1,,VBUF
 ppu,TP10,VREF,1,,VREF
 ppu,TP11,CMP_OUT,1,,CMP_OUT
-cart,J8,Famicom 60-pin (donor),1,P1,GND
-cart,J8,Famicom 60-pin (donor),16,P16,GND
-cart,J8,Famicom 60-pin (donor),30,P30,+5V_SW
-cart,J8,Famicom 60-pin (donor),31,P31,+5V_SW
-cart,J8,Famicom 60-pin (donor),14,P14,CPU_RW
-cart,J8,Famicom 60-pin (donor),15,P15,IRQ_N
-cart,J8,Famicom 60-pin (donor),17,P17,PPU_RD_N
-cart,J8,Famicom 60-pin (donor),18,P18,CIRAM_A10
-cart,J8,Famicom 60-pin (donor),32,P32,M2
-cart,J8,Famicom 60-pin (donor),44,P44,ROMSEL_N
-cart,J8,Famicom 60-pin (donor),45,P45,CART_AUD_OUT
-cart,J8,Famicom 60-pin (donor),46,P46,CART_AUD_RET
-cart,J8,Famicom 60-pin (donor),47,P47,PPU_WR_N
-cart,J8,Famicom 60-pin (donor),48,P48,CIRAM_CE_N
-cart,J8,Famicom 60-pin (donor),49,P49,PA13_N
-cart,J8,Famicom 60-pin (donor),2,P2,CA11
-cart,J8,Famicom 60-pin (donor),3,P3,CA10
-cart,J8,Famicom 60-pin (donor),4,P4,CA9
-cart,J8,Famicom 60-pin (donor),5,P5,CA8
-cart,J8,Famicom 60-pin (donor),6,P6,CA7
-cart,J8,Famicom 60-pin (donor),7,P7,CA6
-cart,J8,Famicom 60-pin (donor),8,P8,CA5
-cart,J8,Famicom 60-pin (donor),9,P9,CA4
-cart,J8,Famicom 60-pin (donor),10,P10,CA3
-cart,J8,Famicom 60-pin (donor),11,P11,CA2
-cart,J8,Famicom 60-pin (donor),12,P12,CA1
-cart,J8,Famicom 60-pin (donor),13,P13,CA0
-cart,J8,Famicom 60-pin (donor),33,P33,CA12
-cart,J8,Famicom 60-pin (donor),34,P34,CA13
-cart,J8,Famicom 60-pin (donor),35,P35,CA14
-cart,J8,Famicom 60-pin (donor),36,P36,CART_D7
-cart,J8,Famicom 60-pin (donor),37,P37,CART_D6
-cart,J8,Famicom 60-pin (donor),38,P38,CART_D5
-cart,J8,Famicom 60-pin (donor),39,P39,CART_D4
-cart,J8,Famicom 60-pin (donor),40,P40,CART_D3
-cart,J8,Famicom 60-pin (donor),41,P41,CART_D2
-cart,J8,Famicom 60-pin (donor),42,P42,CART_D1
-cart,J8,Famicom 60-pin (donor),43,P43,CART_D0
-cart,J8,Famicom 60-pin (donor),19,P19,PA6
-cart,J8,Famicom 60-pin (donor),20,P20,PA5
-cart,J8,Famicom 60-pin (donor),21,P21,PA4
-cart,J8,Famicom 60-pin (donor),22,P22,PA3
-cart,J8,Famicom 60-pin (donor),23,P23,PA2
-cart,J8,Famicom 60-pin (donor),24,P24,PA1
-cart,J8,Famicom 60-pin (donor),25,P25,PA0
-cart,J8,Famicom 60-pin (donor),50,P50,PA7
-cart,J8,Famicom 60-pin (donor),51,P51,PA8
-cart,J8,Famicom 60-pin (donor),52,P52,PA9
-cart,J8,Famicom 60-pin (donor),53,P53,PA10
-cart,J8,Famicom 60-pin (donor),54,P54,PA11
-cart,J8,Famicom 60-pin (donor),55,P55,PA12
-cart,J8,Famicom 60-pin (donor),56,P56,PA13
-cart,J8,Famicom 60-pin (donor),26,P26,PD0
-cart,J8,Famicom 60-pin (donor),27,P27,PD1
-cart,J8,Famicom 60-pin (donor),28,P28,PD2
-cart,J8,Famicom 60-pin (donor),29,P29,PD3
-cart,J8,Famicom 60-pin (donor),57,P57,PD7
-cart,J8,Famicom 60-pin (donor),58,P58,PD6
-cart,J8,Famicom 60-pin (donor),59,P59,PD5
-cart,J8,Famicom 60-pin (donor),60,P60,PD4
-cart,C26,100n,1,,+5V_SW
-cart,C26,100n,2,,GND
-cart,C27,10u,1,,+5V_SW
-cart,C27,10u,2,,GND
-cart,U10,74HC595 (CPU A0-7),14,SER,D_SER
-cart,U10,74HC595 (CPU A0-7),11,SRCLK,D_SRCLK_F
-cart,U10,74HC595 (CPU A0-7),12,RCLK,D_RCLK
-cart,U10,74HC595 (CPU A0-7),10,/SRCLR,+5V_SW
-cart,U10,74HC595 (CPU A0-7),13,/OE,D_OE_ADDR_N
-cart,U10,74HC595 (CPU A0-7),16,VCC,+5V_SW
-cart,U10,74HC595 (CPU A0-7),8,GND,GND
-cart,U10,74HC595 (CPU A0-7),9,QH',D_CA_Q7S
-cart,U10,74HC595 (CPU A0-7),15,QA,CA0
-cart,U10,74HC595 (CPU A0-7),1,QB,CA1
-cart,U10,74HC595 (CPU A0-7),2,QC,CA2
-cart,U10,74HC595 (CPU A0-7),3,QD,CA3
-cart,U10,74HC595 (CPU A0-7),4,QE,CA4
-cart,U10,74HC595 (CPU A0-7),5,QF,CA5
-cart,U10,74HC595 (CPU A0-7),6,QG,CA6
-cart,U10,74HC595 (CPU A0-7),7,QH,CA7
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",1,P1,GND
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",16,P16,GND
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",30,P30,+5V_SW
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",31,P31,+5V_SW
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",14,P14,CPU_RW
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",15,P15,IRQ_N
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",17,P17,PPU_RD_N
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",18,P18,CIRAM_A10
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",32,P32,M2
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",44,P44,ROMSEL_N
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",45,P45,CART_AUD_OUT
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",46,P46,CART_AUD_RET
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",47,P47,PPU_WR_N
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",48,P48,CIRAM_CE_N
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",49,P49,PA13_N
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",2,P2,CA11
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",3,P3,CA10
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",4,P4,CA9
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",5,P5,CA8
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",6,P6,CA7
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",7,P7,CA6
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",8,P8,CA5
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",9,P9,CA4
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",10,P10,CA3
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",11,P11,CA2
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",12,P12,CA1
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",13,P13,CA0
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",33,P33,CA12
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",34,P34,CA13
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",35,P35,CA14
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",36,P36,CART_D7
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",37,P37,CART_D6
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",38,P38,CART_D5
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",39,P39,CART_D4
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",40,P40,CART_D3
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",41,P41,CART_D2
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",42,P42,CART_D1
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",43,P43,CART_D0
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",19,P19,PA6
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",20,P20,PA5
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",21,P21,PA4
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",22,P22,PA3
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",23,P23,PA2
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",24,P24,PA1
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",25,P25,PA0
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",50,P50,PA7
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",51,P51,PA8
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",52,P52,PA9
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",53,P53,PA10
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",54,P54,PA11
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",55,P55,PA12
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",56,P56,PA13
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",26,P26,PD0
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",27,P27,PD1
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",28,P28,PD2
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",29,P29,PD3
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",57,P57,PD7
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",58,P58,PD6
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",59,P59,PD5
+cart,J8,"ED60BGFBK (60-pin card edge, 2.54 mm)",60,P60,PD4
+cart,C25,100n,1,,+5V_SW
+cart,C25,100n,2,,GND
+cart,C26,10u,1,,+5V_SW
+cart,C26,10u,2,,GND
+cart,U10,74HCT595 (CPU A0-7),14,SER,D_SER
+cart,U10,74HCT595 (CPU A0-7),11,SRCLK,D_SRCLK_F
+cart,U10,74HCT595 (CPU A0-7),12,RCLK,D_RCLK
+cart,U10,74HCT595 (CPU A0-7),10,/SRCLR,+5V_SW
+cart,U10,74HCT595 (CPU A0-7),13,/OE,D_OE_ADDR_N
+cart,U10,74HCT595 (CPU A0-7),16,VCC,+5V_SW
+cart,U10,74HCT595 (CPU A0-7),8,GND,GND
+cart,U10,74HCT595 (CPU A0-7),9,QH',D_CA_Q7S
+cart,U10,74HCT595 (CPU A0-7),15,QA,CA0
+cart,U10,74HCT595 (CPU A0-7),1,QB,CA1
+cart,U10,74HCT595 (CPU A0-7),2,QC,CA2
+cart,U10,74HCT595 (CPU A0-7),3,QD,CA3
+cart,U10,74HCT595 (CPU A0-7),4,QE,CA4
+cart,U10,74HCT595 (CPU A0-7),5,QF,CA5
+cart,U10,74HCT595 (CPU A0-7),6,QG,CA6
+cart,U10,74HCT595 (CPU A0-7),7,QH,CA7
+cart,C27,100n,1,,+5V_SW
+cart,C27,100n,2,,GND
+cart,U11,74HCT595 (CPU A8-15),14,SER,D_CA_Q7S
+cart,U11,74HCT595 (CPU A8-15),11,SRCLK,D_SRCLK_F
+cart,U11,74HCT595 (CPU A8-15),12,RCLK,D_RCLK
+cart,U11,74HCT595 (CPU A8-15),10,/SRCLR,+5V_SW
+cart,U11,74HCT595 (CPU A8-15),13,/OE,D_OE_ADDR_N
+cart,U11,74HCT595 (CPU A8-15),16,VCC,+5V_SW
+cart,U11,74HCT595 (CPU A8-15),8,GND,GND
+cart,U11,74HCT595 (CPU A8-15),9,QH',(NC)
+cart,U11,74HCT595 (CPU A8-15),15,QA,CA8
+cart,U11,74HCT595 (CPU A8-15),1,QB,CA9
+cart,U11,74HCT595 (CPU A8-15),2,QC,CA10
+cart,U11,74HCT595 (CPU A8-15),3,QD,CA11
+cart,U11,74HCT595 (CPU A8-15),4,QE,CA12
+cart,U11,74HCT595 (CPU A8-15),5,QF,CA13
+cart,U11,74HCT595 (CPU A8-15),6,QG,CA14
+cart,U11,74HCT595 (CPU A8-15),7,QH,CA15
 cart,C28,100n,1,,+5V_SW
 cart,C28,100n,2,,GND
-cart,U11,74HC595 (CPU A8-15),14,SER,D_CA_Q7S
-cart,U11,74HC595 (CPU A8-15),11,SRCLK,D_SRCLK_F
-cart,U11,74HC595 (CPU A8-15),12,RCLK,D_RCLK
-cart,U11,74HC595 (CPU A8-15),10,/SRCLR,+5V_SW
-cart,U11,74HC595 (CPU A8-15),13,/OE,D_OE_ADDR_N
-cart,U11,74HC595 (CPU A8-15),16,VCC,+5V_SW
-cart,U11,74HC595 (CPU A8-15),8,GND,GND
-cart,U11,74HC595 (CPU A8-15),9,QH',(NC)
-cart,U11,74HC595 (CPU A8-15),15,QA,CA8
-cart,U11,74HC595 (CPU A8-15),1,QB,CA9
-cart,U11,74HC595 (CPU A8-15),2,QC,CA10
-cart,U11,74HC595 (CPU A8-15),3,QD,CA11
-cart,U11,74HC595 (CPU A8-15),4,QE,CA12
-cart,U11,74HC595 (CPU A8-15),5,QF,CA13
-cart,U11,74HC595 (CPU A8-15),6,QG,CA14
-cart,U11,74HC595 (CPU A8-15),7,QH,CA15
+cart,U12,74HCT595 (PPU A0-7),14,SER,D_SER
+cart,U12,74HCT595 (PPU A0-7),11,SRCLK,D_SRCLK_F
+cart,U12,74HCT595 (PPU A0-7),12,RCLK,D_RCLK
+cart,U12,74HCT595 (PPU A0-7),10,/SRCLR,+5V_SW
+cart,U12,74HCT595 (PPU A0-7),13,/OE,D_OE_ADDR_N
+cart,U12,74HCT595 (PPU A0-7),16,VCC,+5V_SW
+cart,U12,74HCT595 (PPU A0-7),8,GND,GND
+cart,U12,74HCT595 (PPU A0-7),9,QH',D_PA_Q7S
+cart,U12,74HCT595 (PPU A0-7),15,QA,PA0
+cart,U12,74HCT595 (PPU A0-7),1,QB,PA1
+cart,U12,74HCT595 (PPU A0-7),2,QC,PA2
+cart,U12,74HCT595 (PPU A0-7),3,QD,PA3
+cart,U12,74HCT595 (PPU A0-7),4,QE,PA4
+cart,U12,74HCT595 (PPU A0-7),5,QF,PA5
+cart,U12,74HCT595 (PPU A0-7),6,QG,PA6
+cart,U12,74HCT595 (PPU A0-7),7,QH,PA7
 cart,C29,100n,1,,+5V_SW
 cart,C29,100n,2,,GND
-cart,U12,74HC595 (PPU A0-7),14,SER,D_SER
-cart,U12,74HC595 (PPU A0-7),11,SRCLK,D_SRCLK_F
-cart,U12,74HC595 (PPU A0-7),12,RCLK,D_RCLK
-cart,U12,74HC595 (PPU A0-7),10,/SRCLR,+5V_SW
-cart,U12,74HC595 (PPU A0-7),13,/OE,D_OE_ADDR_N
-cart,U12,74HC595 (PPU A0-7),16,VCC,+5V_SW
-cart,U12,74HC595 (PPU A0-7),8,GND,GND
-cart,U12,74HC595 (PPU A0-7),9,QH',D_PA_Q7S
-cart,U12,74HC595 (PPU A0-7),15,QA,PA0
-cart,U12,74HC595 (PPU A0-7),1,QB,PA1
-cart,U12,74HC595 (PPU A0-7),2,QC,PA2
-cart,U12,74HC595 (PPU A0-7),3,QD,PA3
-cart,U12,74HC595 (PPU A0-7),4,QE,PA4
-cart,U12,74HC595 (PPU A0-7),5,QF,PA5
-cart,U12,74HC595 (PPU A0-7),6,QG,PA6
-cart,U12,74HC595 (PPU A0-7),7,QH,PA7
+cart,U13,74HCT595 (PPU A8-13),14,SER,D_PA_Q7S
+cart,U13,74HCT595 (PPU A8-13),11,SRCLK,D_SRCLK_F
+cart,U13,74HCT595 (PPU A8-13),12,RCLK,D_RCLK
+cart,U13,74HCT595 (PPU A8-13),10,/SRCLR,+5V_SW
+cart,U13,74HCT595 (PPU A8-13),13,/OE,D_OE_ADDR_N
+cart,U13,74HCT595 (PPU A8-13),16,VCC,+5V_SW
+cart,U13,74HCT595 (PPU A8-13),8,GND,GND
+cart,U13,74HCT595 (PPU A8-13),9,QH',(NC)
+cart,U13,74HCT595 (PPU A8-13),15,QA,PA8
+cart,U13,74HCT595 (PPU A8-13),1,QB,PA9
+cart,U13,74HCT595 (PPU A8-13),2,QC,PA10
+cart,U13,74HCT595 (PPU A8-13),3,QD,PA11
+cart,U13,74HCT595 (PPU A8-13),4,QE,PA12
+cart,U13,74HCT595 (PPU A8-13),5,QF,PA13
+cart,U13,74HCT595 (PPU A8-13),6,QG,(NC)
+cart,U13,74HCT595 (PPU A8-13),7,QH,(NC)
 cart,C30,100n,1,,+5V_SW
 cart,C30,100n,2,,GND
-cart,U13,74HC595 (PPU A8-13),14,SER,D_PA_Q7S
-cart,U13,74HC595 (PPU A8-13),11,SRCLK,D_SRCLK_F
-cart,U13,74HC595 (PPU A8-13),12,RCLK,D_RCLK
-cart,U13,74HC595 (PPU A8-13),10,/SRCLR,+5V_SW
-cart,U13,74HC595 (PPU A8-13),13,/OE,D_OE_ADDR_N
-cart,U13,74HC595 (PPU A8-13),16,VCC,+5V_SW
-cart,U13,74HC595 (PPU A8-13),8,GND,GND
-cart,U13,74HC595 (PPU A8-13),9,QH',(NC)
-cart,U13,74HC595 (PPU A8-13),15,QA,PA8
-cart,U13,74HC595 (PPU A8-13),1,QB,PA9
-cart,U13,74HC595 (PPU A8-13),2,QC,PA10
-cart,U13,74HC595 (PPU A8-13),3,QD,PA11
-cart,U13,74HC595 (PPU A8-13),4,QE,PA12
-cart,U13,74HC595 (PPU A8-13),5,QF,PA13
-cart,U13,74HC595 (PPU A8-13),6,QG,(NC)
-cart,U13,74HC595 (PPU A8-13),7,QH,(NC)
+cart,U14,74HCT595 (control),14,SER,D_SER
+cart,U14,74HCT595 (control),11,SRCLK,D_SRCLK_S
+cart,U14,74HCT595 (control),12,RCLK,D_RCLK
+cart,U14,74HCT595 (control),10,/SRCLR,+5V_SW
+cart,U14,74HCT595 (control),13,/OE,D_OE_ADDR_N
+cart,U14,74HCT595 (control),16,VCC,+5V_SW
+cart,U14,74HCT595 (control),8,GND,GND
+cart,U14,74HCT595 (control),9,QH',D_CTL_Q7S
+cart,U14,74HCT595 (control),15,QA,CPU_RW
+cart,U14,74HCT595 (control),1,QB,PPU_RD_N
+cart,U14,74HCT595 (control),2,QC,PPU_WR_N
+cart,U14,74HCT595 (control),3,QD,LATCH_OE_N
+cart,U14,74HCT595 (control),4,QE,EMU_PU
+cart,U14,74HCT595 (control),5,QF,(NC)
+cart,U14,74HCT595 (control),6,QG,(NC)
+cart,U14,74HCT595 (control),7,QH,(NC)
 cart,C31,100n,1,,+5V_SW
 cart,C31,100n,2,,GND
-cart,U14,74HC595 (control),14,SER,D_SER
-cart,U14,74HC595 (control),11,SRCLK,D_SRCLK_S
-cart,U14,74HC595 (control),12,RCLK,D_RCLK
-cart,U14,74HC595 (control),10,/SRCLR,+5V_SW
-cart,U14,74HC595 (control),13,/OE,D_OE_ADDR_N
-cart,U14,74HC595 (control),16,VCC,+5V_SW
-cart,U14,74HC595 (control),8,GND,GND
-cart,U14,74HC595 (control),9,QH',D_CTL_Q7S
-cart,U14,74HC595 (control),15,QA,CPU_RW
-cart,U14,74HC595 (control),1,QB,PPU_RD_N
-cart,U14,74HC595 (control),2,QC,PPU_WR_N
-cart,U14,74HC595 (control),3,QD,LATCH_OE_N
-cart,U14,74HC595 (control),4,QE,EMU_PU
-cart,U14,74HC595 (control),5,QF,(NC)
-cart,U14,74HC595 (control),6,QG,(NC)
-cart,U14,74HC595 (control),7,QH,(NC)
+cart,U15,74HCT595 (data to cartridge),14,SER,D_CTL_Q7S
+cart,U15,74HCT595 (data to cartridge),11,SRCLK,D_SRCLK_S
+cart,U15,74HCT595 (data to cartridge),12,RCLK,D_RCLK
+cart,U15,74HCT595 (data to cartridge),10,/SRCLR,+5V_SW
+cart,U15,74HCT595 (data to cartridge),13,/OE,D_OE_DATA_N
+cart,U15,74HCT595 (data to cartridge),16,VCC,+5V_SW
+cart,U15,74HCT595 (data to cartridge),8,GND,GND
+cart,U15,74HCT595 (data to cartridge),9,QH',(NC)
+cart,U15,74HCT595 (data to cartridge),15,QA,CART_D0
+cart,U15,74HCT595 (data to cartridge),1,QB,CART_D1
+cart,U15,74HCT595 (data to cartridge),2,QC,CART_D2
+cart,U15,74HCT595 (data to cartridge),3,QD,CART_D3
+cart,U15,74HCT595 (data to cartridge),4,QE,CART_D4
+cart,U15,74HCT595 (data to cartridge),5,QF,CART_D5
+cart,U15,74HCT595 (data to cartridge),6,QG,CART_D6
+cart,U15,74HCT595 (data to cartridge),7,QH,CART_D7
 cart,C32,100n,1,,+5V_SW
 cart,C32,100n,2,,GND
-cart,U15,74HC595 (data to cartridge),14,SER,D_CTL_Q7S
-cart,U15,74HC595 (data to cartridge),11,SRCLK,D_SRCLK_S
-cart,U15,74HC595 (data to cartridge),12,RCLK,D_RCLK
-cart,U15,74HC595 (data to cartridge),10,/SRCLR,+5V_SW
-cart,U15,74HC595 (data to cartridge),13,/OE,D_OE_DATA_N
-cart,U15,74HC595 (data to cartridge),16,VCC,+5V_SW
-cart,U15,74HC595 (data to cartridge),8,GND,GND
-cart,U15,74HC595 (data to cartridge),9,QH',(NC)
-cart,U15,74HC595 (data to cartridge),15,QA,CART_D0
-cart,U15,74HC595 (data to cartridge),1,QB,CART_D1
-cart,U15,74HC595 (data to cartridge),2,QC,CART_D2
-cart,U15,74HC595 (data to cartridge),3,QD,CART_D3
-cart,U15,74HC595 (data to cartridge),4,QE,CART_D4
-cart,U15,74HC595 (data to cartridge),5,QF,CART_D5
-cart,U15,74HC595 (data to cartridge),6,QG,CART_D6
-cart,U15,74HC595 (data to cartridge),7,QH,CART_D7
-cart,C33,100n,1,,+5V_SW
-cart,C33,100n,2,,GND
-cart,RN16,4.7k,1,,D_SER
-cart,RN16,4.7k,8,,+5V_SW
-cart,RN16,4.7k,2,,D_SRCLK_F
-cart,RN16,4.7k,7,,+5V_SW
-cart,RN16,4.7k,3,,D_SRCLK_F
-cart,RN16,4.7k,6,,+5V_SW
-cart,RN16,4.7k,4,,D_SRCLK_S
-cart,RN16,4.7k,5,,+5V_SW
-cart,RN17,4.7k,1,,D_RCLK
-cart,RN17,4.7k,8,,+5V_SW
-cart,RN17,4.7k,2,,D_OE_ADDR_N
-cart,RN17,4.7k,7,,+5V_SW
-cart,RN17,4.7k,3,,D_OE_DATA_N
-cart,RN17,4.7k,6,,+5V_SW
-cart,RN17,4.7k,4,,(NC)
-cart,RN17,4.7k,5,,(NC)
-cart,R58,1k,1,,M2
-cart,R58,1k,2,,EMU_PU
-cart,R59,100,1,,M2
-cart,R59,100,2,,C_M2
-cart,RN18,10k,1,,CART_D0
-cart,RN18,10k,8,,DI_CD0
-cart,RN18,10k,2,,CART_D1
-cart,RN18,10k,7,,DI_CD1
-cart,RN18,10k,3,,CART_D2
-cart,RN18,10k,6,,DI_CD2
-cart,RN18,10k,4,,CART_D3
-cart,RN18,10k,5,,DI_CD3
-cart,RN19,10k,1,,CART_D4
-cart,RN19,10k,8,,DI_CD4
-cart,RN19,10k,2,,CART_D5
-cart,RN19,10k,7,,DI_CD5
-cart,RN19,10k,3,,CART_D6
-cart,RN19,10k,6,,DI_CD6
-cart,RN19,10k,4,,CART_D7
-cart,RN19,10k,5,,DI_CD7
-cart,RN20,10k,1,,PD0
-cart,RN20,10k,8,,DI_PD0
-cart,RN20,10k,2,,PD1
-cart,RN20,10k,7,,DI_PD1
-cart,RN20,10k,3,,PD2
-cart,RN20,10k,6,,DI_PD2
-cart,RN20,10k,4,,PD3
-cart,RN20,10k,5,,DI_PD3
-cart,RN21,10k,1,,PD4
-cart,RN21,10k,8,,DI_PD4
-cart,RN21,10k,2,,PD5
-cart,RN21,10k,7,,DI_PD5
-cart,RN21,10k,3,,PD6
-cart,RN21,10k,6,,DI_PD6
-cart,RN21,10k,4,,PD7
-cart,RN21,10k,5,,DI_PD7
+cart,R58,100,1,,C_SER
+cart,R58,100,2,,D_SER
+cart,R59,100,1,,C_SRCLK_F
+cart,R59,100,2,,D_SRCLK_F
+cart,R60,100,1,,C_SRCLK_S
+cart,R60,100,2,,D_SRCLK_S
+cart,R61,100,1,,C_RCLK
+cart,R61,100,2,,D_RCLK
+cart,R62,100,1,,C_OE_ADDR_N
+cart,R62,100,2,,D_OE_ADDR_N
+cart,R63,100,1,,C_OE_DATA_N
+cart,R63,100,2,,D_OE_DATA_N
+cart,RN14,10k,1,,D_SER
+cart,RN14,10k,8,,GND
+cart,RN14,10k,2,,D_SRCLK_F
+cart,RN14,10k,7,,GND
+cart,RN14,10k,3,,D_SRCLK_S
+cart,RN14,10k,6,,GND
+cart,RN14,10k,4,,D_RCLK
+cart,RN14,10k,5,,GND
+cart,RN15,10k,1,,D_OE_ADDR_N
+cart,RN15,10k,8,,+3V3
+cart,RN15,10k,2,,D_OE_DATA_N
+cart,RN15,10k,7,,+3V3
+cart,RN15,10k,3,,(NC)
+cart,RN15,10k,6,,(NC)
+cart,RN15,10k,4,,(NC)
+cart,RN15,10k,5,,(NC)
+cart,R64,1k,1,,M2
+cart,R64,1k,2,,EMU_PU
+cart,R65,100,1,,M2
+cart,R65,100,2,,C_M2
+cart,RN16,10k,1,,CART_D0
+cart,RN16,10k,8,,DI_CD0
+cart,RN16,10k,2,,CART_D1
+cart,RN16,10k,7,,DI_CD1
+cart,RN16,10k,3,,CART_D2
+cart,RN16,10k,6,,DI_CD2
+cart,RN16,10k,4,,CART_D3
+cart,RN16,10k,5,,DI_CD3
+cart,RN17,10k,1,,CART_D4
+cart,RN17,10k,8,,DI_CD4
+cart,RN17,10k,2,,CART_D5
+cart,RN17,10k,7,,DI_CD5
+cart,RN17,10k,3,,CART_D6
+cart,RN17,10k,6,,DI_CD6
+cart,RN17,10k,4,,CART_D7
+cart,RN17,10k,5,,DI_CD7
+cart,RN18,10k,1,,PD0
+cart,RN18,10k,8,,DI_PD0
+cart,RN18,10k,2,,PD1
+cart,RN18,10k,7,,DI_PD1
+cart,RN18,10k,3,,PD2
+cart,RN18,10k,6,,DI_PD2
+cart,RN18,10k,4,,PD3
+cart,RN18,10k,5,,DI_PD3
+cart,RN19,10k,1,,PD4
+cart,RN19,10k,8,,DI_PD4
+cart,RN19,10k,2,,PD5
+cart,RN19,10k,7,,DI_PD5
+cart,RN19,10k,3,,PD6
+cart,RN19,10k,6,,DI_PD6
+cart,RN19,10k,4,,PD7
+cart,RN19,10k,5,,DI_PD7
 cart,U16,74HC165 (cartridge CPU data),1,SH/LD,IO_LATCH
 cart,U16,74HC165 (cartridge CPU data),2,CLK,IO_CLK
 cart,U16,74HC165 (cartridge CPU data),15,CLK_INH,GND
@@ -866,8 +845,8 @@ cart,U16,74HC165 (cartridge CPU data),3,E,DI_CD4
 cart,U16,74HC165 (cartridge CPU data),4,F,DI_CD5
 cart,U16,74HC165 (cartridge CPU data),5,G,DI_CD6
 cart,U16,74HC165 (cartridge CPU data),6,H,DI_CD7
-cart,C34,100n,1,,+3V3
-cart,C34,100n,2,,GND
+cart,C33,100n,1,,+3V3
+cart,C33,100n,2,,GND
 cart,U17,74HC165 (cartridge PPU data),1,SH/LD,IO_LATCH
 cart,U17,74HC165 (cartridge PPU data),2,CLK,IO_CLK
 cart,U17,74HC165 (cartridge PPU data),15,CLK_INH,GND
@@ -884,156 +863,164 @@ cart,U17,74HC165 (cartridge PPU data),3,E,DI_PD4
 cart,U17,74HC165 (cartridge PPU data),4,F,DI_PD5
 cart,U17,74HC165 (cartridge PPU data),5,G,DI_PD6
 cart,U17,74HC165 (cartridge PPU data),6,H,DI_PD7
-cart,C35,100n,1,,+3V3
-cart,C35,100n,2,,GND
-cart,R60,100,1,,IN_Q6
-cart,R60,100,2,,IN_DATA
-cart,R61,10k,1,,CIRAM_A10
-cart,R61,10k,2,,C_CIRAM_A10
-cart,R62,20k,1,,C_CIRAM_A10
-cart,R62,20k,2,,GND
-video,R63,470,1,,R2
-video,R63,470,2,,VID_R
-video,R64,470,1,,R2
-video,R64,470,2,,VID_R
-video,R65,470,1,,R1
-video,R65,470,2,,VID_R
-video,R66,470,1,,R0
-video,R66,470,2,,R_L1
-video,R67,470,1,,R_L1
-video,R67,470,2,,VID_R
-video,R68,1k,1,,VID_R
-video,R68,1k,2,,R_SH
-video,R69,470,1,,R_SH
-video,R69,470,2,,GND
-video,R70,470,1,,G3
-video,R70,470,2,,VID_G
-video,R71,470,1,,G3
-video,R71,470,2,,VID_G
-video,R72,470,1,,G2
-video,R72,470,2,,VID_G
-video,R73,470,1,,G1
-video,R73,470,2,,G_L1
-video,R74,470,1,,G_L1
-video,R74,470,2,,VID_G
-video,R75,1k,1,,G0
-video,R75,1k,2,,G_L0
-video,R76,1k,1,,G_L0
-video,R76,1k,2,,VID_G
-video,R77,1k,1,,VID_G
-video,R77,1k,2,,G_SH
-video,R78,470,1,,G_SH
-video,R78,470,2,,GND
-video,R79,470,1,,B2
-video,R79,470,2,,VID_B
-video,R80,470,1,,B2
-video,R80,470,2,,VID_B
-video,R81,470,1,,B1
-video,R81,470,2,,VID_B
-video,R82,470,1,,B0
-video,R82,470,2,,B_L1
-video,R83,470,1,,B_L1
-video,R83,470,2,,VID_B
-video,R84,1k,1,,VID_B
-video,R84,1k,2,,B_SH
-video,R85,470,1,,B_SH
-video,R85,470,2,,GND
-video,R86,1k,1,,CSYNC
-video,R86,1k,2,,SYNC_B
-video,R87,10k,1,,SYNC_B
-video,R87,10k,2,,GND
+cart,C34,100n,1,,+3V3
+cart,C34,100n,2,,GND
+cart,R66,100,1,,IN_Q6
+cart,R66,100,2,,IN_DATA
+cart,R67,10k,1,,CIRAM_A10
+cart,R67,10k,2,,C_CIRAM_A10
+cart,R68,20k,1,,C_CIRAM_A10
+cart,R68,20k,2,,GND
+video,R69,470,1,,R2
+video,R69,470,2,,VID_R
+video,R70,470,1,,R2
+video,R70,470,2,,VID_R
+video,R71,470,1,,R1
+video,R71,470,2,,VID_R
+video,R72,470,1,,R0
+video,R72,470,2,,R_L1
+video,R73,470,1,,R_L1
+video,R73,470,2,,VID_R
+video,R74,1k,1,,VID_R
+video,R74,1k,2,,R_SH
+video,R75,470,1,,R_SH
+video,R75,470,2,,GND
+video,R76,470,1,,G3
+video,R76,470,2,,VID_G
+video,R77,470,1,,G3
+video,R77,470,2,,VID_G
+video,R78,470,1,,G2
+video,R78,470,2,,VID_G
+video,R79,470,1,,G1
+video,R79,470,2,,G_L1
+video,R80,470,1,,G_L1
+video,R80,470,2,,VID_G
+video,R81,1k,1,,G0
+video,R81,1k,2,,G_L0
+video,R82,1k,1,,G_L0
+video,R82,1k,2,,VID_G
+video,R83,1k,1,,VID_G
+video,R83,1k,2,,G_SH
+video,R84,470,1,,G_SH
+video,R84,470,2,,GND
+video,R85,470,1,,B2
+video,R85,470,2,,VID_B
+video,R86,470,1,,B2
+video,R86,470,2,,VID_B
+video,R87,470,1,,B1
+video,R87,470,2,,VID_B
+video,R88,470,1,,B0
+video,R88,470,2,,B_L1
+video,R89,470,1,,B_L1
+video,R89,470,2,,VID_B
+video,R90,1k,1,,VID_B
+video,R90,1k,2,,B_SH
+video,R91,470,1,,B_SH
+video,R91,470,2,,GND
+video,R92,1k,1,,CSYNC
+video,R92,1k,2,,SYNC_B
+video,R93,10k,1,,SYNC_B
+video,R93,10k,2,,GND
 video,Q4,MMBT3904,1,,SYNC_B
 video,Q4,MMBT3904,2,,GND
 video,Q4,MMBT3904,3,,SYNC_C
-video,R88,470,1,,+5V
-video,R88,470,2,,SYNC_C
-video,R89,100,1,,SYNC_C
-video,R89,100,2,,VID_SYNC
+video,R94,470,1,,+5V
+video,R94,470,2,,SYNC_C
+video,R95,100,1,,SYNC_C
+video,R95,100,2,,VID_SYNC
 video,J9,RGB + sync (monitor / option),1,,VID_R
 video,J9,RGB + sync (monitor / option),2,,VID_G
 video,J9,RGB + sync (monitor / option),3,,VID_B
 video,J9,RGB + sync (monitor / option),4,,VID_SYNC
 video,J9,RGB + sync (monitor / option),5,,GND
 video,J9,RGB + sync (monitor / option),6,,+5V
-audio,R90,100,1,,APU_AD1
-audio,R90,100,2,,GND
-audio,R91,100,1,,APU_AD2
-audio,R91,100,2,,GND
-audio,R92,20k,1,,APU_AD1
-audio,R92,20k,2,,APU_MIX
-audio,R93,12k,1,,APU_AD2
-audio,R93,12k,2,,APU_MIX
-audio,C36,1u,1,,APU_MIX
-audio,C36,1u,2,,AUD_INV
+audio,R96,100,1,,APU_AD1
+audio,R96,100,2,,GND
+audio,R97,100,1,,APU_AD2
+audio,R97,100,2,,GND
+audio,R98,20k,1,,APU_AD1
+audio,R98,20k,2,,APU_MIX
+audio,R99,12k,1,,APU_AD2
+audio,R99,12k,2,,APU_MIX
+audio,C35,1u,1,,APU_MIX
+audio,C35,1u,2,,AUD_INV
 audio,U18,LM358,3,INA+,AUD_BIAS
 audio,U18,LM358,2,INA-,AUD_INV
 audio,U18,LM358,1,OUTA,AUD_PRE
-audio,U18,LM358,5,INB+,VREF_F
-audio,U18,LM358,6,INB-,VREF_BUF
-audio,U18,LM358,7,OUTB,VREF_BUF
+audio,U18,LM358,5,INB+,AUD_BIAS
+audio,U18,LM358,6,INB-,OPB_OUT
+audio,U18,LM358,7,OUTB,OPB_OUT
 audio,U18,LM358,8,V+,+5V_SW
 audio,U18,LM358,4,GND,GND
-audio,C37,100n,1,,+5V_SW
-audio,C37,100n,2,,GND
-audio,R94,47k,1,,AUD_PRE
-audio,R94,47k,2,,AUD_INV
-audio,C38,220p,1,,AUD_PRE
-audio,C38,220p,2,,AUD_INV
-audio,R95,20k,1,,+5V_SW
-audio,R95,20k,2,,AUD_BIAS
-audio,R96,12k,1,,AUD_BIAS
-audio,R96,12k,2,,GND
-audio,C39,10u,1,,AUD_BIAS
-audio,C39,10u,2,,GND
-audio,R97,1k,1,,AUD_PRE
-audio,R97,1k,2,,GND
-audio,R98,100,1,,AUD_PRE
-audio,R98,100,2,,CART_AUD_OUT
-audio,R99,10k,1,,VREF_PWM
-audio,R99,10k,2,,VREF_F
-audio,C40,1u,1,,VREF_F
-audio,C40,1u,2,,GND
-audio,C41,1u,1,,CART_AUD_RET
-audio,C41,1u,2,,AUD_RET_AC
-audio,R100,10k,1,,AUD_RET_AC
-audio,R100,10k,2,,AUD_SUM
-audio,R101,1k,1,,AUD_PWM
-audio,R101,1k,2,,AUD_PWM_F1
-audio,C42,10n,1,,AUD_PWM_F1
-audio,C42,10n,2,,GND
-audio,R102,1k,1,,AUD_PWM_F1
-audio,R102,1k,2,,AUD_PWM_F2
-audio,C43,10n,1,,AUD_PWM_F2
-audio,C43,10n,2,,GND
-audio,C44,1u,1,,AUD_PWM_F2
-audio,C44,1u,2,,AUD_PWM_AC
-audio,R103,10k,1,,AUD_PWM_AC
-audio,R103,10k,2,,AUD_SUM
+audio,C36,100n,1,,+5V_SW
+audio,C36,100n,2,,GND
+audio,R100,47k,1,,AUD_PRE
+audio,R100,47k,2,,AUD_INV
+audio,C37,220p,1,,AUD_PRE
+audio,C37,220p,2,,AUD_INV
+audio,R101,20k,1,,+5V_SW
+audio,R101,20k,2,,AUD_BIAS
+audio,R102,12k,1,,AUD_BIAS
+audio,R102,12k,2,,GND
+audio,C38,10u,1,,AUD_BIAS
+audio,C38,10u,2,,GND
+audio,R103,1k,1,,AUD_PRE
+audio,R103,1k,2,,GND
+audio,R104,100,1,,AUD_PRE
+audio,R104,100,2,,CART_AUD_OUT
+audio,R105,47k,1,,CART_AUD_RET
+audio,R105,47k,2,,GND
+audio,C39,1u,1,,CART_AUD_RET
+audio,C39,1u,2,,AUD_RET_AC
+audio,R106,10k,1,,AUD_RET_AC
+audio,R106,10k,2,,AUD_SUM
+audio,R107,1k,1,,AUD_PWM
+audio,R107,1k,2,,AUD_PWM_F1
+audio,C40,10n,1,,AUD_PWM_F1
+audio,C40,10n,2,,GND
+audio,R108,1k,1,,AUD_PWM_F1
+audio,R108,1k,2,,AUD_PWM_F2
+audio,C41,10n,1,,AUD_PWM_F2
+audio,C41,10n,2,,GND
+audio,C42,1u,1,,AUD_PWM_F2
+audio,C42,1u,2,,AUD_PWM_AC
+audio,R109,10k,1,,AUD_PWM_AC
+audio,R109,10k,2,,AUD_SUM
 audio,RV1,10k (volume),1,,AUD_SUM
 audio,RV1,10k (volume),2,,AMP_IN
 audio,RV1,10k (volume),3,,GND
-audio,U19,AE-PAM8012,1,+V,+5V
-audio,U19,AE-PAM8012,2,GND,GND
-audio,U19,AE-PAM8012,3,IN+,AMP_IN
-audio,U19,AE-PAM8012,4,IN-,GND
-audio,U19,AE-PAM8012,7,OUT+,SPK_P
-audio,U19,AE-PAM8012,8,OUT+_8,SPK_P
-audio,U19,AE-PAM8012,5,OUT-,SPK_N
-audio,U19,AE-PAM8012,6,OUT-_6,SPK_N
-audio,C45,10u/16V,1,,+5V
-audio,C45,10u/16V,2,,GND
-audio,C46,10u,1,,+5V
-audio,C46,10u,2,,GND
-audio,C47,100n,1,,+5V
-audio,C47,100n,2,,GND
+audio,C43,1u,1,,AMP_IN
+audio,C43,1u,2,,AMP_INP
+audio,C44,1u,1,,AMP_INN
+audio,C44,1u,2,,GND
+audio,U19,PAM8302A,3,IN+,AMP_INP
+audio,U19,PAM8302A,4,IN-,AMP_INN
+audio,U19,PAM8302A,1,/SD,AMP_EN
+audio,U19,PAM8302A,6,VDD,+5V
+audio,U19,PAM8302A,7,GND,GND
+audio,U19,PAM8302A,5,VO+,SPK_P
+audio,U19,PAM8302A,8,VO-,SPK_N
+audio,U19,PAM8302A,2,NC,(NC)
+audio,C45,100n,1,,+5V
+audio,C45,100n,2,,GND
+audio,C46,1u,1,,+5V
+audio,C46,1u,2,,GND
+audio,C47,10u,1,,+5V
+audio,C47,10u,2,,GND
+audio,C48,10u/16V,1,,+5V
+audio,C48,10u/16V,2,,GND
+audio,R110,1k,1,,C_AMP_EN
+audio,R110,1k,2,,AMP_EN
+audio,R111,10k,1,,AMP_EN
+audio,R111,10k,2,,GND
 audio,FB1,120R@100MHz 2A,1,,SPK_P
 audio,FB1,120R@100MHz 2A,2,,J_SPK_P
 audio,FB2,120R@100MHz 2A,1,,SPK_N
 audio,FB2,120R@100MHz 2A,2,,J_SPK_N
-audio,C48,1n,1,,J_SPK_P
-audio,C48,1n,2,,GND
-audio,C49,1n,1,,J_SPK_N
+audio,C49,1n,1,,J_SPK_P
 audio,C49,1n,2,,GND
+audio,C50,1n,1,,J_SPK_N
+audio,C50,1n,2,,GND
 audio,TP12,AUD_PRE,1,,AUD_PRE
 audio,TP13,AMP_IN,1,,AMP_IN
 jamma,J1,JAMMA edge (gold fingers),1,C1,GND
@@ -1051,8 +1038,8 @@ jamma,J1,JAMMA edge (gold fingers),C,SC,+5V_IN
 jamma,J1,JAMMA edge (gold fingers),D,SD,+5V_IN
 jamma,J1,JAMMA edge (gold fingers),5,C5,(NC)
 jamma,J1,JAMMA edge (gold fingers),E,SE,(NC)
-jamma,J1,JAMMA edge (gold fingers),6,C6,(NC)
-jamma,J1,JAMMA edge (gold fingers),F,SF,(NC)
+jamma,J1,JAMMA edge (gold fingers),6,C6,+12V_JAMMA
+jamma,J1,JAMMA edge (gold fingers),F,SF,+12V_JAMMA
 jamma,J1,JAMMA edge (gold fingers),11,C11,(NC)
 jamma,J1,JAMMA edge (gold fingers),M,SM,(NC)
 jamma,J1,JAMMA edge (gold fingers),8,C8,J_CNT1
@@ -1090,200 +1077,200 @@ jamma,J1,JAMMA edge (gold fingers),15,C15,J_TEST
 jamma,J1,JAMMA edge (gold fingers),S,SS,J_TILT
 jamma,J1,JAMMA edge (gold fingers),26,C26,J_1P_B5
 jamma,J1,JAMMA edge (gold fingers),d,Sd,J_2P_B5
-jamma,RN22,1k,1,,J_1P_UP
+jamma,RN20,1k,1,,J_1P_UP
+jamma,RN20,1k,8,,+3V3
+jamma,RN20,1k,2,,J_1P_DOWN
+jamma,RN20,1k,7,,+3V3
+jamma,RN20,1k,3,,J_1P_LEFT
+jamma,RN20,1k,6,,+3V3
+jamma,RN20,1k,4,,J_1P_RIGHT
+jamma,RN20,1k,5,,+3V3
+jamma,RN21,1k,1,,J_1P_B1
+jamma,RN21,1k,8,,+3V3
+jamma,RN21,1k,2,,J_1P_B2
+jamma,RN21,1k,7,,+3V3
+jamma,RN21,1k,3,,J_1P_B3
+jamma,RN21,1k,6,,+3V3
+jamma,RN21,1k,4,,J_1P_B4
+jamma,RN21,1k,5,,+3V3
+jamma,RN22,1k,1,,J_2P_UP
 jamma,RN22,1k,8,,+3V3
-jamma,RN22,1k,2,,J_1P_DOWN
+jamma,RN22,1k,2,,J_2P_DOWN
 jamma,RN22,1k,7,,+3V3
-jamma,RN22,1k,3,,J_1P_LEFT
+jamma,RN22,1k,3,,J_2P_LEFT
 jamma,RN22,1k,6,,+3V3
-jamma,RN22,1k,4,,J_1P_RIGHT
+jamma,RN22,1k,4,,J_2P_RIGHT
 jamma,RN22,1k,5,,+3V3
-jamma,RN23,1k,1,,J_1P_B1
+jamma,RN23,1k,1,,J_2P_B1
 jamma,RN23,1k,8,,+3V3
-jamma,RN23,1k,2,,J_1P_B2
+jamma,RN23,1k,2,,J_2P_B2
 jamma,RN23,1k,7,,+3V3
-jamma,RN23,1k,3,,J_1P_B3
+jamma,RN23,1k,3,,J_2P_B3
 jamma,RN23,1k,6,,+3V3
-jamma,RN23,1k,4,,J_1P_B4
+jamma,RN23,1k,4,,J_2P_B4
 jamma,RN23,1k,5,,+3V3
-jamma,RN24,1k,1,,J_2P_UP
+jamma,RN24,1k,1,,J_START1
 jamma,RN24,1k,8,,+3V3
-jamma,RN24,1k,2,,J_2P_DOWN
+jamma,RN24,1k,2,,J_START2
 jamma,RN24,1k,7,,+3V3
-jamma,RN24,1k,3,,J_2P_LEFT
+jamma,RN24,1k,3,,J_COIN1
 jamma,RN24,1k,6,,+3V3
-jamma,RN24,1k,4,,J_2P_RIGHT
+jamma,RN24,1k,4,,J_COIN2
 jamma,RN24,1k,5,,+3V3
-jamma,RN25,1k,1,,J_2P_B1
+jamma,RN25,1k,1,,J_SERVICE
 jamma,RN25,1k,8,,+3V3
-jamma,RN25,1k,2,,J_2P_B2
+jamma,RN25,1k,2,,J_TEST
 jamma,RN25,1k,7,,+3V3
-jamma,RN25,1k,3,,J_2P_B3
+jamma,RN25,1k,3,,J_TILT
 jamma,RN25,1k,6,,+3V3
-jamma,RN25,1k,4,,J_2P_B4
+jamma,RN25,1k,4,,J_1P_B5
 jamma,RN25,1k,5,,+3V3
-jamma,RN26,1k,1,,J_START1
+jamma,RN26,1k,1,,J_2P_B5
 jamma,RN26,1k,8,,+3V3
-jamma,RN26,1k,2,,J_START2
-jamma,RN26,1k,7,,+3V3
-jamma,RN26,1k,3,,J_COIN1
-jamma,RN26,1k,6,,+3V3
-jamma,RN26,1k,4,,J_COIN2
-jamma,RN26,1k,5,,+3V3
-jamma,RN27,1k,1,,J_SERVICE
-jamma,RN27,1k,8,,+3V3
-jamma,RN27,1k,2,,J_TEST
-jamma,RN27,1k,7,,+3V3
-jamma,RN27,1k,3,,J_TILT
-jamma,RN27,1k,6,,+3V3
-jamma,RN27,1k,4,,J_1P_B5
-jamma,RN27,1k,5,,+3V3
-jamma,RN28,1k,1,,J_2P_B5
-jamma,RN28,1k,8,,+3V3
-jamma,RN28,1k,2,,(NC)
-jamma,RN28,1k,7,,(NC)
-jamma,RN28,1k,3,,(NC)
-jamma,RN28,1k,6,,(NC)
-jamma,RN28,1k,4,,(NC)
-jamma,RN28,1k,5,,(NC)
-jamma,RN29,4.7k,1,,J_1P_UP
-jamma,RN29,4.7k,8,,I_1P_UP
-jamma,RN29,4.7k,2,,J_1P_DOWN
-jamma,RN29,4.7k,7,,I_1P_DOWN
-jamma,RN29,4.7k,3,,J_1P_LEFT
-jamma,RN29,4.7k,6,,I_1P_LEFT
-jamma,RN29,4.7k,4,,J_1P_RIGHT
-jamma,RN29,4.7k,5,,I_1P_RIGHT
-jamma,RN30,4.7k,1,,J_1P_B1
-jamma,RN30,4.7k,8,,I_1P_B1
-jamma,RN30,4.7k,2,,J_1P_B2
-jamma,RN30,4.7k,7,,I_1P_B2
-jamma,RN30,4.7k,3,,J_1P_B3
-jamma,RN30,4.7k,6,,I_1P_B3
-jamma,RN30,4.7k,4,,J_1P_B4
-jamma,RN30,4.7k,5,,I_1P_B4
-jamma,RN31,4.7k,1,,J_2P_UP
-jamma,RN31,4.7k,8,,I_2P_UP
-jamma,RN31,4.7k,2,,J_2P_DOWN
-jamma,RN31,4.7k,7,,I_2P_DOWN
-jamma,RN31,4.7k,3,,J_2P_LEFT
-jamma,RN31,4.7k,6,,I_2P_LEFT
-jamma,RN31,4.7k,4,,J_2P_RIGHT
-jamma,RN31,4.7k,5,,I_2P_RIGHT
-jamma,RN32,4.7k,1,,J_2P_B1
-jamma,RN32,4.7k,8,,I_2P_B1
-jamma,RN32,4.7k,2,,J_2P_B2
-jamma,RN32,4.7k,7,,I_2P_B2
-jamma,RN32,4.7k,3,,J_2P_B3
-jamma,RN32,4.7k,6,,I_2P_B3
-jamma,RN32,4.7k,4,,J_2P_B4
-jamma,RN32,4.7k,5,,I_2P_B4
-jamma,RN33,4.7k,1,,J_START1
-jamma,RN33,4.7k,8,,I_START1
-jamma,RN33,4.7k,2,,J_START2
-jamma,RN33,4.7k,7,,I_START2
-jamma,RN33,4.7k,3,,J_COIN1
-jamma,RN33,4.7k,6,,I_COIN1
-jamma,RN33,4.7k,4,,J_COIN2
-jamma,RN33,4.7k,5,,I_COIN2
-jamma,RN34,4.7k,1,,J_SERVICE
-jamma,RN34,4.7k,8,,I_SERVICE
-jamma,RN34,4.7k,2,,J_TEST
-jamma,RN34,4.7k,7,,I_TEST
-jamma,RN34,4.7k,3,,J_TILT
-jamma,RN34,4.7k,6,,I_TILT
-jamma,RN34,4.7k,4,,J_1P_B5
-jamma,RN34,4.7k,5,,I_1P_B5
-jamma,RN35,4.7k,1,,J_2P_B5
-jamma,RN35,4.7k,8,,I_2P_B5
-jamma,RN35,4.7k,2,,(NC)
-jamma,RN35,4.7k,7,,(NC)
-jamma,RN35,4.7k,3,,(NC)
-jamma,RN35,4.7k,6,,(NC)
-jamma,RN35,4.7k,4,,(NC)
-jamma,RN35,4.7k,5,,(NC)
-jamma,C50,10n,1,,I_1P_UP
-jamma,C50,10n,2,,GND
-jamma,C51,10n,1,,I_1P_DOWN
+jamma,RN26,1k,2,,(NC)
+jamma,RN26,1k,7,,(NC)
+jamma,RN26,1k,3,,(NC)
+jamma,RN26,1k,6,,(NC)
+jamma,RN26,1k,4,,(NC)
+jamma,RN26,1k,5,,(NC)
+jamma,RN27,4.7k,1,,J_1P_UP
+jamma,RN27,4.7k,8,,I_1P_UP
+jamma,RN27,4.7k,2,,J_1P_DOWN
+jamma,RN27,4.7k,7,,I_1P_DOWN
+jamma,RN27,4.7k,3,,J_1P_LEFT
+jamma,RN27,4.7k,6,,I_1P_LEFT
+jamma,RN27,4.7k,4,,J_1P_RIGHT
+jamma,RN27,4.7k,5,,I_1P_RIGHT
+jamma,RN28,4.7k,1,,J_1P_B1
+jamma,RN28,4.7k,8,,I_1P_B1
+jamma,RN28,4.7k,2,,J_1P_B2
+jamma,RN28,4.7k,7,,I_1P_B2
+jamma,RN28,4.7k,3,,J_1P_B3
+jamma,RN28,4.7k,6,,I_1P_B3
+jamma,RN28,4.7k,4,,J_1P_B4
+jamma,RN28,4.7k,5,,I_1P_B4
+jamma,RN29,4.7k,1,,J_2P_UP
+jamma,RN29,4.7k,8,,I_2P_UP
+jamma,RN29,4.7k,2,,J_2P_DOWN
+jamma,RN29,4.7k,7,,I_2P_DOWN
+jamma,RN29,4.7k,3,,J_2P_LEFT
+jamma,RN29,4.7k,6,,I_2P_LEFT
+jamma,RN29,4.7k,4,,J_2P_RIGHT
+jamma,RN29,4.7k,5,,I_2P_RIGHT
+jamma,RN30,4.7k,1,,J_2P_B1
+jamma,RN30,4.7k,8,,I_2P_B1
+jamma,RN30,4.7k,2,,J_2P_B2
+jamma,RN30,4.7k,7,,I_2P_B2
+jamma,RN30,4.7k,3,,J_2P_B3
+jamma,RN30,4.7k,6,,I_2P_B3
+jamma,RN30,4.7k,4,,J_2P_B4
+jamma,RN30,4.7k,5,,I_2P_B4
+jamma,RN31,4.7k,1,,J_START1
+jamma,RN31,4.7k,8,,I_START1
+jamma,RN31,4.7k,2,,J_START2
+jamma,RN31,4.7k,7,,I_START2
+jamma,RN31,4.7k,3,,J_COIN1
+jamma,RN31,4.7k,6,,I_COIN1
+jamma,RN31,4.7k,4,,J_COIN2
+jamma,RN31,4.7k,5,,I_COIN2
+jamma,RN32,4.7k,1,,J_SERVICE
+jamma,RN32,4.7k,8,,I_SERVICE
+jamma,RN32,4.7k,2,,J_TEST
+jamma,RN32,4.7k,7,,I_TEST
+jamma,RN32,4.7k,3,,J_TILT
+jamma,RN32,4.7k,6,,I_TILT
+jamma,RN32,4.7k,4,,J_1P_B5
+jamma,RN32,4.7k,5,,I_1P_B5
+jamma,RN33,4.7k,1,,J_2P_B5
+jamma,RN33,4.7k,8,,I_2P_B5
+jamma,RN33,4.7k,2,,(NC)
+jamma,RN33,4.7k,7,,(NC)
+jamma,RN33,4.7k,3,,(NC)
+jamma,RN33,4.7k,6,,(NC)
+jamma,RN33,4.7k,4,,(NC)
+jamma,RN33,4.7k,5,,(NC)
+jamma,C51,10n,1,,I_1P_UP
 jamma,C51,10n,2,,GND
-jamma,C52,10n,1,,I_1P_LEFT
+jamma,C52,10n,1,,I_1P_DOWN
 jamma,C52,10n,2,,GND
-jamma,C53,10n,1,,I_1P_RIGHT
+jamma,C53,10n,1,,I_1P_LEFT
 jamma,C53,10n,2,,GND
-jamma,C54,10n,1,,I_1P_B1
+jamma,C54,10n,1,,I_1P_RIGHT
 jamma,C54,10n,2,,GND
-jamma,C55,10n,1,,I_1P_B2
+jamma,C55,10n,1,,I_1P_B1
 jamma,C55,10n,2,,GND
-jamma,C56,10n,1,,I_1P_B3
+jamma,C56,10n,1,,I_1P_B2
 jamma,C56,10n,2,,GND
-jamma,C57,10n,1,,I_1P_B4
+jamma,C57,10n,1,,I_1P_B3
 jamma,C57,10n,2,,GND
-jamma,C58,10n,1,,I_2P_UP
+jamma,C58,10n,1,,I_1P_B4
 jamma,C58,10n,2,,GND
-jamma,C59,10n,1,,I_2P_DOWN
+jamma,C59,10n,1,,I_2P_UP
 jamma,C59,10n,2,,GND
-jamma,C60,10n,1,,I_2P_LEFT
+jamma,C60,10n,1,,I_2P_DOWN
 jamma,C60,10n,2,,GND
-jamma,C61,10n,1,,I_2P_RIGHT
+jamma,C61,10n,1,,I_2P_LEFT
 jamma,C61,10n,2,,GND
-jamma,C62,10n,1,,I_2P_B1
+jamma,C62,10n,1,,I_2P_RIGHT
 jamma,C62,10n,2,,GND
-jamma,C63,10n,1,,I_2P_B2
+jamma,C63,10n,1,,I_2P_B1
 jamma,C63,10n,2,,GND
-jamma,C64,10n,1,,I_2P_B3
+jamma,C64,10n,1,,I_2P_B2
 jamma,C64,10n,2,,GND
-jamma,C65,10n,1,,I_2P_B4
+jamma,C65,10n,1,,I_2P_B3
 jamma,C65,10n,2,,GND
-jamma,C66,10n,1,,I_START1
+jamma,C66,10n,1,,I_2P_B4
 jamma,C66,10n,2,,GND
-jamma,C67,10n,1,,I_START2
+jamma,C67,10n,1,,I_START1
 jamma,C67,10n,2,,GND
-jamma,C68,10n,1,,I_COIN1
+jamma,C68,10n,1,,I_START2
 jamma,C68,10n,2,,GND
-jamma,C69,10n,1,,I_COIN2
+jamma,C69,10n,1,,I_COIN1
 jamma,C69,10n,2,,GND
-jamma,C70,10n,1,,I_SERVICE
+jamma,C70,10n,1,,I_COIN2
 jamma,C70,10n,2,,GND
-jamma,C71,10n,1,,I_TEST
+jamma,C71,10n,1,,I_SERVICE
 jamma,C71,10n,2,,GND
-jamma,C72,10n,1,,I_TILT
+jamma,C72,10n,1,,I_TEST
 jamma,C72,10n,2,,GND
-jamma,C73,10n,1,,I_1P_B5
+jamma,C73,10n,1,,I_TILT
 jamma,C73,10n,2,,GND
-jamma,C74,10n,1,,I_2P_B5
+jamma,C74,10n,1,,I_1P_B5
 jamma,C74,10n,2,,GND
+jamma,C75,10n,1,,I_2P_B5
+jamma,C75,10n,2,,GND
 jamma,SW1,TS-1187A,1,,J_TEST
 jamma,SW1,TS-1187A,2,,GND
 jamma,SW2,TS-1187A,1,,J_SERVICE
 jamma,SW2,TS-1187A,2,,GND
-jamma,SW3,DIP switch 4,1,,I_DIP1
-jamma,SW3,DIP switch 4,2,,I_DIP2
-jamma,SW3,DIP switch 4,3,,I_DIP3
-jamma,SW3,DIP switch 4,4,,I_DIP4
-jamma,SW3,DIP switch 4,5,,GND
-jamma,SW3,DIP switch 4,6,,GND
-jamma,SW3,DIP switch 4,7,,GND
-jamma,SW3,DIP switch 4,8,,GND
-jamma,RN36,10k,1,,I_DIP1
-jamma,RN36,10k,8,,+3V3
-jamma,RN36,10k,2,,I_DIP2
-jamma,RN36,10k,7,,+3V3
-jamma,RN36,10k,3,,I_DIP3
-jamma,RN36,10k,6,,+3V3
-jamma,RN36,10k,4,,I_DIP4
-jamma,RN36,10k,5,,+3V3
-jamma,R104,10k,1,,OUT1
-jamma,R104,10k,2,,I_OUT1
-jamma,R105,20k,1,,I_OUT1
-jamma,R105,20k,2,,GND
-jamma,R106,10k,1,,OUT2
-jamma,R106,10k,2,,I_OUT2
-jamma,R107,20k,1,,I_OUT2
-jamma,R107,20k,2,,GND
-jamma,R108,10k,1,,+5V_SW
-jamma,R108,10k,2,,I_5VSW
-jamma,R109,20k,1,,I_5VSW
-jamma,R109,20k,2,,GND
+jamma,SW3,DS-04RP (DIP switch 4),1,,I_DIP1
+jamma,SW3,DS-04RP (DIP switch 4),2,,I_DIP2
+jamma,SW3,DS-04RP (DIP switch 4),3,,I_DIP3
+jamma,SW3,DS-04RP (DIP switch 4),4,,I_DIP4
+jamma,SW3,DS-04RP (DIP switch 4),5,,GND
+jamma,SW3,DS-04RP (DIP switch 4),6,,GND
+jamma,SW3,DS-04RP (DIP switch 4),7,,GND
+jamma,SW3,DS-04RP (DIP switch 4),8,,GND
+jamma,RN34,10k,1,,I_DIP1
+jamma,RN34,10k,8,,+3V3
+jamma,RN34,10k,2,,I_DIP2
+jamma,RN34,10k,7,,+3V3
+jamma,RN34,10k,3,,I_DIP3
+jamma,RN34,10k,6,,+3V3
+jamma,RN34,10k,4,,I_DIP4
+jamma,RN34,10k,5,,+3V3
+jamma,R112,10k,1,,OUT1
+jamma,R112,10k,2,,I_OUT1
+jamma,R113,20k,1,,I_OUT1
+jamma,R113,20k,2,,GND
+jamma,R114,10k,1,,OUT2
+jamma,R114,10k,2,,I_OUT2
+jamma,R115,20k,1,,I_OUT2
+jamma,R115,20k,2,,GND
+jamma,R116,10k,1,,+5V_SW
+jamma,R116,10k,2,,I_5VSW
+jamma,R117,20k,1,,I_5VSW
+jamma,R117,20k,2,,GND
 jamma,U20,74HC165 (1P),1,SH/LD,IO_LATCH
 jamma,U20,74HC165 (1P),2,CLK,IO_CLK
 jamma,U20,74HC165 (1P),15,CLK_INH,GND
@@ -1300,8 +1287,8 @@ jamma,U20,74HC165 (1P),3,E,I_1P_B1
 jamma,U20,74HC165 (1P),4,F,I_1P_B2
 jamma,U20,74HC165 (1P),5,G,I_1P_B3
 jamma,U20,74HC165 (1P),6,H,I_1P_B4
-jamma,C75,100n,1,,+3V3
-jamma,C75,100n,2,,GND
+jamma,C76,100n,1,,+3V3
+jamma,C76,100n,2,,GND
 jamma,U21,74HC165 (2P),1,SH/LD,IO_LATCH
 jamma,U21,74HC165 (2P),2,CLK,IO_CLK
 jamma,U21,74HC165 (2P),15,CLK_INH,GND
@@ -1318,8 +1305,8 @@ jamma,U21,74HC165 (2P),3,E,I_2P_B1
 jamma,U21,74HC165 (2P),4,F,I_2P_B2
 jamma,U21,74HC165 (2P),5,G,I_2P_B3
 jamma,U21,74HC165 (2P),6,H,I_2P_B4
-jamma,C76,100n,1,,+3V3
-jamma,C76,100n,2,,GND
+jamma,C77,100n,1,,+3V3
+jamma,C77,100n,2,,GND
 jamma,U22,"74HC165 (start, coin, service)",1,SH/LD,IO_LATCH
 jamma,U22,"74HC165 (start, coin, service)",2,CLK,IO_CLK
 jamma,U22,"74HC165 (start, coin, service)",15,CLK_INH,GND
@@ -1336,8 +1323,8 @@ jamma,U22,"74HC165 (start, coin, service)",3,E,I_SERVICE
 jamma,U22,"74HC165 (start, coin, service)",4,F,I_TEST
 jamma,U22,"74HC165 (start, coin, service)",5,G,I_TILT
 jamma,U22,"74HC165 (start, coin, service)",6,H,I_1P_B5
-jamma,C77,100n,1,,+3V3
-jamma,C77,100n,2,,GND
+jamma,C78,100n,1,,+3V3
+jamma,C78,100n,2,,GND
 jamma,U23,"74HC165 (switches, status)",1,SH/LD,IO_LATCH
 jamma,U23,"74HC165 (switches, status)",2,CLK,IO_CLK
 jamma,U23,"74HC165 (switches, status)",15,CLK_INH,GND
@@ -1354,8 +1341,8 @@ jamma,U23,"74HC165 (switches, status)",3,E,I_DIP4
 jamma,U23,"74HC165 (switches, status)",4,F,I_OUT1
 jamma,U23,"74HC165 (switches, status)",5,G,I_OUT2
 jamma,U23,"74HC165 (switches, status)",6,H,I_5VSW
-jamma,C78,100n,1,,+3V3
-jamma,C78,100n,2,,GND
+jamma,C79,100n,1,,+3V3
+jamma,C79,100n,2,,GND
 jamma,U24,74HC595 (JAMMA outputs),14,SER,OUT_SER
 jamma,U24,74HC595 (JAMMA outputs),11,SRCLK,IO_CLK
 jamma,U24,74HC595 (JAMMA outputs),12,RCLK,IO_LATCH
@@ -1372,36 +1359,47 @@ jamma,U24,74HC595 (JAMMA outputs),4,QE,GPO4
 jamma,U24,74HC595 (JAMMA outputs),5,QF,GPO5
 jamma,U24,74HC595 (JAMMA outputs),6,QG,GPO6
 jamma,U24,74HC595 (JAMMA outputs),7,QH,GPO7
-jamma,C79,100n,1,,+3V3
-jamma,C79,100n,2,,GND
-jamma,R110,10k,1,,OUT_OE_N
-jamma,R110,10k,2,,+3V3
-jamma,RN37,10k,1,,CNT1_G
-jamma,RN37,10k,8,,GND
-jamma,RN37,10k,2,,CNT2_G
-jamma,RN37,10k,7,,GND
-jamma,RN37,10k,3,,LOCK1_G
-jamma,RN37,10k,6,,GND
-jamma,RN37,10k,4,,LOCK2_G
-jamma,RN37,10k,5,,GND
+jamma,C80,100n,1,,+3V3
+jamma,C80,100n,2,,GND
+jamma,R118,10k,1,,OUT_OE_N
+jamma,R118,10k,2,,+3V3
+jamma,RN35,10k,1,,CNT1_G
+jamma,RN35,10k,8,,GND
+jamma,RN35,10k,2,,CNT2_G
+jamma,RN35,10k,7,,GND
+jamma,RN35,10k,3,,LOCK1_G
+jamma,RN35,10k,6,,GND
+jamma,RN35,10k,4,,LOCK2_G
+jamma,RN35,10k,5,,GND
 jamma,Q5,AO3400A,1,,CNT1_G
 jamma,Q5,AO3400A,2,,GND
 jamma,Q5,AO3400A,3,,J_CNT1
+jamma,D7,SS14,1,,+12V_JAMMA
+jamma,D7,SS14,2,,J_CNT1
 jamma,Q6,AO3400A,1,,CNT2_G
 jamma,Q6,AO3400A,2,,GND
 jamma,Q6,AO3400A,3,,J_CNT2
+jamma,D8,SS14,1,,+12V_JAMMA
+jamma,D8,SS14,2,,J_CNT2
 jamma,Q7,AO3400A,1,,LOCK1_G
 jamma,Q7,AO3400A,2,,GND
 jamma,Q7,AO3400A,3,,J_LOCK1
+jamma,D9,SS14,1,,+12V_JAMMA
+jamma,D9,SS14,2,,J_LOCK1
 jamma,Q8,AO3400A,1,,LOCK2_G
 jamma,Q8,AO3400A,2,,GND
 jamma,Q8,AO3400A,3,,J_LOCK2
-jamma,D7,PSM712,1,,J_CNT1
-jamma,D7,PSM712,2,,J_CNT2
-jamma,D7,PSM712,3,,GND
-jamma,D8,PSM712,1,,J_LOCK1
-jamma,D8,PSM712,2,,J_LOCK2
-jamma,D8,PSM712,3,,GND
+jamma,D10,SS14,1,,+12V_JAMMA
+jamma,D10,SS14,2,,J_LOCK2
+jamma,D11,PSM712,1,,J_CNT1
+jamma,D11,PSM712,2,,J_CNT2
+jamma,D11,PSM712,3,,GND
+jamma,D12,PSM712,1,,J_LOCK1
+jamma,D12,PSM712,2,,J_LOCK2
+jamma,D12,PSM712,3,,GND
+jamma,C81,100n,1,,+12V_JAMMA
+jamma,C81,100n,2,,GND
+jamma,TP14,+12V_JAMMA,1,,+12V_JAMMA
 jamma,J2,spare outputs (option),1,,GPO4
 jamma,J2,spare outputs (option),2,,GPO5
 jamma,J2,spare outputs (option),3,,GPO6
@@ -1441,6 +1439,15 @@ mcu,U25,Pico 2 A (video),37,3V3_EN,(NC)
 mcu,U25,Pico 2 A (video),35,ADC_VREF,(NC)
 mcu,U25,Pico 2 A (video),30,RUN,RUN_A
 mcu,U25,Pico 2 A (video),33,AGND,GND
+mcu,U25,Pico 2 A (video),D1,SWCLK,SWCLK_A
+mcu,U25,Pico 2 A (video),D3,SWDIO,SWDIO_A
+mcu,U25,Pico 2 A (video),D2,GND_D2,GND
+mcu,U25,Pico 2 A (video),TP1,GND_TP1,GND
+mcu,U25,Pico 2 A (video),TP2,USB_DM,(NC)
+mcu,U25,Pico 2 A (video),TP3,USB_DP,(NC)
+mcu,U25,Pico 2 A (video),TP6,BOOTSEL,(NC)
+mcu,U25,Pico 2 A (video),TP4,TP4,(NC)
+mcu,U25,Pico 2 A (video),TP5,TP5,(NC)
 mcu,U25,Pico 2 A (video),3,GND_3,GND
 mcu,U25,Pico 2 A (video),8,GND_8,GND
 mcu,U25,Pico 2 A (video),13,GND_13,GND
@@ -1448,9 +1455,9 @@ mcu,U25,Pico 2 A (video),18,GND_18,GND
 mcu,U25,Pico 2 A (video),23,GND_23,GND
 mcu,U25,Pico 2 A (video),28,GND_28,GND
 mcu,U25,Pico 2 A (video),38,GND_38,GND
-mcu,C80,10u,1,,VSYS
-mcu,C80,10u,2,,GND
-mcu,TP14,A_3V3,1,,A_3V3
+mcu,C82,10u,1,,VSYS
+mcu,C82,10u,2,,GND
+mcu,TP15,A_3V3,1,,A_3V3
 mcu,U26,Pico 2 B (bus),1,GP0,B_CD0
 mcu,U26,Pico 2 B (bus),2,GP1,B_CD1
 mcu,U26,Pico 2 B (bus),4,GP2,B_CD2
@@ -1484,6 +1491,15 @@ mcu,U26,Pico 2 B (bus),37,3V3_EN,(NC)
 mcu,U26,Pico 2 B (bus),35,ADC_VREF,(NC)
 mcu,U26,Pico 2 B (bus),30,RUN,RUN_B
 mcu,U26,Pico 2 B (bus),33,AGND,GND
+mcu,U26,Pico 2 B (bus),D1,SWCLK,SWCLK_B
+mcu,U26,Pico 2 B (bus),D3,SWDIO,SWDIO_B
+mcu,U26,Pico 2 B (bus),D2,GND_D2,GND
+mcu,U26,Pico 2 B (bus),TP1,GND_TP1,GND
+mcu,U26,Pico 2 B (bus),TP2,USB_DM,(NC)
+mcu,U26,Pico 2 B (bus),TP3,USB_DP,(NC)
+mcu,U26,Pico 2 B (bus),TP6,BOOTSEL,(NC)
+mcu,U26,Pico 2 B (bus),TP4,TP4,(NC)
+mcu,U26,Pico 2 B (bus),TP5,TP5,(NC)
 mcu,U26,Pico 2 B (bus),3,GND_3,GND
 mcu,U26,Pico 2 B (bus),8,GND_8,GND
 mcu,U26,Pico 2 B (bus),13,GND_13,GND
@@ -1491,15 +1507,15 @@ mcu,U26,Pico 2 B (bus),18,GND_18,GND
 mcu,U26,Pico 2 B (bus),23,GND_23,GND
 mcu,U26,Pico 2 B (bus),28,GND_28,GND
 mcu,U26,Pico 2 B (bus),38,GND_38,GND
-mcu,C81,10u,1,,VSYS
-mcu,C81,10u,2,,GND
-mcu,TP15,B_3V3,1,,B_3V3
-mcu,U27,"Pico 2 C (I/O, management)",1,GP0,D_SER
-mcu,U27,"Pico 2 C (I/O, management)",2,GP1,D_SRCLK_F
-mcu,U27,"Pico 2 C (I/O, management)",4,GP2,D_SRCLK_S
-mcu,U27,"Pico 2 C (I/O, management)",5,GP3,D_RCLK
-mcu,U27,"Pico 2 C (I/O, management)",6,GP4,D_OE_ADDR_N
-mcu,U27,"Pico 2 C (I/O, management)",7,GP5,D_OE_DATA_N
+mcu,C83,10u,1,,VSYS
+mcu,C83,10u,2,,GND
+mcu,TP16,B_3V3,1,,B_3V3
+mcu,U27,"Pico 2 C (I/O, management)",1,GP0,C_SER
+mcu,U27,"Pico 2 C (I/O, management)",2,GP1,C_SRCLK_F
+mcu,U27,"Pico 2 C (I/O, management)",4,GP2,C_SRCLK_S
+mcu,U27,"Pico 2 C (I/O, management)",5,GP3,C_RCLK
+mcu,U27,"Pico 2 C (I/O, management)",6,GP4,C_OE_ADDR_N
+mcu,U27,"Pico 2 C (I/O, management)",7,GP5,C_OE_DATA_N
 mcu,U27,"Pico 2 C (I/O, management)",9,GP6,C_M2
 mcu,U27,"Pico 2 C (I/O, management)",10,GP7,OUT_OE_N
 mcu,U27,"Pico 2 C (I/O, management)",11,GP8,IN_DATA
@@ -1519,7 +1535,7 @@ mcu,U27,"Pico 2 C (I/O, management)",27,GP21,C_RUN_B
 mcu,U27,"Pico 2 C (I/O, management)",29,GP22,EN_5VSW
 mcu,U27,"Pico 2 C (I/O, management)",31,GP26,ADC_5V
 mcu,U27,"Pico 2 C (I/O, management)",32,GP27,C_CIRAM_A10
-mcu,U27,"Pico 2 C (I/O, management)",34,GP28,C_SPARE
+mcu,U27,"Pico 2 C (I/O, management)",34,GP28,C_AMP_EN
 mcu,U27,"Pico 2 C (I/O, management)",39,VSYS,VSYS
 mcu,U27,"Pico 2 C (I/O, management)",40,VBUS,(NC)
 mcu,U27,"Pico 2 C (I/O, management)",36,3V3,C_3V3
@@ -1527,6 +1543,15 @@ mcu,U27,"Pico 2 C (I/O, management)",37,3V3_EN,(NC)
 mcu,U27,"Pico 2 C (I/O, management)",35,ADC_VREF,(NC)
 mcu,U27,"Pico 2 C (I/O, management)",30,RUN,RUN_C
 mcu,U27,"Pico 2 C (I/O, management)",33,AGND,GND
+mcu,U27,"Pico 2 C (I/O, management)",D1,SWCLK,SWCLK_C
+mcu,U27,"Pico 2 C (I/O, management)",D3,SWDIO,SWDIO_C
+mcu,U27,"Pico 2 C (I/O, management)",D2,GND_D2,GND
+mcu,U27,"Pico 2 C (I/O, management)",TP1,GND_TP1,GND
+mcu,U27,"Pico 2 C (I/O, management)",TP2,USB_DM,USB_DM
+mcu,U27,"Pico 2 C (I/O, management)",TP3,USB_DP,USB_DP
+mcu,U27,"Pico 2 C (I/O, management)",TP6,BOOTSEL,BOOTSEL_C
+mcu,U27,"Pico 2 C (I/O, management)",TP4,TP4,(NC)
+mcu,U27,"Pico 2 C (I/O, management)",TP5,TP5,(NC)
 mcu,U27,"Pico 2 C (I/O, management)",3,GND_3,GND
 mcu,U27,"Pico 2 C (I/O, management)",8,GND_8,GND
 mcu,U27,"Pico 2 C (I/O, management)",13,GND_13,GND
@@ -1534,62 +1559,64 @@ mcu,U27,"Pico 2 C (I/O, management)",18,GND_18,GND
 mcu,U27,"Pico 2 C (I/O, management)",23,GND_23,GND
 mcu,U27,"Pico 2 C (I/O, management)",28,GND_28,GND
 mcu,U27,"Pico 2 C (I/O, management)",38,GND_38,GND
-mcu,C82,10u,1,,VSYS
-mcu,C82,10u,2,,GND
-mcu,TP16,C_3V3,1,,C_3V3
-mcu,R111,100,1,,B_TX
-mcu,R111,100,2,,LINK_BA
-mcu,R112,100,1,,C_TX
-mcu,R112,100,2,,LINK_CB
-mcu,R113,100,1,,C_SCK_O
-mcu,R113,100,2,,C_SCK
-mcu,R114,100,1,,C_MOSI_O
-mcu,R114,100,2,,C_MOSI
-mcu,R115,100,1,,A_MISO
-mcu,R115,100,2,,C_MISO
-mcu,RN38,1k,1,,C_SWCLK_A
-mcu,RN38,1k,8,,SWCLK_A
-mcu,RN38,1k,2,,C_SWDIO_A
-mcu,RN38,1k,7,,SWDIO_A
-mcu,RN38,1k,3,,C_SWCLK_B
-mcu,RN38,1k,6,,SWCLK_B
-mcu,RN38,1k,4,,C_SWDIO_B
-mcu,RN38,1k,5,,SWDIO_B
-mcu,RN39,1k,1,,C_RUN_A
-mcu,RN39,1k,8,,RUN_A
-mcu,RN39,1k,2,,C_RUN_B
-mcu,RN39,1k,7,,RUN_B
-mcu,RN39,1k,3,,(NC)
-mcu,RN39,1k,6,,(NC)
-mcu,RN39,1k,4,,(NC)
-mcu,RN39,1k,5,,(NC)
-mcu,J13,debug pins of Pico A,1,,SWCLK_A
-mcu,J13,debug pins of Pico A,2,,GND
-mcu,J13,debug pins of Pico A,3,,SWDIO_A
-mcu,J14,debug pins of Pico B,1,,SWCLK_B
-mcu,J14,debug pins of Pico B,2,,GND
-mcu,J14,debug pins of Pico B,3,,SWDIO_B
-mcu,J15,debug pins of Pico C,1,,SWCLK_C
-mcu,J15,debug pins of Pico C,2,,GND
-mcu,J15,debug pins of Pico C,3,,SWDIO_C
+mcu,C84,10u,1,,VSYS
+mcu,C84,10u,2,,GND
+mcu,TP17,C_3V3,1,,C_3V3
+mcu,R119,100,1,,B_TX
+mcu,R119,100,2,,LINK_BA
+mcu,R120,100,1,,C_TX
+mcu,R120,100,2,,LINK_CB
+mcu,R121,100,1,,C_SCK_O
+mcu,R121,100,2,,C_SCK
+mcu,R122,100,1,,C_MOSI_O
+mcu,R122,100,2,,C_MOSI
+mcu,R123,100,1,,A_MISO
+mcu,R123,100,2,,C_MISO
+mcu,RN36,1k,1,,C_SWCLK_A
+mcu,RN36,1k,8,,SWCLK_A
+mcu,RN36,1k,2,,C_SWDIO_A
+mcu,RN36,1k,7,,SWDIO_A
+mcu,RN36,1k,3,,C_SWCLK_B
+mcu,RN36,1k,6,,SWCLK_B
+mcu,RN36,1k,4,,C_SWDIO_B
+mcu,RN36,1k,5,,SWDIO_B
+mcu,RN37,1k,1,,C_RUN_A
+mcu,RN37,1k,8,,RUN_A
+mcu,RN37,1k,2,,C_RUN_B
+mcu,RN37,1k,7,,RUN_B
+mcu,RN37,1k,3,,(NC)
+mcu,RN37,1k,6,,(NC)
+mcu,RN37,1k,4,,(NC)
+mcu,RN37,1k,5,,(NC)
 mcu,J16,debug probe for Pico C (option),1,,SWCLK_C
 mcu,J16,debug probe for Pico C (option),2,,GND
 mcu,J16,debug probe for Pico C (option),3,,SWDIO_C
 mcu,SW4,TS-1187A,1,,RUN_C
 mcu,SW4,TS-1187A,2,,GND
-mcu,J10,AE-USB2.0-TYPE-C,1,VBUS,VBUS_USB
-mcu,J10,AE-USB2.0-TYPE-C,2,D-,USB_DM
-mcu,J10,AE-USB2.0-TYPE-C,3,D+,USB_DP
-mcu,J10,AE-USB2.0-TYPE-C,5,CC1,USB_CC1
-mcu,J10,AE-USB2.0-TYPE-C,6,CC2,USB_CC2
-mcu,J10,AE-USB2.0-TYPE-C,4,GND,GND
-mcu,J10,AE-USB2.0-TYPE-C,7,GND_7,GND
-mcu,R116,5.1k,1,,USB_CC1
-mcu,R116,5.1k,2,,GND
-mcu,R117,5.1k,1,,USB_CC2
-mcu,R117,5.1k,2,,GND
-mcu,J11,USB to Pico C,1,,VBUS_USB
-mcu,J11,USB to Pico C,2,,USB_DM
-mcu,J11,USB to Pico C,3,,USB_DP
-mcu,J11,USB to Pico C,4,,GND
-mcu,TP17,C_SPARE,1,,C_SPARE
+mcu,SW5,TS-1187A,1,,BOOTSEL_C
+mcu,SW5,TS-1187A,2,,GND
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A4,VBUS_A4,VBUS_USB
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A9,VBUS_A9,VBUS_USB
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B4,VBUS_B4,VBUS_USB
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B9,VBUS_B9,VBUS_USB
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A5,CC1,USB_CC1
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B5,CC2,USB_CC2
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A6,DP_A6,USB_DP
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B6,DP_B6,USB_DP
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A7,DN_A7,USB_DM
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B7,DN_B7,USB_DM
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A8,SBU1,(NC)
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B8,SBU2,(NC)
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A1,GND_A1,GND
+mcu,J10,USB Type-C socket (TYPE-C16PIN),A12,GND_A12,GND
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B1,GND_B1,GND
+mcu,J10,USB Type-C socket (TYPE-C16PIN),B12,GND_B12,GND
+mcu,J10,USB Type-C socket (TYPE-C16PIN),SH,SHIELD,GND
+mcu,R124,5.1k,1,,USB_CC1
+mcu,R124,5.1k,2,,GND
+mcu,R125,5.1k,1,,USB_CC2
+mcu,R125,5.1k,2,,GND
+mcu,J11,USB lines (option),1,,VBUS_USB
+mcu,J11,USB lines (option),2,,USB_DM
+mcu,J11,USB lines (option),3,,USB_DP
+mcu,J11,USB lines (option),4,,GND

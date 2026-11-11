@@ -7,16 +7,10 @@ Report includes: Errors, Warnings, Exclusions
     @(33.02 mm, 60.96 mm): Symbol RV1 [R_Potentiometer_Trim]
 [footprint_link_issues]: The current configuration does not include the footprint library 'fcjamma'
     ; warning
-    @(81.28 mm, 58.42 mm): Symbol U19 [AE_PAM8012]
-[footprint_link_issues]: The current configuration does not include the footprint library 'fcjamma'
-    ; warning
     @(40.64 mm, 88.90 mm): Symbol J1 [JAMMA56]
 [footprint_link_issues]: The current configuration does not include the footprint library 'fcjamma'
     ; warning
-    @(38.10 mm, 91.44 mm): Symbol J8 [FC_CART60]
-[footprint_link_issues]: The current configuration does not include the footprint library 'fcjamma'
-    ; warning
-    @(76.20 mm, 226.06 mm): Symbol J10 [AE_USB_TYPE_C]
+    @(38.10 mm, 96.52 mm): Symbol J8 [FC_CART60]
 
 ***** Sheet /power/
 
@@ -34,7 +28,7 @@ Report includes: Errors, Warnings, Exclusions
 
 ***** Sheet /mcu/
 
- ** ERC messages: 5  Errors 0  Warnings 5
+ ** ERC messages: 3  Errors 0  Warnings 3
 
  ** Ignored checks:
     - Global label only appears once in the schematic

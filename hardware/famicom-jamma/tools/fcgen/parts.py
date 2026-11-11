@@ -1,42 +1,51 @@
-"""Helpers for the common small parts, with their JLCPCB Basic part numbers.
+"""Helpers for the common small parts, with their JLCPCB part numbers.
 
-Every LCSC number used here is checked against data/jlcpcb_basic_parts_2026-11-10.csv
-by tools/build.py: the build fails if a number is not in the Basic list, or if the
-value written here does not appear in JLCPCB's own description of that number.
+Every part that JLCPCB assembles is named here by its LCSC number:
+- Basic parts (R0603, RARRAY, C0603, TANT, SEMI) are checked against
+  data/jlcpcb_basic_parts_2026-11-10.csv,
+- Extended parts (EXT) against data/jlcpcb_extended_parts.csv, which tools/jlc_parts.py
+  refreshes from JLCPCB's parts library (stock, price, how the part is assembled).
+tools/build.py fails if a number is missing from its list, or if the text written here
+does not appear in JLCPCB's own description of that number.
 
 JLCPCB charges a loading fee for every distinct part on a Standard PCBA order (this board
 needs Standard PCBA because of the gold fingers), so the tables below are kept short on
 purpose: prefer a value that is already used over a new one.
 """
-from .model import JLC, AKI, DONOR, PCB, NC
+from .model import JLC, JLCX, AKI, DONOR, PCB, NC
 
 FP_R = "Resistor_SMD:R_0603_1608Metric"
 FP_C = "Capacitor_SMD:C_0603_1608Metric"
 FP_RA = "Resistor_SMD:R_Array_Convex_4x0603"
 FP_TANT_A = "Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A"
 FP_TANT_B = "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
+FP_CP_6x8 = "Capacitor_SMD:CP_Elec_6.3x7.7"
 FP_SOT23 = "Package_TO_SOT_SMD:SOT-23"
+FP_SOT23_5 = "Package_TO_SOT_SMD:SOT-23-5"
 FP_SOD123 = "Diode_SMD:D_SOD-123"
 FP_SMA = "Diode_SMD:D_SMA"
 FP_SMB = "Diode_SMD:D_SMB"
 FP_SOIC8 = "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+FP_SOIC14 = "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 FP_SOIC16 = "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
-FP_SOP32 = "Package_SO:SOP-32_11.305x20.495mm_P1.27mm"
+FP_SOIC20W = "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm"
+FP_TSOP28 = "Package_SO:TSOP-I-28_11.8x8mm_P0.55mm"
+FP_MSOP8 = "Package_SO:MSOP-8_3x3mm_P0.65mm"
 FP_SOT223 = "Package_TO_SOT_SMD:SOT-223-3_TabPin2"
-FP_DIP8_SOCKET = "Package_DIP:DIP-8_W7.62mm_Socket"
-FP_DIP14 = "Package_DIP:DIP-14_W7.62mm"
-FP_DIP16 = "Package_DIP:DIP-16_W7.62mm"
-FP_DIP20 = "Package_DIP:DIP-20_W7.62mm"
 FP_DIP40_SOCKET = "Package_DIP:DIP-40_W15.24mm_Socket"
-FP_PICO = "Module:RaspberryPi_Pico_Common_THT"
+FP_DIPSW4 = "Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm"
+FP_PICO = "Module:RaspberryPi_Pico_SMD"
+FP_USBC = "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12"
+FP_FUSE2920 = "Fuse:Fuse_2920_7451Metric"
 FP_HDR = "Connector_PinHeader_2.54mm:PinHeader_{r}x{n:02d}_P2.54mm_Vertical"
-FP_SOCKET = "Connector_PinSocket_2.54mm:PinSocket_1x{n:02d}_P2.54mm_Vertical"
 FP_TP = "TestPoint:TestPoint_Pad_D1.5mm"
+FP_SJ2 = "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm"
+FP_SJ3 = "Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm"
 FP_SW_TACT = "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A"
 FP_LED = "LED_SMD:LED_0603_1608Metric"
 FP_FB = "Inductor_SMD:L_0603_1608Metric"
 
-# value -> (LCSC number, text that must appear in JLCPCB's description)
+# ---- Basic parts: value -> (LCSC number, text that must appear in JLCPCB's description)
 R0603 = {
     "33": ("C23140", "33Ω"), "100": ("C22775", "100Ω"), "470": ("C23179", "470Ω"),
     "1k": ("C21190", "1kΩ"), "5.1k": ("C23186", "5.1kΩ"), "10k": ("C25804", "10kΩ"),
@@ -65,11 +74,38 @@ SEMI = {
     "TS-1187A": ("C318884", "Switch:SW_Push", FP_SW_TACT, "TS-1187A"),
     "BLM18PG121": ("C14709", "Device:FerriteBead", FP_FB, "BLM18PG121SN1D"),
 }
-USED_CODES = {}   # LCSC number -> expected text, filled as parts are created
+USED_CODES = {}   # Basic: LCSC number -> expected text, filled as parts are created
+
+# ---- Extended parts: name -> (LCSC number, text that must appear in the maker's part number, text of the package)
+EXT = {
+    "pico2": ("C41407547", "Raspberry Pi Pico 2", ""),
+    "dip40_socket": ("C2874018", "IC254V-12-40", "DIP-40"),
+    "cart60": ("C5173310", "ED60BGFBK", "2.54mm"),
+    "sram": ("C47143", "IS62C256AL-45TLI", "TSOP"),
+    "74HCT138": ("C5965", "74HCT138D", "SOIC-16"),
+    "74HCT00": ("C6764", "SN74HCT00DR", "SOIC-14"),
+    "74HCT573": ("C5209384", "74HCT573D", "SOIC-20"),
+    "74HC165": ("C5613", "74HC165D", "SOIC-16"),
+    "74HCT595": ("C282339", "74HCT595D", "SOIC-16"),
+    "comparator": ("C283912", "LMV7219M5X", "SOT-23-5"),
+    "amp": ("C113367", "PAM8302AASCR", "MSOP-8"),
+    "usbc": ("C393939", "TYPE-C16PIN", ""),
+    "polyfuse": ("C262042", "TLC-LSMD300D", "2920"),
+    "cap470u": ("C46550400", "JVJ16V470M6x8", "6.3"),
+    "dipsw4": ("C92645", "DS-04RP", "2.54mm"),
+    "trimmer10k": ("C118956", "3362P-1-103", ""),
+}
+USED_EXT = {}     # Extended: LCSC number -> (expected part number text, expected package text)
 
 
 def use(code, text):
     USED_CODES[code] = text
+    return code
+
+
+def usex(name):
+    code, text, package = EXT[name]
+    USED_EXT[code] = (text, package)
     return code
 
 
@@ -154,17 +190,23 @@ def ferrite(sh, a, b, note=""):
     return semi(sh, "FB", "BLM18PG121", {1: a, 2: b}, note=note, value="120R@100MHz 2A")
 
 
-def header(sh, ref, rows, n, value, conn, src=AKI, code="", dnp=False, note=""):
+def header(sh, ref, rows, n, value, conn, note=""):
+    """A 2.54 mm pin header position that is left empty (an option to fit by hand)."""
     if rows == 1:
         sym = f"Connector_Generic:Conn_01x{n:02d}"
     else:
         sym = f"Connector_Generic:Conn_{rows:02d}x{n:02d}_Odd_Even"
-    fp = FP_HDR.format(r=rows, n=n)
-    return sh.lib("J", sym, value, fp, src, code, conn, dnp, note, ref=ref)
+    return sh.lib("J", sym, value, FP_HDR.format(r=rows, n=n), AKI, "", conn, True, note, ref=ref)
 
 
-def socket(sh, ref, n, value, conn, src=AKI, code="", dnp=False, note=""):
-    return sh.lib("J", f"Connector_Generic:Conn_01x{n:02d}", value, FP_SOCKET.format(n=n), src, code, conn, dnp, note, ref=ref)
+def solder_jumper2(sh, ref, value, a, b, note=""):
+    """Two pads that are open until someone bridges them with solder."""
+    return sh.lib("JP", "Jumper:SolderJumper_2_Open", value, FP_SJ2, PCB, "", {1: a, 2: b}, False, note, ref=ref)
+
+
+def solder_jumper3(sh, ref, value, a, common, b, note=""):
+    """Three pads; the board is made with a-common joined by a copper bridge that can be cut."""
+    return sh.lib("JP", "Jumper:SolderJumper_3_Bridged12", value, FP_SJ3, PCB, "", {1: a, 2: common, 3: b}, False, note, ref=ref)
 
 
 def testpoint(sh, net, name=None):

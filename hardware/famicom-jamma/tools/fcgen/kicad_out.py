@@ -248,7 +248,7 @@ def write_project(design, outdir, power_flag_nets):
 
     root = ksa.create_schematic(name)
     root.set_paper_size("A3")
-    root.set_title_block(title=design.title, rev="0.1", company="")
+    root.set_title_block(title=design.title, rev=design.rev, company="")
     root_items = [text(design.title, 20, 20, 3.0)]
     files = []
 
@@ -263,7 +263,7 @@ def write_project(design, outdir, power_flag_nets):
                 break
         sch = ksa.create_schematic(name)
         sch.set_paper_size(paper)
-        sch.set_title_block(title=f"{design.title} - {sh.title}", rev="0.1", company="")
+        sch.set_title_block(title=f"{design.title} - {sh.title}", rev=design.rev, company="")
         sx, sy = 25.4 + (idx % 4) * 63.5, 38.1 + (idx // 4) * 38.1
         su = root.add_sheet(sh.key, f"{sh.key}.kicad_sch", position=(sx, sy), size=(50.8, 25.4), project_name=name, page_number=str(idx + 2))
         sch.set_hierarchy_context(root.uuid, su)
@@ -274,9 +274,9 @@ def write_project(design, outdir, power_flag_nets):
         for p in parts:
             xy = pos[p.ref]
             props = {"Source": p.src}
-            if p.src == "JLC":
+            if p.src in ("JLC", "JLCX"):
                 props["LCSC"] = p.code
-            elif p.src == "AKI":
+            elif p.src == "AKI" and p.code:
                 props["Akizuki"] = p.code
             if p.note:
                 props["Note"] = p.note

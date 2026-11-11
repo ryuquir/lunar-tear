@@ -7,16 +7,18 @@ Conventions
 - A net is a plain string.  NC (None) marks a pin that is intentionally left open.
 - Every pin of every part must be given a net or NC; the build fails otherwise.
 - Sourcing class of each part (the project's parts rule):
-    JLC   : assembled by JLCPCB; must be a Basic part (LCSC number checked against data/)
-    AKI   : hand-soldered part bought from Akizuki Denshi (sales code)
-    DONOR : taken from the donor Famicom
-    PCB   : part of the bare board (jumpers, test points, footprints only)
+    JLC   : assembled by JLCPCB, a Basic part (LCSC number checked against data/jlcpcb_basic_parts_*.csv)
+    JLCX  : assembled by JLCPCB, an Extended part (checked against data/jlcpcb_extended_parts.csv:
+            the part must be in JLCPCB's library, assemblable on a Standard PCBA order, and in stock)
+    AKI   : hand-soldered part bought from Akizuki Denshi (sales code); only options that are not fitted use it now
+    DONOR : taken from the donor Famicom and plugged into a socket (the CPU and the PPU)
+    PCB   : part of the bare board (gold fingers, solder jumpers, test points)
 """
 from dataclasses import dataclass, field
 
 NC = None
 
-JLC, AKI, DONOR, PCB = "JLC", "AKI", "DONOR", "PCB"
+JLC, JLCX, AKI, DONOR, PCB = "JLC", "JLCX", "AKI", "DONOR", "PCB"
 
 PIN_TYPES = {
     "in": "input", "out": "output", "bi": "bidirectional", "tri": "tri_state",
@@ -65,19 +67,20 @@ class Part:
 
 
 class Design:
-    def __init__(self, name, title):
+    def __init__(self, name, title, rev="0.1"):
         self.name = name
         self.title = title
+        self.rev = rev
         self.symdefs = {}
         self.sheets = []
         self.parts = {}
         self._auto = {}
         self.notes = {}           # sheet key -> list of text notes
-        self.extras = []          # items to buy that have no footprint of their own (sockets, plug-in chips)
+        self.extras = []          # items of the parts list that are not schematic parts (the sockets under the donor chips)
 
-    def extra(self, src, code, value, qty, note=""):
-        """An item for the parts list that is not a schematic part (a socket, a jumper plug, ...)."""
-        self.extras.append((src, code, value, qty, note))
+    def extra(self, src, code, value, qty, note="", refs=""):
+        """An item for the parts list that is not a schematic part.  refs: the positions where it is fitted."""
+        self.extras.append((src, code, value, qty, note, refs))
 
     # ---- symbols ----
     def symdef(self, name, prefix, left, right, desc=""):
