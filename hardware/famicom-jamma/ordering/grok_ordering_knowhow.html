@@ -1,0 +1,339 @@
+<html>
+<head><meta charset="utf-8"><title>01 発注のノウハウとバグチェック</title></head>
+<body>
+<h1>基板屋（JLCPCB）への発注のノウハウとバグチェック　ファミコンアーキテクチャー基盤 rev 0.3</h1>
+<p>版: 2026-11-14。JLCPCB の公開ページ（各節の末尾と 13 章に、ページと更新日を記載）と、この基板の設計記録をもとに書いています。</p>
+
+<h2>0. この文書の使い方</h2>
+<ul>
+<li>この文書は、GrokBOT が基板（PCB の製造と部品の実装）を JLCPCB に発注するときの手順書です。依頼者と設計者も使います。</li>
+<li><b>使うのは、次の 2 つがそろってからです。</b>
+  <ul>
+  <li>「50_製造データ（段階3で入る）」フォルダにファイルがそろっている。</li>
+  <li>「01_【Grok用】発注代行の指示書」が「発注用」の版に差し替わっている。</li>
+  </ul>
+  それまでは、手順を知るために読むだけにします。</li>
+<li>各章に「確認」の項目があります。すべて満たされたら、次の章へ進みます。1 つでも満たされなければ、その場で<b>止まり</b>、依頼者に報告します。報告には、画面の写しと、表示された文言をそのまま付けます。画面の写しでは、住所・氏名・電話番号・カードの番号を塗りつぶします。</li>
+<li>JLCPCB の注文画面には、この文書の表に無い項目もたくさんあります。表に無い項目は、JLCPCB が最初から選んでいる値のまま触りません。その値のせいで金額が増えているときだけ、画面の写しを撮って<b>止まります</b>。</li>
+<li>表にある項目が見つからないときや、表の値が選べないときは、推測で選ばずに<b>止まります</b>。画面の項目名は、JLCPCB の更新で変わることがあります。</li>
+<li>OK を出せるのは依頼者だけです。設計者（この基板を設計している AI）の意見は、依頼者を通して届きます。JLCPCB の技術者（engineer）の言葉は OK ではありません。</li>
+</ul>
+
+<h2>1. 全体の流れ</h2>
+<ol>
+<li>製造データを受け取り、確かめる（2 章）</li>
+<li>JLCPCB に Gerber をアップロードし、PCB の仕様を選ぶ（3 章）</li>
+<li>部品の実装（PCB Assembly）を選び、部品表と部品の位置の表をアップロードする（4 章）</li>
+<li>部品の照合を確かめる（5 章）</li>
+<li>配置の確認画面で、部品の向きを確かめる（6 章）</li>
+<li>見積もりを確かめる（7 章）</li>
+<li>支払いの前に止まり、依頼者の承認を得る（8 章）</li>
+<li>注文のあと: 製造ファイルの確認、技術的な質問への対応、発送（9 章）</li>
+<li>納品後: 受け入れ検査（10 章。依頼者の作業）</li>
+</ol>
+
+<h2>2. 製造データの確認（発注前のバグチェック その 1）</h2>
+<p>「50_製造データ（段階3で入る）」フォルダには、段階 3 で次のファイルが入ります。</p>
+<table border="1">
+<tr><th>ファイル</th><th>中身</th></tr>
+<tr><td>fcjamma_gerber_rev○.zip</td><td>Gerber と穴あけのデータ。JLCPCB にそのままアップロードする</td></tr>
+<tr><td>fcjamma_bom_jlcpcb_rev○.csv</td><td>部品表。列は Comment, Designator, Footprint, JLCPCB Part #</td></tr>
+<tr><td>fcjamma_cpl_jlcpcb_rev○.csv</td><td>部品の位置の表。列は Designator, Mid X, Mid Y, Layer, Rotation</td></tr>
+<tr><td>製造データの確認記録_rev○.txt</td><td>設計者が行った検査の結果。最後の行が「OK」</td></tr>
+<tr><td>配置確認用の図_rev○.png</td><td>向きのある部品の正しい向きを示した図（6 章で使う）</td></tr>
+</table>
+<p><b>確認</b></p>
+<ul>
+<li>上の 5 つがすべてあり、rev の番号がすべて同じ。</li>
+<li>確認記録の最後の行が「OK」。確認記録の日付が、ほかの 4 つのファイルの更新日と同じか、それより後。</li>
+<li>確認記録に書かれた各ファイルのバイト数が、実物と同じ。</li>
+<li>部品表の JLCPCB Part # が、すべての行で埋まっている。部品表には、次のものは載せない。
+  <ul>
+  <li>ドナー機から移す CPU と PPU のチップ。U1 と U6 の位置には、チップではなくソケット（C2874018）が載る。</li>
+  <li>基板そのものの部分（J1 の金フィンガー、テストパッド TP1〜TP20、はんだジャンパ JP1〜JP3）。</li>
+  <li>実装しない部品（ヘッダの位置 J2、J3、J4、J5、J7、J9、J11、J16 など）。</li>
+  </ul>
+</li>
+<li>部品の位置の表の Layer が、すべて Top。</li>
+<li>部品表と部品の位置の表とで、位置番号（Designator）が一致する。</li>
+</ul>
+<p>1 つでも満たされなければ<b>止まる</b>。</p>
+
+<h2>3. PCB の仕様（JLCPCB の注文画面）</h2>
+<table border="1">
+<tr><th>項目</th><th>選ぶ値</th><th>理由</th></tr>
+<tr><td>Base Material</td><td>FR-4</td><td>標準</td></tr>
+<tr><td>Layers</td><td>確認記録に書かれた層数（2 の予定）</td><td>設計で決まる</td></tr>
+<tr><td>Dimensions</td><td>自動で読み取られた値</td><td>確認記録に書かれた外形寸法（捨て基板を含む。案では 230 × 162 mm、捨て基板を除くと 220 × 162 mm）と、縦・横とも 1 mm 以内で一致すること。外れたら<b>止まる</b></td></tr>
+<tr><td>PCB Qty</td><td>5</td><td>試作の枚数（依頼者の指示があればその数）</td></tr>
+<tr><td>Product Type</td><td>Industrial/Consumer electronics</td><td>標準</td></tr>
+<tr><td>Different Design</td><td>1</td><td>1 種類の基板</td></tr>
+<tr><td>Delivery Format</td><td>Single PCB</td><td>面付けしない。金フィンガーは基板の外周に出す必要がある</td></tr>
+<tr><td>PCB Thickness</td><td>1.6 mm</td><td>JAMMA のコネクタは 1.6 mm の基板用。GrokBOT はこの値を変えない</td></tr>
+<tr><td>PCB Color</td><td>Green</td><td>安くて早い。別の色は依頼者の指示があるときだけ</td></tr>
+<tr><td>Silkscreen</td><td>White</td><td>標準</td></tr>
+<tr><td>Surface Finish</td><td>ENIG</td><td>金フィンガーは ENIG のときだけ金になる。HASL では錫になる</td></tr>
+<tr><td>Gold Thickness</td><td>1 U"</td><td>2 U" は依頼者の指示があるときだけ</td></tr>
+<tr><td>Gold Fingers</td><td>Yes。面取り（Bevel、Chamfer）は 30°</td><td>筐体のコネクタに挿す端子。JLCPCB は 45° より 30° を勧めている</td></tr>
+<tr><td>Outer Copper Weight</td><td>1 oz</td><td>標準</td></tr>
+<tr><td>Via Covering</td><td>Tented</td><td>Pico 2 の下に露出した銅を作らない</td></tr>
+<tr><td>Mark on PCB</td><td>付けない</td><td>2026 年 5 月以降、何も選ばなければ印は付かない</td></tr>
+<tr><td>Confirm Production File</td><td>Yes</td><td>製造前に JLCPCB の技術者が作ったデータを確かめる（9 章）</td></tr>
+<tr><td>Castellated Holes、Edge Plating、Impedance Control など、ほかの特別な加工</td><td>No</td><td>使わない</td></tr>
+<tr><td>PCB Remark（PCB 側の備考）</td><td>空欄</td><td>必要なことは、部品実装の備考に書く（4 章）</td></tr>
+</table>
+<p><b>確認</b></p>
+<ul>
+<li>寸法と層数が確認記録と同じ。</li>
+<li>金フィンガーの面取りの図が表示され、角度が 30° になっている。参考: 厚さ 1.6 mm の基板を 30° で面取りするときは、先端から約 1.13 mm に銅を置いてはいけない（JLCPCB の Copper Setback）。この基板は 1.2 mm 空けてある。</li>
+<li>選べない値や、見当たらない項目が無い。捨て基板の取り外し（Depanel、Remove edge rails など）は選んでいない。</li>
+</ul>
+<p>根拠: JLCPCB「Gold Fingers」（2026-11-10 更新）、「How to mark on PCB」（2026-05-22 更新）、「How to confirm the production file」（2026-11-10 更新）。</p>
+
+<h2>4. 部品の実装（PCB Assembly）の設定</h2>
+<table border="1">
+<tr><th>項目</th><th>選ぶ値</th><th>理由</th></tr>
+<tr><td>PCB Assembly</td><td>On</td><td>部品をすべて JLCPCB に付けてもらう</td></tr>
+<tr><td>PCBA Type</td><td>Standard</td><td>金フィンガーのある基板は Standard だけ。Pico 2 も「Standard Only」の部品</td></tr>
+<tr><td>Assembly Side</td><td>Top Side</td><td>部品は表面だけ</td></tr>
+<tr><td>PCBA Qty</td><td>5</td><td>PCB Qty と同じ</td></tr>
+<tr><td>Edge Rails / Fiducials</td><td>捨て基板を自分で付けた側の選択肢（Added by Customer など、画面の表記どおり）</td><td>Standard PCBA では、捨て基板（幅 5 mm 以上）と位置合わせマークが要る。設計者が、金フィンガーの辺と直角な左右 2 辺に付ける。確認記録に「捨て基板あり（左右 2 辺、幅 5 mm）」と書かれていない、またはガーバーの表示に捨て基板が見えないときは<b>止まる</b>。「Added by JLCPCB」は選ばない（金フィンガーの辺に捨て基板が付くと、面取りができない）</td></tr>
+<tr><td>Confirm Parts Placement</td><td>Yes</td><td>0.45 米ドル。部品の向きを JLCPCB と確かめるため</td></tr>
+<tr><td>PCBA Remark（部品実装の備考）</td><td>下の英文をそのまま貼る</td><td>JLCPCB は発注者の Gerber からステンシル（はんだを塗る型）を作らない。特別な指定は備考に書く必要がある</td></tr>
+</table>
+<p>備考の英文です。依頼 1 の回答によって変わることがあり、そのときは設計者がこの文書を更新します。</p>
+<blockquote>
+<p>1. U25, U26, U27 (C41407547, Raspberry Pi Pico 2): machine placement and reflow only, no hand soldering. Please use stencil apertures of 3.8 x 2.2 mm on the 40 castellated edge pads (Raspberry Pi Pico 2 datasheet, section 3.2, Figure 6) and the same size on the 3 debug pads at the end of each module. Please print solder paste on the six round pads under each module that belong to the module footprint (the module's pads TP1 to TP6 of U25, U26 and U27; these are not the board test points TP1 to TP20). Do not print paste at the module's TP7 position: our board has no pad and no copper there.</p>
+<p>2. Please protect the gold fingers with high-temperature tape during reflow and through-hole soldering. No solder or flux on the fingers.</p>
+<p>3. Through-hole parts (U1, U6: C2874018 sockets; J8: C5173310; SW3: C92645; RV1: C118956): please keep flux and solder out of the socket and connector contacts.</p>
+<p>4. Please send us the X-ray images of U25, U26 and U27.</p>
+</blockquote>
+<p>JLCPCB は「英語の備考があると審査に時間がかかる」と書いています。それでも、この基板では必要です。</p>
+<p>次に、部品表（BOM）と部品の位置の表（CPL）をアップロードします。</p>
+<p>根拠: JLCPCB「SMT Stencil Data Prepared for SMT Orders」（2026-09-09 更新）、「How to add edge rails/fiducials for PCB assembly order」（2026-09-09 更新）、「Instructions for ordering」、部品実装の料金表（2026-10-22 更新）。</p>
+
+<h2>5. 部品の照合（BOM マッチング）</h2>
+<p>JLCPCB は、部品表の JLCPCB Part #（C で始まる番号）で部品を照合します。</p>
+<p><b>確認</b></p>
+<ul>
+<li>画面の行数、異なる C 番号の数、実装点数の 3 つが、確認記録に書かれた数と一致する（rev 0.3 の時点で、異なる C 番号が 50 個、実装点数が 343 点。うち Pico 2 が 3 点、ソケットが 2 点。画面の行数は、確認記録の値を使う）。</li>
+<li>どの部品も、部品表の C 番号と画面の C 番号が同じ。</li>
+<li>在庫不足（Shortfall、Out of stock）の部品が 1 つも無い。</li>
+<li>代わりの部品や似た部品に置き換わっていない。</li>
+<li>「実装しない」になっている部品が無い。</li>
+<li>Pico 2（C41407547）は、事前購入した分があれば、その在庫（My Parts Lib）が使われている。</li>
+<li>手で挿す部品 4 種が「Wave Soldering」と表示されている。
+  <ul>
+  <li>C2874018（ソケット、U1 と U6 の 2 個）</li>
+  <li>C5173310（カセット端子 J8）</li>
+  <li>C92645（DIP スイッチ SW3）</li>
+  <li>C118956（音量の半固定抵抗 RV1）</li>
+  </ul>
+  これらは作業者が手ではんだ付けするので、納期が 1 日延びます。</li>
+</ul>
+<p>1 つでも満たされなければ<b>止まる</b>。在庫不足を自分で解決しない（代わりの部品も Global Sourcing も使わない）。</p>
+
+<h2>6. 配置の確認画面（いちばん大事なバグチェック）</h2>
+<p>JLCPCB の部品データと、こちらの設計データとでは、部品の向き（回転）やピン番号の付け方が違うことがあります。部品が 90° や 180° 回って付くと、基板は動きません。ダイオードや TVS が逆向きだと、電源の短絡（D2）、Pico 2 の電源が入らない（D3、D4）、コインの出力が入ったままになる（D7〜D10）といった故障になります。</p>
+<p>配置の確認画面（2D と 3D の表示）で、次の部品を 1 つずつ確かめてください。正しい向きは、「配置確認用の図」と、基板に印刷された印（シルク）で判断します。</p>
+<table border="1">
+<tr><th>部品</th><th>位置番号</th><th>確かめること</th><th>間違えたときの結果</th></tr>
+<tr><td>入口の逆接続保護ダイオード SS54（+5V と GND の間）</td><td>D2</td><td>帯（カソード）の側がシルクの帯と同じ</td><td>電源を入れると +5V が GND に短絡する。自己復帰ヒューズ F1 が働いて電源が入らない。D2 と筐体の電源が過熱する恐れがある</td></tr>
+<tr><td>ダイオード SS14</td><td>D3、D4</td><td>同上</td><td>Pico 2 に電源が入らない</td></tr>
+<tr><td>TVS SMAJ15A</td><td>D7〜D10</td><td>同上（帯がコイン用出力の側）</td><td>コインカウンタなどに電流が流れ続け、部品が過熱する</td></tr>
+<tr><td>双方向 TVS SMBJ6.5CA</td><td>D1</td><td>向きは問わない。付いていることだけ確かめる</td><td>—</td></tr>
+<tr><td>LED</td><td>D5、D6</td><td>帯（カソード）の向き</td><td>点灯しない</td></tr>
+<tr><td>タンタルコンデンサ</td><td>C6、C13、C18、C50</td><td>帯（＋）の向き</td><td>発熱、破損</td></tr>
+<tr><td>電解コンデンサ 470 µF</td><td>C1、C23</td><td>− の印の向き</td><td>破損</td></tr>
+<tr><td>IC（SOIC、MSOP、SOT など）</td><td>U2、U4、U5、U7、U9〜U24、U28、U29</td><td>1 番ピンの印（点、切り欠き、面取り）がシルクの印と同じ</td><td>動かない、壊れる</td></tr>
+<tr><td>RAM（TSOP、足が細かい）</td><td>U3、U8</td><td>1 番ピンの点が、シルクの点と同じ角にある</td><td>動かない</td></tr>
+<tr><td>Raspberry Pi Pico 2</td><td>U25、U26、U27</td><td>外形がシルクの外形にぴったり重なる。USB 端子の側がシルクの印の側。JLCPCB の部品データは、こちらのデータに対して 90° 回っていることがある</td><td>動かない。付いたあとは外せない</td></tr>
+<tr><td>トランジスタ（SOT-23）</td><td>Q1〜Q8</td><td>3 本の足が、すべてパッドに乗っている</td><td>動かない</td></tr>
+<tr><td>IC ソケット</td><td>U1、U6</td><td>切り欠きの向きがシルクと同じ</td><td>CPU と PPU を逆に挿す原因になる</td></tr>
+<tr><td>タクトスイッチ</td><td>SW1、SW2、SW4、SW5</td><td>4 本の足が、配置確認用の図と同じ向きでパッドに乗っている（90° 回っていない）</td><td>押していないのに押した状態になる。SW4 や SW5 だと Pico C が動かない</td></tr>
+<tr><td>DIP スイッチ</td><td>SW3</td><td>「ON」の側と 1 番の位置がシルクと同じ</td><td>モードの切り替えが逆になる</td></tr>
+<tr><td>USB Type-C 端子</td><td>J10</td><td>差し込み口が基板の端を向いている</td><td>ケーブルが挿さらない</td></tr>
+<tr><td>カセット端子</td><td>J8</td><td>外形がシルクの外形に重なる</td><td>カセットが挿さらない</td></tr>
+</table>
+<p><b>確認</b>: 1 つでも向きが違う、または判断できないときは、画面の写しを撮り、<b>止まって</b>依頼者に報告します。GrokBOT は自分で回転を直しません。</p>
+
+<h2>7. 見積もりの確認</h2>
+<p>部品と実装の目安です（2026-11-14 時点、5 枚。「23_【参考】費用の内訳.csv」による）。</p>
+<table border="1">
+<tr><th>項目</th><th>5 枚の合計（米ドル）</th></tr>
+<tr><td>部品代</td><td>約 211</td></tr>
+<tr><td>はんだ付けの従量分（表面実装 1 か所 0.0016、手作業 1 か所 0.0164）</td><td>約 23</td></tr>
+<tr><td>X 線検査（Pico 2 の 15 個。11〜50 個は 1 個 0.82）</td><td>約 12</td></tr>
+<tr><td>注文ごとの料金（下の内訳）</td><td>約 109</td></tr>
+<tr><td><b>部品と実装の合計</b></td><td><b>約 355</b></td></tr>
+</table>
+<p>注文ごとの料金の内訳は次のとおりです。</p>
+<ul>
+<li>段取り 25.56</li>
+<li>ステンシル 8.21</li>
+<li>部品の装着料 46 種 × 1.53 = 70.38</li>
+<li>手作業の基本料 3.58</li>
+<li>梱包 約 0.50</li>
+<li>配置の確認 0.45</li>
+</ul>
+<p>次のものは目安に入っていません。追加になることがあります。</p>
+<ul>
+<li>はんだ付け用の治具（見積もりの表記は Fixture）16.42</li>
+<li>Pico 2 のはんだ付けの前作業（Pre-reflow Soldering。1 か所 0.016、1 枚あたり最大約 2.35）</li>
+<li>挿入部品 4 種の装着料（Feeder Loading。4 × 1.53 = 6.12。請求される場合）</li>
+<li>ステンシルの保管（Stencil Storage 4.93。選ばない）</li>
+<li>歩留まり用に多めに請求される部品</li>
+</ul>
+<p>PCB の製造費（約 220 × 162 mm、2 層、ENIG、金フィンガー）、送料、輸入時の税は別です。</p>
+<p><b>確認</b>: 部品と実装の合計が 270〜450 米ドルの範囲に入っている。外れるときは、内訳の写しを撮って<b>止まる</b>。</p>
+<p>根拠: JLCPCB 部品実装の料金表（2026-10-22 更新）、Pico 2 の部品ページ（「X-ray Inspection: Required」）。</p>
+
+<h2>8. 支払いの前に止まる</h2>
+<p>支払いの前に、次のものを依頼者に見せます。</p>
+<ul>
+<li>合計金額（PCB、部品、実装、送料、税）とその内訳の写し</li>
+<li>納期と配送方法</li>
+<li>2 章〜7 章の確認結果（すべて満たされていること）</li>
+<li>6 章の配置確認画面の写し</li>
+</ul>
+<p>あわせて、アップロードした 3 つのファイル（Gerber、部品表、部品の位置の表）、備考の全文、見積もりの写しを「60_注文の記録（Grokが記録を置く）」に保存します。</p>
+<p>依頼者の「OK」を受けてから支払います。</p>
+
+<h2>9. 注文のあと</h2>
+<h3>9.1 製造ファイルの確認（Confirm Production File）</h3>
+<ol>
+<li>支払いのあと、JLCPCB から確認の依頼メールが来ます。注文履歴の「confirm production file」から、製造ファイル（zip）をダウンロードします。</li>
+<li>zip を「60_注文の記録（Grokが記録を置く）」に保存し、依頼者に知らせます。zip の中身は次のとおりです。
+  <ul>
+  <li>yg フォルダ: 発注者のデータ</li>
+  <li>ok フォルダ: JLCPCB の技術者が作った製造用のデータ</li>
+  <li>info フォルダ: 見なくてよい</li>
+  </ul>
+</li>
+<li>zip は展開しても、中身を書き換えません。zip の中のファイルは実行しません。</li>
+<li>「Yes, please proceed to production」は、依頼者が OK と言うまで押しません。依頼者には、特に次を見てもらいます。
+  <ul>
+  <li>金フィンガー（長さが短くされていないか、面取り、キー溝）</li>
+  <li>外形と穴</li>
+  </ul>
+</li>
+<li>直してほしい点があるときは、依頼者の指示を受けて「not good, modification needed」を選び、指示の内容を書きます。</li>
+</ol>
+
+<h3>9.2 部品の配置の確認（Confirm Parts Placement）</h3>
+<ul>
+<li>支払いのあと、JLCPCB の技術者が直した配置の画像と、確認の依頼が届きます（注文で Confirm Parts Placement を Yes にしたため）。</li>
+<li>全文と画像を、すぐに依頼者へ送ります。承認（Confirm）や修正の依頼は、依頼者の指示を受けてから行います。GrokBOT が自分で承認しません。</li>
+<li>返事の期限が書かれていたら、報告の 1 行目に書きます。</li>
+</ul>
+
+<h3>9.3 技術的な質問（Engineering Question、EQ）</h3>
+<ul>
+<li>JLCPCB の技術者から、質問のメールが来ることがあります（部品の向き、パッド、ステンシルなど）。</li>
+<li>全文を、すぐに依頼者へ転送します。GrokBOT は答えません。</li>
+<li>回答が遅れると製造が止まります。</li>
+</ul>
+
+<h3>9.4 そのほかの連絡</h3>
+<ul>
+<li>注文のあとに、次の連絡が来ることがあります。どの選択肢も選ばず、全文と期限を依頼者へ送ります。期限が 24 時間以内なら、報告の先頭にそう書きます。
+  <ul>
+  <li>在庫不足</li>
+  <li>部品の取り外し（実装しない）</li>
+  <li>別の部品や、Economic PCBA への変更の提案</li>
+  <li>追加料金（ステップステンシルなど）</li>
+  </ul>
+</li>
+</ul>
+
+<h3>9.5 発送</h3>
+<ul>
+<li>追跡番号を記録し、依頼者に知らせます。</li>
+<li>輸入のとき、配送業者から消費税と手数料の請求が来ることがあります。支払うのは依頼者です。</li>
+</ul>
+
+<h2>10. 納品後の受け入れ検査（依頼者の作業）</h2>
+<p>GrokBOT は、この一覧を依頼者に渡すだけです。</p>
+<ol>
+<li><b>外観を見る。</b>基板は、捨て基板が付いたまま届きます。捨て基板を折る前に、次を確かめます。
+  <ul>
+  <li>Pico 2 の縁のはんだ</li>
+  <li>ダイオード、TVS、LED、コンデンサの向き（6 章）</li>
+  <li>金フィンガーに、はんだやフラックスが付いていないか</li>
+  <li>ソケットの穴が汚れていないか</li>
+  </ul>
+</li>
+<li><b>捨て基板を外す。</b>V カットの溝に沿って折ります。基板を大きく曲げないでください。Pico 2 の近くは特に注意します。</li>
+<li><b>電源だけを確かめる。</b>CPU と PPU はまだ挿しません。手順は「20_【参考】設計記録（README）」の 7 章にあります。</li>
+<li><b>USB を確かめる。</b>Type-C 端子でパソコンにつなぎ、USB ドライブが見えるかを見ます。見えれば、Pico C（U27）の裏側のパッド（TP2・TP3）が正しくはんだ付けされています。Pico A・B（U25、U26）の確認は、設計記録 7 章の手順で行います。</li>
+<li>以降は、設計記録 7 章の順で確かめます。</li>
+<li>不良を見つけたら写真を撮り、JLCPCB に連絡する前に設計者に見せます。JLCPCB の不良か、設計の誤りかを切り分けるためです。</li>
+</ol>
+<p>JLCPCB は、届いたら確かめて報告するように求めています。報告せずに再注文すると、補償の対象は最初の注文だけになります（「Instructions for ordering」）。</p>
+
+<h2>11. よくある失敗と、この基板での対策（ノウハウ集）</h2>
+<table border="1">
+<tr><th>#</th><th>よくある失敗</th><th>この基板での対策</th></tr>
+<tr><td>1</td><td>金フィンガーの面取りの範囲に銅がある。面取りで削られて、銅が露出する</td><td>設計で、先端から 1.2 mm には銅を置かない（30° の面取りで約 1.13 mm 削られる）</td></tr>
+<tr><td>2</td><td>金フィンガーを面付けの内側に置く。面取りできない</td><td>単品（Single PCB）で発注する。捨て基板は、金フィンガーの辺と直角な左右の 2 辺だけに付ける</td></tr>
+<tr><td>3</td><td>表面処理に HASL を選ぶ。金フィンガーが錫になる</td><td>ENIG を選ぶ</td></tr>
+<tr><td>4</td><td>Economic PCBA を選ぶ</td><td>金フィンガーのある基板は Standard PCBA で発注する</td></tr>
+<tr><td>5</td><td>部品の向き（回転）を誤る</td><td>配置の確認画面で確かめる（6 章）。設計者は、回転の補正表を作って確かめる</td></tr>
+<tr><td>6</td><td>在庫切れ、在庫不足</td><td>発注の直前に在庫を確かめる（設計者は tools/jlc_parts.py で取り直す）。代わりの部品は選ばない</td></tr>
+<tr><td>7</td><td>部品の種類が増えて、装着料がかさむ</td><td>1 種類あたり 1.53 米ドル。この基板は、表面実装の部品が 46 種類</td></tr>
+<tr><td>8</td><td>手で挿す部品を使うと、納期と費用が増える</td><td>納期は 1 日延びる。費用は手作業の基本料 3.58 米ドルと、はんだ 1 か所 0.0164 米ドル</td></tr>
+<tr><td>9</td><td>Pico 2 の裏側のパッドは、手はんだでは付かない</td><td>リフローで付けることと、はんだの量（ステンシルの開口）を備考で指定する</td></tr>
+<tr><td>10</td><td>特別なはんだの量を Gerber で指定したつもりになる。JLCPCB のステンシルは、発注者の Gerber からは作られない</td><td>必要な指定は備考に書く</td></tr>
+<tr><td>11</td><td>説明書きを zip に入れる。JLCPCB は Gerber 以外を読まない</td><td>必要な指定は Gerber に入れるか、備考に書く。英語の備考があると審査に時間がかかる</td></tr>
+<tr><td>12</td><td>製造ファイルを確かめない</td><td>Confirm Production File を Yes にする（9.1 節）</td></tr>
+<tr><td>13</td><td>捨て基板が付いたまま届いて驚く</td><td>外すのは自分で行う。JLCPCB に頼むと追加料金になる</td></tr>
+<tr><td>14</td><td>再注文で、前と違うものが届く</td><td>再注文では、前回の製造ファイルがそのまま使われる。注文番号を記録しておく</td></tr>
+<tr><td>15</td><td>注文番号の印を消し忘れる</td><td>2026 年 5 月から、注文番号の印は廃止された。何も選ばなければ印は付かない。シルクに「JLCJLCJLCJLC」を入れない</td></tr>
+<tr><td>16</td><td>X 線検査の料金を見落とす</td><td>Pico 2 は X 線検査が必須。1〜10 個は 1 個 1.64 米ドル、11〜50 個は 0.82 米ドル</td></tr>
+<tr><td>17</td><td>基板の厚さがばらつく</td><td>JLCPCB の公差は ±10%（±0.16 mm）で、JAMMA のコネクタの想定（1.6 ± 0.15 mm）をわずかに超える。依頼 1 の質問 5 の回答をもとに、設計者が決める。GrokBOT は厚さの選択を 1.6 mm から変えない</td></tr>
+<tr><td>18</td><td>輸入時の税を見落とす</td><td>配送業者が、消費税と手数料を請求する</td></tr>
+</table>
+
+<h2>12. 設計者が行っているバグチェック（参考）</h2>
+<ul>
+<li><b>回路の検査（tools/build.py）</b>: 次を確かめています。
+  <ul>
+  <li>部品が JLCPCB にあるか、在庫は足りるか、品名とパッケージは合っているか</li>
+  <li>依頼者が自分ではんだ付けする部品が無いこと（JLCPCB の作業者が手ではんだ付けする挿入部品 4 種は別）</li>
+  <li>フットプリント</li>
+  <li>電気的規則チェック（ERC）と、ネットリストの一致</li>
+  <li>基板固有の規則 6 つ</li>
+  <li>データシートから書き起こした事実</li>
+  </ul>
+  わざと入れた 52 種類の誤りを、すべて検出することを確認済みです。</li>
+<li><b>設計者以外による回路の見直し</b>: 3 回行いました。</li>
+<li><b>段階 3 で加える検査</b>: 次を行い、結果を「製造データの確認記録」に書きます。
+  <ul>
+  <li>DRC（配線の規則の検査）</li>
+  <li>Gerber を別のビューアで見る確認</li>
+  <li>部品表と部品の位置の表の照合</li>
+  <li>回転の補正</li>
+  <li>金フィンガーの寸法</li>
+  <li>JLCPCB の DFM チェック</li>
+  </ul>
+</li>
+</ul>
+
+<h2>13. 根拠にした資料</h2>
+<ul>
+<li>JLCPCB 部品実装の料金表（2026-10-22 更新）: https://jlcpcb.com/help/article/pcb-assembly-price</li>
+<li>JLCPCB ステンシルの作り方（2026-09-09 更新）: https://jlcpcb.com/help/article/smt-stencil-data-prepared-for-smt-orders</li>
+<li>JLCPCB 金フィンガー（2026-11-10 更新）: https://jlcpcb.com/help/article/jlcpcb-gold-fingers</li>
+<li>JLCPCB 捨て基板と位置合わせマーク（2026-09-09 更新）: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order</li>
+<li>JLCPCB 基板への印（2026-05-22 更新）: https://jlcpcb.com/help/article/How-to-mark-on-PCB</li>
+<li>JLCPCB 製造ファイルの確認（2026-11-10 更新）: https://jlcpcb.com/help/article/how-to-confirm-the-production-file</li>
+<li>JLCPCB 発注の注意: https://jlcpcb.com/help/article/instructions-for-ordering</li>
+<li>JLCPCB 部品表の形式（2026-09-09 更新）: https://jlcpcb.com/help/article/bill-of-materials-for-pcb-assembly</li>
+<li>JLCPCB 部品の位置の表の形式（2026-09-09 更新）: https://jlcpcb.com/help/article/pick-place-file-for-pcb-assembly</li>
+<li>JLCPCB KiCad からの Gerber の出し方（2026-11-10 更新）: https://jlcpcb.com/help/article/how-to-generate-gerber-and-drill-files-in-kicad-8</li>
+<li>JLCPCB 部品実装の FAQ（手で挿す部品は手作業、納期 +1 日）: https://jlcpcb.com/help/article/pcb-assembly-faqs</li>
+<li>JLCPCB 部品の購入と事前購入: https://jlcpcb.com/help/article/what-is-jlcpcb-parts-pre-order-service</li>
+<li>Raspberry Pi Pico 2 データシート（3.2 節と図 6、表面実装での使い方）: https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf</li>
+</ul>
+</body>
+</html>

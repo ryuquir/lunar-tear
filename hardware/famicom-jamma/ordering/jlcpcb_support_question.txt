@@ -1,12 +1,16 @@
-I am preparing a Standard PCBA order of 5 to 10 boards and would like to confirm a few points before I finish the layout. The board is 2 layers, 1.6 mm, ENIG, about 200 x 150 mm, with gold fingers on one edge (a JAMMA edge connector: 28 positions on each side at 3.96 mm pitch, one position is a key slot) and a 30 degree bevel on that edge. All parts are on the top side.
+Subject: Questions before a Standard PCBA order (Raspberry Pi Pico 2 modules, gold fingers, through-hole parts)
+
+Hello,
+
+I am preparing a Standard PCBA order of 5 boards (possibly 10 later) and would like to confirm a few points before I finish the layout. The board is 2 layers (4 if the routing needs it), 1.6 mm, ENIG, about 220 x 162 mm without rails (a 220 x 150 mm body plus a 114.4 mm wide, 12 mm long edge-connector tongue; 230 x 162 mm with the two edge rails of question 3), with gold fingers on that tongue (a JAMMA edge connector: 28 positions on each side at 3.96 mm pitch, one position is a key slot) and a 30 degree bevel on that edge. All parts are on the top side.
 
 1) Raspberry Pi Pico 2 module, JLCPCB part C41407547 (your part page says "SMT Assembly", "Standard Only", "X-ray Inspection: Required"). Each board carries three of them, soldered flat on the top side by their castellated edge pads.
 1a) Is the module placed by machine and soldered by reflow, or soldered by hand? I need reflow, because pads under the module must be soldered too (see 1c).
 1b) Which land pattern should I use? Is the official Raspberry Pi footprint (40 edge pads, 3 debug pads at the end of the module, 6 test pads underneath) acceptable?
-1c) The module has round test pads on its underside. My footprint has matching pads for TP1 to TP6 with solder paste, and I use TP2, TP3 and TP6 as electrical connections. Will these pads get stencil apertures and be soldered in the same reflow?
-1d) Raspberry Pi's datasheet (section 3.2, Figure 6) requires stencil apertures of 3.8 x 2.2 mm on the 40 edge pads, larger than the 3.2 x 1.6 mm pads. Do you apply this for C41407547 by default? If not, will you apply it when I ask in the order remarks?
-1e) What does the X-ray inspection of this part cost for 15 and for 30 modules (5 and 10 boards, three modules each)? Can you send me the X-ray images of the pads under the modules? Are there other charges for this part, for example manual placement or a fixture?
-1f) Your stock shows 55 pieces. If I need 30, should I pre-order them into my parts library now? Can you tell me the date code or the silicon revision (A2 or A4) of the RP2350 chip on these modules?
+1c) The module has round test pads on its underside. Our footprint for U25, U26 and U27 has pads for the module's TP1 to TP6 (these are not our board's own test points TP1 to TP20). There is no pad at the module's TP7, and we keep copper away from it. On U27 we use TP2, TP3 (USB) and TP6 (BOOTSEL) as electrical connections. Will these six pads get stencil apertures and be soldered in the same reflow, and will no paste be printed at TP7?
+1d) Raspberry Pi's datasheet (section 3.2, Figure 6) requires stencil apertures of 3.8 x 2.2 mm on the 40 edge pads, larger than the 3.2 x 1.6 mm pads. Do you apply this for C41407547 by default? If not, will you apply it when I ask in the order remarks? What aperture will you use on the 3 debug pads at the end of the module?
+1e) Your price page lists X-ray inspection at $0.82 per piece for 11 to 50 pieces. Is it charged per module (5 boards = 15 modules = 15 pieces)? Can you send us the X-ray images of the pads under the modules? Will 'Pre-reflow Soldering' or a fixture be charged for this part?
+1f) Is C41407547 restocked regularly? If we buy 17 pieces into our parts library now, are any extra pieces needed for losses (attrition)? Can you tell us the date code or the RP2350 revision (A2 or A4) of these modules?
 
 2) Through-hole parts on the same board, all marked "Wave Soldering" in your parts library: two 40-pin DIP IC sockets (C2874018), one 60-position card-edge connector (C5173310, 15.6 mm high), one 4-position DIP switch (C92645) and one trimmer potentiometer (C118956).
 2a) Can these be assembled on a board that has bevelled gold fingers? How are the gold fingers protected during soldering (tape, fixture)? Is a fixture charged?
@@ -14,6 +18,10 @@ I am preparing a Standard PCBA order of 5 to 10 boards and would like to confirm
 2c) Are these parts soldered by hand or by wave at this quantity? Is flux residue kept out of the socket and connector contacts, or cleaned?
 2d) Is the feeder loading fee charged for these through-hole parts as well, or only for the SMT parts?
 
-3) Edge rails and fiducials: can the two rails be on the two sides next to the gold-finger edge, so that the bevelled edge stays an outer edge of the panel?
+3) Edge rails and fiducials: we plan to add two 5 mm rails ourselves, on the left and right edges of the 220 x 150 mm body (the two 150 mm edges, perpendicular to the gold-finger edge), so that the bevelled gold-finger edge stays an outer edge. The size is then 230 x 162 mm. Is this acceptable for Standard PCBA, and should the rails be joined by V-cut or by mouse bites? We will put 3 fiducials (1 mm) on the rails.
 
 4) Does anything above require assembly on both sides, or add to the lead time?
+
+5) Tolerances at the edge connector: can you keep the board thickness at the gold fingers within 1.6 +/- 0.15 mm, and the width of the 114.4 mm tongue within +0/-0.2 mm? If this needs an option (for example a tighter board outline tolerance), which one, and what does it cost?
+
+Thank you very much for your help.

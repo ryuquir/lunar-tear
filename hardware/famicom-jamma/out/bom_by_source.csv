@@ -34,36 +34,36 @@ JLC,C7420377,SMBJ6.5CA,SMBJ6.5CA,Diode_SMD:D_SMB,1,,D1,JLCPCB (SMT Assembly),113
 JLC,C2480,SS14,SS14,Diode_SMD:D_SMA,2,,D3 D4,JLCPCB (SMT Assembly),1610469,0.0192,
 JLC,C22452,SS54,SS54,Diode_SMD:D_SMA,1,,D2,JLCPCB (SMT Assembly),1735691,0.0446,conducts and trips F1 if the supply is connected the wrong way round
 JLC,C318884,TS-1187A,TS-1187A-B-A-B,Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A,4,,SW1 SW2 SW4 SW5,JLCPCB (SMT Assembly),848744,0.0215,"TEST, same as JAMMA finger 15"
-JLCX,C118956,10k (volume),3362P-1-103,fcjamma:Trimmer_Bourns_3362P,1,,RV1,JLCPCB (Wave Soldering),33603,0.1725,"3362P: pin 2 is the wiper; clockwise moves it towards pin 3, so clockwise is louder"
-JLCX,C46550400,470u/16V,JVJ16V470M6x8,Capacitor_SMD:CP_Elec_6.3x7.7,2,,C1 C23,JLCPCB (SMT Assembly),126833,0.1079,
-JLCX,C5613,74HC165 (1P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U20,JLCPCB (SMT Assembly),210649,0.1022,
-JLCX,C5613,74HC165 (2P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U21,JLCPCB (SMT Assembly),210649,0.1022,
-JLCX,C5613,74HC165 (cartridge CPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U16,JLCPCB (SMT Assembly),210649,0.1022,
-JLCX,C5613,74HC165 (cartridge PPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U17,JLCPCB (SMT Assembly),210649,0.1022,
-JLCX,C5613,"74HC165 (start, coin, service)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U22,JLCPCB (SMT Assembly),210649,0.1022,
-JLCX,C5613,"74HC165 (switches, status)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U23,JLCPCB (SMT Assembly),210649,0.1022,
-JLCX,C6764,74HCT00,SN74HCT00DR,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,1,,U5,JLCPCB (SMT Assembly),1874,0.4038,"1: /ROMSEL = NAND(M2, A15); 2: /PA13 for the cartridge; 3: receives OUT0 at TTL levels; 4: optional 5 V clock buffer (JP2)"
-JLCX,C5965,74HCT138,"74HCT138D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U4,JLCPCB (SMT Assembly),3033,0.2716,"M2 high and A15 low: Y0 = 0000-1FFF (RAM), Y1 = 2000-3FFF (PPU), Y2 = 4000-5FFF, Y3 = 6000-7FFF"
-JLCX,C5209384,74HCT573,"74HCT573D,653",Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm,1,,U7,JLCPCB (SMT Assembly),34451,0.37,does the job of the Famicom's 74LS373: holds PA0-7 while the bus carries data
-JLCX,C282339,74HCT595 (CPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U10,JLCPCB (SMT Assembly),10081,0.2385,
-JLCX,C282339,74HCT595 (CPU A8-15),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U11,JLCPCB (SMT Assembly),10081,0.2385,the CPU address lines are driven directly: some cartridges load them with several 74LS inputs
-JLCX,C282339,74HCT595 (PPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U12,JLCPCB (SMT Assembly),10081,0.2385,
-JLCX,C282339,74HCT595 (PPU A8-13),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U13,JLCPCB (SMT Assembly),10081,0.2385,
-JLCX,C282339,74HCT595 (control),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U14,JLCPCB (SMT Assembly),10081,0.2385,"QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE M2, QF low = U15 drives the data bus"
-JLCX,C282339,74HCT595 (data to cartridge),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U15,JLCPCB (SMT Assembly),10081,0.2385,drives the data bus only while a mapper register is being written
-JLCX,C92645,DS-04RP (DIP switch 4),DS-04RP,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,JLCPCB (Wave Soldering),15031,0.3623,"1: off = CPU and PPU chips fitted, on = emulation (it also unlocks the dump drivers); 2-4: for the firmware"
-JLCX,C5173310,"ED60BGFBK (60-pin card edge, 2.54 mm)",ED60BGFBK,fcjamma:Famicom_Cart_60,1,,J8,JLCPCB (Wave Soldering),299,1.3568,made for 1.57 mm cards; its fit with Famicom cartridges has to be tried with a sample before the order
-JLCX,C47143,IS62C256AL (video RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U8,JLCPCB (SMT Assembly),2021,3.3248,
-JLCX,C47143,IS62C256AL (work RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U3,JLCPCB (SMT Assembly),2021,3.3248,
-JLCX,C283912,LMV7219,LMV7219M5X/NOPB,Package_TO_SOT_SMD:SOT-23-5,1,,U9,JLCPCB (SMT Assembly),2220,0.7569,"high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns; on +3V3, so its output suits the Pico"
-JLCX,C113367,PAM8302A,PAM8302AASCR,Package_SO:MSOP-8_3x3mm_P0.65mm,1,,U19,JLCPCB (SMT Assembly),20636,0.4103,"class D, gain 15 (23.5 dB), 1.3 W into 8 ohm at 1 % distortion (1.5 W at 10 %); powered from +5V, not through the +5V_SW switch"
-JLCX,C41407547,Pico 2 A (video),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U25,JLCPCB (SMT Assembly),55,9.2829,
-JLCX,C41407547,Pico 2 B (bus),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U26,JLCPCB (SMT Assembly),55,9.2829,
-JLCX,C41407547,"Pico 2 C (I/O, management)",Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U27,JLCPCB (SMT Assembly),55,9.2829,
-JLCX,C86819,SMAJ15A,SMAJ15A/TR13,Diode_SMD:D_SMA,4,,D7 D8 D9 D10,JLCPCB (SMT Assembly),88933,0.0475,"takes the coil's turn-off current: nothing flows up to 15 V (coil supplies above that are not allowed), the drain stays below 25 V (the transistor stands 30 V)"
-JLCX,C262042,TLC-LSMD300D (3 A hold),TLC-LSMD300D,Fuse:Fuse_2920_7451Metric,1,,F1,JLCPCB (SMT Assembly),11284,0.1526,"resettable fuse: holds 3 A, trips at 6 A"
-JLCX,C55266,TPS2553,TPS2553DBVR,Package_TO_SOT_SMD:SOT-23-6,1,,U29,JLCPCB (SMT Assembly),54487,0.5525,"off while EN is low or +5V is below 2.4 V; limits the current to 1.2-1.4 A; nothing flows back from +5V_SW to +5V; /FAULT pulls the I_5VSW bit low on over-current (after 7.5 ms), over-temperature or reverse voltage.  7 V is the part's absolute maximum; in a short circuit it switches off and on thermally until Pico C lowers EN"
-JLCX,C165948,USB Type-C socket (TYPE-C-31-M-12),TYPE-C-31-M-12,Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12,1,,J10,JLCPCB (SMT Assembly),283271,0.1867,
+JLCX,C118956,10k (volume),3362P-1-103,fcjamma:Trimmer_Bourns_3362P,1,,RV1,JLCPCB (Wave Soldering),28066,0.1727,"3362P: pin 2 is the wiper; clockwise moves it towards pin 3, so clockwise is louder"
+JLCX,C46550400,470u/16V,JVJ16V470M6x8,Capacitor_SMD:CP_Elec_6.3x7.7,2,,C1 C23,JLCPCB (SMT Assembly),119592,0.108,
+JLCX,C5613,74HC165 (1P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U20,JLCPCB (SMT Assembly),271161,0.1059,
+JLCX,C5613,74HC165 (2P),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U21,JLCPCB (SMT Assembly),271161,0.1059,
+JLCX,C5613,74HC165 (cartridge CPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U16,JLCPCB (SMT Assembly),271161,0.1059,
+JLCX,C5613,74HC165 (cartridge PPU data),"74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U17,JLCPCB (SMT Assembly),271161,0.1059,
+JLCX,C5613,"74HC165 (start, coin, service)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U22,JLCPCB (SMT Assembly),271161,0.1059,
+JLCX,C5613,"74HC165 (switches, status)","74HC165D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U23,JLCPCB (SMT Assembly),271161,0.1059,
+JLCX,C6764,74HCT00,SN74HCT00DR,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,1,,U5,JLCPCB (SMT Assembly),1874,0.4042,"1: /ROMSEL = NAND(M2, A15); 2: /PA13 for the cartridge; 3: receives OUT0 at TTL levels; 4: optional 5 V clock buffer (JP2)"
+JLCX,C5965,74HCT138,"74HCT138D,653",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U4,JLCPCB (SMT Assembly),3033,0.2718,"M2 high and A15 low: Y0 = 0000-1FFF (RAM), Y1 = 2000-3FFF (PPU), Y2 = 4000-5FFF, Y3 = 6000-7FFF"
+JLCX,C5209384,74HCT573,"74HCT573D,653",Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm,1,,U7,JLCPCB (SMT Assembly),34451,0.3703,does the job of the Famicom's 74LS373: holds PA0-7 while the bus carries data
+JLCX,C282339,74HCT595 (CPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U10,JLCPCB (SMT Assembly),6561,0.2388,
+JLCX,C282339,74HCT595 (CPU A8-15),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U11,JLCPCB (SMT Assembly),6561,0.2388,the CPU address lines are driven directly: some cartridges load them with several 74LS inputs
+JLCX,C282339,74HCT595 (PPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U12,JLCPCB (SMT Assembly),6561,0.2388,
+JLCX,C282339,74HCT595 (PPU A8-13),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U13,JLCPCB (SMT Assembly),6561,0.2388,
+JLCX,C282339,74HCT595 (control),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U14,JLCPCB (SMT Assembly),6561,0.2388,"QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE M2, QF low = U15 drives the data bus"
+JLCX,C282339,74HCT595 (data to cartridge),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U15,JLCPCB (SMT Assembly),6561,0.2388,drives the data bus only while a mapper register is being written
+JLCX,C92645,DS-04RP (DIP switch 4),DS-04RP,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,JLCPCB (Wave Soldering),14606,0.3626,"1: off = CPU and PPU chips fitted, on = emulation (it also unlocks the dump drivers); 2-4: for the firmware"
+JLCX,C5173310,"ED60BGFBK (60-pin card edge, 2.54 mm)",ED60BGFBK,fcjamma:Famicom_Cart_60,1,,J8,JLCPCB (Wave Soldering),296,1.358,made for 1.57 mm cards; its fit with Famicom cartridges has to be tried with a sample before the order
+JLCX,C47143,IS62C256AL (video RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U8,JLCPCB (SMT Assembly),2021,3.3279,
+JLCX,C47143,IS62C256AL (work RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U3,JLCPCB (SMT Assembly),2021,3.3279,
+JLCX,C283912,LMV7219,LMV7219M5X/NOPB,Package_TO_SOT_SMD:SOT-23-5,1,,U9,JLCPCB (SMT Assembly),745,0.7576,"high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns; on +3V3, so its output suits the Pico"
+JLCX,C113367,PAM8302A,PAM8302AASCR,Package_SO:MSOP-8_3x3mm_P0.65mm,1,,U19,JLCPCB (SMT Assembly),20283,0.4107,"class D, gain 15 (23.5 dB), 1.3 W into 8 ohm at 1 % distortion (1.5 W at 10 %); powered from +5V, not through the +5V_SW switch"
+JLCX,C41407547,Pico 2 A (video),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U25,JLCPCB (SMT Assembly),480,9.2916,
+JLCX,C41407547,Pico 2 B (bus),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U26,JLCPCB (SMT Assembly),480,9.2916,
+JLCX,C41407547,"Pico 2 C (I/O, management)",Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U27,JLCPCB (SMT Assembly),480,9.2916,
+JLCX,C86819,SMAJ15A,SMAJ15A/TR13,Diode_SMD:D_SMA,4,,D7 D8 D9 D10,JLCPCB (SMT Assembly),88864,0.0475,"takes the coil's turn-off current: nothing flows up to 15 V (coil supplies above that are not allowed), the drain stays below 25 V (the transistor stands 30 V)"
+JLCX,C262042,TLC-LSMD300D (3 A hold),TLC-LSMD300D,Fuse:Fuse_2920_7451Metric,1,,F1,JLCPCB (SMT Assembly),10660,0.1527,"resettable fuse: holds 3 A, trips at 6 A"
+JLCX,C55266,TPS2553,TPS2553DBVR,Package_TO_SOT_SMD:SOT-23-6,1,,U29,JLCPCB (SMT Assembly),48326,0.5531,"off while EN is low or +5V is below 2.4 V; limits the current to 1.2-1.4 A; nothing flows back from +5V_SW to +5V; /FAULT pulls the I_5VSW bit low on over-current (after 7.5 ms), over-temperature or reverse voltage.  7 V is the part's absolute maximum; in a short circuit it switches off and on thermally until Pico C lowers EN"
+JLCX,C165948,USB Type-C socket (TYPE-C-31-M-12),TYPE-C-31-M-12,Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12,1,,J10,JLCPCB (SMT Assembly),530495,0.1869,
 DONOR,,RP2A03 (donor),,Package_DIP:DIP-40_W15.24mm_Socket,1,,U1,plugged in by hand,,,plugged into the 40-pin socket that JLCPCB solders at this position
 DONOR,,RP2C02 (donor),,Package_DIP:DIP-40_W15.24mm_Socket,1,,U6,plugged in by hand,,,plugged into the 40-pin socket that JLCPCB solders at this position
 PCB,,+3V3,,TestPoint:TestPoint_Pad_D1.5mm,1,,TP3,part of the board,,,
@@ -97,4 +97,4 @@ AKI,,USB lines (option),,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Verti
 AKI,,composite video (test),,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,1,DNP,J5,not fitted,,,
 AKI,,debug probe for Pico C (option),,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,1,DNP,J16,not fitted,,,
 AKI,,spare outputs (option),,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,1,DNP,J2,not fitted,,,
-JLCX,C2874018,"40-pin IC socket, round pins",IC254V-12-40-0743-P1524,(the footprint of U1 U6),2,,U1 U6,JLCPCB (Wave Soldering),2913,0.9318,soldered by JLCPCB; the donor's CPU and PPU are plugged in afterwards
+JLCX,C2874018,"40-pin IC socket, round pins",IC254V-12-40-0743-P1524,(the footprint of U1 U6),2,,U1 U6,JLCPCB (Wave Soldering),2913,0.9326,soldered by JLCPCB; the donor's CPU and PPU are plugged in afterwards
