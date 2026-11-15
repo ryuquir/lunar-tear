@@ -34,16 +34,22 @@ share one). Two TLV62569DBVR: +3V3 (10k / 2.2k = 3.327 V) and +1V1 (10k / (10k +
 
 Where this file departs from the plan's block sketch (docs/13 "基板", 配置の案), and why:
   * Rows: the plan's 19.7 mm row height holds the QFN, the flash and the fan-out, but not the crystal group as well. The
-    crystal groups therefore sit on KiCad B, and row 1 reaches h 46.5 (plan 45.2), row 2 starts at h 44.5 under U5 and
-    at 46.6 (B) / 48.8 (F) under the hub and U4. Rot-0 chips of row 1 stand with their QFN at h 33.5 so that their
-    crystal clears the front rib band (h 22.6-25.4); rot-180 chips at h 38.5 so that their flash clears the slot.
+    crystal groups therefore sit on KiCad B, and row 1 reaches h 46.5 (plan 45.2), row 2 starts at h 44.5 under U5, at
+    46.6 (B) / 48.8 (F) under U4 and at 47.6 (B) under the hub. Rot-0 chips of row 1 stand with their QFN at h 33.5 so
+    that their crystal clears the front rib band (h 22.6-25.4); rot-180 chips at h 38.5 so that their flash clears the slot.
   * U3 is 2 mm to the right (x' +2) as the plan says; with this ring of decoupling the post then stands between the
     exposed-pad vias and the right-hand column of capacitors, which stands upright 0.7 mm further out on U3 (RING_POST).
     The inner channels become 10.3 mm (U2 | U3) and 6.3 mm (U3 | U1) between courtyards.
   * The +3V3 converter is not under the microSD socket with the +1V1 one (no room for both and the VSEL network); it
     sits in the free strip at the top right, beside the USB diode D11 (both fed from V5_IN).
   * The USB-C sits 6 mm right of the hub's centre (the hub's flash takes the space straight above the hub).
-  * The 0.8 mm +5V trunk from pin 30 is not pre-routed (pin 30 is on B.Cu here; PREROUTE draws on F.Cu only)."""
+  * U8 / U9 stand at x' +-36.2 (plan +-37.7): 1.5 mm inward, their pins on the board-edge side get a 2.9 mm escape strip
+    before the side route keep-out (x' 44.4) and their flashes clear it; the channels U1 | U8 and U9 | U2 become 5.7 mm
+    between courtyards (plan: 3.81 mm).
+  * The hub stands 1 mm above row 2 (HUB_H): one row of vias between U3's and the hub's crystal groups on KiCad B.
+  * The hub's M2 (GPIO33) has its own 1k (RN18's spare element) instead of joining U1 / U4's node C_M2 (docs/13).
+  * Pre-routed (PREROUTE with layers): the 0.8 mm +5V trunk from pin 30 (B.Cu) to C4 / C3 / D10, the two ground-finger
+    straps, and the 0.5 mm V5_IN trunk on B.Cu from D10 to both converters."""
 import shells
 from design_revd import GPIO_PIN       # RP2350B QFN-80: GPIO number -> pin number (checked against the datasheet, docs/13)
 
@@ -147,7 +153,7 @@ g = {}                                                    # U6 hub: no spare pin
 put(g, 0, WL); put(g, 3, xl('H1', 1)); put(g, 6, xl('H1', 'H')); put(g, 9, xl('H2', 2)); put(g, 12, xl('H2', 'H'))
 g.update({15: 'LINK_F', 16: 'PLINK_F', 17: 'HIRQ', 18: 'SWCLK1', 19: 'SWDIO1', 20: 'SWCLK2', 21: 'SWDIO2', 22: 'SWCLK3', 23: 'SWDIO3',
           24: 'nRST', 25: 'VSEL_S', 26: 'SD_CLK', 27: 'SD_CMD', 28: 'SD_DAT0', 29: 'SD_DAT1', 30: 'SD_DAT2', 31: 'SD_DAT3', 32: 'SD_CD',
-          33: 'C_M2', 34: 'PWM2', 35: 'SWCLK4', 36: 'SWDIO4', 37: 'SWCLK5', 38: 'SWDIO5', 39: 'LED6', 40: 'V5S', 41: 'EXT', 42: 'VBUS_S',
+          33: 'HM2', 34: 'PWM2', 35: 'SWCLK4', 36: 'SWDIO4', 37: 'SWCLK5', 38: 'SWDIO5', 39: 'LED6', 40: 'V5S', 41: 'EXT', 42: 'VBUS_S',
           43: 'SWCLK8', 44: 'SWDIO8', 45: 'SWCLK9', 46: 'SWDIO9', 47: 'QSPI6_SS1'}); G[6] = g
 for n, (link_out, link_in) in ((8, ('48', '4')), (9, ('59', '5'))):      # U8 / U9: compute only, GPIO0-31 and 46-47 spare
     g = {i: None for i in range(48)}; put(g, 32, xl(link_out, n)); put(g, 35, xl(link_out, link_in))
@@ -182,7 +188,7 @@ RING_POST = RING[:3] + [(4.0, 2.9, 90, C0402, '100n', '+3V3'), (4.0, 0.9, 90, C0
 FLASH_Y = -10.1                                            # flash centre in the QFN frame (courtyards 1.6 mm apart)
 CHIP_XY = {}
 
-def chip(n, xp, hc, rot, run, fx=2.0, ring=RING, xtal_dx=0.0, link=None, link_x=5.5, led=((6.15, 6.4), (6.15, -6.4)), usb=False, fcap_dx=3.6):
+def chip(n, xp, hc, rot, run, fx=2.0, ring=RING, xtal_dx=0.0, link=None, link_x=5.5, led=((7.0, 6.4), (7.0, -6.4)), usb=False, fcap_dx=3.6):
     """RP2350B U<n> with flash U1<n>, crystal Y<n>, decoupling, LED D2<n> + 2.2k. (xp, hc): QFN centre; rot 0 / 180.
     led: board-relative centres (dx, dy, y down) of the LED and of its resistor (both at 0 degrees)."""
     ref = f'U{n}'; CHIP_XY[ref] = (xp, hc, rot)
@@ -221,18 +227,19 @@ def chip(n, xp, hc, rot, run, fx=2.0, ring=RING, xtal_dx=0.0, link=None, link_x=
 
 ROW1_LO, ROW1_HI = 33.5, 38.5          # QFN centres in row 1: flash above (rot 0) / below (rot 180)
 ROW2 = 54.5                            # row 2, rot 0 (flash above)
+HUB_H = ROW2 + 1.0                     # the hub 1 mm higher: a row of vias between the crystal groups of U3 and the hub (B)
 # Row 1 (h 25.5-46.5): U9, U2, U3, U1, U8. Bus pins face the outer channels (U2 left, U1 / U3 right), the links of U8 /
 # U9 face the board edge, where XLINK-48 / -59 run straight up to U4 / U5.
-chip(9, -37.7, ROW1_HI, 180, 'nRST', led=((4.3, 8.5), (4.3, 11.0)))
+chip(9, -36.2, ROW1_HI, 180, 'nRST', led=((4.3, 8.5), (4.3, 11.0)), fcap_dx=0.9)          # flash 100 nF off the corner rib box
 chip(2, -19.4, ROW1_LO, 0, 'nRST', link=('RN22', 'LINK_B'))
-chip(3, 2.0, ROW1_HI, 180, 'nRST', ring=RING_POST, link=('RN24', 'LINK_C'), led=((-6.15, -6.4), (-6.15, 6.35)), fcap_dx=1.2)   # flash 100 nF off the slot's rib box
-chip(1, 19.4, ROW1_HI, 180, 'nRST', link=('RN20', 'LINK_A'), led=((-6.15, -6.4), (-6.15, 6.35)))
-chip(8, 37.7, ROW1_LO, 0, 'nRST', xtal_dx=-1.1, led=((-1.2, 6.6), (2.3, 6.6)))
+chip(3, 2.0, ROW1_HI, 180, 'nRST', ring=RING_POST, link=('RN24', 'LINK_C'), led=((-7.0, -6.4), (-7.0, 6.35)), fcap_dx=1.2)   # flash 100 nF off the slot's rib box
+chip(1, 19.4, ROW1_HI, 180, 'nRST', link=('RN20', 'LINK_A'), led=((-7.0, -6.4), (-7.0, 6.35)))
+chip(8, 36.2, ROW1_LO, 0, 'nRST', xtal_dx=-1.1, led=((-1.2, 6.85), (2.3, 6.85)))   # LED + 2.2k as low as the notch allows
 # Row 2 (h 44.5-67.5): U5 (rot 180, bus to the right), TF-01A with the +1V1 supply under it, hub with the USB-C above it,
 # U7 + SW1-SW3, U4 (rot 0, bus to the left).
-chip(5, -36.6, 57.5, 180, 'nRST', link=('RN23', 'LINK_E'), led=((6.15, -6.4), (6.15, -8.0)))
-chip(6, 0.0, ROW2, 0, 'RUN6', fx=-4.6, link=('RN25', 'LINK_F'), link_x=-5.5, led=((6.15, 6.4), (6.15, 8.0)), usb=True)
-chip(4, 36.6, ROW2, 0, 'nRST', link=('RN21', 'LINK_D'), led=((-6.15, -8.6), (-6.15, -11.0)))
+chip(5, -36.6, 57.5, 180, 'nRST', link=('RN23', 'LINK_E'), led=((7.0, -6.4), (7.0, -8.0)))
+chip(6, 0.0, HUB_H, 0, 'RUN6', fx=-4.6, link=('RN25', 'LINK_F'), link_x=-5.5, led=((7.0, 6.4), (7.0, 8.0)), usb=True)
+chip(4, 36.6, ROW2, 0, 'nRST', link=('RN21', 'LINK_D'), led=((-6.15, -8.6), (-6.15, -11.0)), fcap_dx=1.2)   # flash 100 nF off the right tab
 
 # ------------------------------------------------------------------ console-interface band (rev G, mirrored, KiCad F)
 # The arrays stand in the order of the fingers below them (see design_revg.py). Finger x' in this drawing (F | B):
@@ -276,7 +283,9 @@ rarr(32.4, HZ, [(f'CPU_A{b}', f'ZA{b}') for b in (11, 10, 9, 8)], 'ZA3')
 # CPU-side strobes (rev G's row, moved up above the ZA / ZD row)
 HB = 14.2
 nfet(38.2, HB, 'M2', 'M2n', 'Q1')                                                       # M2n = NOT M2 (0 / 5 V)
-rarr(34.3, HB, [('M2n', '+5V'), ('WS_D', '+3V3'), ('RSEL_D', '+3V3'), (None, None)], 'RN18')   # the three 1k pull-ups (now to the common +3V3)
+rarr(34.3, HB, [('M2n', '+5V'), ('WS_D', '+3V3'), ('RSEL_D', '+3V3'), ('M2', 'HM2')], 'RN18')   # the three 1k pull-ups (now to the common +3V3);
+# rev H: the spare element is the hub's own 1k branch of M2 (GPIO33, duty measurement), so that the hub's track does not
+# load U1 / U4's M2 node C_M2
 nfet(30.2, HB, 'CPU_RW', 'WS_D', 'Q2'); nfet(26.2, HB, 'M2n', 'WS_D', 'Q3')              # WS_D low while R/W is high or M2 is low
 nfet(22.2, HB, 'nROMSEL', 'RSEL_D', 'Q4'); res('2.2k', 19.2, HB, 'nROMSEL', '+5V')       # RSEL_D = NOT /ROMSEL; 2.2k lifts the 74LS139's high level
 res('100k', 16.8, HB, 'CPU_RW', '+5V')                                                 # R/W reads "read" while the CPU pins float
@@ -307,24 +316,29 @@ rarr(-27.5, 48.6, [('PLINK_F', 'PLINK_B'), ('PLINK_F', 'PLINK_B'), ('PLINK_F', '
 
 # ------------------------------------------------------------------ supplies
 # +1V1 (U21, the cores of all eight chips) under the microSD socket; VSEL: Q7 puts 2 x 100k across the lower resistor
-P('U21', 'Regulator_Switching', 'TLV62569DBV', 'TLV62569DBVR', SOT235, -21.0, 53.8, 0)
+# (TI SLVSDG1C 10.2: input capacitor at VIN / GND, inductor at SW, the feedback divider at FB on the far side from SW)
+P('U21', 'Regulator_Switching', 'TLV62569DBV', 'TLV62569DBVR', SOT235, -22.2, 53.8, 0)    # SW / VIN row (h 52.85) faces L2
 for p, nn in {1: 'V5_IN', 2: 'GND', 3: 'SW_1V1', 4: 'V5_IN', 5: 'FB_1V1'}.items(): c('U21', p, nn)   # EN tied to VIN
-P('L2', 'Device', 'L', '2.2uH', IND, -21.0, 49.2, 0); c('L2', 1, 'SW_1V1'); c('L2', 2, '+1V1')
-cap('10u', C0805, -24.8, 53.8, 'V5_IN')
+P('L2', 'Device', 'L', '2.2uH', IND, -22.2, 49.2, 0); c('L2', 1, 'SW_1V1'); c('L2', 2, '+1V1')
+cap('10u', C0805, -18.4, 52.6, 'V5_IN', rot=0)                                           # input 10 uF beside VIN (pin 4)
 cap('22u', C0805, -16.6, 49.2, '+1V1'); cap('22u', C0805, -14.4, 49.2, '+1V1')
-res('10k', -16.6, 53.8, '+1V1', 'FB_1V1'); res('10k', -14.95, 53.8, 'FB_1V1', 'FB_1V1_M'); res('2.2k', -13.3, 53.8, 'FB_1V1_M', 'GND')
-res('100k', -11.65, 53.8, 'FB_1V1', 'VSEL_M'); res('100k', -10.0, 53.8, 'VSEL_M', 'VSEL_D')
-nfet(-10.5, 49.2, 'VSEL_S', 'VSEL_D', 'Q7', rot=0); res('100k', -10.0, 45.9, 'VSEL_S', 'GND', rot=0)   # gate pull-down: low voltage while the hub is in reset
+# divider row: the three FB pads (R30, R33, R31) side by side on the top row, level with FB (pin 5); R30 takes +1V1 down
+# between the two 22 uF; only VSEL_M (under R31 / R32) and VSEL_D (to Q7) run further
+res('10k', -15.9, 53.8, '+1V1', 'FB_1V1'); res('10k', -12.6, 53.8, 'FB_1V1', 'FB_1V1_M', rot=270); res('2.2k', -10.95, 53.8, 'FB_1V1_M', 'GND')
+res('100k', -14.25, 53.8, 'FB_1V1', 'VSEL_M', rot=270); res('100k', -9.3, 53.8, 'VSEL_M', 'VSEL_D')
+nfet(-9.9, 49.2, 'VSEL_S', 'VSEL_D', 'Q7', rot=0); res('100k', -12.62, 49.2, 'VSEL_S', 'GND', rot=270)   # gate pull-down beside Q7: low voltage while the hub is in reset
 # +3V3 (U20) at the top right, beside the USB diode D11 (D_USB)
 schottky('D11', 14.5, 71.8, 'VBUS', 'V5_IN')
-cap('10u', C0805, 19.0, 71.5, 'V5_IN')
-P('U20', 'Regulator_Switching', 'TLV62569DBV', 'TLV62569DBVR', SOT235, 22.6, 71.5, 0)
+cap('10u', C0805, 19.0, 71.5, 'V5_IN', rot=270)                                          # input 10 uF: V5_IN level with VIN, GND below
+P('U20', 'Regulator_Switching', 'TLV62569DBV', 'TLV62569DBVR', SOT235, 22.6, 71.5, 180)  # VIN (21.46) / SW (23.74) row at h 72.45
 for p, nn in {1: 'V5_IN', 2: 'GND', 3: 'SW_3V3', 4: 'V5_IN', 5: 'FB_3V3'}.items(): c('U20', p, nn)
 P('L1', 'Device', 'L', '2.2uH', IND, 28.2, 71.5, 0); c('L1', 1, 'SW_3V3'); c('L1', 2, '+3V3')
 cap('10u', C0805, 32.6, 71.5, '+3V3')
-res('10k', 35.0, 71.5, '+3V3', 'FB_3V3'); res('2.2k', 36.65, 71.5, 'FB_3V3', 'GND')
+# divider under FB (pin 5, h 70.55): both FB pads (23.28 / 21.83) within 2.3 mm of it, +3V3 taken on the right (towards
+# L1 and the output 10 uF), GND on the left beside the input capacitor's GND
+res('10k', 24.1, 68.3, '+3V3', 'FB_3V3', rot=180); res('2.2k', 21.0, 68.3, 'FB_3V3', 'GND', rot=180)
 # test pads (KiCad B, not assembled): measure the dividers before the first power-up (docs/13 "立ち上げ" 1)
-for i, (net, xp, h) in enumerate((('+1V1', -16.0, 51.0), ('+3V3', 30.0, 71.5), ('V5_IN', -24.8, 50.0), ('FB_3V3', 33.4, 71.5),
+for i, (net, xp, h) in enumerate((('+1V1', -16.0, 51.0), ('+3V3', 30.0, 71.5), ('V5_IN', -26.0, 53.5), ('FB_3V3', 22.6, 68.6),
                                   ('FB_1V1', -13.0, 51.0), ('GND', 26.6, 71.5))):
     P(f'TP{i + 1}', 'Connector', 'TestPoint', 'TP ' + net, TP, xp, h, 0, 'B'); c(f'TP{i + 1}', 1, net)
 
@@ -336,12 +350,15 @@ for pin in ('A4', 'A9', 'B4', 'B9'): c('J7', pin, 'VBUS')
 for pin in ('A1', 'A12', 'B1', 'B12', 'S1'): c('J7', pin, 'GND')
 c('J7', 'A5', 'CC1'); c('J7', 'B5', 'CC2'); c('J7', 'A6', 'USB_DP'); c('J7', 'B6', 'USB_DP'); c('J7', 'A7', 'USB_DM'); c('J7', 'B7', 'USB_DM')
 c('J7', 'A8', None); c('J7', 'B8', None)
-res('27', 1.0, ROW2 + 7.0, 'USB_DP', 'USB_DP_R', fp=R0402); res('27', 2.1, ROW2 + 7.0, 'USB_DM', 'USB_DM_R', fp=R0402)
-for i, cc in enumerate(('CC1', 'CC1', 'CC2', 'CC2')): res('10k', 3.9 + 1.65 * i, 64.6, cc, 'GND')
-res('10k', 10.5, 64.6, 'VBUS', 'VBUS_S'); res('10k', 12.15, 64.6, 'VBUS_S', 'GND')     # VBUS / 2 on hub ADC2 (GPIO42)
+# 27 ohm: pad 1 (lower, 1.2 mm from pins 66 / 67) on the hub's side, pad 2 towards J7
+res('27', 1.0, HUB_H + 6.6, 'USB_DP_R', 'USB_DP', fp=R0402); res('27', 2.1, HUB_H + 6.6, 'USB_DM_R', 'USB_DM', fp=R0402)
+# CC2 (B5, x' 4.25) on the left and CC1 (A5, x' 7.25) on the right of the D+ / D- pins, with a corridor at x' 4.9-7.5 for the
+# pair; CC pads on top (towards J7), and 1.1 mm under them for the pair on its way left to the 27 ohm
+for xp_, cc in ((2.5, 'CC2'), (4.15, 'CC2'), (8.2, 'CC1'), (9.85, 'CC1')): res('10k', xp_, 65.3, cc, 'GND', rot=270)
+res('10k', 8.6, 62.3, 'VBUS', 'VBUS_S', rot=0); res('10k', 11.75, 62.3, 'VBUS_S', 'GND', rot=0)     # VBUS / 2 on hub ADC2 (GPIO42)
 # microSD TF-01A at the top edge, card mouth up: CLK GPIO26, CMD 27 (100k), DAT0 28 (100k), DAT1-2 29-30 (100k), DAT3/CS 31
 # (10k), CD 32 (internal pull-up), 4.7 uF at VDD (KiCad B)
-P('J3', 'Connector', 'Micro_SD_Card_Det1', 'TF-01A', 'famicart:microSD_HRO_TF-01A', -18.2, H - 9.4, 180)
+P('J3', 'famicart', 'TF-01A', 'TF-01A', 'famicart:microSD_HRO_TF-01A', -18.2, H - 9.4, 180)   # symbol with the shell tabs 10-13
 for p, nn in {1: 'SD_DAT2', 2: 'SD_DAT3', 3: 'SD_CMD', 4: '+3V3', 5: 'SD_CLK', 6: 'GND', 7: 'SD_DAT0', 8: 'SD_DAT1', 9: 'SD_CD',
               10: 'GND', 11: 'GND', 12: 'GND', 13: 'GND'}.items(): c('J3', p, nn)
 for xp_, net, val in ((-21.0, 'SD_DAT2', '100k'), (-19.35, 'SD_DAT3', '10k'), (-17.7, 'SD_CMD', '100k'), (-13.8, 'SD_DAT0', '100k'), (-12.15, 'SD_DAT1', '100k')):
@@ -358,12 +375,12 @@ res('2.2k', 24.0, 63.5, 'QSPI6_SS1', '+3V3')
 P('SW1', 'Switch', 'SW_Push', 'TS-1187A (RESET)', SW, 14.5, 50.5, 0); c('SW1', 1, 'nRST'); c('SW1', 2, 'GND')
 P('SW2', 'Switch', 'SW_Push', 'TS-1187A (BOOTSEL)', SW, 22.5, 50.5, 0); c('SW2', 1, 'BOOT6'); c('SW2', 2, 'GND')
 P('SW3', 'Switch', 'SW_Push', 'TS-1187A (HUB RUN)', SW, 18.5, 56.5, 0); c('SW3', 1, 'RUN6'); c('SW3', 2, 'GND')
-res('1k', 24.5, 54.4, 'QSPI6_SS', 'BOOT6', rot=0, fp=R0402)
-res('10k', 9.0, 50.5, 'nRST', '+3V3')
+res('1k', -5.0, 70.0, 'QSPI6_SS', 'BOOT6', rot=0, fp=R0402)                           # at the hub's flash (pin 1): only BOOT6 runs to SW2
+res('10k', 9.6, 50.5, 'nRST', '+3V3')                                                 # (clear of the hub's LED)
 res('2.2k', 9.0, 54.5, 'EXT_P', 'EXT')                                                 # J4: 0-3.3 V only (2.2k limits a 5 V lead to ~0.5 mA)
 # wire pads (KiCad B, not assembled)
-P('J2', 'famicart', 'WirePads_1x3', 'RST/GND/LINK pads', PADS3, 0.0, 17.5, 0, 'B'); c('J2', 1, 'nRST'); c('J2', 2, 'GND'); c('J2', 3, 'LINK_T')
-P('J4', 'famicart', 'WirePads_1x3', 'EXT/GND/3V3 pads', PADS3, 18.0, 62.0, 0, 'B'); c('J4', 1, 'EXT_P'); c('J4', 2, 'GND'); c('J4', 3, '+3V3')
+P('J2', 'famicart', 'WirePads_1x3_GND2', 'RST/GND/LINK pads', PADS3, 0.0, 17.5, 0, 'B'); c('J2', 1, 'nRST'); c('J2', 2, 'GND'); c('J2', 3, 'LINK_T')
+P('J4', 'famicart', 'WirePads_1x3_GND2', 'EXT/GND/3V3 pads', PADS3, 18.0, 62.0, 0, 'B'); c('J4', 1, 'EXT_P'); c('J4', 2, 'GND'); c('J4', 3, '+3V3')
 P('J5', 'Connector_Generic', 'Conn_01x05', 'hub SWD pads', 'Connector_PinHeader_1.27mm:PinHeader_1x05_P1.27mm_Vertical_SMD_Pin1Left', 26.5, 53.0, 0, 'B')
 for p, nn in {1: 'SWCLK6', 2: 'SWDIO6', 3: 'RUN6', 4: 'GND', 5: '+3V3'}.items(): c('J5', p, nn)
 P('J6', 'Connector_Generic', 'Conn_02x08_Odd_Even', 'SWD pads U1-U5 U8 U9', 'Connector_PinHeader_1.27mm:PinHeader_2x08_P1.27mm_Vertical_SMD', 18.5, 53.0, 0, 'B')
@@ -381,23 +398,50 @@ def _poly(pts):
     return [at(xp, h) for xp, h in pts]
 def _rect(xp0, h0, xp1, h1): return _poly([(xp0, h0), (xp1, h0), (xp1, h1), (xp0, h1)])
 def _core_island(xp, hc, rot):
-    """+1V1 on In2 under one chip: a bar through DVDD 10 / 51 (QFN frame y -1.0 .. 0.6) and a stub down to DVDD 32."""
+    """+1V1 on In2 under one chip: a bar through DVDD 10 / 51 (QFN frame y -1.0 .. 0.6) and a stub down to DVDD 32. The bar
+    goes round the 3 x 3 exposed-pad vias (+-1.35 mm, 0.25 mm zone clearance) as a U (inner edge +-1.75, bottom 1.75 .. 2.6):
+    a straight bar through them would fill as seven pieces and leave DVDD 10, 51 and 32 unjoined."""
     s = 1 if rot == 0 else -1
-    pts = [(-4.4, -1.0), (4.4, -1.0), (4.4, 0.6), (1.0, 0.6), (1.0, 4.0), (0.2, 4.0), (0.2, 0.6), (-4.4, 0.6)]
+    pts = [(-4.4, -1.0), (-1.75, -1.0), (-1.75, 1.75), (1.75, 1.75), (1.75, -1.0), (4.4, -1.0), (4.4, 0.6), (2.6, 0.6), (2.6, 2.6),
+           (1.0, 2.6), (1.0, 4.0), (0.2, 4.0), (0.2, 2.6), (-2.6, 2.6), (-2.6, 0.6), (-4.4, 0.6)]
     return _poly([(xp + s * x, hc - s * y) for x, y in pts])
 # Layers (docs/13 "層の役目", drawn from the back): F.Cu (6) back, main parts, QFN fan-out, USB; In1 (5) GND; In2 (4)
 # power: the +3V3 plane with +1V1 islands under each chip and at its supply, V5_IN at the two converter inputs;
 # In3 (3) signal; In4 (2) GND; B.Cu (1) front: passives, fingers 1-30, pads. F.Cu and B.Cu get a GND pour (OUTER_GND).
 PLANES = {'In1.Cu': [('GND', 'board')],
           'In2.Cu': [('+3V3', 'board')] + [('+1V1', _core_island(*CHIP_XY[u])) for u in sorted(CHIP_XY)]
-                    + [('+1V1', _rect(-19.6, 46.9, -13.2, 51.6)),                    # +1V1 output: L2, 2 x 22 uF
-                       ('V5_IN', _rect(-26.4, 51.8, -22.6, 56.0)),                   # +1V1 converter input
-                       ('V5_IN', _rect(11.8, 69.4, 21.0, 74.4))],                    # D11, +3V3 converter input
+                    + [('+1V1', _rect(-20.8, 46.9, -13.2, 51.2)),                    # +1V1 output: L2, 2 x 22 uF
+                       ('V5_IN', _rect(-25.5, 51.6, -18.6, 56.0)),                   # +1V1 converter: VIN, EN, input 10 uF, trunk via
+                       ('V5_IN', _rect(11.8, 69.4, 24.6, 74.4))],                    # trunk via, D11, +3V3 converter: input 10 uF, VIN, EN
           'In4.Cu': [('GND', 'board')]}
-# Wider tracks for the supply nets the router draws (V5_IN from D10 / D11 to the converters, VBUS, the switch nodes, +1V1
-# to the 24 DVDD pins). The 0.8 mm +5V trunk from pin 30 is not pre-routed: pin 30 is on B.Cu in this drawing and
-# gen_pcb.py's PREROUTE draws on F.Cu only (open point for the routing step).
+# Wider tracks for the supply nets the router draws (V5_IN from the trunk to the converter pads, VBUS, the switch nodes,
+# +1V1 to the 24 DVDD pins). With PLANES the DSN gives every net of this map a width class for ALL its connections, so
+# +5V is not in it: its other connections (pin 31 / C8, RN18, the BAV99 cathodes, the 2.2k / 100k / 10k pull-ups and V5S)
+# end on 0.4-0.6 mm pads; the supply path itself is pre-routed below (as in rev G).
 NET_WIDTH = {'V5_IN': 0.5, 'VBUS': 0.5, 'SW_1V1': 0.5, 'SW_3V3': 0.5, '+1V1': 0.4}
+# Tracks and vias laid before routing (gen_pcb.py PREROUTE with a layer, PREROUTE_VIAS; the router keeps them):
+#  * +5V trunk (docs/13 "電源"): finger 30 is on B.Cu (x' -37.33). 0.8 mm up from the finger on B and left under the
+#    shoulder to two vias at x' -40.4 / -41.4 (left of finger 60's way up on F), then on F through the +5V pads of C4 and
+#    C3 to the anode of D10.
+#  * GND: a strap as wide as rev G's from each ground finger (1: B, x' +37.33, 1.6 mm; 16: B, x' -1.27, 1.2 mm) up into
+#    the B.Cu pour.
+#  * V5_IN trunk, 0.5 mm on B.Cu (docs/13 layer 1 carries the supply trunk): D10's cathode -> via -> up the left margin
+#    and at 45 degrees (clear of the notch) into the U9 | U2 channel at x' -28 -> TP3 -> via into the In2 V5_IN island of
+#    the +1V1 converter; from there up to h 63.5, along it under J3 / U16 (free on B) to x' 12.85 and a via into the
+#    island of D11 and the +3V3 converter. The converter pads reach the islands through the router's vias.
+PREROUTE = [('+5V', 0.8, _poly([(-37.33, -3.4), (-37.33, 1.2), (-41.4, 1.2)]), 'B.Cu'),
+            ('+5V', 0.8, _poly([(-40.4, 1.2), (-41.4, 1.2), (-42.1, 1.9), (-42.1, 4.6), (-42.1, 6.7), (-42.1, 7.9), (-43.65, 9.0)])),
+            ('GND', 1.6, _poly([(37.33, -3.1), (37.33, 1.4)]), 'B.Cu'), ('GND', 1.2, _poly([(-1.27, -3.3), (-1.27, 1.6)]), 'B.Cu'),
+            ('V5_IN', 0.5, _poly([(-40.35, 9.0), (-40.35, 10.5)])),                                             # D10 cathode -> via (F)
+            ('V5_IN', 0.5, _poly([(-40.35, 10.5), (-40.35, 19.5), (-28.0, 31.85), (-28.0, 50.5), (-26.0, 52.5), (-26.0, 53.5),
+                                  (-24.9, 54.6), (-24.9, 55.4)]), 'B.Cu'),
+            ('V5_IN', 0.5, _poly([(-24.9, 55.4), (-24.9, 63.5), (12.85, 63.5), (12.85, 69.9)]), 'B.Cu'),
+            ('V5_IN', 0.5, _poly([(12.85, 69.9), (12.85, 71.8)]))]                                              # via -> D11 cathode (F)
+PREROUTE_VIAS = [('+5V',) + at(-40.4, 1.2), ('+5V',) + at(-41.4, 1.2),
+                 ('V5_IN',) + at(-40.35, 10.5), ('V5_IN',) + at(-24.9, 55.4), ('V5_IN',) + at(12.85, 69.9)]
+# No inner-layer copper in the card-edge tab below the shoulder (docs/13 "端子の面取り"; the planes stop at h 0.5, this
+# keeps the router's In3 tracks and every inner via ring out of the tab as well)
+RULE_AREAS = [('tab_inner_keepout', [(5.3, H), (84.7, H), (84.7, H + 11.2), (5.3, H + 11.2)], ['In1.Cu', 'In2.Cu', 'In3.Cu', 'In4.Cu'])]
 # Parts that cross the top edge (mouths flush with it, docs/13 "捨て基板"); check_place.py lets their body cross it within
 # the shell's usb_top window by at most EDGE_OVERHANG (default 1.0 mm)
 EDGE_CONNECTORS = ('J3', 'J7')
@@ -407,11 +451,13 @@ BOTTOM_OK = {C0402, C0603, R0402, XTAL, RARR}
 # Edge rails (make_rails.py): rev G's left and right rails plus a top rail (5 mm, 2 mm gap, mouse-bite tabs), one frame;
 # no top tab in front of the USB-C (J7, x 45.9-56.1) or the microSD socket (J3, x 18.2-35.4)
 RAILS = dict(width=5.0, gap=2.0, tab=5.2, hole=0.6, hole_out=0.3, pitch=0.9, holes=7, end_gap=2.7,
-             tabs={'L': (7.0, 36.0, 60.0), 'R': (9.5, 32.1, 60.0)}, top=dict(tabs=(8.0, 40.6, 66.0, 83.0)),
+             tabs={'L': (4.5, 45.0, 60.0), 'R': (4.5, 45.0, 60.0)}, top=dict(tabs=(8.0, 40.6, 83.0)),
              fiducials=(('T', 3.85), ('T', -3.85), ('L', -3.85)), fid_inset=3.85,
              tooling=(('T', 14.0), ('T', -14.0), ('L', -14.0), ('R', -14.0)), tooling_d=2.0)
 
 ROLE = {'U1': 'cpu', 'U2': 'ppu', 'U3': 'x', 'U4': 'cpu-ext', 'U5': 'ppu-ext', 'U6': 'hub', 'U8': 'calc-cpu', 'U9': 'calc-ppu'}
+# ROLE text off the exposed pad: 6.6 mm from the QFN centre on the side away from the flash (QFN frame), level
+ROLE_AT = {'*': (0, 6.6, 0), 'U8': (0, -6.6, 0), 'U9': (0, -6.6, 0)}      # U8 / U9: the flash side (LED below U8, U5's flash above U9)
 SILK_TEXT = [('famicart rev H', 45.0 - 36.0, H - 70.0, 'F', 1.2), ('famicart rev H (front)', 45.0 - 20.0, H - 15.0, 'B', 1.2)]
 DRAW_NAMES = {'U1': 'U1 CPU バス', 'U2': 'U2 PPU バス', 'U3': 'U3 IRQ・音源', 'U4': 'U4 CPU 増設', 'U5': 'U5 PPU 増設',
               'U6': 'U6 ハブ', 'U7': 'U7 フラッシュ', 'U8': 'U8 計算 CPU 側', 'U9': 'U9 計算 PPU 側', 'J3': 'J3 microSD',

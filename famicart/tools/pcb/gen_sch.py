@@ -51,6 +51,17 @@ def prop(name, value, x, y, hide=False, justify=None):
     if hide: eff.append(Sym('hide'))
     return ['property', name, value, ['at', x, y, 0], eff]
 
+def missing_symbol_pins(parts, nets):
+    """[(ref, lib, symbol, [pin numbers])] for every part whose NETS entry connects pins its symbol does not have
+    (lib and symbol None when the reference is not in PARTS at all)."""
+    out = []
+    for ref, pins_ in nets.items():
+        if ref not in parts: out.append((ref, None, None, sorted(pins_))); continue
+        have = {p['number'] for p in KL.pins(KL.get_symbol(lib_path(parts[ref][0]), parts[ref][1]))}
+        miss = sorted((p for p, n in pins_.items() if n and p not in have), key=lambda s: (len(s), s))
+        if miss: out.append((ref, parts[ref][0], parts[ref][1], miss))
+    return out
+
 def main():
     _seq[0] = 0
     out = ['kicad_sch', ['version', 20221206], ['generator', Sym('famicart')], ['uuid', Sym(ROOT_UUID)], ['paper', 'A1']]
@@ -92,6 +103,11 @@ def main():
         pins = KL.pins(KL.get_symbol(lib_path(lib), name))
         xs = [p['x'] for p in pins] or [0]; ys = [p['y'] for p in pins] or [0]
         return (max(xs) - min(xs) + 60, max(ys) - min(ys) + 14)
+    # every pin that NETS connects must exist on the symbol: a pin the symbol does not have would be left out of the
+    # schematic without a trace (the board would carry a net that "Update PCB from Schematic" removes)
+    for ref, lib, name, miss in missing_symbol_pins(D.PARTS, D.NETS):
+        raise SystemExit('%s: symbol %s:%s has no pin %s (NETS connects it): give the part a symbol with these pins'
+                         % (ref, lib, name, ', '.join(miss)) if lib else 'NETS names %s, which is not in PARTS' % ref)
     units_of = {ref: (KL.units(KL.get_symbol(lib_path(D.PARTS[ref][0]), D.PARTS[ref][1])) or [1]) for ref in D.PARTS}
     order = sorted(D.PARTS, key=lambda r: -extent(r)[0] * extent(r)[1])
     x, y, row_h, X0, XMAX = 40, 60, 0, 40, 560

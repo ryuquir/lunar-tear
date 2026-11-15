@@ -12,7 +12,16 @@ Optional design attributes (rev H on; a design without them gets exactly the boa
   STACKUP    'JLC06121H-3313' (a template of STACKUPS) or a list like it: the stack-up of a multilayer board, written
              into the board file with ENIG and the bevelled edge connector, as for 2-layer boards (write_stackup()).
   A shell drawn from the back (shells.mirrored()): the default board text '(back)' goes on KiCad's F side, which is
-  the back of the cartridge there."""
+  the back of the cartridge there.
+  PREROUTE   [(net, width, [(x, y), ...]) | (net, width, [(x, y), ...], layer name)]: tracks laid before routing (the
+             autorouter keeps them). Without a layer they go on F.Cu, as up to rev G; a fourth item names the layer
+             (e.g. 'B.Cu' for a trunk from a finger on the back of a board drawn from the back).
+  PREROUTE_VIAS  [(net, x, y), ...]: through vias of the design's via size laid with PREROUTE (layer changes of a
+             pre-routed trunk).
+  RULE_AREAS [(name, [(x, y), ...], [layer names]) | (..., {'tracks': bool, 'vias': bool, 'pour': bool})]: further
+             keep-outs (default: no tracks, no vias, no pour on those layers), e.g. no inner copper in the card-edge tab.
+  ROLE_AT    (x, y, angle) or {reference: (x, y, angle), '*': (x, y, angle)}: where the ROLE text stands, in the
+             footprint's own frame (mm, degrees; the text keeps upright). Without it: (0, 2.0, 90) (Pico: (0, 6.0, 90))."""
 import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 import pcbnew
@@ -194,6 +203,40 @@ def add_zone(board, net, layer, pts, clearance=0.25):
 # ---------------------------------------------------------------------------------------------- opt-in: rev H on
 # Designs up to rev G set none of PLANES / OUTER_GND / EP_VIAS; for them main() takes the code paths it always took.
 
+def role_text_at(role_at, ref, fpname):
+    """(x, y, angle) of a ROLE text in the footprint's own frame: D.ROLE_AT (one tuple for all, or a dict by reference with
+    '*' as the default), else the place used up to rev G: (0, 2.0, 90), Pico footprints (0, 6.0, 90)."""
+    pos = role_at.get(ref, role_at.get('*')) if isinstance(role_at, dict) else role_at
+    return tuple(pos) if pos else (0, 6.0 if 'Pico' in fpname else 2.0, 90)
+
+def add_rule_areas(board, areas, cu):
+    """D.RULE_AREAS = [(name, [(x, y), ...], [layer names]) or (..., {'tracks': .., 'vias': .., 'pour': ..})]: keep-outs
+    on the named copper layers (default: no tracks, vias or pour). Stops when a layer is not a copper layer of the board.
+    Returns the zones added."""
+    out = []
+    for name, poly, layers, *flags in areas:
+        f = dict(dict(tracks=True, vias=True, pour=True), **(flags[0] if flags else {}))
+        bad = [l for l in layers if board.GetLayerID(l) not in cu]
+        if bad: raise SystemExit('RULE_AREAS %s: %s are not copper layers of this board' % (name, bad))
+        out.append(add_rule_area(board, name, [tuple(p) for p in poly], [board.GetLayerID(l) for l in layers], f['tracks'], f['vias'], f['pour']))
+    return out
+
+def add_preroute(board, netmap, preroute, vias, cu, via_dia, via_drill):
+    """D.PREROUTE = [(net, width, [(x, y), ...]) or (..., layer name)]: tracks laid before routing, on F.Cu unless a layer is
+    named (designs up to rev G: F.Cu only); D.PREROUTE_VIAS = [(net, x, y)]: through vias of via_dia / via_drill.
+    Stops when a layer is not a copper layer of the board. Returns (tracks, vias) added."""
+    nt = 0
+    for net, w, pts, *lay in preroute:
+        layer = board.GetLayerID(lay[0]) if lay else pcbnew.F_Cu
+        if layer not in cu: raise SystemExit('PREROUTE %s: %s is not a copper layer of this board' % (net, lay[0]))
+        for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+            t = pcbnew.PCB_TRACK(board); t.SetStart(mm(ax, ay)); t.SetEnd(mm(bx, by)); t.SetWidth(FromMM(w))
+            t.SetLayer(layer); t.SetNet(netmap[net]); board.Add(t); nt += 1
+    for net, vx, vy in vias:
+        v = pcbnew.PCB_VIA(board); v.SetPosition(mm(vx, vy)); v.SetViaType(pcbnew.VIATYPE_THROUGH)
+        v.SetWidth(FromMM(via_dia)); v.SetDrill(FromMM(via_drill)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(netmap[net]); board.Add(v)
+    return nt, len(vias)
+
 def plane_map(nl, planes=None, outer_gnd=None):
     """The copper pours of a board as {layer name: [(net, polygon in board mm | 'board'), ...]}.
     planes: the design's PLANES (layers it does not name get no pour), else the plan used up to rev G: In1 GND and the
@@ -304,8 +347,9 @@ def main():
             t = pcbnew.FP_TEXT(fp); t.SetText(('%s %s' % (ref, role)).upper() if JLC else '%s %s' % (ref, role)); t.SetLayer(pcbnew.F_SilkS)
             ts = 1.5 if 'Pico' in fpname else 1.1
             t.SetTextSize(VECTOR2I(FromMM(ts), FromMM(ts))); t.SetTextThickness(FromMM(ts * 0.14))
-            t.SetPosition(mm(0, 6.0 if 'Pico' in fpname else 2.0)); t.SetLocalCoord()
-            t.SetTextAngleDegrees(90); t.SetKeepUpright(True)
+            rx, ry, ra_ = role_text_at(getattr(D, 'ROLE_AT', None), ref, fpname)
+            t.SetPosition(mm(rx, ry)); t.SetLocalCoord()
+            t.SetTextAngleDegrees(ra_); t.SetKeepUpright(True)
             fp.Add(t)
             if JLC and 'XIAO' in fpname:        # a XIAO fits turned by 180 degrees: mark its USB end like the Pico footprints do
                 u = pcbnew.FP_TEXT(fp); u.SetText('USB'); u.SetLayer(pcbnew.F_SilkS)
@@ -588,11 +632,9 @@ def main():
         for i, (side, poly) in enumerate(SHELL['comp_keepouts']):   # shell ribs / posts: no components on that side
             add_rule_area(board, 'shell_rib_%s%d' % (side, i), poly, [pcbnew.F_Cu if side == 'F' else pcbnew.B_Cu],
                           tracks=False, vias=False, pour=False, footprints=True)
+    add_rule_areas(board, getattr(D, 'RULE_AREAS', []), CU)             # (opt-in) further keep-outs of the design
     # tracks laid before routing (supply trunk, ground straps): the autorouter keeps them (dsn_export: "protect")
-    for net, w, pts in getattr(D, 'PREROUTE', []):
-        for (ax, ay), (bx, by) in zip(pts, pts[1:]):
-            t = pcbnew.PCB_TRACK(board); t.SetStart(mm(ax, ay)); t.SetEnd(mm(bx, by)); t.SetWidth(FromMM(w))
-            t.SetLayer(pcbnew.F_Cu); t.SetNet(netmap[net]); board.Add(t)
+    add_preroute(board, netmap, getattr(D, 'PREROUTE', []), getattr(D, 'PREROUTE_VIAS', []), CU, VIA, VDR)
     # GND pours on both layers over the body (not the tab)
     body = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
     if getattr(D, 'PLANES', None) is not None or getattr(D, 'OUTER_GND', None) is not None:

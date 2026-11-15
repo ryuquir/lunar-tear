@@ -206,10 +206,15 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         ol = z.Outline().Outline(0)
         pts = ' '.join(f'{U(ToMM(ol.CPoint(i).x))} {-U(ToMM(ol.CPoint(i).y))}' for i in range(ol.PointCount()))
         kind = 'keepout' if z.GetDoNotAllowTracks() else 'via_keepout'
-        on = [lname_of(l) for l in z.GetLayerSet().Seq() if pcbnew.IsCopperLayer(l)]
-        every = len(on) >= board.GetCopperLayerCount() or kind == 'via_keepout'       # a via touches every layer
+        cu_l = [l for l in z.GetLayerSet().Seq() if pcbnew.IsCopperLayer(l)]
+        every = len(cu_l) >= board.GetCopperLayerCount() or kind == 'via_keepout'     # a via touches every layer
+        # a layer the router does not see (a plane layer of PLANES) gets no keep-out of its own: lname_of() would turn it
+        # into F.Cu. Vias are forbidden there all the same, so such an area also becomes a via keep-out on every layer.
+        on = [lname_of(l) for l in cu_l if l in dict(LAYERS)]
         for lay in (['signal'] if every else on):
             out.append(f'    ({kind} {q(zname)} (polygon {lay} 0 {pts}))')
+        if not every and z.GetDoNotAllowVias() and len(on) < len(cu_l):
+            out.append(f'    (via_keepout {q(zname)} (polygon signal 0 {pts}))')
     out.append('  )')
     out.append('  (placement')
     by_img = {}

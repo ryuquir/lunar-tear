@@ -20,14 +20,6 @@
 <circle cx="815.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="824.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="833.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<rect x="1034.0" y="240.0" width="52.0" height="20.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
-<circle cx="1033.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1042.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1051.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1060.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1069.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1078.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1087.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <rect x="1204.0" y="240.0" width="52.0" height="20.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
 <circle cx="1203.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="1212.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
@@ -43,22 +35,22 @@
 <circle cx="472.0" cy="215.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
 <circle cx="1228.0" cy="215.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
 <circle cx="357.0" cy="950.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
-<rect x="382.0" y="304.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
-<circle cx="399.0" cy="303.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="312.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="321.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="330.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="339.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="348.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="357.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<rect x="382.0" y="594.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
-<circle cx="399.0" cy="593.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="602.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="611.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="620.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="629.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="638.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="399.0" cy="647.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="382.0" y="279.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="399.0" cy="278.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="287.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="296.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="305.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="314.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="323.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="332.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="382.0" y="684.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="399.0" cy="683.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="692.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="701.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="710.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="719.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="728.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="737.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <rect x="382.0" y="834.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
 <circle cx="399.0" cy="833.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="399.0" cy="842.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
@@ -68,22 +60,22 @@
 <circle cx="399.0" cy="878.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="399.0" cy="887.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="1343.0" cy="950.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
-<rect x="1298.0" y="329.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
-<circle cx="1301.0" cy="328.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="337.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="346.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="355.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="364.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="373.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="382.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<rect x="1298.0" y="555.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
-<circle cx="1301.0" cy="554.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="563.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="572.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="581.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="590.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="599.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
-<circle cx="1301.0" cy="608.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="1298.0" y="279.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1301.0" cy="278.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="287.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="296.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="305.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="314.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="323.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="332.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="1298.0" y="684.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1301.0" cy="683.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="692.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="701.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="710.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="719.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="728.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="737.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <rect x="1298.0" y="834.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
 <circle cx="1301.0" cy="833.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
 <circle cx="1301.0" cy="842.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
@@ -130,10 +122,10 @@
 <line x1="458.0" y1="1122.0" x2="1242.0" y2="1122.0" stroke="#b42318" stroke-width="5.0"/>
 <text x="850.0" y="1157.0" font-size="22" fill="#b42318" text-anchor="middle" font-weight="bold">GOLD FINGERS on this edge only (60 fingers) - bevel 30 degrees</text>
 <text x="850.0" y="1187.0" font-size="20" fill="#b42318" text-anchor="middle" font-weight="normal">This edge must stay a free routed edge: no rail, no V-cut, no mouse bites</text>
-<line x1="392.0" y1="620.0" x2="552.0" y2="560.0" stroke="#1c2530" stroke-width="1.0"/>
-<text x="558.0" y="556.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">mouse-bite tab 5.2 mm wide: 7 holes of 0.6 mm, 0.3 mm apart,</text>
-<text x="558.0" y="580.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">touching the board edge line from outside (3 tabs on each side)</text>
-<text x="432.0" y="300.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">top rail: 5 mm, 2 mm gap, 4 mouse-bite tabs (the same holes as on the sides)</text>
+<line x1="392.0" y1="710.0" x2="552.0" y2="650.0" stroke="#1c2530" stroke-width="1.0"/>
+<text x="558.0" y="646.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">mouse-bite tab 5.2 mm wide: 7 holes of 0.6 mm, 0.3 mm apart,</text>
+<text x="558.0" y="670.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">touching the board edge line from outside (3 tabs on each side)</text>
+<text x="432.0" y="300.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">top rail: 5 mm, 2 mm gap, 3 mouse-bite tabs (the same holes as on the sides)</text>
 <text x="432.0" y="324.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">fiducials: 3 on each side (top and bottom), copper 1 mm, mask opening 2 mm, centre 3.85 mm from the panel edges</text>
 <text x="432.0" y="348.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">tooling holes: 2.0 mm, not plated (4 in total)</text>
 <text x="850.0" y="850.0" font-size="24" fill="#14532d" text-anchor="middle" font-weight="bold">CARTRIDGE BOARD  89.6 x 85.7</text>
