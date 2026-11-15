@@ -1,4 +1,4 @@
-/* Tests for src/core/mappers/m_port_unl.c (36, 38, 138, 139, 141, 144, 148, 168, 193) and mapper 158. */
+/* Tests for src/core/mappers/m_port_unl.c (36, 38, 138, 139, 141, 144, 148, 168, 193) and m064_rambo1.c (64, 158). */
 #include "tm_util.h"
 
 extern const mapper_desc_t mapper_036, mapper_038, mapper_138, mapper_139, mapper_141, mapper_144,
@@ -183,7 +183,19 @@ static void t_168(int *checks, int *fails) {
     TM_CHECK(c.irq_line, "168 restarts from 0");
 }
 
+/* ---- Tengen RAMBO-1 (64, 158). Evidence: furrtek's gate-level trace of the chip
+ * (https://github.com/furrtek/SiliconRE/tree/master/Misc/RAMBO-1, RAMBO-1_schematics.pdf; "pN CELL" = page and cell
+ * name) and the nesdev wiki (RAMBO-1, INES_Mapper_158). The IRQ timings below also matched, cycle for cycle, a gate
+ * model of p3 driven with the same writes and A12 levels (CPU mode: counter cells clocked on the rising edge;
+ * scanline mode: on the falling edge; see docs/03_mapper_coverage.md). */
 static void rb(uint8_t r, uint8_t v) { wr(0x8000, r); wr(0x8001, v); }
+static void rb_cyc(int n) { while (n-- > 0) cart_cpu_cycle(&c); }
+static int rb_irq_in(int n) { for (int i = 1; i <= n; i++) { cart_cpu_cycle(&c); if (c.irq_line) return i; } return -1; }  /* M2 until /IRQ */
+static void rb_rise(int low) { cart_ppu_read(&c, 0x0000); rb_cyc(low); cart_ppu_read(&c, 0x1000); }  /* A12 low `low` M2, then high */
+static int rb_lines(int max) {   /* scanlines (A12 low 100 M2, rise, 13 M2 high) until /IRQ, -1 = none */
+    for (int l = 1; l <= max; l++) { rb_rise(100); if (rb_irq_in(13) > 0) return l; }
+    return -1;
+}
 static void t_158(int *checks, int *fails) {
     TM_CHECK(tm_load(&c, &mapper_158, 0, 128, 256, 0, 0, 0), "158 load");
     TM_CHECK(tm_prg_bank(&c, 4) == 0 && tm_prg_bank(&c, 5) == 1 && tm_prg_bank(&c, 6) == 2 && tm_prg_bank(&c, 7) == 15, "158 power-on prg");
@@ -198,14 +210,10 @@ static void t_158(int *checks, int *fails) {
     rb(0xA2, 0x80); rb(0xA3, 0x00); rb(0xA4, 0x00); rb(0xA5, 0x80);   /* inverted: R2-R5 at $0000 */
     TM_CHECK(tm_chr_bank(&c, 0) == 0x80 && tm_chr_bank(&c, 3) == 0x80, "158 inverted chr");
     TM_CHECK(tm_nt(&c, 0) == 1 && tm_nt(&c, 1) == 0 && tm_nt(&c, 2) == 0 && tm_nt(&c, 3) == 1, "158 inverted nt from R2-R5");
-    /* IRQ shared with 64 */
+    /* IRQ shared with 64. Lines of ~113 M2: the A12 filter needs 16 M2 of A12 low (8-M2 lines never count). A12 is
+     * high at the $C001 write, so the 1st counted rise loads the latch and the IRQ comes on line L + 1. */
     wr(0xC000, 2); wr(0xC001, 0); wr(0xE001, 0);
-    for (int line = 0; line < 8 && !c.irq_line; line++) {
-        for (int k = 0; k < 8; k++) cart_ppu_read(&c, 0x0000);
-        cart_ppu_read(&c, 0x1000);
-        for (int k = 0; k < 8; k++) cart_cpu_cycle(&c);
-    }
-    TM_CHECK(c.irq_line, "158 A12 irq");
+    TM_CHECK(rb_lines(8) == 3, "158 A12 irq on the 3rd line (L + 1)");
     wr(0xE000, 0);
     TM_CHECK(!c.irq_line, "158 irq ack");
 
@@ -215,27 +223,101 @@ static void t_158(int *checks, int *fails) {
     rb(0, 0x80);
     wr(0xA000, 1);
     TM_CHECK(tm_nt(&c, 1) == 0 && tm_nt(&c, 2) == 1 && tm_chr_bank(&c, 0) == 0x80, "64 H, chr");
-    /* PRG modes (nesdev wiki RAMBO-1): P=0 $8000 R6, $A000 R7, $C000 RF; P=1 $8000 RF, $A000 R7, $C000 R6; $E000 last */
-    rb(0x06, 3); rb(0x07, 5); rb(0x0F, 7);
-    TM_CHECK(tm_prg_bank(&c, 4) == 3 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 7 && tm_prg_bank(&c, 7) == 15, "64 P=0 prg R6/R7/RF/last");
-    wr(0x8000, 0x46);
-    TM_CHECK(tm_prg_bank(&c, 4) == 7 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 3 && tm_prg_bank(&c, 7) == 15, "64 P=1 prg RF/R7/R6/last (prg %u %u %u)", tm_prg_bank(&c, 4), tm_prg_bank(&c, 5), tm_prg_bank(&c, 6));
-    /* CPU-cycle mode: a $C001 write resets the /4 prescaler, so a latch of 0 reaches 0 at the 4th cycle after it */
-    wr(0xE000, 0); wr(0xC000, 0); wr(0xC001, 1);          /* cycle mode */
-    cart_cpu_cycle(&c); cart_cpu_cycle(&c);               /* the prescaler is now mid-count (2 of 4) */
-    TM_CHECK(!c.irq_line, "64 cycle mode: no irq while disabled");
-    wr(0xE001, 0); wr(0xC001, 1);                         /* restart: prescaler back to 0 */
-    int fired = -1;
-    for (int k = 1; k <= 12 && fired < 0; k++) { cart_cpu_cycle(&c); if (c.irq_line) fired = k; }
-    TM_CHECK(fired == 4 + 3, "64 cycle mode: prescaler restarts at $C001 (irq after %d cycles, expected 4 + the 3-cycle assertion delay)", fired);
-    /* $E000 also drops an IRQ that is still waiting out its assertion delay */
-    wr(0xE000, 0); wr(0xE001, 0); wr(0xC001, 1);
-    int k = 0;
-    while (k < 12 && !c.s.rambo1.irq_delay) { cart_cpu_cycle(&c); k++; }   /* counter reached 0: IRQ pending, not yet asserted */
-    TM_CHECK(c.s.rambo1.irq_delay && !c.irq_line, "64 irq pending before $E000");
+}
+
+static void t_64(int *checks, int *fails) {
+    TM_CHECK(tm_load(&c, &mapper_064, 0, 128, 256, 0, 0, 0), "64 load");
+    /* PRG (p5): P ($8000 bit 6) only swaps $8000/$C000: F23 = P xor CPU A14 selects R6 or RF (MUX21 B28 D16 C27 B26 C28B
+     * B31) for CPU A13 = 0, CPU A13 = 1 takes R7 OR CPU A14 (OR A38 E32 A26 A25 E37 A40). Until 2026-11-15 P = 1 put R6
+     * at $A000 and R7 at $C000. */
+    rb(6, 3); rb(7, 5); rb(0xF, 7);
+    TM_CHECK(tm_prg_bank(&c, 4) == 3 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 7 && tm_prg_bank(&c, 7) == 15, "64 P=0: R6 R7 RF last");
+    wr(0x8000, 0x40);
+    TM_CHECK(tm_prg_bank(&c, 4) == 7 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 3 && tm_prg_bank(&c, 7) == 15,
+             "64 P=1: RF R7 R6 last (got %u %u %u)", tm_prg_bank(&c, 4), tm_prg_bank(&c, 5), tm_prg_bank(&c, 6));
+    /* decode (p1 D19, D12): CPU A14, A13, A0 only; indexes A-E have no write strobe and $A001 (D19 X3) is not connected */
+    wr(0x9FFE, 0x46); wr(0x8FFF, 9);
+    TM_CHECK(tm_prg_bank(&c, 6) == 9, "64 $9FFE/$8FFF are $8000/$8001");
+    for (uint8_t r = 0x4A; r <= 0x4E; r++) rb(r, 0x55);
+    wr(0xA001, 0xFF);
+    TM_CHECK(tm_prg_bank(&c, 4) == 7 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 9 && tm_chr_bank(&c, 0) == 0 && tm_chr_bank(&c, 7) == 5
+             && tm_nt(&c, 1) == 1, "64 R10-R14 and $A001 change nothing");
+
+    /* CPU-cycle IRQ (p3). $C001 resets the /4 prescaler (H40, G52), sets the count to $FF (M47 -> CLR) and arms the
+     * reload (R2; R4 takes it when the H37 mux output falls). The counter clocks when that output rises: in CPU mode
+     * at the 2nd M2 after the write, then every 4th. CPU mode to CPU mode the output is low when the write ends, so
+     * the 1st clock takes $FF to $FE and the 2nd loads the latch as written. /IRQ falls at the M2 fall after the clock
+     * that reaches 0 (G49), so the line is up in the cpu_cycle() 4L + 7 after the write, whatever the prescaler phase.
+     * (Was: free-running prescaler, latch | 1, the line raised 3 cycles late.) */
+    for (int pre = 0; pre < 4; pre++) {
+        wr(0xE000, 0); wr(0xC000, 2); wr(0xC001, 1); rb_cyc(pre); wr(0xE001, 0); wr(0xC001, 1);
+        TM_CHECK(rb_irq_in(40) == 15, "64 cpu L=2: IRQ 15 M2 after $C001 (prescaler phase %d)", pre);
+    }
+    wr(0xE000, 0); wr(0xE001, 0);
+    TM_CHECK(rb_irq_in(40) == 12, "64 cpu L=2: then every 4 (L + 1) M2");
+    wr(0xE000, 0); wr(0xC000, 3); wr(0xE001, 0); wr(0xC001, 1);
+    TM_CHECK(rb_irq_in(40) == 19, "64 cpu L=3: IRQ 19 M2 after $C001 (the odd latch as written, no | 1)");
+    wr(0xE001, 0);
+    TM_CHECK(c.irq_line, "64 $E001 does not acknowledge");
+    wr(0xC001, 1);
+    TM_CHECK(c.irq_line, "64 $C001 does not acknowledge (it does not reach G50)");
     wr(0xE000, 0);
-    for (k = 0; k < 8; k++) cart_cpu_cycle(&c);
-    TM_CHECK(!c.irq_line, "64 $E000 cancels a pending (delayed) IRQ");
+    TM_CHECK(!c.irq_line, "64 $E000 acknowledges");
+    /* $E000 holds G50 clear (E38): a zero reached in the cycle of the write never raises /IRQ, even after $E001 */
+    wr(0xE001, 0); wr(0xC000, 2); wr(0xC001, 1); rb_cyc(14);    /* the 14th M2 takes the count to 0 */
+    wr(0xE000, 0); rb_cyc(4); wr(0xE001, 0);
+    TM_CHECK(!c.irq_line && rb_irq_in(40) == 9, "64 $E000 drops the pending IRQ, the next one comes a period later");
+    /* $C001 in that cycle: the count is $FF again before G49 samples it, so no IRQ, and the count restarts */
+    wr(0xE000, 0); wr(0xE001, 0); wr(0xC001, 1); rb_cyc(14); wr(0xC001, 1);
+    TM_CHECK(rb_irq_in(40) == 15, "64 $C001 drops a zero reached in its cycle and restarts");
+    /* G49/G50 fire on the step to 0 only: latch 0 gives one IRQ, then none while the count stays 0 */
+    wr(0xE000, 0); wr(0xE001, 0); wr(0xC000, 0); wr(0xC001, 1);
+    TM_CHECK(rb_irq_in(40) == 7, "64 cpu L=0: IRQ 7 M2 after $C001");
+    wr(0xE000, 0); wr(0xE001, 0);
+    TM_CHECK(rb_irq_in(200) < 0, "64 cpu L=0: no further IRQ (was one per clock)");
+    wr(0xC000, 1);
+    TM_CHECK(rb_irq_in(12) > 0, "64 cpu: a non-zero latch is loaded at the next clock and counts again");
+
+    /* scanline IRQ (p3): PPU A12 goes through 16 flip-flops clocked by M2 (J38 -> ... -> J41, each reset by the one
+     * before), so a rise counts only after 16 M2 of A12 low. In scanline mode the mux output is H41./Q = NOT(filter
+     * full): it falls when the filter fills and rises, clocking the counter, at the M2 rise after the first M2 fall
+     * that sees A12 high again. /IRQ falls on the 2nd M2 fall after the A12 rise (1-2 CPU cycles, as measured on a
+     * cartridge). The load is at the 1st clock after $C001 if the output is high when the write ends (A12 high, or low
+     * for fewer than 16 M2) and at the 2nd if it is low (filter full; the 1st takes $FF to $FE): IRQ on line L + 1 or
+     * L + 2. (Was: a 3-PPU-read filter, latch | 1, the line raised on the 3rd cpu_cycle().) */
+    wr(0xE000, 0); wr(0xC000, 0); wr(0xC001, 0); wr(0xE001, 0);   /* A12 high at the write: the 1st clock loads */
+    rb_rise(15);
+    TM_CHECK(rb_irq_in(8) < 0, "64 A12 low for 15 M2: filtered out");
+    for (int k = 0; k < 6; k++) { cart_ppu_read(&c, 0x0000); if (k & 1) cart_cpu_cycle(&c); }   /* 6 reads, 3 M2 */
+    cart_ppu_read(&c, 0x1000);
+    TM_CHECK(rb_irq_in(8) < 0, "64 A12 low for 6 PPU reads over 3 M2: filtered out (the 3-read filter counted it)");
+    rb_cyc(4); rb_rise(16);          /* 1st clock: loads 0 over $FF */
+    TM_CHECK(rb_irq_in(8) == 2, "64 A12 low for 16 M2: clocked, /IRQ on the 2nd M2 after the rise");
+    wr(0xE000, 0); wr(0xE001, 0);
+    TM_CHECK(rb_lines(8) < 0, "64 A12 L=0: one IRQ only");
+    wr(0xE000, 0); wr(0xC000, 3); wr(0xC001, 0); wr(0xE001, 0);
+    TM_CHECK(rb_lines(10) == 4, "64 A12 L=3, $C001 with A12 high: IRQ on the 4th line (L + 1)");
+    wr(0xE000, 0); wr(0xE001, 0);
+    TM_CHECK(rb_lines(10) == 4, "64 A12 L=3: then every L + 1 lines");
+    /* $C001 with the filter full: the 1st clock takes $FF to $FE, the 2nd loads */
+    wr(0xE000, 0); wr(0xE001, 0);
+    cart_ppu_read(&c, 0x0000); rb_cyc(20); wr(0xC001, 0); rb_cyc(80); cart_ppu_read(&c, 0x1000);   /* line 1: $FF -> $FE */
+    TM_CHECK(rb_irq_in(13) < 0 && rb_lines(10) == 4, "64 A12 L=3, $C001 with the filter full: IRQ on the 5th line (L + 2)");
+    /* /WR_C001 does not reach the filter: A12 low across the write still makes 16 M2. It had been low for 10 M2 at
+     * the write (filter not full), so this 1st clock loads, and L = 0 raises /IRQ at once. */
+    wr(0xE000, 0); wr(0xC000, 0); wr(0xE001, 0);
+    cart_ppu_read(&c, 0x0000); rb_cyc(10); wr(0xC001, 0); rb_cyc(6); cart_ppu_read(&c, 0x1000);
+    TM_CHECK(rb_irq_in(8) == 2, "64 A12 low across $C001 still counts (and the 1st clock loads)");
+    /* CPU mode: A12 rises do not clock the counter (H37 selects the prescaler). CPU mode to CPU mode with L = 3 the
+     * count is 1 from the 14th to the 17th M2 after the write and /IRQ comes at the 19th; the rise comes at the 15th,
+     * after 19 M2 of A12 low. */
+    wr(0xE000, 0); wr(0xC000, 3); wr(0xC001, 1); wr(0xE001, 0);
+    cart_ppu_read(&c, 0x0000); rb_cyc(4); wr(0xC001, 1); rb_cyc(15); cart_ppu_read(&c, 0x1000);
+    TM_CHECK(rb_irq_in(10) == 4, "64 cpu mode ignores A12 (IRQ still 19 M2 after $C001)");
+    /* mode switch: from scanline mode with A12 high (output high) to CPU mode the output falls at the end of the
+     * write, so the 1st prescaler clock already loads: IRQ 4L + 3 M2 after the write */
+    wr(0xE000, 0); wr(0xC001, 0); wr(0xE001, 0); rb_cyc(2); wr(0xC000, 2); wr(0xC001, 1);
+    TM_CHECK(rb_irq_in(40) == 11, "64 scanline (A12 high) to cpu mode: IRQ 4L + 3 M2 after $C001");
 }
 
 void tm_unl(int *checks, int *fails) {
@@ -247,4 +329,5 @@ void tm_unl(int *checks, int *fails) {
     t_36(checks, fails);
     t_168(checks, fails);
     t_158(checks, fails);
+    t_64(checks, fails);
 }

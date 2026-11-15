@@ -53,7 +53,11 @@ typedef struct { uint8_t prg[3], chr[8], mirroring; uint16_t irq_counter, irq_re
 
 typedef struct { uint8_t prg[2], chr[6], mirroring, wram_en; uint8_t irq_latch, irq_counter, irq_enable, irq_reload; } taito_state_t;
 
-typedef struct { uint8_t bank, prg_mode, mirroring, chr[8], prg[3]; uint8_t irq_latch, irq_counter, irq_enable, irq_reload, irq_mode; uint8_t irq_delay; uint8_t a12_state; } rambo1_state_t;
+/* RAMBO-1 (64/158), see m064_rambo1.c. irq_reload: clocks left until the latch is loaded after a $C001 write (2: the
+ * next clock takes $FF to $FE, 1: the next clock loads). irq_next: M2 rises until the next counter clock (CPU mode: the
+ * /4 prescaler; scanline mode: 1 after a qualified A12 rise, else 0). irq_due: /IRQ falls at the M2 fall ending this
+ * cycle. a12_hi, a12_low_since: PPU A12 level, and cpu_cycles when it last went low (the 16-M2 filter). */
+typedef struct { uint8_t bank, mirroring, chr[8], prg[3]; uint8_t irq_latch, irq_counter, irq_enable, irq_reload, irq_mode, irq_next, irq_due, a12_hi; uint32_t a12_low_since; } rambo1_state_t;
 
 typedef struct { uint8_t regs[32]; uint16_t r16[8]; uint32_t r32[4]; bool b[8]; } generic_state_t;
 
