@@ -20,8 +20,11 @@ Options (rev H on; a design without them gets exactly the panel it always got):
       holes touch the board's top edge from outside). The finger edge at the bottom stays free, so the frame is open
       there. No V-cut: a V-cut line runs straight across the whole panel, and every rail here is held by tabs.
       Tabs must keep clear of the parts that cross the top edge (D.EDGE_CONNECTORS: USB-C, microSD), whose mouths
-      reach into the gap. Fiducials and tooling holes may sit on it: ('T', d), d mm from the panel's left end
-      (d < 0: from its right end).
+      reach into the gap, and such a part's courtyard must end at least 0.5 mm before the top rail. Each top tab sits
+      on the straight top edge with room for its rounded corners (LO + R + tab/2 <= x <= HI - R - tab/2) and
+      neighbouring tabs are more than tab + 2 R apart. Fiducials and tooling holes may sit on it: ('T', d), d mm from
+      the panel's left end (d < 0: from its right end); the 'EDGE RAIL - BREAK OFF' text on the top rail keeps 3 mm
+      away from them (it moves along the rail, and the tool stops when there is no such place).
   D.ASSEMBLY == 'both' (parts on both sides): every fiducial is placed on both sides (JLCPCB needs fiducials on each
       side it assembles).
   Boards with inner copper layers: the inner layers are plotted and archived too (In1.Cu ... In4.Cu).
@@ -58,6 +61,26 @@ def top_tabs_clear(tabs, tab_w, parts, clear):
     """[(tab x, part reference)] for every top tab that comes within `clear` of the x range of a part that crosses the
     top edge (parts = [(reference, x0, x1)])."""
     return [(xc, ref) for xc in tabs for (ref, x0, x1) in parts if xc - tab_w / 2 - clear < x1 and xc + tab_w / 2 + clear > x0]
+
+def top_tab_problems(tabs, tab_w, lo, hi, r):
+    """Reasons why top tabs (centre x) do not fit the straight top edge lo..hi with corner radius r: a tab must leave
+    r for the rounded inner corners at both of its ends, and two neighbouring tabs room for both their corners."""
+    out = []
+    for xc in tabs:
+        if not (lo + r + tab_w / 2 - 1e-9 <= xc <= hi - r - tab_w / 2 + 1e-9):
+            out.append('tab at x %.2f is not on the straight top edge %.2f..%.2f with %.2f mm for its corners' % (xc, lo, hi, r))
+    for a, b in zip(sorted(tabs), sorted(tabs)[1:]):
+        if b - a <= tab_w + 2 * r + 1e-6: out.append('tabs at x %.2f and %.2f are %.2f mm apart (more than %.2f needed)' % (a, b, b - a, tab_w + 2 * r))
+    return out
+
+def text_clear_x(xc0, half_w, keep, lo, hi, step=0.5):
+    """The x (nearest to xc0, at most 40 mm away, the text inside lo..hi) for a text of half width half_w whose
+    extent keeps clear of every x interval in `keep` [(x0, x1)]; None when there is none."""
+    for k in range(0, 81):
+        for xc in ((xc0 + k * step, xc0 - k * step) if k else (xc0,)):
+            if xc - half_w < lo or xc + half_w > hi: continue
+            if all(xc + half_w <= a or xc - half_w >= b for (a, b) in keep): return xc
+    return None
 
 def edge_x_range(board, ref):
     """(x0, x1, y0) of the courtyard of part `ref` on the board (its pads when it has no courtyard), in mm."""
@@ -108,7 +131,12 @@ def main():
         YT = -tgap - tw                                        # outer (upper) edge of the top rail = top edge of the panel
         PX0, PX1 = rails['L'][0], rails['R'][1]                # panel left / right end
         xpos = lambda d: PX0 + d if d >= 0 else PX1 + d       # along the top rail: from the panel's left end (< 0: right end)
+        bad = top_tab_problems(top['tabs'], RA['tab'], LO, HI, R)
+        if bad: raise SystemExit('RAILS["top"]: %s' % '; '.join(bad))
         crossing = [(ref,) + edge_x_range(board, ref) for ref in getattr(D, 'EDGE_CONNECTORS', ())]
+        deep = [(c[0], -c[3]) for c in crossing if c[3] < -(tgap - 0.5)]       # the body must end 0.5 mm before the top rail
+        if deep: raise SystemExit('RAILS["top"]: parts reach into the top rail (their courtyard must end at least 0.5 mm before it, %.2f mm above the top edge): %s'
+                                  % (tgap - 0.5, ', '.join('%s %.2f mm above the edge' % d for d in deep)))
         crossing = [c[:3] for c in crossing if c[3] < 0.0]     # (ref, x0, x1) of the parts that reach past the top edge
         hit = top_tabs_clear(top['tabs'], RA['tab'], crossing, R + 0.5)
         if hit: raise SystemExit('RAILS["top"]: tabs in front of a part that reaches past the top edge: %s' % ', '.join('x %.1f (%s)' % h for h in hit))
@@ -181,7 +209,13 @@ def main():
     for side in 'LR': gen_pcb.add_text(board, 'EDGE RAIL - BREAK OFF', rails[side][0] + (1.2 if side == 'L' else 3.8), T / 2, pcbnew.F_SilkS, 1.0, 0.15)
     for d in board.GetDrawings():
         if d.GetClass() == 'PCB_TEXT' and d.GetText().startswith('EDGE RAIL'): d.SetTextAngleDegrees(90)
-    if top: gen_pcb.add_text(board, 'EDGE RAIL - BREAK OFF', W / 2, (rails['T'][0] + rails['T'][1]) / 2, pcbnew.F_SilkS, 1.0, 0.15)
+    if top:     # the text on the top rail: 3 mm away from the fiducials and tooling holes on it
+        probe = pcbnew.PCB_TEXT(board); probe.SetText('EDGE RAIL - BREAK OFF'); probe.SetTextSize(VECTOR2I(FromMM(1.0), FromMM(1.0))); probe.SetTextThickness(FromMM(0.15))
+        half = ToMM(probe.GetTextBox().GetWidth()) / 2 if hasattr(probe, 'GetTextBox') else 0.6 * len(probe.GetText()) / 2
+        keep = [(xpos(d) - r - 3.0, xpos(d) + r + 3.0) for (s_, d), r in [(f, 1.0) for f in RA['fiducials']] + [(t, RA.get('tooling_d', 2.0) / 2) for t in RA.get('tooling', ())] if s_ == 'T']
+        tx = text_clear_x(W / 2, half, keep, PX0 + 1.0, PX1 - 1.0)
+        if tx is None: raise SystemExit('RAILS["top"]: no place on the top rail for its text 3 mm away from the fiducials and tooling holes there')
+        gen_pcb.add_text(board, 'EDGE RAIL - BREAK OFF', tx, (rails['T'][0] + rails['T'][1]) / 2, pcbnew.F_SilkS, 1.0, 0.15)
     # ---- replace the outline drawing (last: after board.Remove() pcbnew hands out untyped objects for new footprints)
     for d in list(board.GetDrawings()):
         if d.GetLayer() == pcbnew.Edge_Cuts: board.Remove(d)

@@ -1,12 +1,6 @@
-# microSD_HRO_TF-01A -- HRO TF-01A push-push microSD socket with card detect (LCSC C91145, JLCPCB Extended).
-# Drawn from JLCPCB's library footprint (EasyEDA "TF-SMD_TF-01A"), so that its origin, pad numbers and pads are the ones JLCPCB
-# places with: 13 SMD pads (1-8 card contacts at 1.1 mm pitch, 9 card detect, 10-13 shell tabs) and two 1.0 mm
-# non-plated locating holes, all taken over to 0.001 mm; the Fab outline is the library's body outline (14.76 x 14.50 mm),
-# the courtyard is body and pads plus 0.25 mm, the card mouth is the +y edge. Pin functions as in the EasyEDA symbol
-# (not checked against the HRO drawing). tests/check_footprints_easyeda.py compares it with the library footprint.
 (footprint "microSD_HRO_TF-01A" (version 20221018) (generator famicart)
   (layer "F.Cu")
-  (descr "microSD socket, push-push with card detect, HRO TF-01A (LCSC C91145): pads, holes and body from JLCPCB's library footprint TF-SMD_TF-01A. Pins 1-8 card contacts (1 DAT2, 2 CD/DAT3, 3 CMD, 4 VDD, 5 CLK, 6 VSS, 7 DAT0, 8 DAT1), 9 card detect, 10-13 shell (GND). Card mouth at +y.")
+  (descr "microSD socket, push-push with card detect, HRO TF-01A (LCSC C91145): pads, holes and body from JLCPCB's library footprint TF-SMD_TF-01A. Pins 1-8 card contacts (1 DAT2, 2 CD/DAT3, 3 CMD, 4 VDD, 5 CLK, 6 VSS, 7 DAT0, 8 DAT1), 9 card detect, 10-13 shell (GND). Card mouth at +y. See famicart.pretty/README.md.")
   (tags "micro SD TF card socket push-push detect")
   (attr smd)
   (fp_text reference "REF**" (at 0 -6.925) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))

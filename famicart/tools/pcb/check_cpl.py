@@ -17,12 +17,17 @@ its own in PAD_ALIAS): a library pad then lands correctly on a board pad that ca
 and every board pad must be covered by exactly one library pad (pads stacked on one spot, like A1 / B12 of a USB-C
 receptacle, are covered together).
 Bottom side (designs with ASSEMBLY = 'both'; see gen_jlc.cpl_table for the angle): a Bottom row is allowed only for a
-part on the back of the board that BOTTOM_OK allows there. JLCPCB views it from below, so the library footprint is
-turned counter-clockwise by the CPL angle and then mirrored left to right (x -> -x about the CPL position) before it is
-compared with the board pads; it must land pad for pad with the same numbers. Because JLCPCB does not document which
-way it turns the board over, the placement turned by a further 180 degrees (mirrored top to bottom) must also land pad
-on pad: BOTTOM_OK parts work either way round. The part must sit at a multiple of 90 degrees: there the KiCad angle
-taken as it is (what JLCPCB's KiCad guide uploads without the plugin) is also within 180 degrees of both readings.
+part on the back of the board that gen_jlc.bottom_ok() allows there: declared in BOTTOM_OK AND with a footprint of
+gen_jlc.BOTTOM_TURN (R / C chips 0201-1206, R_Array_Convex_4x0603 / 4x0402, Crystal_SMD_3225-4Pin_3.2x2.5mm); an LED,
+a diode or any other polarized part is refused whatever the design declares. JLCPCB views a bottom part from below,
+so the library footprint is turned counter-clockwise by the CPL angle and then mirrored left to right (x -> -x about
+the CPL position) before it is compared with the board pads; it must land pad for pad with the same numbers. Because
+JLCPCB does not document which way it turns the board over, the placement turned by a further 180 degrees (mirrored
+top to bottom) must land exactly on the pads that the footprint's BOTTOM_TURN map names (R / C: 1 <-> 2; the arrays:
+k <-> k + 4, four equal resistors; the crystal: 1 <-> 3, 2 <-> 4): pads that merely coincide are not enough. Only for
+these footprints is that second reading the same circuit. The part must sit at a multiple of 90 degrees: there the
+KiCad angle taken as it is (what JLCPCB's KiCad guide uploads without the plugin) is also within 180 degrees of both
+readings.
 Writes jlcpcb/cpl_check.csv. Exit status 1 when a row does not fit, 2 when the library could not be read.
     FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 check_cpl.py"""
 import os, sys, csv, json, math, importlib, urllib.request
@@ -116,6 +121,32 @@ def land(lib, board, alias=None, symm=False):
     if symm and len(targets) == len(groups) and len(set(targets)) == len(targets) and set(targets) == {q[0] for q in board}: return worst, 'same groups'
     return worst, None
 
+def landing(lib, board):
+    """({library pad name: set of board pad numbers at the spot it lands on}, worst distance, every board pad covered
+    exactly once) for placed library pads [(number, x, y)] on board pads [(number, x, y)]."""
+    hits, worst, out = [0] * len(board), 0.0, {}
+    for (n, px, py) in lib:
+        d = [math.hypot(px - q[1], py - q[2]) for q in board]
+        dmin = min(d); worst = max(worst, dmin)
+        spot = [i for i, x in enumerate(d) if x <= dmin + STACK]
+        for i in spot: hits[i] += 1
+        out.setdefault(n, set()).update(board[i][0] for i in spot)
+    return out, worst, all(h == 1 for h in hits)
+
+def land_turned(first, turned, board, turn_map):
+    """The second reading of a bottom-side row: `turned` are the placed library pads turned by a further 180 degrees,
+    `first` the same pads as the row places them. (worst distance, True when every board pad is covered exactly once
+    and each library pad lands on the 180-degree partners (turn_map) of the board pads it lands on in the first reading:
+    the turned part is then the same circuit)."""
+    m1, _, _ = landing(first, board)
+    m2, worst, once = landing(turned, board)
+    ok = turn_map is not None and once and worst <= FIT
+    for n, nums in m1.items():
+        if not ok: break
+        want = {turn_map.get(b) for b in nums}
+        ok = None not in want and m2.get(n) == want
+    return worst, ok
+
 def fits_alias(lib, kic, alias, symm):
     """fits() for a footprint with pad-name aliases, by land()."""
     out = {}
@@ -158,7 +189,7 @@ def main():
         if fp is None: bad.append('%s: not on the board' % ref); continue
         bottom = both and fp.IsFlipped() and row['Layer'] == 'Bottom' and gen_jlc.bottom_ok(ref)
         if both and not bottom and (fp.IsFlipped() or row['Layer'] != 'Top'):
-            bad.append('%s: side of the board (%s) and CPL layer (%s) disagree, or the part is on the bottom side and BOTTOM_OK does not allow it there' % (ref, 'back' if fp.IsFlipped() else 'front', row['Layer']))
+            bad.append('%s: side of the board (%s) and CPL layer (%s) disagree, or the part is on the bottom side and may not be there (BOTTOM_OK must declare it and its footprint must be one of gen_jlc.BOTTOM_TURN)' % (ref, 'back' if fp.IsFlipped() else 'front', row['Layer']))
         elif not both and (fp.IsFlipped() or row['Layer'] != 'Top'): bad.append('%s: side of the board (%s) and CPL layer (%s) disagree or are not the top' % (ref, 'back' if fp.IsFlipped() else 'front', row['Layer']))
         x, y = ToMM(fp.GetPosition().x), ToMM(fp.GetPosition().y)
         cx, cy = float(row['Mid X'].rstrip('m')), float(row['Mid Y'].rstrip('m'))
@@ -169,9 +200,9 @@ def main():
         symm = ''.join(ch for ch in ref if ch.isalpha()) in SYMMETRIC
         if bottom or code in aliases:    # pad-name aliases and the bottom side: land() (stacked pads, mirrored placement)
             worst, how = land(placed(lp, row, bottom=bottom), pads, aliases.get(code), symm)
-            if bottom:                   # the other way of turning the board over: a further 180 degrees, pad on pad
-                worst2, how2 = land(placed(lp, row, bottom=True, extra=180.0), pads, aliases.get(code), True)
-                if how and not how2: bad.append('%s (%s, %s): bottom side, turned by a further 180 degrees the library pads do not land pad on pad (miss up to %.2f mm): not a part for BOTTOM_OK' % (ref, key, code, worst2))
+            if bottom:                   # the other way of turning the board over: a further 180 degrees, on the 180-degree partners
+                worst2, ok2 = land_turned(placed(lp, row, bottom=True), placed(lp, row, bottom=True, extra=180.0), pads, gen_jlc.bottom_turn(fpname))
+                if how and not ok2: bad.append('%s (%s, %s): bottom side, turned by a further 180 degrees the library pads do not land on the pads of its 180-degree map %s (miss up to %.2f mm): not a part for the bottom side' % (ref, key, code, gen_jlc.bottom_turn(fpname), worst2))
                 worst = max(worst, worst2)
                 a = fp.GetOrientationDegrees() % 90.0
                 if min(a, 90.0 - a) > 0.01:

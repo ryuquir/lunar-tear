@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Autoroute hardware/famicart.kicad_pcb with Freerouting, import the result, fill zones, run DRC, export fab files."""
+"""Autoroute hardware/famicart.kicad_pcb with Freerouting, import the result, fill zones, run DRC, export fab files.
+Layer roles: the design's PLANES when it has one (dsn_export.layer_roles: inner layers with a board-wide pour are planes,
+the others signal layers), else the roles used up to rev G. Designs with PLANES or EP_VIAS: existing vias (exposed-pad
+vias) go to the router with their own padstack (dsn_export own_via_padstacks)."""
 import os, re, sys, subprocess, shutil, re
 sys.path.insert(0, os.path.dirname(__file__))
 import pcbnew
@@ -7,6 +10,8 @@ from pcbnew import ToMM
 import dsn_export, ses_import, gen_pcb
 HW_LIB = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'hardware'))
 HW = os.path.abspath(os.environ.get('FC_HW_DIR', HW_LIB))
+PLANE_MAP = getattr(gen_pcb.D, 'PLANES', None)                  # layer roles from the design's plane map (rev H on)
+OWN_VIAS = PLANE_MAP is not None or getattr(gen_pcb.D, 'EP_VIAS', None) is not None    # existing vias keep their own size in the DSN (rev H on)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PCB = os.path.join(HW, 'famicart.kicad_pcb')
@@ -26,7 +31,7 @@ def main():
     board = pcbnew.LoadBoard(PCB)
     dsn = os.path.join(WORK, 'famicart.dsn'); ses = os.path.join(WORK, 'famicart.ses')
     TRK, CLR, VIA, VDR = gen_pcb.rules()
-    n = dsn_export.export(board, dsn, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR, net_width=getattr(gen_pcb.D, 'NET_WIDTH', None))
+    n = dsn_export.export(board, dsn, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR, net_width=getattr(gen_pcb.D, 'NET_WIDTH', None), plane_map=PLANE_MAP, own_via_padstacks=OWN_VIAS)
     print('DSN written with', n, 'nets')
     pre = os.environ.get('FC_SES')            # import an existing session file instead of running the router
     if pre and os.path.exists(pre): ses = pre
@@ -57,13 +62,14 @@ def main():
                     pts += [(float(a), float(b)) for a, b in re.findall(r'@\(([0-9.]+) mm, ([0-9.]+) mm\)', blk)]
             doomed = []
             for t in board.GetTracks():
-                if t.GetNetname() in ('GND', '+3V3'): continue                  # keep the power stubs
+                if t.GetNetname() in (('GND', '+3V3') if PLANE_MAP is None else set(dsn_export.layer_roles(board.GetCopperLayerCount(), PLANE_MAP)[1].values())): continue   # keep the power stubs
                 pos = [t.GetPosition()] if t.GetClass() == 'PCB_VIA' else [t.GetStart(), t.GetEnd()]
                 if any(((ToMM(p.x) - x) ** 2 + (ToMM(p.y) - y) ** 2) ** 0.5 < rip for p in pos for (x, y) in pts): doomed.append(t)
             for t in doomed: board.Remove(t)
             print('stage 2: ripped up', len(doomed), 'items around', len(pts), 'open points (radius', rip, 'mm)')
             pcbnew.SaveBoard(PCB, board); board = pcbnew.LoadBoard(PCB)
-        dsn_export.export(board, dsn2, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR, net_width=getattr(gen_pcb.D, 'NET_WIDTH', None))
+        dsn_export.export(board, dsn2, outline(), track=TRK, clearance=CLR, pad_clearance=CLR, via_dia=VIA, via_drill=VDR, net_width=getattr(gen_pcb.D, 'NET_WIDTH', None), plane_map=PLANE_MAP,
+                          own_via_padstacks=OWN_VIAS)
         cmd = ['xvfb-run', '-a', 'java', '-jar', JAR, '-de', dsn2, '-do', ses2, '-mp', str(PASSES), '-mt', '1', '-oit', os.environ.get('FC_OIT', '8'), '-da']
         print('stage 2:', ' '.join(cmd))
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=int(os.environ.get('FC_TIMEOUT', '1500')))
@@ -98,11 +104,14 @@ def report_and_export(board=None, inner=True):
     gen_pcb.write_stackup(PCB, board.GetCopperLayerCount())      # thickness / ENIG / bevelled edge for the Gerber job file (no-op when present)
     # fab exports
     fab = os.path.join(HW, 'fab'); shutil.rmtree(fab, ignore_errors=True); os.makedirs(fab)
-    cu = {6: 'F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu', 4: 'F.Cu,In1.Cu,In2.Cu,B.Cu'}.get(board.GetCopperLayerCount(), 'F.Cu,B.Cu')
+    ncu = board.GetCopperLayerCount()           # every copper layer (2: F/B, 4, 6, an 8-layer fallback: In1 .. In6)
+    cu = ','.join(['F.Cu'] + ['In%d.Cu' % k for k in range(1, ncu - 1)] + ['B.Cu'])
     subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', cu + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts,F.Fab,B.Fab', '-o', fab + '/', PCB], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', fab + '/', PCB], check=True, capture_output=True)
     views = [('front', 'F.Cu,F.SilkS,F.Fab,Edge.Cuts', []), ('back', 'B.Cu,B.SilkS,Edge.Cuts', ['--mirror'])]
-    if inner and board.GetCopperLayerCount() == 6: views += [('in2', 'In2.Cu,Edge.Cuts', []), ('in3', 'In3.Cu,Edge.Cuts', [])]
+    if inner and PLANE_MAP is not None:          # the inner signal layers of the design's plane map
+        views += [(l.lower().replace('.cu', ''), l + ',Edge.Cuts', []) for l in dsn_export.layer_roles(ncu, PLANE_MAP)[0] if l.startswith('In')]
+    elif inner and board.GetCopperLayerCount() == 6: views += [('in2', 'In2.Cu,Edge.Cuts', []), ('in3', 'In3.Cu,Edge.Cuts', [])]
     for name, layers, extra in views:
         pdf = os.path.join(HW, f'famicart_{name}.pdf'); png = os.path.join(HW, f'famicart_{name}.png')
         subprocess.run(['kicad-cli', 'pcb', 'export', 'pdf', '--layers', layers] + extra + ['-o', pdf, PCB], check=True, capture_output=True)

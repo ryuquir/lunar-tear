@@ -11,6 +11,11 @@
 Everything that depends on the board is taken from jlcpcb/README.md (which gen_jlc.py writes from the design and the
 board file and check_jlc.py verifies); the tool stops when a passage it relies on is missing, so the instructions cannot
 drift away from the order notes. Quantities and the Akizuki price list are the constants below.
+Designs that declare their part classes (LCSC_CLASS, rev H on; main_declared()): everything is placed by JLCPCB on
+both sides, so there is no Akizuki list; the folder gets the question, one PCB remark and one assembly remark
+(jlcpcb_pcb_remark.txt, jlcpcb_assembly_remark.txt) and the instructions, which state the expected parts list as
+"Basic n rows, Extended m rows (declared: ...)" and stop only on an Extended row the design does not declare, on short
+stock (including the RP2350B) or on a mismatch.
     FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 gen_order.py"""
 import os, re, csv, sys, html, importlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -79,7 +84,184 @@ def to_html(blocks, title):
                 ''.join('<th>%s</th>' % inline(c) for c in b[1]), ''.join('<tr>%s</tr>' % ''.join('<td>%s</td>' % inline(c) for c in r) for r in b[2])))
     return '\n'.join(out) + '\n</body></html>\n'
 
+JLC_DATE_H = '2026-11-14'          # designs with declared classes (rev H): the day the quote and the catalogue were read (docs/13)
+
+def main_declared():
+    """The hand-over for a design that declares its JLCPCB part classes (LCSC_CLASS, rev H on: every part placed by
+    JLCPCB, Basic and Extended, both sides, multilayer), from the order notes gen_jlc.py writes with README_H. The parts
+    list is expected to show the declared numbers of Basic and Extended rows; the orderer stops only on an Extended row
+    that the design does not declare, on short stock or on a mismatch (not on Extended as such)."""
+    notes = open(os.path.join(HW, 'jlcpcb', 'README.md')).read()
+    if getattr(D, 'HAND', {}): raise SystemExit('gen_order: a design with LCSC_CLASS and hand-soldered parts (HAND) has no hand-over procedure yet')
+    question = quote_after(notes, '質問文（そのまま貼る）:')
+    remark = quote_after(notes, 'PCB Remark（そのまま貼る）:')
+    assert len(question) >= 2 and question[1].startswith('1) '), question
+    assert len(remark) >= 3 and remark[0].startswith('1) '), remark
+    panel = need(r'\*\*注文に使うデータ\*\*: 基板＋左右と上の捨て基板（ミシン目のタブでつないだ 1 枚）。([\d.]+ × [\d.]+) mm、(\d+) 層', notes, 'the panel size and the layer count')
+    panel, layers = panel.group(1), int(panel.group(2))
+    board = need(r'\| `gerbers\.zip` \| 基板だけ（([\d.]+ × [\d.]+) mm）', notes, 'the board size').group(1)
+    m = need(r'部品の照合画面の正しい状態: \*\*(\d+) 行・(\d+) 点がすべて一致、Basic (\d+) 行・Extended (\d+) 行（Extended は設計が宣言した (\d+) 品番だけ: ([^）]*)）、未選択の部品なし\*\*', notes, 'the expected state of the parts list (declared classes)')
+    ntypes, nparts, nbasic, next_, ncodes, extended = m.groups()
+    cls = D.LCSC_CLASS
+    declared_ext = sorted(c for c, k in cls.items() if k == 'Extended')
+    listed = re.findall(r'(?:^|、)(C\d+) ', extended)                  # each item: 'code name'
+    if sorted(listed) != declared_ext: raise SystemExit('gen_order: the order notes list the Extended parts %s, the design declares %s (run gen_jlc.py)' % (listed, declared_ext))
+    dnp = need(r'実装しない部品: ([^\n]*)', notes, 'the list of parts that are not placed').group(1).strip() or 'なし'
+    orient = re.findall(r'^  \d\. (.+)$', need(r'\*\*部品プレビューで見る点\*\*[^\n]*\n((?:  \d\. [^\n]+\n)+)', notes, 'the preview check list').group(1), re.M)
+    counts = need(r'このデータの基板は、配線 (\d+) 本・ビア (\d+) 個・未接続 (\d+)。', notes, 'the track and via counts')
+    if counts.group(3) != '0': raise SystemExit('gen_order: the board of the order notes has open connections')
+    sides = need(r'実装は\*\*両面\*\*（Top (\d+) 点、Bottom (\d+) 点）', notes, 'the parts per side')
+    rp = need(r'1 枚に (\d+) 個。注文する日に在庫を確かめ、5 枚なら先に JLCPCB の\n  部品在庫として (\d+) 個（＋予備 2 個）を買って確保する。2 枚なら (\d+) 個。', notes, 'the RP2350B pre-purchase')
+    prebuy = {5: int(rp.group(2)), 2: int(rp.group(3))}.get(PCBA_QTY)
+    col = {2: 1, 5: 2}.get(PCBA_QTY)
+    if col is None or prebuy is None: raise SystemExit('gen_order: the order notes give assembly costs for 2 or 5 boards only')
+    JLC_ASM = int(need(r'\| 実装費（Standard・両面、X 線検査込み） \| 約 US\$ (\d+) \| 約 US\$ (\d+) \|', notes, 'the assembly cost').group(col))
+    JLC_ASM_FIX = int(need(r'\| 治具（Fixture）費 2 個が加わった場合 \| 約 US\$ (\d+) \| 約 US\$ (\d+) \|', notes, 'the assembly cost with fixtures').group(col))
+    JLC_PCB = int(need(r'送料別。2026-11-14 の見積もり画面）: 約 US\$ (\d+)。', notes, 'the board price').group(1))
+    if PCB_QTY != 5: raise SystemExit('gen_order: the board price of the order notes is for 5 boards')
+    for s in ('**Panel by Customer**', 'Do not confirm automatically', 'Added by Customer', 'Complete File, just proceed with my own files', 'By Customer (Self-Service)',
+              '**ENIG**', '**2 U"**', 'Beveling **30°**', '**1.2 mm**', 'Remove Mark', 'Flying Probe Fully Test', '**JLC06121H-3313**', '**0.5 oz**',
+              '**0.3mm/(0.4/0.45mm)**', '**Epoxy Filled & Capped**', '**Both Sides**', 'X-ray Inspection'):
+        if s not in notes: raise SystemExit('gen_order: the order notes no longer contain %r; adapt gen_order.py' % s)
+    os.makedirs(OUT, exist_ok=True)
+    def write(name, text):
+        open(os.path.join(OUT, name), 'w').write(text); print('written', os.path.join(OUT, name))
+    write('jlcpcb_support_question.txt', '\n\n'.join([question[0]] + ['\n'.join(question[1:])]) + '\n')
+    write('jlcpcb_pcb_remark.txt', '\n'.join(remark) + '\n')
+    write('jlcpcb_assembly_remark.txt', '\n'.join(remark[:3]) + '\n')
+    price_date = need(r'JLCPCB の料金表 (\d{4}-\d{2}-\d{2}) 更新分から計算', notes, 'the date of the price list').group(1)
+    lim_pcb, lim_asm = int(JLC_PCB * 1.3), int(JLC_ASM_FIX * 1.3)
+    parts_state = '%s 行・%s 点がすべて一致し、Basic %s 行・Extended %s 行（宣言済みの Extended は %s 品番: %s）で、未選択の部品が無い' % (ntypes, nparts, nbasic, next_, ncodes, extended)
+    T = 'ファミコン基板（famicart %s）発注指示書' % D.REV
+    B = [('h1', T),
+         ('p', 'この文書は、発注を代行する GrokBOT に向けた手順書です。JLCPCB への基板と部品実装（全部品、両面）の発注を扱います。手はんだの部品は無く、ほかの店での買い物はありません。'
+               '書いてあるとおりに進め、「止まって確認」とある所では必ず依頼者（このフォルダの持ち主）の返事を待ってください。'),
+         ('h2', '依頼の内容'),
+         ('ul', ['JLCPCB に、基板 **%d 枚**の製造と、そのうち **%d 枚**への部品実装（Standard PCBA、**両面**）を発注する。' % (PCB_QTY, PCBA_QTY),
+                 '部品はすべて JLCPCB が載せる。**Basic %s 行・Extended %s 行**で、Extended はこの設計が宣言した %s 品番（%s）。Extended があること自体は正しい（Standard PCBA では Basic と同じ料金）。' % (nbasic, next_, ncodes, extended)]),
+         ('h2', '必ず守ること'),
+         ('ol', ['**注文を確定する直前（支払いの直前）で止まる。** 注文内容と合計金額（送料・手数料・税を含む）を依頼者に見せ、承認をもらってから確定と支払いをする。'
+                 '依頼者があらかじめ上限金額を決めて任せていて、合計がその範囲に収まる場合だけ、この確認を省いてよい。',
+                 '**ログイン情報、配送先、支払い方法は依頼者から受け取る。** このフォルダにも、この文書にも書かれていない。受け取った情報を、JLCPCB 以外に渡さない。',
+                 '**判断が要る所で推測しない。** この文書の表にある項目で、書かれている値を選べない場合は、止まって依頼者に聞く。表に無い項目は、基板・実装とも、最初から選ばれている値のままにする。'
+                 'ただし、最初から選ばれている値が無くて自分で選ばないと進めない項目と、選ぶと追加料金が出る項目は、止まって確認する（下の「止まって確認する場面」）。',
+                 '**JLCPCB からの提案を自分で承諾しない。** 担当者やサポートが、この文書と違うやり方（捨て基板の位置を変える、V カットにする、面取りをやめる、部品を別の品番に替える、など）を提案してきたら、内容を依頼者に伝えて指示を待つ。',
+                 '**部品を別の品番に替えない。** JLCPCB の画面が出す代替部品の候補は選ばない。']),
+         ('h2', 'このフォルダのファイル'),
+         ('table', ['ファイル', '使い道'],
+          [['`gerbers_rails.zip`', '**これを使う**。基板と左右・上の捨て基板を 1 枚にまとめた製造データ（%d 層）。大きさ %s mm' % (layers, panel)],
+           ['`gerbers.zip`', '基板だけのデータ（%s mm）。**注文には使わない**（上の捨て基板が無いと、上端のコネクタが実装の条件を満たさない）' % board],
+           ['`bom_jlc.csv`', '実装する部品の表'], ['`cpl_jlc.csv`', '部品の位置と向き（Top と Bottom の両面）'],
+           ['`rails.png`', 'JLCPCB のサポートへの質問に添付する図'],
+           ['`jlcpcb_support_question.txt`', 'サポートへの質問文（英語）。そのまま送る'],
+           ['`jlcpcb_pcb_remark.txt`、`jlcpcb_assembly_remark.txt`', '注文フォームに貼る Remark（PCB 用と実装用）'],
+           ['`jlcpcb_order_notes.md`', '設計者が書いた注文メモの全文。この文書と食い違う所は、この文書に従う。メモに出てくる `docs/…` や `tools/pcb/…` のファイルはこのフォルダに無いので、探さなくてよい'],
+           ['`outline.png`、`placement.png`', '基板の外形図と部品の配置図（参考。シェルの裏、主な部品面から見た図）'],
+           ['`parts_check.csv`、`cpl_check.csv`', 'JLCPCB の部品の区分（宣言した Basic / Extended）・在庫と、部品の向きを照合した結果（参考。%s 時点）' % JLC_DATE_H]]),
+         ('h2', '数量'),
+         ('table', ['品目', '数量', '補足'],
+          [['基板（PCB Qty）', '%d 枚' % PCB_QTY, '注文できる最少の枚数'],
+           ['部品実装（PCBA Qty）', '%d 枚' % PCBA_QTY, '残りの %d 枚は部品なしの基板で届く' % (PCB_QTY - PCBA_QTY)]]),
+         ('h2', 'JLCPCB の手順'),
+         ('h3', '支払いの前にサポートへ質問する'),
+         ('p', 'この基板は端に金めっきの接点（金フィンガー）があり、その辺を斜めに削る加工（面取り）を頼みます。実装に必要な捨て基板は、左右と上の 3 辺にデータの中で描き込んであります。'
+               'この組み合わせで面取りと両面の実装をしてもらえるかは、JLCPCB のどのページにも書かれていません。そのため、注文の前に確かめます。'),
+         ('ol', ['JLCPCB のサポートに、`jlcpcb_support_question.txt` の英文を送り、`rails.png` を添付する。GrokBOT から送れない場合は、文面と図を依頼者に渡して送ってもらう。',
+                 '回答の全文を依頼者に報告する。', '回答に応じて、下の表のとおりに進める。']),
+         ('p', '質問文（`jlcpcb_support_question.txt` と同じ内容）:'),
+         ('quote', question),
+         ('table', ['質問', '回答', 'すること'],
+          [['1) 面取りできるか', 'できる', '次へ進む'], ['1) 面取りできるか', 'できない', '**止まって確認。**'],
+           ['2) この捨て基板で両面の実装ができるか', 'できる', '次へ進む'], ['2) この捨て基板で両面の実装ができるか', 'できない、または条件つき', '**止まって確認。** 足りない点を聞き取って依頼者に伝える。データの作り直しが要る'],
+           ['3) Delivery Format', 'Panel by Customer', 'この文書のとおりに選ぶ'], ['3) Delivery Format', 'Single PCB', 'Delivery Format を Single PCB にする。追加料金の説明があれば依頼者に伝える'],
+           ['4)・5) 追加料金', '追加料金がある', '金額を依頼者に伝える（止まって確認）']]),
+         ('p', '2 営業日たっても回答が無い場合、回答があいまいな場合、質問 1)〜3) のどれかに答えが無い場合は、支払いへ進まずに、止まって依頼者に確認してください。'),
+         ('h3', '基板（PCB）の指定'),
+         ('ol', ['[注文フォーム](https://cart.jlcpcb.com/quote) を開き、"Add gerber file" に `gerbers_rails.zip` を上げる。',
+                 '読み込まれた大きさ（Dimensions）が **%s mm**、層の数が **%d** であることを確かめる。違う場合は止まって確認。' % (panel, layers),
+                 '下の表のとおりに選ぶ。表に無い項目は、最初から選ばれている値のままにする。',
+                 'PCB Remark の欄に、`jlcpcb_pcb_remark.txt` の英文をそのまま貼る。欄に全文が入らない場合は、自分で削らずに止まって確認。']),
+         ('table', ['項目', '選ぶ値'],
+          [['Base Material', 'FR-4'], ['Layers', '**%d**' % layers], ['PCB Qty（Delivery Format を Panel by Customer にすると、項目名が Panel Qty に変わる）', '%d' % PCB_QTY],
+           ['Product Type', 'Industrial/Consumer electronics'], ['Different Design', '1'],
+           ['Delivery Format', '**Panel by Customer**。Panel Format は Column 1、Row 1（サポートが Single PCB と答えた場合はそれに合わせる）。"Panel by JLCPCB" は選ばない'],
+           ['PCB Thickness', '**1.2 mm**'], ['Layer Stackup', '**JLC06121H-3313**（選べない場合は止まって確認）'], ['PCB Color', 'Green'], ['Silkscreen', 'White'],
+           ['Surface Finish', '**ENIG**。Gold Thickness は **2 U"**'], ['Outer Copper Weight', '1 oz'], ['Inner Copper Weight', '**0.5 oz**'],
+           ['Min via hole size/diameter', '**0.3mm/(0.4/0.45mm)**（最初に選ばれている値のまま。「0.2mm」は選ばない）'], ['Via Covering', '**Epoxy Filled & Capped**'],
+           ['Board Outline Tolerance', '±0.2 mm（Regular）'], ['Mark on PCB', 'Remove Mark'], ['Electrical Test', 'Flying Probe Fully Test'],
+           ['Gold Fingers', '**Yes**。Beveling は **30°**'], ['Castellated Holes', 'No'],
+           ['Confirm Production file', '**Yes**。選ぶと出る画面では **"Do not confirm automatically"** を選ぶ']]),
+         ('p', 'PCB Remark に貼る文（`jlcpcb_pcb_remark.txt` と同じ内容）:'),
+         ('quote', remark),
+         ('h3', '部品実装（PCB Assembly）の指定'),
+         ('ol', ['PCB Assembly を有効にし、下の表のとおりに選ぶ。表に無い項目は、最初から選ばれている値のままにする。',
+                 'BOM に `bom_jlc.csv`、CPL に `cpl_jlc.csv` を上げる。',
+                 '部品の照合画面で、**%s**ことを確かめる。Extended の行があること自体は正しい。**宣言済みの一覧に無い Extended の行、在庫が足りない行（%d 枚分に足りない、または在庫切れ）、不一致、未選択があれば止まって確認。**代替部品の候補は選ばない。' % (parts_state, PCBA_QTY),
+                 'RP2350B（C42415655）の在庫を確かめる。1 枚に %s 個、%d 枚で %d 個要る。在庫が %d 個より少ない場合は止まって確認。設計者は、在庫が薄いので部品を先に確保すること（JLCPCB の部品在庫として %d 個＋予備 2 個を先に買う）を勧めている。先に買うかどうかは依頼者に聞く。'
+                 % (rp.group(1), PCBA_QTY, prebuy, 3 * prebuy, prebuy),
+                 '部品の配置のプレビューで、下の「部品の向きの確認」の %d 点と、Bottom（裏）の %s 点がパッドに重なっていることを確かめる。' % (len(orient), sides.group(2)),
+                 '実装用の Remark の欄に、`jlcpcb_assembly_remark.txt` の英文をそのまま貼る。欄に全文が入らない場合は、自分で削らずに止まって確認。',
+                 'カートに入れ、配送方法の候補とそれぞれの金額を控える。配送方法は依頼者が選ぶ。',
+                 '支払う日が %s より後になる場合は、支払いの前に止まり、依頼者に「部品の区分と在庫の確認（`gen_jlc.py`）と部品の向きの照合（`check_cpl.py`）を今日もう一度実行して、合格したか」を確かめてもらう。'
+                 'この道具はこのフォルダに無く、GrokBOT は実行できない。' % JLC_DATE_H,
+                 '合計金額と内訳を依頼者に見せ、承認をもらってから支払う（「必ず守ること」の 1）。']),
+         ('table', ['項目', '選ぶ値'],
+          [['PCBA Type', '**Standard**（Economic は金フィンガー付きの基板を受け付けない）'], ['Assembly Side', '**Both Sides**'], ['PCBA Qty', '%d' % PCBA_QTY],
+           ['Edge Rails/Fiducials', '**Added by Customer**'], ['Tooling holes（項目が出た場合）', 'Added by Customer'],
+           ['File provided as（項目が出た場合）', 'Complete File, just proceed with my own files'],
+           ['Confirm Parts Placement', '**Yes**。選ぶと出る画面では **"Do not confirm automatically"** を選ぶ（この選択肢が出ない場合は止まって確認）'],
+           ['Parts Selection（部品の選び方）', 'By Customer (Self-Service)'], ['X-ray Inspection（項目が出た場合）', '**Yes**'], ['捨て基板を外すサービス（Depaneling）', '選ばない']]),
+         ('p', '実装しない部品（照合画面に出なくて正しいもの）: %s。' % dnp),
+         ('h3', '部品の向きの確認'),
+         ('p', 'プレビューは、基板を上（Top）から見て、金色の接点が下に来る向きで確かめます。Bottom の部品（%s 点）は、向きのない受動部品だけです。パッドに重なっていれば正しい。' % sides.group(2)),
+         ('ol', orient),
+         ('p', '**向きのある部品が 180° 回って見える場合や、パッドからずれて見える場合は、承認せずに止まって確認してください。**'),
+         ('h3', '金額の目安'),
+         ('ul', ['基板: 約 US$ %d（%d 枚。%s の見積もり画面の値。%d 層、ENIG、金フィンガー、面取り、Epoxy Filled & Capped、Confirm Production file を含み、送料は別）。' % (JLC_PCB, PCB_QTY, JLC_DATE_H, layers),
+                 '実装: 約 US$ %d（%d 枚、両面、X 線検査込み。JLCPCB の料金表〔%s 更新〕から計算した値で、見積もり画面では確かめていない。治具の費用が加わると約 US$ %d）。'
+                 '部品代は見積もり画面に出る金額で、この文書では計算していない。' % (JLC_ASM, PCBA_QTY, price_date, JLC_ASM_FIX),
+                 '送料、関税、消費税は、見積もり画面と配送業者の案内による。この文書では確かめていない。',
+                 '比べるのは項目ごと。基板の代金（送料を除く）が US$ %d を超える場合、または実装の料金（部品代を除き、治具の費用を含む）が US$ %d を超える場合は、止まって、どの項目が高いかを添えて依頼者に伝える。' % (lim_pcb, lim_asm)]),
+         ('h3', '注文したあと'),
+         ('ol', ['製造データ（Production file）の確認依頼が届いたら、承認する前に依頼者に見せる。確かめる点は、捨て基板が左右と上にあること、金色の接点の辺に捨て基板も V カットの線も無いこと、面取りの指示が入っていること、積層が JLC06121H-3313 であること。',
+                 '部品の配置の確認依頼（Confirm Parts Placement）が届いたら、「部品の向きの確認」の %d 点と Bottom の部品を確かめ、画面を依頼者に見せてから承認する。' % len(orient),
+                 'JLCPCB から質問や変更の提案が届いたら、内容を依頼者に伝えて指示を待つ。']),
+         ('h2', '止まって確認する場面'),
+         ('ul', ['注文の確定と支払いの直前（依頼者が上限金額を決めて任せていて、合計がその範囲に収まる場合を除く）。',
+                 'JLCPCB のサポートが、面取りできない、この捨て基板では実装できない、と答えたとき。回答が無い、あいまい、質問 1)〜3) のどれかに答えが無いとき。追加料金の説明があったとき。',
+                 '注文フォームで、この文書の表にある値を選べないとき。最初から選ばれている値が無い項目や、選ぶと追加料金が出る項目に当たったとき。読み込まれた大きさや層の数が違うとき。',
+                 'Remark が欄に入りきらないとき。',
+                 '部品の照合画面で、**宣言済みの一覧に無い Extended の行**、**在庫が足りない行**、不一致、未選択があるとき（宣言済みの Extended %s 品番の行は止まる理由にならない）。' % ncodes,
+                 'RP2350B の在庫が %d 個より少ないとき。' % (3 * prebuy),
+                 '部品の向きが「部品の向きの確認」と違って見えるとき。Bottom の部品がパッドからずれて見えるとき。',
+                 '支払う日が %s より後になるとき。' % JLC_DATE_H,
+                 '製造データや部品の配置の確認依頼が届いたとき（承認の前）。自動で承認されない設定（Do not confirm automatically）を選べなかったとき。',
+                 'JLCPCB から質問、変更の提案、追加料金の連絡が届いたとき。',
+                 '基板の代金が US$ %d、または実装の料金（部品代を除く）が US$ %d を超えたとき。' % (lim_pcb, lim_asm)]),
+         ('h2', '終わったら報告すること'),
+         ('ul', ['注文番号、選んだ Delivery Format、合計金額と内訳、配送方法、納期の見込み、サポートの回答の全文。',
+                 '部品の照合画面の Basic と Extended の行数、RP2350B の在庫と、先に確保したかどうか。',
+                 '止まって確認した点と、その結果。未解決のことがあればその内容。']),
+         ('h2', 'この基板について知っておくこと'),
+         ('ul', ['基板の名前は famicart %s。ファミリーコンピュータ用のカセット基板で、大きさは %s mm（捨て基板込み %s mm）、%d 層、板厚 1.2 mm。部品は Top %s 点・Bottom %s 点。' % (D.REV, board, panel, layers, sides.group(1), sides.group(2)),
+                 'データは機械的な検査（配線の未接続 0、設計ルールの違反 0、JLCPCB の製造条件、部品の向き、部品の区分と在庫）に合格している。実物での動作確認はまだで、今回が最初の製造になる。そのため数量は最少にしてある。',
+                 'この文書とフォルダのデータは、配線 %s 本・ビア %s 個の版のもの（`jlcpcb_order_notes.md` の冒頭に同じ数字がある）。数字が違うデータを渡された場合は、止まって確認する。' % (counts.group(1), counts.group(2)),
+                 'この発注に含まれないもの: カセットの外側のケース、USB ケーブル。',
+                 '細かい理由や JLCPCB の条件の出典は `jlcpcb_order_notes.md` にある。']),
+         ('h2', '根拠にした資料'),
+         ('ul', ['JLCPCB の注文フォーム（項目名、見積もり。%s 確認）: https://cart.jlcpcb.com/quote' % JLC_DATE_H,
+                 'JLCPCB 実装仕様（金フィンガーは Standard PCBA のみ）: https://jlcpcb.com/capabilities/pcb-assembly-capabilities',
+                 'JLCPCB 金フィンガーと面取り: https://jlcpcb.com/help/article/jlcpcb-gold-fingers',
+                 'JLCPCB ビアの処理: https://jlcpcb.com/help/article/pcb-via-covering',
+                 'JLCPCB 捨て基板とフィデューシャル: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order',
+                 'JLCPCB 実装の料金表: https://jlcpcb.com/help/article/pcb-assembly-price'])]
+    write('grokbot_instructions.md', to_md(B))
+    write('grokbot_instructions.html', to_html(B, T))
+    print('order folder: PCB %d, PCBA %d (both sides); parts list Basic %s rows, Extended %s rows (declared: %s); stop on undeclared Extended or short stock'
+          % (PCB_QTY, PCBA_QTY, nbasic, next_, extended))
+
 def main():
+    if hasattr(D, 'LCSC_CLASS'): return main_declared()      # every part placed by JLCPCB, declared classes (rev H on)
     notes = open(os.path.join(HW, 'jlcpcb', 'README.md')).read()
     # ---- taken from the order notes
     question = quote_after(notes, '質問文（そのまま貼る）:')

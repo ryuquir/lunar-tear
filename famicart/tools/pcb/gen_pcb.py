@@ -5,9 +5,14 @@ Optional design attributes (rev H on; a design without them gets exactly the boa
   PLANES     {layer name: [(net, polygon | 'board'), ...]}: the pours of every layer (plane_map(); later entries of a
              layer have the higher priority). Without it: In1 GND and the last inner layer +3V3 on 4 / 6 layers.
   OUTER_GND  True: board-wide GND pours on F.Cu and B.Cu as well (always so on 2 layers).
-  EP_VIAS    {'footprint': name(s), 'grid': 3, 'pitch': 1.1, 'drill': 0.3, 'dia': 0.5, 'net': 'GND'}: board vias in
-             the exposed pad of every footprint of that name (add_ep_vias(); for footprints without vias of their
-             own, e.g. famicart:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia)."""
+  EP_VIAS    {'footprint': name(s), 'grid': 3, 'pitch': 1.1, 'drill': 0.3, 'dia': 0.5, 'net': 'GND', 'count': 8}: board
+             vias in the exposed pad of every footprint of that name (add_ep_vias(); for footprints without vias of
+             their own, e.g. famicart:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia). The tool stops when no footprint
+             of that name is on the board, or when 'count' is given and that many footprints are not.
+  STACKUP    'JLC06121H-3313' (a template of STACKUPS) or a list like it: the stack-up of a multilayer board, written
+             into the board file with ENIG and the bevelled edge connector, as for 2-layer boards (write_stackup()).
+  A shell drawn from the back (shells.mirrored()): the default board text '(back)' goes on KiCad's F side, which is
+  the back of the cartridge there."""
 import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 import pcbnew
@@ -42,15 +47,49 @@ STACKUP_2L = '''    (stackup
     )
 '''
 
-def write_stackup(path, layers):
-    """Insert the stack-up block at the start of (setup ...). Only for 2-layer boards; idempotent."""
-    if layers != 2: return False
+# Multilayer stack-ups (opt-in: D.STACKUP names one of these or gives such a list). (layer, type, thickness mm,
+# material, epsilon_r): copper layers by their KiCad name, dielectrics in between, top to bottom.
+# JLC06121H-3313: JLCPCB's standard 6-layer 1.2 mm stack-up (docs/13_rev_h_plan.md "基板"; https://jlcpcb.com/impedance):
+# outer copper 1 oz (0.035), inner copper 0.5 oz (0.0152), 3313 prepreg 0.0994 under the outer layers, 0.35 cores,
+# 2116 prepreg 0.1164 in the centre. epsilon_r: the values of JLCPCB's impedance calculator for 3313 / 2116 prepreg and
+# its core material; the order form's stack-up is the reference.
+STACKUPS = {'JLC06121H-3313': [
+    ('F.Cu', 'copper', 0.035, None, None), ('dielectric 1', 'prepreg', 0.0994, '3313', 4.1),
+    ('In1.Cu', 'copper', 0.0152, None, None), ('dielectric 2', 'core', 0.35, 'FR4', 4.6),
+    ('In2.Cu', 'copper', 0.0152, None, None), ('dielectric 3', 'prepreg', 0.1164, '2116', 4.16),
+    ('In3.Cu', 'copper', 0.0152, None, None), ('dielectric 4', 'core', 0.35, 'FR4', 4.6),
+    ('In4.Cu', 'copper', 0.0152, None, None), ('dielectric 5', 'prepreg', 0.0994, '3313', 4.1),
+    ('B.Cu', 'copper', 0.035, None, None)]}
+
+def stackup_block(spec):
+    """The (stackup ...) text of a multilayer board: masks, silkscreen and paste around the layers of `spec` (a name
+    of STACKUPS or such a list), ENIG, the bevelled edge connector."""
+    layers = STACKUPS[spec] if isinstance(spec, str) else list(spec)
+    out = ['    (stackup', '      (layer "F.SilkS" (type "Top Silk Screen"))', '      (layer "F.Paste" (type "Top Solder Paste"))',
+           '      (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))']
+    for name, kind, th, mat, er in layers:
+        if kind == 'copper': out.append('      (layer "%s" (type "copper") (thickness %g))' % (name, th))
+        else: out.append('      (layer "%s" (type "%s") (thickness %g) (material "%s") (epsilon_r %g) (loss_tangent 0.02))' % (name, kind, th, mat, er))
+    out += ['      (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))', '      (layer "B.Paste" (type "Bottom Solder Paste"))',
+            '      (layer "B.SilkS" (type "Bottom Silk Screen"))', '      (copper_finish "ENIG")', '      (dielectric_constraints no)',
+            '      (edge_connector bevelled)', '    )']
+    return '\n'.join(out) + '\n', sum(1 for l in layers if l[1] == 'copper')
+
+def write_stackup(path, layers, spec=None):
+    """Insert the stack-up block at the start of (setup ...); idempotent. 2-layer boards: STACKUP_2L. Multilayer
+    boards: only when the design gives D.STACKUP (or `spec`), which must have that many copper layers."""
+    spec = getattr(D, 'STACKUP', None) if spec is None else spec
+    if layers != 2 and spec is None: return False
     s = open(path).read()
     if '(stackup' in s: return False
     i = s.find('(setup')
     if i < 0: raise SystemExit('no (setup ...) section in ' + path)
     j = s.find('\n', i) + 1
-    open(path, 'w').write(s[:j] + STACKUP_2L % dict(core=THICKNESS - 0.09) + s[j:])
+    if layers == 2 and spec is None: block = STACKUP_2L % dict(core=THICKNESS - 0.09)
+    else:
+        block, ncu = stackup_block(spec)
+        if ncu != layers: raise SystemExit('STACKUP %s has %d copper layers, the board %d' % (spec if isinstance(spec, str) else 'list', ncu, layers))
+    open(path, 'w').write(s[:j] + block + s[j:])
     return True
 
 # Board outline (mm): HVC-TGROM-01 measurements from nesdev "Famicom cartridge dimensions"
@@ -200,14 +239,17 @@ def add_ep_vias(board, netmap, cfg):
     or a list; the name without or with its library): cfg = D.EP_VIAS = {'footprint': ..., 'grid': 3, 'pitch': 1.1,
     'drill': 0.3, 'dia': 0.5, 'net': 'GND', 'pad': '81'}. The exposed pad is the pad numbered cfg['pad'] (default: the
     largest SMD pad of the footprint); the net is cfg['net'] (default: the pad's net) and must be the pad's net.
+    Stops (SystemExit) when no footprint of that name is on the board, or cfg['count'] footprints are not.
     Returns the number of vias."""
     names = cfg['footprint'] if isinstance(cfg['footprint'], (list, tuple)) else [cfg['footprint']]
     grid, pitch = int(cfg.get('grid', 3)), float(cfg.get('pitch', 1.1))
     drill, dia = float(cfg.get('drill', 0.3)), float(cfg.get('dia', 0.5))
     n = 0
-    for fp in board.GetFootprints():
-        fpid = fp.GetFPIDAsString()
-        if fpid not in names and fpid.split(':')[-1] not in names: continue
+    matched = [fp for fp in board.GetFootprints() if fp.GetFPIDAsString() in names or fp.GetFPIDAsString().split(':')[-1] in names]
+    if not matched: raise SystemExit('EP_VIAS: no footprint named %s on the board (a typo would leave the exposed pads without vias)' % ' / '.join(names))
+    if cfg.get('count') is not None and len(matched) != int(cfg['count']):
+        raise SystemExit('EP_VIAS: %d footprints named %s on the board, count says %d' % (len(matched), ' / '.join(names), int(cfg['count'])))
+    for fp in matched:
         smd = [p for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD and p.IsOnCopperLayer()]
         if 'pad' in cfg: smd = [p for p in smd if p.GetNumber() == str(cfg['pad'])]
         if not smd: raise SystemExit('EP_VIAS: %s has no exposed pad' % fp.GetReference())
@@ -525,7 +567,8 @@ def main():
     add_text(board, ('FAB: %.1f mm FR4, ENIG, gold fingers with 30 deg bevel, vias tented' if JLC else 'FAB: %.1f mm FR4, ENIG/hard gold fingers, 2 mm x 30 deg bevel, vias tented') % THICKNESS, 45, 34.0, pcbnew.F_Fab, 0.8, 0.12)
     # board-level silk text: D.SILK_TEXT = [(text, x, y, 'F'|'B', size_mm), ...] (must sit clear of pads: check the DRC
     # report for silk_over_copper); default = the revision on the back, top centre
-    for (stxt, sx, sy, sside, ssize) in getattr(D, 'SILK_TEXT', [('famicart %s  (back)' % getattr(D, 'REV', 'rev B'), 45, 2.0, 'B', 1.2)]):
+    back = 'F' if SHELL and SHELL.get('mirrored') else 'B'      # a board drawn from the back: the cartridge's back is KiCad's F side
+    for (stxt, sx, sy, sside, ssize) in getattr(D, 'SILK_TEXT', [('famicart %s  (back)' % getattr(D, 'REV', 'rev B'), 45, 2.0, back, 1.2)]):
         add_text(board, stxt, sx, sy, pcbnew.B_SilkS if sside == 'B' else pcbnew.F_SilkS, ssize, ssize / 6.0, mirror=(sside == 'B'))
 
     # rule areas: no tracks/vias/pour on the card-edge tab (fingers only; traces may enter the top 1.1 mm of a pad).
@@ -563,7 +606,7 @@ def main():
         add_zone(board, netmap['GND'], pcbnew.B_Cu, body)
 
     pcbnew.SaveBoard(OUT, board)
-    write_stackup(OUT, NL)
+    if write_stackup(OUT, NL) and NL != 2: print('stack-up written:', getattr(D, 'STACKUP'))
     print('board written:', OUT, 'footprints', len(board.GetFootprints()), 'nets', board.GetNetCount(), 'thickness', THICKNESS)
 
 if __name__ == '__main__':

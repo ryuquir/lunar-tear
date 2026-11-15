@@ -19,10 +19,12 @@ MPN = {  # suggested orderable parts (any equivalent works)
  'TP wire pads': 'no part (solder wires from Pico TP2/TP3/TP1 if hand-assembling)', 'USB D+ -> TP_A | TP_B': 'solder jumper, bridge after checking TP2/TP3', 'USB D- -> TP_B | TP_A': 'solder jumper, bridge after checking TP2/TP3',
 }
 LCSC, HAND = getattr(D, 'LCSC', {}), getattr(D, 'HAND', {})
+CLASS = getattr(D, 'LCSC_CLASS', None)       # rev H on: {LCSC code: 'Basic' | 'Extended'} as the design declares it
 def suggest(val):
     """Designs with their own part map (rev E on) name the exact part: the generic MPN table above describes the parts
-    of the earlier boards (e.g. a different reset switch, and an RP2040 Pico must not be fitted where 5 V reaches the pins)."""
-    if val in LCSC: return '%s (LCSC %s, JLCPCB Basic)' % (LCSC[val][1], LCSC[val][0])
+    of the earlier boards (e.g. a different reset switch, and an RP2040 Pico must not be fitted where 5 V reaches the pins).
+    The JLCPCB class is Basic for designs without LCSC_CLASS (rev E-G use Basic parts only), else the declared class."""
+    if val in LCSC: return '%s (LCSC %s, JLCPCB %s)' % (LCSC[val][1], LCSC[val][0], 'Basic' if CLASS is None else CLASS.get(LCSC[val][0], 'class not declared'))
     if val in HAND: return 'hand-soldered: ' + ', '.join(HAND[val])
     return MPN.get(val, '')
 groups = collections.OrderedDict()

@@ -1,24 +1,6 @@
-# Famicom_CardEdge_60_M -- the Famicom card edge for a board drawn as seen from the BACK of the cartridge.
-#
-# Why: rev H puts its main components on the back of the cartridge and draws the board from that side, so that the
-# back is KiCad's F.Cu and JLCPCB's "Top" (docs/13_rev_h_plan.md, "基板データの描き方"; shells.mirrored() does the
-# same to the shell outline and keep-outs).
-#
-# Geometry, derived from Famicom_CardEdge_60 (drawn from the FRONT: pins 1-30 on F.Cu, pin 1 at x = -37.33 on the
-# left, pins 31-60 on B.Cu, pin N+30 directly behind pin N):
-#   * seen from the back, left and right change places: every pad and Fab label x becomes -x (the footprint origin
-#     stays on the tab centre line at the shoulder; y is unchanged, so the fingers still hang below y = 0);
-#   * the back is now the viewer's side: pins 31-60 move to F.Cu / F.Mask, pins 1-30 to B.Cu / B.Mask;
-#   * so pin 31 is at x = +37.33 on F.Cu (the right end seen from the back) and pin 1 is directly behind it on B.Cu,
-#     pin 60 is at x = -36.83 on F.Cu with pin 30 behind it at x = -37.33 on B.Cu, and pin N+30 is behind pin N
-#     everywhere, exactly as in the original;
-#   * every pad keeps its own size: 1, 30 and 31 are the wide 2.6 x 6.7 pads, 16 is the long 1.6 x 6.7 pad, 46 and 60
-#     are normal 1.6 x 5.7 pads (the original's pad 60 sits 0.5 mm inboard of pad 30 so that their inner edges line up).
-# Placed unflipped (side 'F') with the board drawn from the back, this is the same copper as Famicom_CardEdge_60
-# placed on a board drawn from the front. tests/test_geometry_gen.py checks every pad against the original.
 (footprint "Famicom_CardEdge_60_M" (version 20221018) (generator famicart)
   (layer "F.Cu")
-  (descr "Famicom 60-pin card edge for a board drawn as seen from the BACK of the cartridge (rev H): the original Famicom_CardEdge_60 mirrored in x, copper layers swapped. Pins 31-60 on F.Cu (left to right seen from the back: 31 on the right), pins 1-30 on B.Cu, pin N+30 behind pin N, every pad keeps its own size (1, 30, 31 wide, 16 long).")
+  (descr "Famicom 60-pin card edge for a board drawn as seen from the BACK of the cartridge (rev H): the original Famicom_CardEdge_60 mirrored in x, copper layers swapped. Pins 31-60 on F.Cu (left to right seen from the back: 31 on the right), pins 1-30 on B.Cu, pin N+30 behind pin N, every pad keeps its own size (1, 30, 31 wide, 16 long). See famicart.pretty/README.md.")
   (tags "famicom cartridge edge connector")
   (attr smd exclude_from_pos_files)
   (fp_text reference "J1" (at 0 -1.5) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))

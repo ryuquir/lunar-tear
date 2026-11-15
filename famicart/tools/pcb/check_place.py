@@ -14,8 +14,11 @@ assembly edge rails, normally joined by V-cut, and JLCPCB wants copper at least 
 pads keep FC_SIDE_MARGIN (0.4 mm) from those two edges.
 Edge connectors (rev H on: D.EDGE_CONNECTORS, the references of e.g. the USB-C and microSD sockets whose mouths are
 flush with the top edge): their body (courtyard) may cross the TOP edge, and only there, within the shell's usb_top x
-window; their pads stay on the board like every other pad. A board drawn from the back uses shells.mirrored(), whose
-usb_top window is mirrored and whose keep-outs are already on the KiCad side they apply to.
+window and by at most D.EDGE_OVERHANG mm (default 1.0: the mouth reaches a little into the 2 mm gap before a top
+edge rail, docs/13 "捨て基板"; make_rails.py also keeps it 0.5 mm away from the rail); their pads stay on the board
+like every other pad. The raster then reaches EDGE_OVERHANG + 0.5 mm above the board. A board drawn from the back
+uses shells.mirrored(), whose usb_top window is mirrored and whose keep-outs are already on the KiCad side they
+apply to.
 Exit status 1 when anything fails.   FC_DESIGN=design_reve2 FC_HW_DIR=... python3 check_place.py"""
 import os, sys, importlib
 import numpy as np
@@ -30,6 +33,7 @@ G = 0.05; MARGIN = float(os.environ.get('FC_EDGE_MARGIN', '0.3'))
 SIDE = float(os.environ.get('FC_SIDE_MARGIN', '0.4'))                                # to a V-cut (edge rail) side edge
 BODY = {'RPi_Pico_SMD': 1.6, 'RPi_Pico_SMD_Short': 1.6, 'XIAO-RP2350-Edge': 1.0}      # modules: USB connector overhang past the marked end (mm)
 EDGE = tuple(getattr(D, 'EDGE_CONNECTORS', ()))                                        # parts that may cross the top edge (usb_top window)
+EDGE_OVERHANG = float(getattr(D, 'EDGE_OVERHANG', 1.0))                                 # ... by at most this much (mm)
 
 def pip(px, py, poly):
     """vectorised point-in-polygon (even-odd)"""
@@ -43,7 +47,8 @@ def pip(px, py, poly):
 def main():
     b = pcbnew.LoadBoard(os.path.join(HW, 'famicart.kicad_pcb'))
     bb = b.GetBoardEdgesBoundingBox()
-    X0, Y0 = ToMM(bb.GetX()) - 1, ToMM(bb.GetY()) - 1; X1, Y1 = ToMM(bb.GetRight()) + 1, ToMM(bb.GetBottom()) + 1
+    X0, Y0 = ToMM(bb.GetX()) - 1, ToMM(bb.GetY()) - (max(1.0, EDGE_OVERHANG + 0.5) if EDGE else 1); X1, Y1 = ToMM(bb.GetRight()) + 1, ToMM(bb.GetBottom()) + 1
+    ytop = ToMM(bb.GetY()) + 0.05                                    # the top edge line (outline drawn 0.1 mm wide)
     xs = np.arange(X0, X1, G); ys = np.arange(Y0, Y1, G); PX, PY = np.meshgrid(xs, ys)
     if SH:
         T = SH['body_h'] + 10.7
@@ -134,6 +139,7 @@ def main():
             if not win: bad.append(f'{ref} ({side}) is listed in EDGE_CONNECTORS but the shell has no usb_top window')
             out_ok = ((PY < MARGIN + G) & (PX >= win[0]) & (PX <= win[1])) if win else np.zeros(board.shape, bool)
             if (m & ~ok & ~out_ok).any(): bad.append(f'{ref} ({side}) edge connector leaves the board other than past the top edge within the usb_top window: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
+            if ytop - ry0 > EDGE_OVERHANG + 1e-6: bad.append(f'{ref} ({side}) sticks out {ytop - ry0:.2f} mm past the top edge (at most {EDGE_OVERHANG:.2f}, EDGE_OVERHANG)')
         elif (m & ~ok).any(): bad.append(f'{ref} ({side}) leaves the board / hits a cut-out or the edge margin: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
         if (m & ko[side]).any(): bad.append(f'{ref} ({side}) sits on a shell rib/post keep-out: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
         if usb_m is not None: m = m | usb_m

@@ -11,6 +11,9 @@ Without options the track width, clearance and via size come from the design fil
   --no-rip             only use free room (no track of another net is removed)
   --only NET           work on the open connections of one net
   --protect NET,NET    tracks of these nets are never removed
+Layer roles: the design's PLANES when it has one (dsn_export.layer_roles: inner layers with a board-wide pour are plane
+layers, their nets the plane nets; a via that finishes a plane net must lie inside that net's filled plane), else the
+roles used up to rev G (6 layers: signals on F, In2, In3, B; GND and +3V3 planes).
 The routes of this tool end at the first grid cell inside the target pad, a few hundredths of a millimetre from its
 edge: run anchor_tracks.py afterwards (finish_package.sh does), which carries such ends on to the pad centre.
 On a crowded board the plain mode can run away: every route it forces through removes tracks of other nets, which
@@ -159,7 +162,23 @@ def raster_cells(kind, prm, infl):
     tmp = np.zeros((NY, NX), bool); raster(tmp, kind, prm, infl)
     return np.flatnonzero(tmp)
 
-def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_rip=True, history=None):
+PLANE_MAP = getattr(_D, 'PLANES', None)
+
+def plane_cover(board, net, plane_ids):
+    """For designs with PLANES: a test (x, y) -> True when a via there (radius VR) lies inside the filled pour of `net`
+    on one of its plane layers (a +3V3 plane has islands of other nets cut out of it). Cached per grid cell."""
+    polys = [z.GetFilledPolysList(lid) for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetname() == net
+             for lid in plane_ids if z.IsOnLayer(lid)]
+    cache = {}
+    def inside(j, i):
+        if (j, i) not in cache:
+            x, y = i * G, j * G; r = VR + 0.05
+            pts = [(x, y)] + [(x + r * math.cos(a * math.pi / 4), y + r * math.sin(a * math.pi / 4)) for a in range(8)]
+            cache[(j, i)] = any(all(p.Contains(VECTOR2I(FromMM(px), FromMM(py))) for px, py in pts) for p in polys)
+        return cache[(j, i)]
+    return inside
+
+def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_rip=True, history=None, cover=None):
     """A* from src island to dst island (or to any plane-reaching via spot). Pads and the board edge are hard
     obstacles; other nets' tracks/vias are soft (cost SOFT_COST per cell) when allow_rip. Returns
     (path, plane_via, rip_items) or None."""
@@ -241,7 +260,7 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
     PM = 1.3
     def is_goal(k, j, i):
         if (k, j, i) in dst: return True
-        return plane_goal and not hard_via[j, i] and soft_via[j, i] == 0 and PM / G <= i <= (BW - PM) / G and PM / G <= j <= (BH - 0.5 - PM) / G
+        return plane_goal and not hard_via[j, i] and soft_via[j, i] == 0 and PM / G <= i <= (BW - PM) / G and PM / G <= j <= (BH - 0.5 - PM) / G and (cover is None or cover(j, i))
     dl = list(dst)[:: max(1, len(dst) // 64)] if dst else []
     def h(j, i):
         if plane_goal or not dl: return 0.0
@@ -344,8 +363,17 @@ def main():
     if args.cleanup_only:
         print('cleanup removed', cleanup_pass(args.pcb)); return
     ncu = board.GetCopperLayerCount()
-    sig_layers = {6: [pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.B_Cu], 4: [pcbnew.F_Cu, pcbnew.B_Cu]}.get(ncu, [pcbnew.F_Cu, pcbnew.B_Cu])
-    plane_nets = {'GND', '+3V3'} if ncu >= 4 else set()
+    if PLANE_MAP is not None:          # roles from the design's plane map (rev H: signals F, In3, B; planes In1 GND, In2 +3V3, In4 GND)
+        import dsn_export
+        sig_names, plane_of = dsn_export.layer_roles(ncu, PLANE_MAP)
+        sig_layers = [board.GetLayerID(n) for n in sig_names]
+        plane_nets = set(plane_of.values())
+        plane_ids = {net: [board.GetLayerID(l) for l, n in plane_of.items() if n == net] for net in plane_nets}
+        print('layer roles from PLANES: signals %s, planes %s' % (', '.join(sig_names), ', '.join('%s %s' % kv for kv in sorted(plane_of.items()))))
+    else:
+        sig_layers = {6: [pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.B_Cu], 4: [pcbnew.F_Cu, pcbnew.B_Cu]}.get(ncu, [pcbnew.F_Cu, pcbnew.B_Cu])
+        plane_nets = {'GND', '+3V3'} if ncu >= 4 else set()
+        plane_ids = None
     import json
     hist_path = args.pcb + '.riphistory.json'
     history = json.load(open(hist_path)) if os.path.exists(hist_path) else {}
@@ -371,7 +399,8 @@ def main():
                 if not jobs: jobs.append((ia, ib))
             else: jobs.append((ia, ib))
             for src, dst in jobs:
-                res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets), allow_rip=not args.no_rip, history=history)
+                cover = plane_cover(board, net, plane_ids[net]) if (plane_ids is not None and net in plane_nets) else None
+                res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets), allow_rip=not args.no_rip, history=history, cover=cover)
                 if res is None: print(f'  {net}: no path'); continue
                 path, pv, rip = res
                 if rip:

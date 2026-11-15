@@ -1,10 +1,6 @@
-# L_SXN_SMNR4020 -- shielded SMD power inductor 4.0 x 4.0 mm, SXN SMNR4020 series (2.2 uH: LCSC C135262, JLCPCB Extended).
-# Drawn from JLCPCB's library footprint (EasyEDA "IND-SMD_L4.0-W4.0_LQH44PN2R2MP0L"): two 1.5 x 4.0 mm pads 3.6 mm apart (centres), origin in the
-# middle, body outline 4.0 x 4.0 mm on the Fab layer, courtyard pads and body plus 0.25 mm. No polarity.
-# tests/check_footprints_easyeda.py compares it with the library footprint.
 (footprint "L_SXN_SMNR4020" (version 20221018) (generator famicart)
   (layer "F.Cu")
-  (descr "Shielded power inductor 4.0 x 4.0 mm, SXN SMNR4020 (2.2 uH: LCSC C135262): pads and body from JLCPCB's library footprint IND-SMD_L4.0-W4.0_LQH44PN2R2MP0L")
+  (descr "Shielded power inductor 4.0 x 4.0 mm, SXN SMNR4020 (2.2 uH: LCSC C135262): pads and body from JLCPCB's library footprint IND-SMD_L4.0-W4.0_LQH44PN2R2MP0L. See famicart.pretty/README.md.")
   (tags "inductor SMNR4020 4020")
   (attr smd)
   (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))

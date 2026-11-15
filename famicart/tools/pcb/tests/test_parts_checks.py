@@ -77,13 +77,14 @@ def run(fn):
     return code, out.getvalue()
 
 # ---------------------------------------------------------------- fixture
-def build_board(hw, D, vias=((30.0, 34.0, 0.5, 0.3), (34.0, 34.0, 0.45, 0.2)), edge_pour=False):
-    """The fixture board: Edge.Cuts 60 x 40 mm, 6 copper layers, a GND pour on In1 (and on In3 up to the left edge
-    with edge_pour), the parts of D.PARTS except U5, vias (x, y, diameter, hole); fabrication files in <hw>/fab."""
+def build_board(hw, D, vias=((30.0, 34.0, 0.5, 0.3), (34.0, 34.0, 0.45, 0.2)), edge_pour=False, layers=6, pth=None):
+    """The fixture board: Edge.Cuts 60 x 40 mm, `layers` copper layers, a GND pour on In1 (and on In3 up to the left
+    edge with edge_pour), the parts of D.PARTS except U5, vias (x, y, diameter, hole), pth = (x, y, copper, hole): one
+    plated through-hole pad of its own; fabrication files in <hw>/fab."""
     import pcbnew
     from pcbnew import FromMM, VECTOR2I
     os.makedirs(os.path.join(hw, 'fab'), exist_ok=True)
-    b = pcbnew.BOARD(); b.SetCopperLayerCount(6)
+    b = pcbnew.BOARD(); b.SetCopperLayerCount(layers)
     b.GetDesignSettings().m_CopperEdgeClearance = 0       # let a pour reach the edge (the refusal case)
     b.GetDesignSettings().SetBoardThickness(FromMM(1.2))
     gnd = pcbnew.NETINFO_ITEM(b, 'GND'); b.Add(gnd)
@@ -103,6 +104,12 @@ def build_board(hw, D, vias=((30.0, 34.0, 0.5, 0.3), (34.0, 34.0, 0.45, 0.2)), e
         fp.SetOrientationDegrees(rot)
     for (x, y, dia, hole) in vias:
         v = pcbnew.PCB_VIA(b); v.SetPosition(VECTOR2I(FromMM(x), FromMM(y))); v.SetWidth(FromMM(dia)); v.SetDrill(FromMM(hole)); v.SetNet(gnd); b.Add(v)
+    if pth:                                    # a plated hole that belongs to a footprint (no LCSC part: not in the BOM)
+        x, y, cu, hole = pth
+        fp = pcbnew.FOOTPRINT(b); fp.SetReference('TP1'); fp.SetValue('test point'); fp.SetAttributes(pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_BOARD_ONLY); b.Add(fp); fp.SetPosition(VECTOR2I(FromMM(x), FromMM(y)))
+        pad = pcbnew.PAD(fp); pad.SetAttribute(pcbnew.PAD_ATTRIB_PTH); pad.SetShape(pcbnew.PAD_SHAPE_CIRCLE); pad.SetNumber('1')
+        pad.SetSize(VECTOR2I(FromMM(cu), FromMM(cu))); pad.SetDrillSize(VECTOR2I(FromMM(hole), FromMM(hole))); pad.SetPosition(VECTOR2I(FromMM(x), FromMM(y)))
+        pad.SetLayerSet(pcbnew.PAD.PTHMask()); pad.SetNet(gnd); fp.Add(pad)
     def pour(layer, x0, y0, x1, y1):
         z = pcbnew.ZONE(b); z.SetLayer(layer); z.SetNet(gnd); z.SetIsFilled(False); z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_NEVER)
         o = z.Outline(); o.NewOutline()
@@ -114,7 +121,8 @@ def build_board(hw, D, vias=((30.0, 34.0, 0.5, 0.3), (34.0, 34.0, 0.45, 0.2)), e
     b = pcbnew.LoadBoard(pcb)                  # fill the pours on the board as loaded from its file (as route_pcb.py does)
     pcbnew.ZONE_FILLER(b).Fill(b.Zones()); b.BuildConnectivity(); pcbnew.SaveBoard(pcb, b)
     fab = os.path.join(hw, 'fab')
-    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', 'F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts', '-o', fab + '/', pcb], check=True, capture_output=True)
+    cu = ','.join(['F.Cu'] + ['In%d.Cu' % k for k in range(1, layers - 1)] + ['B.Cu'])
+    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', cu + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts', '-o', fab + '/', pcb], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', fab + '/', pcb], check=True, capture_output=True)
     return pcb
 
@@ -189,6 +197,7 @@ def test_declared(gen_jlc, D, hw):
     code, out, rows, head = case({})
     check(code is None and all(r['Result'] == 'OK' for r in rows.values()), 'declared classes and ample stock: passes')
     check(head.startswith('LCSC,Part,Library,Stock,Result,'), 'parts_check.csv keeps its first five columns (LCSC, Part, Library, Stock, Result)')
+    check(head.endswith(',Problem,Boards') and all(r['Boards'] == '5' for r in rows.values()), 'parts_check.csv: the number of boards checked for (Boards) is the last column (5 by default)')
     check(rows['C141836']['Library'] == 'Extended' and rows['C2286']['Library'] == 'Basic', 'the Library column carries the class from the catalogue')
     check(rows['C2286']['Need'] == str(8 * 5 + 3), 'need = per board x 5 boards (default FC_PCBA_QTY) + lossNumber')
     code, out, rows, _ = case({'C2286': dict(componentLibraryType='expand')})
@@ -207,7 +216,7 @@ def test_declared(gen_jlc, D, hw):
     code, out, rows, _ = case({'C141836': dict(canPresaleNumber=None)})
     check(code is not None, 'a catalogue entry without canPresaleNumber fails')
     code, out, rows, _ = case({'C141836': dict(canPresaleNumber=2 * 2 + 3)}, qty=2)
-    check(code is None and rows['C141836']['Need'] == '7', 'FC_PCBA_QTY=2: need = 2 x 2 + 3')
+    check(code is None and rows['C141836']['Need'] == '7' and rows['C141836']['Boards'] == '2', 'FC_PCBA_QTY=2: need = 2 x 2 + 3, Boards 2')
     code, out, rows, _ = case({}, per_board=dict(per, C99999=1))
     check(code is not None and 'not declared' in rows['C99999']['Problem'], 'a placed code without a declaration fails')
     code, out, rows, _ = case({}, per_board={'C141836': 2})
@@ -315,16 +324,19 @@ def test_refusals(base, D):
     gen_jlc, check_cpl, check_jlc = load(hw)
     code, out = write_package(gen_jlc)
     check(code is not None and 'U9' in str(code), 'gen_jlc.py refuses a bottom-side part that BOTTOM_OK does not allow (%s)' % str(code)[:90])
-    D.BOTTOM_OK.add('U')                     # write the package anyway, to see that the checks refuse it on their own
+    D.BOTTOM_OK.add('U')                     # declaring it is not enough: a SOT-23-5 does not turn by 180 degrees without harm
     code, out = write_package(gen_jlc)
+    check(code is not None and 'U9' in str(code), 'gen_jlc.py refuses it even when BOTTOM_OK names its prefix (bottom_ok: footprint not in BOTTOM_TURN)')
     D.BOTTOM_OK.discard('U')
+    real = gen_jlc.bottom_ok; gen_jlc.bottom_ok = lambda ref, fpname=None: True       # a package written without the rule,
+    code, out = write_package(gen_jlc); gen_jlc.bottom_ok = real                    # to see that the checks refuse it on their own
     code, out = run(check_cpl.main)
     check(code == 1 and 'U9: side of the board' in out, 'check_cpl.py refuses U9 on the bottom side')
     check('R9: on the bottom side at 30.0 degrees' in out, 'check_cpl.py refuses a bottom-side part that is not at a multiple of 90 degrees')
     check('FAIL R1' not in out and 'FAIL RN1' not in out and 'FAIL Y1' not in out, 'the allowed bottom-side parts of the same board pass')
     code, out = jlc_check(check_jlc)
-    check('U9 is assembled by JLCPCB on the back, but BOTTOM_OK does not allow it there' in out, 'check_jlc.py refuses U9 on the back')
-    check("CPL layers disagree with the sides of the board or with BOTTOM_OK: ['U9']" in out, 'check_jlc.py refuses the Bottom row of U9')
+    check('U9 is assembled by JLCPCB on the back, but it may not be there' in out, 'check_jlc.py refuses U9 on the back')
+    check("CPL layers disagree with the sides of the board or with what may go on the bottom side (BOTTOM_OK, gen_jlc.BOTTOM_TURN): ['U9']" in out, 'check_jlc.py refuses the Bottom row of U9')
     check('2 holes break the multilayer small-hole rule' in out and '0.20 mm needs copper 0.45 mm across, it has 0.40' in out and 'hole 0.15 mm < 0.20' in out,
           'small holes: 0.2 mm with 0.40 mm copper and a 0.15 mm hole are refused')
     check('mm from the left edge <' in out, 'a pour on In3 is measured against the edges')
@@ -352,6 +364,151 @@ def test_old_designs(base, D):
     check(check_jlc.NL == 2, 'check_jlc: a 6-layer design without JLC_RULES (rev D) is checked as before (2 layers expected)')
     D.JLC_RULES = True
     for k, v in keep.items(): setattr(D, k, v)
+
+def test_bottom_rule(base, D):
+    print('bottom side: only footprints whose 180-degree turn is harmless, whatever BOTTOM_OK declares')
+    gen_jlc, check_cpl, check_jlc = load(os.path.join(base, 'hw'))
+    keep = set(D.BOTTOM_OK); D.BOTTOM_OK.update({'D', 'C', 'Y', 'U', 'Q'})
+    ok = {'Resistor_SMD:R_0402_1005Metric': 'R7', 'Capacitor_SMD:C_0603_1608Metric': 'C7', 'Capacitor_SMD:C_1206_3216Metric': 'C8',
+          'Resistor_SMD:R_0201_0603Metric': 'R8', 'Resistor_SMD:R_Array_Convex_4x0603': 'RN7', 'Resistor_SMD:R_Array_Convex_4x0402': 'RN8',
+          'Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm': 'Y7'}
+    no = {'LED_SMD:LED_0603_1608Metric': 'D7', 'Diode_SMD:D_SOD-123': 'D8', 'Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A': 'C9',
+          'Package_TO_SOT_SMD:SOT-23': 'Q7', 'Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm_HandSoldering': 'Y8', 'Capacitor_SMD:C_1210_3225Metric': 'C10',
+          'Package_TO_SOT_SMD:SOT-23-5': 'U7'}
+    check(all(gen_jlc.bottom_ok(r, fp) for fp, r in ok.items()), 'bottom_ok: R / C 0201-1206, the 4x0603 / 4x0402 arrays and the 3225 crystal when declared')
+    check(not any(gen_jlc.bottom_ok(r, fp) for fp, r in no.items()), 'bottom_ok refuses LEDs, diodes, tantalum capacitors, SOT-23, other crystals, 1210, SOT-23-5 although declared')
+    D.BOTTOM_OK.clear(); D.BOTTOM_OK.update(keep)
+    check(not gen_jlc.bottom_ok('D7', 'Resistor_SMD:R_0402_1005Metric'), 'bottom_ok: a safe footprint that BOTTOM_OK does not declare is refused')
+    keep_attr = D.BOTTOM_OK; D.BOTTOM_OK = 'RN'
+    check(gen_jlc.bottom_ok('RN1') and not gen_jlc.bottom_ok('R1'), "BOTTOM_OK = 'RN' (a string) is one entry: RN1 allowed, R1 not ('R' is not taken as a letter of it)")
+    D.BOTTOM_OK = keep_attr
+    maps = {'Resistor_SMD:R_0402_1005Metric': {'1': '2', '2': '1'}, 'Resistor_SMD:R_Array_Convex_4x0603': {'1': '5', '2': '6', '3': '7', '4': '8', '5': '1', '6': '2', '7': '3', '8': '4'},
+            'Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm': {'1': '3', '2': '4', '3': '1', '4': '2'}}
+    check(all(gen_jlc.bottom_turn(fp) == m for fp, m in maps.items()), 'BOTTOM_TURN pad maps: R 1<->2, array k<->k+4, crystal 1<->3 2<->4')
+    # each map against the KiCad footprint itself: turned by 180 degrees every pad lands on its partner
+    import math
+    good = True
+    for fp, m in maps.items():
+        pads = check_cpl.kicad_pads(fp)
+        for (n, x, y) in pads:
+            q = min(pads, key=lambda p: math.hypot(p[1] + x, p[2] + y)); good &= q[0] == m[n] and math.hypot(q[1] + x, q[2] + y) < 1e-6
+    check(good, 'the BOTTOM_TURN maps are the 180-degree pad maps of the KiCad footprints')
+    # land_turned: the second reading must land on the 180-degree partners, not just on some pads
+    xt = [(n, x, y) for (n, x, y) in check_cpl.kicad_pads('Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm')]
+    turned = [(n, -x, -y) for (n, x, y) in xt]; mirrored = [(n, -x, y) for (n, x, y) in xt]
+    check(check_cpl.land_turned(xt, turned, xt, maps['Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm'])[1], 'land_turned: a crystal turned by 180 degrees lands on its partners (1-3, 2-4)')
+    check(not check_cpl.land_turned(xt, mirrored, xt, maps['Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm'])[1], 'land_turned: pads that land on other pads (1-2, 3-4: the crystal across its case pins) are refused')
+    check(not check_cpl.land_turned(xt, turned, xt, None)[1], 'land_turned: a footprint without a 180-degree map is refused')
+
+    print('an LED declared for the bottom side is refused by gen_jlc, check_cpl and check_jlc')
+    hw = os.path.join(base, 'hw_led')
+    D.PARTS['D3'] = ('', '', 'red LED', D.LED, (44.0, 32.0, 0, 'B')); D.PARTS['D4'] = ('', '', 'red LED', D.LED, (48.0, 32.0, 90, 'B'))
+    D.BOTTOM_OK.add('D')
+    build_board(hw, D)
+    gen_jlc, check_cpl, check_jlc = load(hw)
+    code, out = write_package(gen_jlc)
+    check(code is not None and 'D3' in str(code) and 'D4' in str(code), 'gen_jlc.py refuses the LEDs on the bottom side although BOTTOM_OK names D (%s)' % str(code)[:80])
+    real = gen_jlc.bottom_ok; gen_jlc.bottom_ok = lambda ref, fpname=None: True
+    code, out = write_package(gen_jlc); gen_jlc.bottom_ok = real
+    code, out = run(check_cpl.main)
+    check(code == 1 and 'D3: side of the board' in out and 'D4: side of the board' in out, 'check_cpl.py refuses D3 / D4 on the bottom side')
+    code, out = jlc_check(check_jlc)
+    check('D3 is assembled by JLCPCB on the back, but it may not be there' in out and 'D4 is assembled by JLCPCB on the back' in out, 'check_jlc.py refuses D3 / D4 on the back')
+    check("['D3', 'D4']" in out and 'CPL layers disagree' in out, 'check_jlc.py refuses their Bottom rows')
+    D.BOTTOM_OK.discard('D'); del D.PARTS['D3'], D.PARTS['D4']
+
+def test_eight_layers(base, D):
+    print('8 layers (the fallback of docs/13): In1..In6 in gerbers.zip, the fresh plot and the layer count')
+    hw = os.path.join(base, 'hw8'); D.LAYERS = 8
+    try:
+        build_board(hw, D, layers=8)
+        gen_jlc, check_cpl, check_jlc = load(hw)
+        check(all(('In%d_Cu.g%d' % (k, k + 1)).endswith(gen_jlc.FAB_SUFFIX) for k in range(1, 7)), 'FAB_SUFFIX covers In1..In6 (.g2 .. .g7)')
+        code, out = write_package(gen_jlc)
+        check(code is None, 'gen_jlc.py writes the package of an 8-layer board (exit %r)%s' % (code, '' if code is None else ': ' + out[-200:]))
+        import zipfile
+        names = zipfile.ZipFile(os.path.join(hw, 'jlcpcb', 'gerbers.zip')).namelist()
+        check(all(any(n.endswith('In%d_Cu.g%d' % (k, k + 1)) for n in names) for k in range(1, 7)), 'gerbers.zip carries In1..In6')
+        code, out = jlc_check(check_jlc)
+        check('copper layers' not in out and check_jlc.NL == 8, 'check_jlc: 8 copper layers as the design says')
+        check('gerbers.zip: %d files, each identical to a fresh plot of the board' % len(names) in out, 'gerbers.zip with In1..In6 is identical to a fresh plot (%d files)' % len(names))
+    finally:
+        D.LAYERS = 6
+
+def test_small_holes_without_vias(base, D):
+    print('multilayer small-hole rule on a board without vias (plated pad holes)')
+    hw = os.path.join(base, 'hw_novia')
+    build_board(hw, D, vias=(), pth=(44.0, 34.0, 0.40, 0.20))
+    gen_jlc, check_cpl, check_jlc = load(hw)
+    write_package(gen_jlc)
+    code, out = jlc_check(check_jlc)
+    check('1 holes break the multilayer small-hole rule' in out and 'pad TP1.1: hole 0.20 mm needs copper 0.45 mm across, it has 0.40' in out,
+          'a 0.20 mm plated pad hole with 0.40 mm copper is refused although the board has no via')
+
+def test_stock_for_order(hw, D):
+    print('check_jlc.py recomputes the stock needed for FC_PCBA_QTY boards from parts_check.csv')
+    gen_jlc, check_cpl, check_jlc = load(hw)
+    write_package(gen_jlc)
+    p = os.path.join(hw, 'jlcpcb', 'parts_check.csv'); rows = list(csv.DictReader(open(p))); fields = list(rows[0].keys())
+    r = next(r for r in rows if r['LCSC'] == 'C20197'); need2 = int(r['Per board']) * 2 + int(r['Loss'])
+    r['Stock'], r['Can presale'] = str(3 * need2), str(need2)            # enough for 2 boards, not for 5
+    with open(p, 'w', newline='') as f: w = csv.DictWriter(f, fieldnames=fields); w.writeheader(); w.writerows(rows)
+    os.environ['FC_PCBA_QTY'] = '2'
+    try: code, out = jlc_check(check_jlc)
+    finally: os.environ.pop('FC_PCBA_QTY', None)
+    check('not enough stock' not in out and 'can presale >= need for 2 boards' in out, 'FC_PCBA_QTY=2: stock for 2 boards is enough')
+    code, out = jlc_check(check_jlc)
+    check("not enough stock for 5 boards" in out and 'C20197: need %d' % (int(r['Per board']) * 5 + int(r['Loss'])) in out, 'default 5 boards: the same rows are refused (stock for 2 boards only)')
+
+def test_usb_footprint(base):
+    print('the USB-C footprint of famicart.pretty against JLCPCB\'s library footprint (recorded pads)')
+    gen_jlc, check_cpl, check_jlc = load(os.path.join(base, 'hw'))
+    kp = check_cpl.kicad_pads('famicart:USB_C_Receptacle_HRO_TYPE-C-31-M-12_JLC')
+    fit = check_cpl.fits_alias(EASYEDA['C165948'][1], kp, check_cpl.PAD_ALIAS['C165948'], False)
+    check(list(fit) == [0] and fit[0][1] == 'same numbers' and fit[0][0] < 0.2, 'USB_C_..._JLC fits C165948 at 0 degrees only, same numbers, worst %.3f mm (HRO land vs EasyEDA pads)' % fit.get(0, (9,))[0])
+
+def test_handover(base, D):
+    print('hand-over of a design with declared classes: gen_bom, part_map, README_H, gen_order')
+    hw = os.path.join(base, 'hw')
+    gen_jlc, check_cpl, check_jlc = load(hw)
+    pm = gen_jlc.part_map()
+    check(pm['TLV62569DBVR'][2] == 'JLCPCB Extended' and pm['1k x4'][2] == 'JLCPCB Basic', 'part_map labels each part with its declared class')
+    env = dict(os.environ, FC_DESIGN='design_selftest', FC_HW_DIR=hw, PYTHONPATH=os.pathsep.join(sys.path))
+    subprocess.run([sys.executable, os.path.join(TOOLS, 'gen_bom.py')], env=env, check=True, capture_output=True)
+    bom = {r['Value']: r['Suggested part'] for r in csv.DictReader(open(os.path.join(hw, 'bom.csv')))}
+    check(bom['TLV62569DBVR'].endswith('JLCPCB Extended)') and bom['1k x4'].endswith('JLCPCB Basic)'), 'gen_bom.py: bom.csv names the declared class (%s / %s)' % (bom['TLV62569DBVR'], bom['1k x4']))
+    keep_rev = D.REV; D.REV = 'rev H'
+    D.RAILS = dict(width=5.0, gap=2.0, tab=5.2, hole=0.6, hole_out=0.3, pitch=0.9, holes=7, end_gap=2.7, tabs={'L': (8.0, 30.0), 'R': (8.0, 30.0)},
+                   top=dict(tabs=(12.0, 48.0)), fiducials=(('T', 3.85), ('T', -3.85), ('L', -3.85)), fid_inset=3.85, tooling=(('T', 14.0), ('T', -14.0)), tooling_d=2.0)
+    try:
+        gen_jlc, check_cpl, check_jlc = load(hw)
+        code, out = write_package(gen_jlc)
+        check(code is None, 'gen_jlc.py writes the rev H notes (README_H) without a placeholder left (exit %r)%s' % (code, '' if code is None else ': ' + str(code)[:200]))
+        notes = open(os.path.join(hw, 'jlcpcb', 'README.md')).read()
+        bom_, dnp, placed, ntypes = gen_jlc.bom_table(warn=False)
+        import pcbnew
+        b = pcbnew.LoadBoard(os.path.join(hw, 'famicart.kicad_pcb'))
+        joints = sum(len(list(fp.Pads())) for fp in b.GetFootprints() if fp.GetReference() in placed)
+        e2, e5 = (gen_jlc.assembly_estimate(ntypes, joints, n, gen_jlc.xray_count(placed), 2) for n in (2, 5))
+        check('| 実装費（Standard・両面、X 線検査込み） | 約 US$ %.0f | 約 US$ %.0f |' % (e2, e5) in notes, 'README_H: @EST2@ / @EST5@ are the two-sided estimates ($%.0f / $%.0f)' % (e2, e5))
+        check('Basic 2 行・Extended 5 行（Extended は設計が宣言した 4 品番だけ: C141836 TLV62569DBVR、C165948 TYPE-C-31-M-12、C25100 27R 0402、C362368 TXM12M0004322CBCDO00T）' in notes,
+              'README_H: the parts list state with the declared Extended codes')
+        settings = ('FR-4 / **6**', '**JLC06121H-3313**', '**0.5 oz**', '**0.3mm/(0.4/0.45mm)**', '**Epoxy Filled & Capped**', 'Beveling **30°**', '**Panel by Customer**',
+                    'left, right\n> and top edges', '**Both Sides**', '**Yes**（QFN などの見えない接合', 'RP2350B（C42415655）は 1 品番だけで在庫が薄い', '74.0 × 47.0 mm')
+        check(all(s in notes for s in settings), 'README_H: 6 layers, JLC06121H-3313, inner 0.5 oz, min via kept, epoxy filled & capped, 30 deg, panel with three rails, both sides, X-ray, RP2350B, panel size (missing: %s)'
+              % [s for s in settings if s not in notes])
+        sys.modules.pop('gen_order', None); os.environ['FC_HW_DIR'] = hw
+        import gen_order
+        code, out = run(gen_order.main)
+        check(code is None, 'gen_order.py writes the hand-over of the declared design (exit %r)%s' % (code, '' if code is None else ': ' + str(code)[:200]))
+        g = open(os.path.join(hw, 'order', 'grokbot_instructions.md')).read()
+        check('Basic 2 行・Extended 5 行（宣言済みの Extended は 4 品番' in g and 'すべて Basic' not in g, 'gen_order: "Basic n, Extended m (declared)", not "all Basic"')
+        check('**宣言済みの一覧に無い Extended の行、在庫が足りない行（2 枚分に足りない、または在庫切れ）、不一致、未選択があれば止まって確認。**' in g
+              and '宣言済みの Extended 4 品番の行は止まる理由にならない' in g, 'gen_order: stops on undeclared Extended rows or short stock only')
+        check(not os.path.exists(os.path.join(hw, 'order', 'akizuki_parts.csv')) and '**Both Sides**' in g and '**6**' in g, 'gen_order: no Akizuki list, both sides, 6 layers')
+        check(open(os.path.join(hw, 'order', 'jlcpcb_pcb_remark.txt')).read().count('\n') == 6, 'gen_order: the PCB remark of README_H (6 points)')
+    finally:
+        D.REV = keep_rev; del D.RAILS; sys.modules.pop('gen_order', None)
 
 def fetch_live(check_cpl):
     """--online: the EasyEDA footprints of the fixture's parts, downloaded once (spaced: EasyEDA refuses bursts), must
@@ -390,6 +547,12 @@ def main():
         test_cpl_rot(gen_jlc, D)
         gen_jlc, check_cpl, check_jlc = test_package(hw, D)
         test_refusals(base, D)
+        test_bottom_rule(base, D)
+        test_eight_layers(base, D)
+        test_small_holes_without_vias(base, D)
+        test_stock_for_order(hw, D)
+        test_usb_footprint(base)
+        test_handover(base, D)
         test_old_designs(base, D)
         if ONLINE: test_online(load(hw)[0])
     finally:

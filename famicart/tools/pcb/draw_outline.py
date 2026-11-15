@@ -2,9 +2,14 @@
 """Draw the board of a design as two SVG drawings in FC_HW_DIR:
   outline.svg    the outline as seen from the front (label side) with its dimensions
   placement.svg  where the modules and connectors sit, front and back (the back as seen from the back)
-  jlcpcb/rails.svg  the board with its edge rails (designs with RAILS), labelled in English for JLCPCB's support
+  jlcpcb/rails.svg  the board with its edge rails (designs with RAILS; with RAILS['top'] also the top rail and its
+                 tabs), labelled in English for JLCPCB's support
 The geometry comes from the same data the board generator uses (shells.py, gen_pcb.py) and from the board file, so
 the drawings cannot drift from the fabrication data. Text is Japanese (font: IPAGothic or any CJK sans).
+A board drawn from the back (shells.mirrored(), rev H): KiCad's F side is the back of the cartridge, so outline.svg
+says it is seen from the back (31-60 side), and placement.svg names KiCad F the back (main component side) and KiCad B
+the front (label side), each seen from its own side. D.DRAW_NAMES / D.DRAW_NOTES replace the labels and the notes of
+placement.svg (the defaults describe rev G's modules); the USB end is marked on module footprints (Pico, XIAO) only.
     FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 draw_outline.py
 Rasterise with any SVG renderer (a browser, rsvg-convert, Inkscape)."""
 import os, sys, math, importlib
@@ -18,6 +23,7 @@ SH = getattr(D, 'SHELL', None)
 W, H, T = gen_pcb.BOARD_W, gen_pcb.BODY_H, gen_pcb.TOTAL_H
 X0, X1, CH = gen_pcb.TAB_X0, gen_pcb.TAB_X0 + gen_pcb.TAB_W, gen_pcb.CHAMFER
 S = 10.0                                    # px per mm
+MIR = bool(SH and SH.get('mirrored'))       # drawn from the back: KiCad F = the back of the cartridge
 FONT = "IPAGothic, 'IPAexGothic', 'Noto Sans CJK JP', 'Yu Gothic', sans-serif"
 INK, DIM, EDGE, FILL, GOLD, MUTED = '#1c2530', '#2f5f9e', '#14532d', '#e3f0e6', '#c9a227', '#6b7280'
 
@@ -91,7 +97,8 @@ def draw_outline(board):
     py = lambda y: oy + y * S
     lo, hi = (SH.get('edge_x') or (0.0, W)) if SH else (0.0, W)
     g.text(ox - 290, 52, 'famicart %s　基板外形図' % D.REV, 34, INK, 'start', 'bold')
-    g.text(ox - 290, 92, '表（ラベル面・1〜30 番端子の面）から見た図　単位 mm　設計値（製造公差: ルーター加工 ±0.2 mm）', 21, MUTED, 'start')
+    if MIR: g.text(ox - 290, 92, '裏（主な部品面・31〜60 番端子の面）から見た図。基板データはこの向きで描いてある　単位 mm　設計値（製造公差: ルーター加工 ±0.2 mm）', 21, MUTED, 'start')
+    else: g.text(ox - 290, 92, '表（ラベル面・1〜30 番端子の面）から見た図　単位 mm　設計値（製造公差: ルーター加工 ±0.2 mm）', 21, MUTED, 'start')
     # edge rails that JLCPCB adds for assembly (not part of the board)
     for x0, x1, lab in ((lo - 5.0, lo, '捨て基板'), (hi, hi + 5.0, '捨て基板')):
         g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="7 5"/>' % (px(x0), py(0), (x1 - x0) * S, T * S))
@@ -103,9 +110,9 @@ def draw_outline(board):
     g.text(px(W / 2) + 8, py(-3) + 16, '中心線', 16, MUTED, 'start')
     for (num, a, b, c, d, front) in fingers(board):
         if front: g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s" stroke="#8a6d14" stroke-width="0.8"/>' % (px(a), py(b), (c - a) * S, (d - b) * S, GOLD))
-    g.text(px(X0 + 3.2), py(H + 2.2), '1', 17, INK); g.text(px(X1 - 3.2), py(H + 2.2), '30', 17, INK)
+    g.text(px(X0 + 3.2), py(H + 2.2), '60' if MIR else '1', 17, INK); g.text(px(X1 - 3.2), py(H + 2.2), '31' if MIR else '30', 17, INK)
     g.add('<rect x="%.1f" y="%.1f" width="520" height="24" fill="%s"/>' % (px(W / 2) - 260, py(H + 2.2) - 19, FILL))
-    g.text(px(W / 2), py(H + 2.2), '金フィンガー 表 1〜30 番（裏 31〜60 番）　2.54 mm ピッチ', 18, INK)
+    g.text(px(W / 2), py(H + 2.2), '金フィンガー 裏 31〜60 番（表 1〜30 番）　2.54 mm ピッチ' if MIR else '金フィンガー 表 1〜30 番（裏 31〜60 番）　2.54 mm ピッチ', 18, INK)
     # ---- overall dimensions
     g.hdim(px(lo), px(hi), py(0) - 62, '%.1f（全幅）' % (hi - lo), ext=py(0))
     g.vdim(py(0), py(H), px(hi) + 100, '%.1f（本体）' % H, ext=px(hi), side='right')
@@ -149,8 +156,14 @@ def draw_placement(board):
     gap, ox, oy = 150.0, 70.0, 170.0
     g = Svg(int(ox * 2 + 2 * W * S + gap), int(oy + T * S + 150))
     g.text(ox, 52, 'famicart %s　部品の配置' % D.REV, 34, INK, 'start', 'bold')
-    g.text(ox, 92, '手はんだのモジュール・コネクタと、JLCPCB が実装する小さい部品（灰色）。裏面は裏から見た向き。単位 mm', 21, MUTED, 'start')
-    for side, flip, bx, title in ((False, False, ox, '表（ラベル面）'), (True, True, ox + W * S + gap, '裏（裏から見た図。左右が入れ替わる）')):
+    names = getattr(D, 'DRAW_NAMES', NAMES)
+    if MIR:
+        g.text(ox, 92, '名前のある部品と、ほかの部品（灰色）。KiCad の表 (F) がシェルの裏、KiCad の裏 (B) がシェルの表。それぞれその面から見た向き。単位 mm', 21, MUTED, 'start')
+        views = ((False, False, ox, '裏（主な部品面。裏から見た図、基板データの向き）'), (True, True, ox + W * S + gap, '表（ラベル面。表から見た図。左右が入れ替わる）'))
+    else:
+        g.text(ox, 92, '手はんだのモジュール・コネクタと、JLCPCB が実装する小さい部品（灰色）。裏面は裏から見た向き。単位 mm', 21, MUTED, 'start')
+        views = ((False, False, ox, '表（ラベル面）'), (True, True, ox + W * S + gap, '裏（裏から見た図。左右が入れ替わる）'))
+    for side, flip, bx, title in views:
         px = (lambda x, bx=bx, flip=flip: bx + ((W - x) if flip else x) * S)
         py = lambda y: oy + y * S
         g.text(bx + W * S / 2, oy - 22, title, 24, INK, 'middle', 'bold')
@@ -164,7 +177,8 @@ def draw_placement(board):
             if front != side:
                 xa, xb = sorted((px(a), px(c)))
                 g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s" stroke="#8a6d14" stroke-width="0.6"/>' % (xa, py(b), xb - xa, (d - b) * S, GOLD))
-        g.text(px(X0 + 3.0), py(H + 2.3), '31' if side else '1', 16, INK); g.text(px(X1 - 3.0), py(H + 2.3), '60' if side else '30', 16, INK)
+        if MIR: g.text(px(X0 + 3.0), py(H + 2.3), '30' if side else '60', 16, INK); g.text(px(X1 - 3.0), py(H + 2.3), '1' if side else '31', 16, INK)
+        else: g.text(px(X0 + 3.0), py(H + 2.3), '31' if side else '1', 16, INK); g.text(px(X1 - 3.0), py(H + 2.3), '60' if side else '30', 16, INK)
         big = []
         for fp in board.GetFootprints():
             ref = fp.GetReference()
@@ -173,10 +187,11 @@ def draw_placement(board):
             if cy.GetWidth() == 0: cy = fp.GetBoundingBox(False, False)
             a, b, c, d = ToMM(cy.GetX()), ToMM(cy.GetY()), ToMM(cy.GetRight()), ToMM(cy.GetBottom())
             xa, xb = sorted((px(a), px(c)))
-            if ref in NAMES:
+            if ref in names:
                 usb = None                      # modules: pads 1 and the last pad sit at the USB end
                 ends = [q for q in fp.Pads() if q.GetNumber() in ('1', '40' if 'Pico' in fp.GetValue() else '14')]
-                if len(ends) == 2 and ref.startswith('U') and ref != 'U7':
+                module = any(k in fp.GetFPIDAsString() for k in ('Pico', 'XIAO'))
+                if len(ends) == 2 and ref.startswith('U') and ref != 'U7' and module:
                     ex = sum(ToMM(q.GetPosition().x) for q in ends) / 2 - ToMM(fp.GetPosition().x)
                     ey = sum(ToMM(q.GetPosition().y) for q in ends) / 2 - ToMM(fp.GetPosition().y)
                     usb = ((-1 if flip else 1) * (1 if ex > 0 else -1), 0) if abs(ex) > abs(ey) else (0, 1 if ey > 0 else -1)
@@ -192,7 +207,7 @@ def draw_placement(board):
                 g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="#374151"/>' % (ux, uy, tw, th))
                 if usb[0]: g.text(ux + tw / 2 + 5, uy + th / 2, 'USB', 15, '#ffffff', 'middle', 'bold', rot=-90)
                 else: g.text(ux + tw / 2, uy + th / 2 + 5, 'USB', 15, '#ffffff', 'middle', 'bold')
-            lab = NAMES[ref]; units = sum(1.0 if ord(ch) > 0x2E7F else 0.52 for ch in lab)
+            lab = names[ref]; units = sum(1.0 if ord(ch) > 0x2E7F else 0.52 for ch in lab)
             vertical = h > w * 1.3 and w < 90
             room = (h if vertical else w) - 14 - (30 if usb and bool(usb[0]) != vertical else 0)
             size = int(max(11, min(22, room / units)))
@@ -202,8 +217,12 @@ def draw_placement(board):
             if vertical: g.text(cx + size * 0.36, cy, lab, size, INK, 'middle', rot=-90)
             else: g.text(cx, cy + size * 0.36, lab, size, INK, 'middle', 'bold' if size >= 18 else 'normal')
     ly = oy + T * S + 70
-    g.text(ox, ly, '・基本構成は U1・U2・U3・U6 の 4 個。U4・U5 は 512 KB 級の PRG・CHR やコプロセッサ用の増設で、載せなくても動く。', 19, INK, 'start')
-    g.text(ox, ly + 32, '・USB: U1・U4 は左端、U5・U3 は右端、U6 と microSD は上端に向く。U2 は基板の中央なので、はんだ付けの前に書き込む。', 19, INK, 'start')
+    notes = getattr(D, 'DRAW_NOTES', None)
+    if notes is None:
+        g.text(ox, ly, '・基本構成は U1・U2・U3・U6 の 4 個。U4・U5 は 512 KB 級の PRG・CHR やコプロセッサ用の増設で、載せなくても動く。', 19, INK, 'start')
+        g.text(ox, ly + 32, '・USB: U1・U4 は左端、U5・U3 は右端、U6 と microSD は上端に向く。U2 は基板の中央なので、はんだ付けの前に書き込む。', 19, INK, 'start')
+    else:
+        for i, s in enumerate(notes): g.text(ox, ly + 32 * i, '・' + s, 19, INK, 'start')
     g.save('placement.svg')
 
 def draw_rails(board):
@@ -211,19 +230,39 @@ def draw_rails(board):
     RA = getattr(D, 'RAILS', None)
     if not RA: return
     lo, hi = SH['edge_x']; gap, rw = RA['gap'], RA['width']
-    ox, oy = 330.0 + (gap + rw) * S, 170.0
+    top = RA.get('top'); tgap, tw = (top.get('gap', gap), top.get('width', rw)) if top else (0.0, 0.0)
+    ox, oy = 330.0 + (gap + rw) * S, 170.0 + ((tgap + tw) * S + 20.0 if top else 0.0)
     g = Svg(int(ox + (W + gap + rw) * S + 330), int(oy + T * S + 300))
     px = lambda x: ox + x * S
     py = lambda y: oy + y * S
     RED = '#b42318'
-    g.text(40, 52, 'famicart %s - board with edge rails for Standard PCBA (top side, gold fingers at the bottom)' % D.REV, 26, INK, 'start', 'bold')
-    g.text(40, 88, 'Dimensions in mm. Rails are joined by mouse-bite tabs (routed, no V-cut). 2 layers, 1.2 mm, ENIG, 30 degree bevel on the gold-finger edge.', 19, MUTED, 'start')
+    both = getattr(D, 'ASSEMBLY', 'top') == 'both'
+    g.text(40, 52, 'famicart %s - board with edge rails for Standard PCBA (%s, gold fingers at the bottom)' % (D.REV, 'both sides' if both else 'top side'), 26, INK, 'start', 'bold')
+    g.text(40, 88, 'Dimensions in mm. Rails are joined by mouse-bite tabs (routed, no V-cut). %d layers, 1.2 mm, ENIG, 30 degree bevel on the gold-finger edge.' % int(getattr(D, 'LAYERS', 2)), 19, MUTED, 'start')
     rails = {'L': (lo - gap - rw, lo - gap), 'R': (hi + gap, hi + gap + rw)}
     YE = T - RA.get('end_gap', 0.0); ypos = lambda y: y if y >= 0 else YE + y
+    YT = -(tgap + tw) if top else 0.0                     # with a top rail the side rails run up to its upper edge (one frame)
+    PX0, PX1 = rails['L'][0], rails['R'][1]
+    xpos = lambda d: PX0 + d if d >= 0 else PX1 + d       # along the top rail (as make_rails.py)
+    def rail_xy(side, d, at):
+        """Board mm of a point on a rail: along it d (make_rails.py's convention); across it the centre ('mid') or the fiducial inset."""
+        if side == 'T': return xpos(d), (YT + RA['fid_inset'] if at == 'fid' else (YT - tgap) / 2)
+        xa, xb = rails[side]
+        return ((xa + RA['fid_inset'] if side == 'L' else xb - RA['fid_inset']) if at == 'fid' else (xa + xb) / 2), ypos(d)
+    if top:
+        g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="2.2"/>' % (px(PX0), py(YT), (PX1 - PX0) * S, tw * S, EDGE))
+        g.text(px(W / 2), py((YT - tgap) / 2) + 7, 'EDGE RAIL %.0f mm - break off' % tw, 18, INK, 'middle')
+        for xc in top['tabs']:
+            g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="1.6"/>' % (px(xc - RA['tab'] / 2), py(-tgap), RA['tab'] * S, tgap * S, EDGE))
+            for i in range(RA['holes']):
+                g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="0.8"/>' % (px(xc + (i - (RA['holes'] - 1) / 2) * RA['pitch']), py(-RA['hole_out']), RA['hole'] / 2 * S, INK))
     for side, (xa, xb) in rails.items():
-        g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="2.2"/>' % (px(xa), py(0), (xb - xa) * S, YE * S, EDGE))
+        g.add('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#d9dde3" stroke="%s" stroke-width="2.2"/>' % (px(xa), py(YT), (xb - xa) * S, (YE - YT) * S, EDGE))
         g.text(px((xa + xb) / 2) + 7, py(T / 2), 'EDGE RAIL %.0f mm - break off' % rw, 18, INK, 'middle', rot=-90)
     for (side, y) in RA.get('tooling', ()):
+        if side == 'T':
+            tx, ty = rail_xy(side, y, 'mid')
+            g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="1.2"/>' % (px(tx), py(ty), RA['tooling_d'] / 2 * S, INK)); continue
         xa, xb = rails[side]
         g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="1.2"/>' % (px((xa + xb) / 2), py(ypos(y)), RA['tooling_d'] / 2 * S, INK))
         for yc in RA['tabs'][side]:
@@ -233,7 +272,7 @@ def draw_rails(board):
             for i in range(RA['holes']):
                 g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="0.8"/>' % (px(xe), py(yc + (i - (RA['holes'] - 1) / 2) * RA['pitch']), RA['hole'] / 2 * S, INK))
     for (side, y) in RA['fiducials']:
-        xa, xb = rails[side]; x = xa + RA['fid_inset'] if side == 'L' else xb - RA['fid_inset']; y = ypos(y)
+        x, y = rail_xy(side, y, 'fid')
         g.add('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="%s" stroke-width="0.8"/><circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>' % (px(x), py(y), 1.0 * S, MUTED, px(x), py(y), 0.5 * S, GOLD))
     board_shape(g, ox, oy)
     for (num, a, b, c, d, front) in fingers(board):
@@ -247,27 +286,37 @@ def draw_rails(board):
     g.line(px(lo - gap / 2), py(yc), px(lo) + 150, py(yc) - 60, INK, 1.0)
     g.text(px(lo) + 156, py(yc) - 64, 'mouse-bite tab %.1f mm wide: %d holes of %.1f mm, %.1f mm apart,' % (RA['tab'], RA['holes'], RA['hole'], RA['pitch'] - RA['hole']), 18, INK, 'start')
     g.text(px(lo) + 156, py(yc) - 40, 'touching the board edge line from outside (3 tabs on each side)', 18, INK, 'start')
-    fs, fy = RA['fiducials'][0]; fx = rails[fs][0] + RA['fid_inset']
-    g.line(px(fx), py(fy), px(lo) + 110, py(fy) + 46, INK, 1.0)
-    g.text(px(lo) + 116, py(fy) + 52, 'fiducial (3 in total): copper 1 mm, solder mask opening 2 mm,', 18, INK, 'start')
-    g.text(px(lo) + 116, py(fy) + 76, 'centre %.2f mm from the panel edges' % RA['fid_inset'], 18, INK, 'start')
-    if RA.get('tooling'):
-        ts, ty = RA['tooling'][0]; tx = (rails[ts][0] + rails[ts][1]) / 2
-        g.line(px(tx), py(ypos(ty)), px(lo) + 110, py(ypos(ty)) + 60, INK, 1.0)
-        g.text(px(lo) + 116, py(ypos(ty)) + 66, 'tooling hole %.1f mm, not plated (%d in total)' % (RA['tooling_d'], len(RA['tooling'])), 18, INK, 'start')
+    if not top:
+        fs, fy = RA['fiducials'][0]; fx = rails[fs][0] + RA['fid_inset']
+        g.line(px(fx), py(fy), px(lo) + 110, py(fy) + 46, INK, 1.0)
+        g.text(px(lo) + 116, py(fy) + 52, 'fiducial (3 in total): copper 1 mm, solder mask opening 2 mm,', 18, INK, 'start')
+        g.text(px(lo) + 116, py(fy) + 76, 'centre %.2f mm from the panel edges' % RA['fid_inset'], 18, INK, 'start')
+        if RA.get('tooling'):
+            ts, ty = RA['tooling'][0]; tx = (rails[ts][0] + rails[ts][1]) / 2
+            g.line(px(tx), py(ypos(ty)), px(lo) + 110, py(ypos(ty)) + 60, INK, 1.0)
+            g.text(px(lo) + 116, py(ypos(ty)) + 66, 'tooling hole %.1f mm, not plated (%d in total)' % (RA['tooling_d'], len(RA['tooling'])), 18, INK, 'start')
+    else:                                   # labels in the board area, below the top rail
+        g.text(px(lo) + 30, py(4.0), 'top rail: %.0f mm, %.0f mm gap, %d mouse-bite tabs (the same holes as on the sides)' % (tw, tgap, len(top['tabs'])), 18, INK, 'start')
+        g.text(px(lo) + 30, py(4.0) + 24, 'fiducials: %d on each side%s, copper 1 mm, mask opening 2 mm, centre %.2f mm from the panel edges'
+               % (len(RA['fiducials']), ' (top and bottom)' if both else '', RA['fid_inset']), 18, INK, 'start')
+        g.text(px(lo) + 30, py(4.0) + 48, 'tooling holes: %.1f mm, not plated (%d in total)' % (RA.get('tooling_d', 0.0), len(RA.get('tooling', ()))), 18, INK, 'start')
     g.text(px(W / 2), py(59), 'CARTRIDGE BOARD  %.1f x %.1f' % (hi - lo, T), 24, EDGE, 'middle', 'bold')
-    g.text(px(W / 2), py(59) + 30, 'parts on this side are placed by JLCPCB', 18, EDGE, 'middle')
+    g.text(px(W / 2), py(59) + 30, 'parts on both sides are placed by JLCPCB' if both else 'parts on this side are placed by JLCPCB', 18, EDGE, 'middle')
     # dimensions
-    g.hdim(px(rails['L'][0]), px(rails['R'][1]), py(0) - 34, '%.1f (with rails)' % (hi - lo + 2 * (gap + rw)), ext=py(0))
-    g.vdim(py(0), py(T), px(rails['R'][1]) + 60, '%.1f' % T, ext=px(rails['R'][1]), side='right')
+    g.hdim(px(rails['L'][0]), px(rails['R'][1]), py(YT) - 34, '%.1f (with rails)' % (hi - lo + 2 * (gap + rw)), ext=py(YT))
+    g.vdim(py(YT), py(T), px(rails['R'][1]) + 60, '%.1f' % (T - YT), ext=px(rails['R'][1]), side='right')
     if RA.get('end_gap'):
         g.vdim(py(YE), py(T), px(rails['R'][0]) - 26, '%.1f' % RA['end_gap'], size=18, side='left')
         g.text(px(rails['R'][1]) + 80, py(YE) - 6, 'rails stop above', 16, MUTED, 'start'); g.text(px(rails['R'][1]) + 80, py(YE) + 14, 'the finger edge', 16, MUTED, 'start')
     g.hdim(px(rails['L'][0]), px(rails['L'][1]), py(T) + 110, '%.1f' % rw, ext=py(YE), size=18, below=True)
     g.hdim(px(rails['L'][1]), px(lo), py(T) + 150, '%.1f gap' % gap, ext=py(YE), size=18, below=True)
     ny = py(T) + 215
-    g.text(40, ny, 'If JLCPCB adds the rails instead (Gerber without rails): please put them on the left and right edges (the two %.1f mm edges), panel %.1f x %.1f mm,' % (T, hi - lo + 2 * rw, T), 19, INK, 'start')
-    g.text(40, ny + 28, 'not on the gold-finger edge and not on the opposite edge, although those are the longer edges.', 19, INK, 'start')
+    if top:
+        g.text(40, ny, 'The rails on the left, right and top edges are one frame. The board alone (%.1f x %.1f mm) is not to be ordered without them:' % (hi - lo, T), 19, INK, 'start')
+        g.text(40, ny + 28, 'the connectors at the top edge need the top rail (parts at least 2.5 mm from the panel edge).', 19, INK, 'start')
+    else:
+        g.text(40, ny, 'If JLCPCB adds the rails instead (Gerber without rails): please put them on the left and right edges (the two %.1f mm edges), panel %.1f x %.1f mm,' % (T, hi - lo + 2 * rw, T), 19, INK, 'start')
+        g.text(40, ny + 28, 'not on the gold-finger edge and not on the opposite edge, although those are the longer edges.', 19, INK, 'start')
     os.makedirs(os.path.join(HW, 'jlcpcb'), exist_ok=True)
     g.save(os.path.join('jlcpcb', 'rails.svg'))
 

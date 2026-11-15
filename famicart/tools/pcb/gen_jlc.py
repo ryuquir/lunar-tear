@@ -8,9 +8,13 @@ LCSC part numbers: designs with their own LCSC map (rev E on: Basic parts only) 
 older designs read <hw dir>/jlc_parts.json (created from DEFAULT_PARTS on first run; edit it to substitute parts).
 Opt-in design attributes (rev H on; designs without them get exactly the files they got before):
   LCSC_CLASS = {LCSC code: 'Basic' | 'Extended'}   the parts check takes the declared classes and the stock needed for
-                                                    FC_PCBA_QTY boards (check_declared) instead of "Basic only"
-  ASSEMBLY = 'both', BOTTOM_OK = {...}              JLCPCB also places parts on the bottom side (cpl_table, two_sided)
-  LAYERS > 2 (with JLC_RULES)                       the inner copper layers must be in gerbers.zip
+                                                    FC_PCBA_QTY boards (check_declared) instead of "Basic only"; the
+                                                    parts are labelled with their declared class (part_map)
+  ASSEMBLY = 'both', BOTTOM_OK = {...}              JLCPCB also places parts on the bottom side (cpl_table, two_sided):
+                                                    only declared parts whose footprint turns by 180 degrees without
+                                                    harm (bottom_ok, BOTTOM_TURN)
+  LAYERS > 2 (with JLC_RULES)                       the inner copper layers must be in gerbers.zip (up to In30)
+  REV = 'rev H'                                     the notes of README_H (fully assembled, both sides, 6 layers)
 The assembly estimate adds X-ray inspection for leadless packages and the double-sided setup and stencil."""
 import os, sys, re, csv, json, subprocess, shutil
 sys.path.insert(0, os.path.dirname(__file__))
@@ -46,18 +50,40 @@ def cpl_correction(fpname):
     return CPL_ROT.get(name, 0)
 
 # Two-sided assembly (designs with ASSEMBLY = 'both'): JLCPCB also places parts on its "Bottom" side, which is KiCad's
-# B.Cu. BOTTOM_OK names what may go there: footprint names ('lib:name' or 'name') or reference prefixes ('R', 'C',
-# 'RN', 'Y'). Only parts that work the same when turned by 180 degrees belong in it (resistors, capacitors, the 1k x4
-# arrays, 3225 crystals), because the bottom-side angle convention below is not stated by JLCPCB itself (see cpl_table).
+# B.Cu. JLCPCB does not state its bottom-side angle convention (see cpl_table), so a part may go there only when a
+# placement turned by 180 degrees is still electrically the same part on the same pads. The tools do not take the
+# design's word for that: a bottom-side part must
+#   1. be declared by the design in BOTTOM_OK (footprint names 'lib:name' or 'name', or reference prefixes such as
+#      'R', 'C', 'RN', 'Y'; a single string is one entry, not a set of letters), and
+#   2. have one of the footprints in BOTTOM_TURN, whose 180-degree pad map is known and harmless:
+#        R / C chip resistors and capacitors 0201 .. 1206   pad 1 <-> 2 (no polarity)
+#        R_Array_Convex_4x0603 / 4x0402 (four equal resistors) pad k <-> k + 4: resistor 1-8 lands on 5-4, ...
+#        Crystal_SMD_3225-4Pin_3.2x2.5mm                      pad 1 <-> 3 (the crystal), 2 <-> 4 (its case pins)
+# LEDs, diodes, tantalum or electrolytic capacitors (CP_...), transistors, ICs and connectors are refused on the bottom
+# side whatever BOTTOM_OK says. check_cpl.py also places JLCPCB's library footprint both ways round and wants the
+# turned placement to land exactly on the pads this map names; check_jlc.py refuses such a part on the back.
+BOTTOM_TURN = ((re.compile(r'^(R|C)_(0201|0402|0603|0805|1206)_\d+Metric(_|$)'), {'1': '2', '2': '1'}),
+               (re.compile(r'^R_Array_Convex_4x(0603|0402)$'), {str(k): str((k + 3) % 8 + 1) for k in range(1, 9)}),
+               (re.compile(r'^Crystal_SMD_3225-4Pin_3\.2x2\.5mm$'), {'1': '3', '2': '4', '3': '1', '4': '2'}))
+
 def two_sided():
     return getattr(D, 'ASSEMBLY', 'top') == 'both'
 
+def bottom_turn(fpname):
+    """The pad map {pad: pad it lands on when the part is turned by 180 degrees} of a footprint that may go on the
+    bottom side (BOTTOM_TURN), else None."""
+    name = fpname.split(':')[-1]
+    return next((dict(m) for rx, m in BOTTOM_TURN if rx.search(name)), None)
+
 def bottom_ok(ref, fpname=None):
-    """True when the design allows part `ref` to be placed by JLCPCB on the bottom side."""
+    """True when part `ref` may be placed by JLCPCB on the bottom side: the design declares it in BOTTOM_OK and its
+    footprint is one whose 180-degree turn is harmless (bottom_turn)."""
     allowed = getattr(D, 'BOTTOM_OK', ()) or ()
+    allowed = {allowed} if isinstance(allowed, str) else set(allowed)
     fpname = fpname or D.PARTS[ref][3]
     prefix = re.match(r'[A-Za-z_#]*', ref).group()
-    return fpname in allowed or fpname.split(':')[-1] in allowed or prefix in allowed
+    declared = fpname in allowed or fpname.split(':')[-1] in allowed or prefix in allowed
+    return declared and bottom_turn(fpname) is not None
 
 # JLCPCB "PCB assembly price" (help article, last updated 2026-10-22), Standard PCBA, single-sided, USD
 # (setup2 / stencil2: the same table, double-sided assembly)
@@ -87,8 +113,9 @@ def assembly_estimate(types, joints, n, xray=0, sides=1):
     if xray: total += xray_fee(xray * n)
     return total
 # files that go into gerbers.zip for designs made to JLCPCB's rules: the fabrication layers and the drill files only
-# (the F.Fab / B.Fab plots are drawings for people; a fab note on them must not reach the order)
-FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl', '_Cu.g2', '_Cu.g3', '_Cu.g4', '_Cu.g5', '_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo',
+# (the F.Fab / B.Fab plots are drawings for people; a fab note on them must not reach the order). Inner copper layers:
+# In1_Cu.g2 .. In30_Cu.g31 (KiCad's Protel names), so a 6- or an 8-layer board is archived with all its layers.
+FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl') + tuple('_Cu.g%d' % k for k in range(2, 32)) + ('_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo',
               '_Mask.gts', '_Mask.gbs', '-Edge_Cuts.gm1', '.drl')
 
 DEFAULT_PARTS = {   # value-key [or "value@pkg"] -> (LCSC, comment, note)   (looked up via the JLCPCB parts API, 2026-10)
@@ -578,6 +605,155 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 - 部品の向きの補正表（KiBot。JLCPCB 向けの回転の一覧）: https://kibot.readthedocs.io/en/latest/notes_position.html
 '''
 
+README_H = '''# JLCPCB 注文パッケージ（famicart rev H: RP2350B ×8、JLCPCB の実装だけで完成）
+
+回路・配置・部品の選び方は `docs/13_rev_h_plan.md`、外形図は `../outline.png`、配置図は `../placement.png`。
+**基板はシェルの裏（主な部品面）から見て描いてある**: KiCad の表（F.Cu）＝ JLCPCB の Top ＝ シェルの裏。端子は Top に 31〜60 番、
+Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）には、180° 回っても同じ働きの受動部品だけを置いてある。
+
+**状態**: 実機では未検証。手はんだの部品は無く、全部品を JLCPCB が実装する。**シェルへの収まり（特に表の隙間）は実物で確かめて
+から注文する**（`docs/13_rev_h_plan.md` の「立ち上げの手順と合格基準」の 0）。最初の注文は最少枚数にする。
+
+| ファイル | 内容 |
+|---|---|
+| `gerbers_rails.zip` | **注文に使うデータ**: 基板＋左右と上の捨て基板（ミシン目のタブでつないだ 1 枚）。@PANEL@ mm、@LAYERS@ 層 |
+| `gerbers.zip` | 基板だけ（@SIZE@ mm）。注文には使わない（上端の USB-C と microSD が「部品の本体は基板の端から 2.5 mm 以上」の条件を満たすには、上の捨て基板が要る） |
+| `bom_jlc.csv`、`cpl_jlc.csv` | 部品表と配置。CPL は両面（Top と Bottom） |
+| `rails.png` | 捨て基板の位置の図。JLCPCB への問い合わせに添付する |
+| `parts_check.csv`、`cpl_check.csv` | 部品の区分（宣言した Basic / Extended）・在庫と、部品の向きの検査結果 |
+
+このデータの基板は、配線 @NTRACKS@ 本・ビア @NVIAS@ 個・未接続 @NOPEN@。
+
+## 1. 注文の種類と、捨て基板
+- 金フィンガー付きの基板は **Economic PCBA では受け付けられない**。**Standard PCBA** で、実装は**両面**（Top @NTOP@ 点、Bottom @NBOTTOM@ 点）、
+  @TYPES@ 種類・@PARTS@ 点/枚。Standard PCBA では Basic と Extended のフィーダー料金は同じ（1 種類 $1.53）。
+- 捨て基板は自分で描き込んである（JLCPCB に付けてもらうと、上の辺に付かない・端子の辺に付く、のどちらかになる）。全体 @PANEL@ mm、基板は 1 枚。
+  - 左・右・上の 3 本で 1 つの枠になっている。幅 @RAILW@ mm、基板との間は幅 @GAP@ mm のルーター加工の溝で、V カットは無い。
+  - 端子の辺には何も付かない。左右の捨て基板は端子の辺の線より @ENDGAP@ mm 手前で終わる（面取りの刃が通る所を空けるため）。
+  - 基板とは、左右に各 @NTABS@ か所、上に @NTOPTABS@ か所のタブ（幅 @TABW@ mm）でつながる。タブには直径 @HOLE@ mm の穴が @NHOLES@ 個、
+    穴と穴の間を @WEB@ mm 空けて並ぶ（ミシン目）。穴は基板の端の線に外側から接している。折り取った跡は高さ @RIDGE@ mm 以下。
+  - USB-C と microSD の口は基板の上端にそろえてあり、縁が上の溝に少し出る（上のタブはその前を避けてある）。
+  - フィデューシャルが表と裏に @NFID@ 個ずつ（両面の同じ位置。銅 1 mm、レジスト開口 2 mm、中心がパネルの端から @FIDIN@ mm）と、
+    ツーリング穴 @NTOOL@ 個（直径 @TOOLD@ mm、めっき無し）が捨て基板の上にある。
+- 注文画面では **Delivery Format を "Panel by Customer"（Panel Format は Column 1・Row 1）**、実装の **Edge Rails/Fiducials を
+  "Added by Customer"** にする。
+
+**支払いの前に**: 次をサポート（チャット）に `rails.png` を添えて確かめる。質問文（そのまま貼る）:
+
+> I am going to order a @LAYERS@-layer board, 1.2 mm, ENIG, gold fingers (30 on each side) with a 30 degree bevel, and Standard PCBA
+> on both sides. Please see the attached drawing. My Gerber file already contains edge rails that I drew myself on the left, right
+> and top edges (one frame, @RAILW@ mm wide), joined to the board by mouse-bite tabs (@TABW@ mm wide, @HOLE@ mm holes) across a @GAP@ mm
+> routed gap. There is no V-cut. The rails end @ENDGAP@ mm above the gold-finger edge, so that edge is completely free. The rails carry
+> @NFID@ fiducials on each side (top and bottom) and @NTOOL@ tooling holes (@TOOLD@ mm). Panel size @PANEL_X@ mm, one board per panel.
+> 1) Can you bevel the gold-finger edge of this board?
+> 2) Is this rail arrangement accepted for Standard PCBA on both sides?
+> 3) Which Delivery Format must I select: Single PCB or Panel by Customer (1 x 1)? Is there an extra charge?
+> 4) The USB-C receptacle TYPE-C-31-M-12 (C165948) has four plated through-hole shell legs. Are they soldered in your assembly process
+> without a hand-soldering charge?
+> 5) Do you X-ray only the QFN parts (C42415655), or also the crystals (C362368) and the inductors (C135262)?
+
+答えに応じて変える所:
+- 1) が「面取りできない」の場合: 止まって確認する（捨て基板を外して端子の辺に付ける提案は断る）。
+- 2) が「この捨て基板では実装できない」の場合: 足りない寸法を聞き、設計の `RAILS` を直してデータを作り直す。
+- 4)・5) で追加料金がある場合: 4 章の見積もりに加える（`docs/13_rev_h_plan.md` の費用の表の「加わりうるもの」）。
+
+## 2. PCB の指定（Instant Quote → Add gerber file → `gerbers_rails.zip`）
+| 項目 | 指定 |
+|---|---|
+| Base Material / Layers | FR-4 / **@LAYERS@** |
+| Dimensions | @PANEL@ mm（ガーバーから自動で入る）|
+| PCB Qty | 5（Delivery Format を Panel by Customer にすると、項目名が Panel Qty に変わる）|
+| Delivery Format | **Panel by Customer**、Panel Format は Column 1・Row 1 |
+| PCB Thickness | **1.2 mm** |
+| Layer Stackup | **JLC06121H-3313**（外層の下 0.0994 mm、芯 0.35 mm、中央 0.1164 mm。基板ファイルの積層と同じ。選べない場合は止まって確認）|
+| PCB Color / Silkscreen | Green / White |
+| Surface Finish | **ENIG**、Gold Thickness は **2 U"** |
+| Outer Copper Weight | 1 oz |
+| Inner Copper Weight | **0.5 oz** |
+| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)**（既定のまま。設計値: 標準のビアは穴 @VDR@ mm・径 @VIA@ mm、穴 0.3 mm 未満のビア @NSMALL@ 個は径 0.45 mm 以上。注文画面: 多層で径 0.45 mm 以上なら 0.2 mm の穴も追加料金なし。「0.2mm」を選ぶと見積もりが上がる）|
+| Via Covering | **Epoxy Filled & Capped**（6 層では無料。QFN の中央パッドのビアもこれで埋める）|
+| Board Outline Tolerance | ±0.2 mm（Regular）|
+| Mark on PCB | **Remove Mark** |
+| Electrical Test | Flying Probe Fully Test |
+| Gold Fingers | **Yes**、Beveling **30°** |
+| Confirm Production file | **Yes**（約 $1）。選ぶと出る画面では **"Do not confirm automatically"** を選ぶ |
+
+製造データ（Production file）が届いたら、承認する前に次を確かめる: 捨て基板が左右と上にあること、端子の辺に捨て基板も V カットの線も
+無いこと、面取りの指示が入っていること、積層が JLC06121H-3313 であること、外形の切り欠きとスリットが図面どおりであること。
+
+PCB Remark（そのまま貼る）:
+
+> 1) This is ONE board with edge rails that I drew myself on the left, right and top edges (one frame, @RAILW@ mm wide), joined by
+> mouse-bite tabs (@TABW@ mm wide, @HOLE@ mm holes) across a @GAP@ mm routed gap: panel @PANEL_X@ mm, one board per panel. @NFID@ fiducials
+> on each side (top and bottom) and @NTOOL@ tooling holes (@TOOLD@ mm) are on the rails. Please do NOT add other rails and do NOT add V-cut.
+> 2) Gold fingers are on ONE edge only: the bottom edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge
+> 30 degrees. This edge must stay a free routed edge; the rails end @ENDGAP@ mm above it.
+> 3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
+> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: @VDR@ mm holes; the vias with 0.2 mm holes have pads of at least 0.45 mm, so I
+> left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads.
+> 5) You may shorten the finger copper to your standard setback for the bevel.
+> 6) The solder mask window over the gold fingers is intentional. The outline has two side notches, one inner slot and cut corners
+> beside the tab; inner corners are drawn with R 0.5 mm. Please keep them as drawn.
+
+## 3. PCB Assembly の指定
+| 項目 | 指定 |
+|---|---|
+| PCBA Type | **Standard** |
+| Assembly Side | **Both Sides**（Top: 主な部品、Bottom: 受動部品だけ）|
+| PCBA Qty | 2 または 5 |
+| Edge Rails/Fiducials | **Added by Customer** |
+| Tooling holes（項目が出た場合）| Added by Customer |
+| File provided as（面付けの注文で出る項目）| "Complete File, just proceed with my own files" |
+| Confirm Parts Placement | Yes。期限までに確認しないと自動で承認されるので、選ぶと出る画面では **"Do not confirm automatically"** を選ぶ |
+| Parts Selection（部品の選び方）| By Customer (Self-Service)。BOM に LCSC の部品番号が入っている |
+| X-ray Inspection（項目が出た場合）| **Yes**（QFN などの見えない接合 @XRAY@ 個/枚。項目が無くても料金表では自動で掛かる）|
+| BOM / CPL | `bom_jlc.csv` / `cpl_jlc.csv` |
+| 捨て基板を外すサービス（Depaneling）| 選ばない |
+
+- 実装の Remark には、PCB Remark の 1)〜3) を貼る。
+- 部品の照合画面の正しい状態: **@TYPES@ 行・@PARTS@ 点がすべて一致、Basic @NBASIC@ 行・Extended @NEXT@ 行（Extended は設計が宣言した @NEXTCODES@ 品番だけ: @EXTENDED@）、未選択の部品なし**。
+  宣言に無い Extended の行、在庫が足りない行（`parts_check.csv` の条件: 在庫が必要数の 3 倍以上、予約可能数が必要数以上）、不一致があれば止める。
+  Extended であること自体は問題ない（Standard PCBA ではフィーダー料金が Basic と同じ）。
+- 実装しない部品: @DNP@
+- **RP2350B（C42415655）は 1 品番だけで在庫が薄い**（JLCPCB の予備も 0）。1 枚に @NRP@ 個。注文する日に在庫を確かめ、5 枚なら先に JLCPCB の
+  部品在庫として @PREBUY5@ 個（＋予備 2 個）を買って確保する。2 枚なら @PREBUY2@ 個。
+- Bottom の @NBOTTOM@ 点は、180° 回っても同じパッドに同じ働きで載る部品（チップ抵抗・コンデンサ、1 kΩ ×4 アレイ、3225 水晶）だけ。
+  JLCPCB は裏面の角度の決まりを公開していないので、Bottom の角度は KiBot が JLCPCB 向けとして載せている規則（180° − KiCad の角度 ＋ 補正）で書き、
+  `check_cpl.py` はその両方の読み方（鏡映、鏡映＋180°）でパッドが合うことを確かめてある。**最初の注文では、部品の配置の確認画面で Bottom の向きも見る。**
+- CPL の角度は JLCPCB の部品ライブラリの向きに合わせて補正済み。JLCPCB はライブラリを書き換えることがあるので、**注文する日に `check_cpl.py` を
+  もう一度実行する**。
+- **部品プレビューで見る点**（Top を上から見て、端子を下にした向き）:
+@ORIENT@
+
+## 4. 費用（JLCPCB の料金表 @PRICEDATE@ 更新分から計算。部品代・送料・税は別）
+| | 2 枚実装 | 5 枚実装 |
+|---|---|---|
+| 実装費（Standard・両面、X 線検査込み） | 約 US$ @EST2@ | 約 US$ @EST5@ |
+| 治具（Fixture）費 2 個が加わった場合 | 約 US$ @FIX2@ | 約 US$ @FIX5@ |
+
+- 内訳: 両面のセットアップ $51.12 + ステンシル $16.42 + フィーダー $1.53 × @TYPES@ 種類 + はんだ付け $0.0016 × @JOINTS@ 接点 × 枚数
+  （1 枚あたり最低 $0.48）+ X 線検査 @XRAY@ 個/枚 × 枚数（料金表の段階で 1 個 $0.82〜$1.64）+ 梱包 $0.50 + 配置確認 $0.45。
+- PCB 代（5 枚、@LAYERS@ 層、上の捨て基板込み、ENIG 2 U"・金フィンガー・30° 面取り・1.2 mm・Epoxy Filled & Capped・Confirm Production file 込み、
+  送料別。2026-11-14 の見積もり画面）: 約 US$ 75。最小ビアに「0.2mm」を選ぶと約 US$ 113 になる（だから既定のままにする）。
+- 部品代（2026-11-14 の部品データ）: 2 枚で約 US$ 63、5 枚で約 US$ 140。RP2350B の事前購入はこの中に入る。
+
+## 5. 受け取ってから
+1. 板厚をノギスで測る（1.08〜1.32 mm）。
+2. 捨て基板を外す: タブの穴と穴の間をニッパーで切り（基板を折り曲げない）、端面の突起を基板の端の線までやすりで落とす。
+3. 通電の前に `docs/13_rev_h_plan.md` の「立ち上げの手順と合格基準」の 1（+1V1・+3V3 の短絡と分圧抵抗の値）を行う。
+
+## 出典（JLCPCB 公式。注文する日にもう一度読む）
+- 実装仕様（金フィンガーは Standard PCBA のみ、両面実装）: https://jlcpcb.com/capabilities/pcb-assembly-capabilities
+- 製造仕様（6 層の最小ビア、ミシン目パネル、PTH の環状幅）: https://jlcpcb.com/capabilities/pcb-capabilities
+- ビアの処理（Epoxy Filled & Capped）: https://jlcpcb.com/help/article/pcb-via-covering 、パッド上のビア: https://jlcpcb.com/help/article/via-in-pad-pofv-guide
+- 積層: https://jlcpcb.com/impedance
+- 金フィンガー（面取り、端子部のレジスト全面開口）: https://jlcpcb.com/help/article/jlcpcb-gold-fingers
+- 捨て基板とフィデューシャル: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order
+- 実装の料金表（@PRICEDATE@ 更新、X 線検査・両面）: https://jlcpcb.com/help/article/pcb-assembly-price
+- BOM と CPL の書式（回転は反時計回りが正）: https://jlcpcb.com/help/article/pick-place-file-for-pcb-assembly
+- 裏面の角度（KiBot の JLCPCB 向けの規則）: https://kibot.readthedocs.io/en/latest/notes_position.html
+'''
+
 def lookup(code):
     """(catalogue entry of `code` from the JLCPCB parts API, or None; the reason when None)."""
     import urllib.request, time
@@ -619,16 +795,18 @@ def check_declared(per_board, qty=None):
       - the class in JLCPCB's catalogue is the declared class,
       - need = per board x FC_PCBA_QTY (boards assembled, default 5) + the catalogue's lossNumber (attrition),
         stock >= 3 x need and canPresaleNumber (what can be ordered now) >= need.
-    Writes parts_check.csv (the first five columns as for check_basic: LCSC, Part, Library, Stock, Result); exits on failure."""
+    Writes parts_check.csv (the first five columns as for check_basic: LCSC, Part, Library, Stock, Result; the number of
+    boards the check was made for in the last column, Boards); exits on failure. check_jlc.py recomputes the need from
+    the columns for the FC_PCBA_QTY of its own run."""
     qty = int(os.environ.get('FC_PCBA_QTY', '5')) if qty is None else qty
     declared = D.LCSC_CLASS
     rows, bad = [], []
     for code in sorted(set(per_board) | set(declared)):
         want = declared.get(code); n = per_board.get(code, 0)
         if not n:
-            rows.append((code, '?', '?', '?', 'NG', want, 0, '', '', '', 'declared in LCSC_CLASS but not placed')); bad.append(code); continue
+            rows.append((code, '?', '?', '?', 'NG', want, 0, '', '', '', 'declared in LCSC_CLASS but not placed', qty)); bad.append(code); continue
         it, err = lookup(code)
-        if not it: rows.append((code, '?', '?', '?', 'NG', want or '', n, '', '', '', err)); bad.append(code); continue
+        if not it: rows.append((code, '?', '?', '?', 'NG', want or '', n, '', '', '', err, qty)); bad.append(code); continue
         lib = API_CLASS.get(it.get('componentLibraryType'), str(it.get('componentLibraryType')))
         stock = int(it.get('stockCount') or 0); loss = int(it.get('lossNumber') or 0)
         presale = it.get('canPresaleNumber'); presale = int(presale) if presale is not None else None
@@ -639,11 +817,11 @@ def check_declared(per_board, qty=None):
         if stock < 3 * need: why.append(f'stock {stock} < 3 x {need}')
         if presale is None: why.append('the catalogue gives no canPresaleNumber')
         elif presale < need: why.append(f'canPresaleNumber {presale} < {need}')
-        rows.append((code, it.get('componentModelEn'), lib, stock, 'NG' if why else 'OK', want or '', n, need, '' if presale is None else presale, loss, '; '.join(why)))
+        rows.append((code, it.get('componentModelEn'), lib, stock, 'NG' if why else 'OK', want or '', n, need, '' if presale is None else presale, loss, '; '.join(why), qty))
         if why: bad.append(code)
     with open(os.path.join(OUT, 'parts_check.csv'), 'w', newline='') as f:
-        w = csv.writer(f); w.writerow(['LCSC', 'Part', 'Library', 'Stock', 'Result', 'Declared', 'Per board', 'Need', 'Can presale', 'Loss', 'Problem']); w.writerows(rows)
-    for r in rows: print('  %-9s %-28s %-8s %9s %s  declared %-8s per board %3s need %5s presale %6s loss %3s %s' % tuple(str(x) for x in r))
+        w = csv.writer(f); w.writerow(['LCSC', 'Part', 'Library', 'Stock', 'Result', 'Declared', 'Per board', 'Need', 'Can presale', 'Loss', 'Problem', 'Boards']); w.writerows(rows)
+    for r in rows: print('  %-9s %-28s %-8s %9s %s  declared %-8s per board %3s need %5s presale %6s loss %3s %s' % tuple(str(x) for x in r[:11]))
     rule = f'class as declared, stock >= 3 x need, canPresaleNumber >= need; need = per board x {qty} boards + loss'
     if bad: raise SystemExit(f'parts check FAILED for {bad} ({rule})')
     ncls = {c: sum(1 for r in rows if r[2] == c) for c in ('Basic', 'Extended')}
@@ -687,7 +865,7 @@ def orientation_notes(b, D):
         out.append('U7: 1 番ピンの印が**%s**。1〜4 番ピンが%s側に、%s並ぶ。' % (_dir(*d1), row, run))
     for val, pad, text in (('B5819W', '1', 'カソードの帯が**%s**'),):
         g = grouped(val, lambda fp: _dir(*off(fp, pad)))
-        out.append('B5819W: ' + '、'.join('%s は%s' % (_refs(r), text % k) for k, r in sorted(g.items())) + '。')
+        if g: out.append('B5819W: ' + '、'.join('%s は%s' % (_refs(r), text % k) for k, r in sorted(g.items())) + '。')
     g = {}
     for val in ('2N7002', 'BAV99'):
         for k, r in grouped(val, lambda fp: _dir(*off(fp, '3'))).items(): g.setdefault(k, []).extend(r)
@@ -769,9 +947,16 @@ def routed_or_exit():
     if not ntr or nopen:
         raise SystemExit(f'not packaging: the board has {ntr} tracks and {nopen} open connections (route it first; FC_ALLOW_UNROUTED=1 for a rehearsal)')
 
+def part_class(code):
+    """'JLCPCB Basic' / 'JLCPCB Extended': the class the design declares for an LCSC code (LCSC_CLASS); designs without
+    LCSC_CLASS use Basic parts only (rev E-G)."""
+    cls = getattr(D, 'LCSC_CLASS', None)
+    if cls is None: return 'JLCPCB Basic'
+    return 'JLCPCB ' + cls.get(code, 'class not declared')
+
 def part_map():
-    if hasattr(D, 'LCSC'):           # designs that carry their own (Basic-only) part map: it is the only source
-        parts = {k: (v[0], v[1], 'JLCPCB Basic') for k, v in D.LCSC.items()}
+    if hasattr(D, 'LCSC'):           # designs that carry their own part map: it is the only source
+        parts = {k: (v[0], v[1], part_class(v[0])) for k, v in D.LCSC.items()}
         for k, v in getattr(D, 'HAND', {}).items(): parts[k] = ('', k, 'hand-solder: ' + ', '.join(v))
         return parts
     if not os.path.exists(PARTS_JSON):
@@ -809,9 +994,11 @@ def cpl_table(dnp):
     ("mirror_bottom: ... (180 - component rot + angle). This is used by JLCPCB."): JLCPCB views a bottom part from
     below, the board turned over left to right, and turns its library footprint counter-clockwise in that view.
     check_cpl.py places the library footprint that way pad by pad, and also turned by a further 180 degrees (the other
-    way of turning the board over); BOTTOM_OK allows only parts for which both are right, and check_cpl.py wants them
-    at multiples of 90 degrees, where the KiCad angle taken as it is also lands within 180 degrees. The order's
-    placement preview remains the final check. Other designs keep the KiCad angle on the bottom side, as before."""
+    way of turning the board over). Which reading is right is not known, so only footprints whose 180-degree turn is
+    harmless may go on the bottom side (bottom_ok(): BOTTOM_TURN, whatever BOTTOM_OK declares), check_cpl.py wants the
+    turned placement to land exactly on the pads of their BOTTOM_TURN map, and it wants them at multiples of 90
+    degrees, where the KiCad angle taken as it is also lands within 180 degrees. The order's placement preview remains
+    the final check. Other designs keep the KiCad angle on the bottom side, as before."""
     import tempfile
     pos = os.path.join(tempfile.mkdtemp(prefix='gen_jlc_'), 'pos.csv')
     subprocess.run(['kicad-cli', 'pcb', 'export', 'pos', '--format', 'csv', '--units', 'mm', '--side', 'both', '-o', pos, PCB], check=True, capture_output=True)
@@ -828,7 +1015,8 @@ def cpl_table(dnp):
 
 def order_notes(dnp, placed, ntypes):
     """Text of jlcpcb/README.md for the design and the board file as they are now (no network needed)."""
-    txt = {'rev B': README_B, 'rev C': README_C, 'rev E': README_E, 'rev F': README_F, 'rev F2': README_F2, 'rev G': README_G}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp))
+    txt = {'rev B': README_B, 'rev C': README_C, 'rev E': README_E, 'rev F': README_F, 'rev F2': README_F2, 'rev G': README_G,
+           'rev H': README_H}.get(D.REV, README_D).replace('@DNP@', ', '.join(dnp))
     if '@TYPES@' in txt:
         import pcbnew, gen_pcb
         b = pcbnew.LoadBoard(PCB); bb = b.GetBoardEdgesBoundingBox()
@@ -846,15 +1034,30 @@ def order_notes(dnp, placed, ntypes):
                ('@ORIENT@', orientation_notes(b, D)), ('@MASKWEB@', mask_web_note(b)), ('@BRIDGES@', bridge_note(b, D)), ('@SENSE@', sense_note(dnp))]
         if RA:                                 # every number of the rails in the notes comes from the design; check_jlc.py measures the railed board against JLCPCB's limits
             pw = bw + 2 * (RA['gap'] + RA['width']); small_first = (bw, bh + 10.0) if bh <= bw else (bw + 10.0, bh)
-            rep += [('@PANEL@', '%.1f × %.1f' % (pw, bh)), ('@PANEL_X@', '%.1f x %.1f' % (pw, bh)), ('@SIZE_X@', '%.1f x %.1f' % (bw, bh)),
+            top = RA.get('top')                # a top rail (make_rails.py): the panel is that much higher
+            ph = bh + (top.get('gap', RA['gap']) + top.get('width', RA['width']) if top else 0.0)
+            rep += [('@PANEL@', '%.1f × %.1f' % (pw, ph)), ('@PANEL_X@', '%.1f x %.1f' % (pw, ph)), ('@SIZE_X@', '%.1f x %.1f' % (bw, bh)),
                     ('@PANELB@', '%.1f × %.1f' % (bw + 10.0, bh)), ('@PANELB_X@', '%.1f x %.1f' % (bw + 10.0, bh)),
                     ('@FORMB@', '%.1f × %.1f' % small_first), ('@FORMB_X@', '%.1f x %.1f' % small_first),       # the order form adds 10 mm to the smaller dimension
-                    ('@RAILW@', num(RA['width'])), ('@GAP@', num(RA['gap'])), ('@RAILLEN@', num(bh - RA.get('end_gap', 0.0))), ('@ENDGAP@', num(RA.get('end_gap', 0.0))),
+                    ('@RAILW@', num(RA['width'])), ('@GAP@', num(RA['gap'])), ('@RAILLEN@', num(ph - RA.get('end_gap', 0.0))), ('@ENDGAP@', num(RA.get('end_gap', 0.0))),
+                    ('@NTOPTABS@', str(len(top['tabs']) if top else 0)),
                     ('@NTABS@', str(len(RA['tabs']['L']))), ('@TABW@', num(RA['tab'])), ('@HOLE@', num(RA['hole'])), ('@NHOLES@', str(RA['holes'])),
                     ('@WEB@', num(RA['pitch'] - RA['hole'])), ('@RIDGE@', num(RA['hole_out'])), ('@NFID@', str(len(RA['fiducials']))), ('@FIDIN@', num(RA['fid_inset'])),
                     ('@NTOOL@', str(len(RA.get('tooling', ())))), ('@TOOLD@', num(RA.get('tooling_d', 0.0)))]
             assert len(RA['tabs']['L']) == len(RA['tabs']['R']), 'the notes describe the same number of tabs on both rails'
         else: rep.append(('@PANEL@', '-'))
+        if '@NBASIC@' in txt:                  # notes of designs with declared classes (README_H): classes, sides, X-ray, small vias, RP2350B
+            cls = getattr(D, 'LCSC_CLASS', {})
+            bom = bom_table(warn=False)[0]; per = per_board_counts(bom)
+            ext = sorted({row[3] for row in bom[1:] if cls.get(row[3]) == 'Extended'})
+            names = {row[3]: row[0] for row in bom[1:]}
+            sides = [r[3] for r in cpl_table(dnp)[1:]]
+            nrp = per.get('C42415655', 0)
+            rep += [('@NBASIC@', str(sum(1 for row in bom[1:] if cls.get(row[3]) == 'Basic'))), ('@NEXT@', str(sum(1 for row in bom[1:] if cls.get(row[3]) == 'Extended'))),
+                    ('@NEXTCODES@', str(len(ext))), ('@EXTENDED@', '、'.join('%s %s' % (c, names[c]) for c in ext) or 'なし'),
+                    ('@NTOP@', str(sides.count('Top'))), ('@NBOTTOM@', str(sides.count('Bottom'))), ('@XRAY@', str(xray_count(placed))),
+                    ('@LAYERS@', str(b.GetCopperLayerCount())), ('@NSMALL@', str(sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_VIA' and pcbnew.ToMM(t.GetDrillValue()) < 0.3 - 0.002))),
+                    ('@NRP@', str(nrp)), ('@PREBUY2@', str(2 * nrp)), ('@PREBUY5@', str(5 * nrp))]
         for k, v in rep: txt = txt.replace(k, v)
         for k, v in (('@TYPES@', str(ntypes)), ('@PARTS@', str(len(placed))), ('@JOINTS@', str(joints)), ('@PRICEDATE@', JLC_PRICE['date']),
                      ('@EST2@', '%.0f' % est(2)), ('@EST5@', '%.0f' % est(5)),
@@ -874,7 +1077,8 @@ def main():
     cpl = cpl_table(dnp)
     if two_sided():                    # the bottom-side angle is verified only for parts that may be turned by 180 degrees
         wrong = [r[0] for r in cpl[1:] if r[3] == 'Bottom' and not bottom_ok(r[0])]
-        if wrong: raise SystemExit(f'parts on the bottom side that BOTTOM_OK does not allow: {wrong} (move them to the top or declare them)')
+        if wrong: raise SystemExit(f'parts on the bottom side that may not be there: {wrong} (BOTTOM_OK must declare them and their footprint must be one '
+                                   f'that turns by 180 degrees without harm, BOTTOM_TURN: R / C 0201-1206, 4x resistor arrays, 3225 crystals; move the others to the top)')
     with open(os.path.join(OUT, 'cpl_jlc.csv'), 'w', newline='') as f: csv.writer(f).writerows(cpl)
     # ---- Gerbers ----
     fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')

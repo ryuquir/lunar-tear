@@ -1,4 +1,11 @@
-"""Minimal Specctra DSN exporter for a pcbnew BOARD (2-layer, SMD/THT pads, outline, nets, rules)."""
+"""Minimal Specctra DSN exporter for a pcbnew BOARD (2-layer, SMD/THT pads, outline, nets, rules).
+Layer roles: without a plane map the layers used up to rev G (6 layers: F sig | In1 GND | In2 sig | In3 sig | In4 +3V3 |
+B sig; 4 layers: see set_layers). With the design's PLANES (gen_pcb.py; rev H on, passed as export(plane_map=...)), every
+inner layer that PLANES gives a board-wide pour ('board') is a plane layer the router does not see, every other copper
+layer is a signal layer (layer_roles()). With export(own_via_padstacks=True) (route_pcb.py: designs with EP_VIAS or
+PLANES, rev H on) existing vias are exported with their own padstack (diameter / drill) when they differ from the
+router's via (the exposed-pad vias of gen_pcb.py EP_VIAS, 0.2 mm vias); otherwise every existing via is exported with
+the router's via padstack, as before (a routed rev D board, 0.5 / 0.2 mm vias, keeps its DSN)."""
 import math, os
 import pcbnew
 from pcbnew import ToMM
@@ -8,13 +15,35 @@ def U(mm): return int(round(mm * 1000 * RES))
 LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.B_Cu, 'B.Cu')]
 PLANE_NETS = ()
 POWER_NETS = ()
-def set_layers(board):
+def layer_roles(ncu, planes):
+    """(signal layer names in stack order, {plane layer name: net}) of an ncu-layer board from a plane map
+    {layer name: [(net, polygon | 'board'), ...]} (gen_pcb.py PLANES): an inner layer with a board-wide pour ('board')
+    is a plane layer (its net: the board-wide entry; islands of other nets on it are not planes); F.Cu, B.Cu and the
+    other inner layers are signal layers. Rev H (drawn from the back, docs/13 layer table: (6) back = F.Cu, (5) GND =
+    In1, (4) power = In2, (3) signal = In3, (2) GND = In4, (1) front = B.Cu): signals F.Cu, In3.Cu, B.Cu; planes In1 GND,
+    In2 +3V3, In4 GND."""
+    names = ['F.Cu'] + ['In%d.Cu' % k for k in range(1, ncu - 1)] + ['B.Cu']
+    plane = {}
+    for layer, entries in (planes or {}).items():
+        if layer in ('F.Cu', 'B.Cu') or layer not in names: continue
+        whole = [net for net, poly in entries if isinstance(poly, str) and poly == 'board']
+        if whole: plane[layer] = whole[0]
+    return [n for n in names if n not in plane], plane
+
+def set_layers(board, planes=None):
     """Signal layers offered to the autorouter. On 4-layer boards the inner layers are solid GND/+3V3 planes that
     the router must not touch (FC_DSN_INNER=1 offers them anyway), and the plane nets are left out of the netlist:
-    gen_pcb already gave every plane pad a fixed via stub."""
+    gen_pcb already gave every plane pad a fixed via stub. With a plane map (planes = the design's PLANES): the signal
+    layers of layer_roles(); with FC_STUBS=1 the nets of its plane layers are the stubbed plane nets."""
     global LAYERS, PLANE_NETS, POWER_NETS
     ncu = board.GetCopperLayerCount()
     stubs = os.environ.get('FC_STUBS', '0') == '1'
+    if planes is not None:
+        sig, plane = layer_roles(ncu, planes)
+        LAYERS = [(board.GetLayerID(n), n) for n in sig]
+        PLANE_NETS = tuple(sorted(set(plane.values()))) if stubs else ()
+        POWER_NETS = ()
+        return
     if ncu == 6:      # F sig | In1 GND | In2 sig | In3 sig | In4 +3V3 | B sig  -> the router only sees the 4 signal layers
         LAYERS = [(pcbnew.F_Cu, 'F.Cu'), (pcbnew.In2_Cu, 'In2.Cu'), (pcbnew.In3_Cu, 'In3.Cu'), (pcbnew.B_Cu, 'B.Cu')]
     elif ncu == 4:
@@ -58,8 +87,11 @@ def pad_padstack(pad, fp_flipped):
         shapes = [f'(shape (rect {l} {-hx} {-hy} {hx} {hy}))' for l in layers]
     return name, f'(padstack {q(name)} ' + ' '.join(shapes) + ' (attach off))'
 
-def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False, net_width=None):
-    set_layers(board)
+def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False, net_width=None, plane_map=None,
+           own_via_padstacks=False):
+    """plane_map: the design's PLANES (layer roles, set_layers); planes: B.Cu zones as Specctra planes (old option);
+    own_via_padstacks: existing vias of another size than via_dia / via_drill get a padstack of their own."""
+    set_layers(board, plane_map)
     padstacks = {}
     images = {}
     placements = []
@@ -103,6 +135,14 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         images[img_name] = f'(image {q(img_name)} ' + ' '.join(pins) + ')'
     via_name = f'Via[0-1]_{U(via_dia)}:{U(via_drill)}_um'
     padstacks[via_name] = f'(padstack {q(via_name)} ' + ' '.join(f'(shape (circle {l} {U(via_dia)}))' for _, l in LAYERS) + ' (attach off))'
+    # existing vias of another size (exposed-pad vias, 0.2 mm vias): each with a padstack of its own diameter and drill
+    via_of = {}
+    for t in (board.GetTracks() if own_via_padstacks else ()):
+        if t.GetClass() != 'PCB_VIA': continue
+        dia, drl = ToMM(t.GetWidth()), ToMM(t.GetDrillValue())
+        if (U(dia), U(drl)) == (U(via_dia), U(via_drill)): continue
+        name = f'Via[0-1]_{U(dia)}:{U(drl)}_um'; via_of[t.m_Uuid.AsString()] = name
+        if name not in padstacks: padstacks[name] = f'(padstack {q(name)} ' + ' '.join(f'(shape (circle {l} {U(dia)}))' for _, l in LAYERS) + ' (attach off))'
     # nets (pads that already carry a fixed power stub are not handed to the router)
     stubbed = set()
     if PLANE_NETS:
@@ -192,7 +232,7 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
     wires = []
     for t in board.GetTracks():
         if t.GetClass() == 'PCB_VIA':
-            wires.append(f'    (via {q(via_name)} {U(ToMM(t.GetPosition().x))} {-U(ToMM(t.GetPosition().y))} (net {q(t.GetNetname())}) (type protect))')
+            wires.append(f'    (via {q(via_of.get(t.m_Uuid.AsString(), via_name))} {U(ToMM(t.GetPosition().x))} {-U(ToMM(t.GetPosition().y))} (net {q(t.GetNetname())}) (type protect))')
         elif t.GetClass() == 'PCB_TRACK':
             if t.GetLayer() not in dict(LAYERS): continue
             lname = lname_of(t.GetLayer())

@@ -15,8 +15,12 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
                     boards up to 1.6 mm), board >= 50 x 50 mm, solder mask fully opened
                     over the finger area, no silkscreen and no plated hole within 1.0 mm of a finger
   Standard PCBA     board >= 70 x 70 mm, all assembled parts on the top side, every part number a Basic part
-                    (designs with LCSC_CLASS: the class each code declares, Basic or Extended; designs with
-                    ASSEMBLY = 'both': parts named by BOTTOM_OK may also sit on the bottom side)
+                    (designs with LCSC_CLASS: the class each code declares, Basic or Extended, and the stock for
+                    FC_PCBA_QTY boards (default 5), recomputed here from parts_check.csv: stock >= 3 x need and
+                    can-presale >= need, need = per board x boards + loss; designs with ASSEMBLY = 'both': a part
+                    may also sit on the bottom side when gen_jlc.bottom_ok() allows it, i.e. BOTTOM_OK declares it
+                    AND its footprint turns by 180 degrees without harm (R / C chips 0201-1206, 4x0603 / 4x0402
+                    resistor arrays, 3225 four-pad crystals); LEDs, diodes and other polarized parts never)
   paste             only on pads of parts that JLCPCB places
   gerbers.zip       fabrication layers and drill files only; every file is compared with a fresh plot of the board
                     (so an archive that was made from another state of the board is refused)
@@ -26,7 +30,10 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
                     the rails is the routed board object for object, rails >= 5 mm, break-off tabs >= 5 mm with holes
                     of 0.5-0.8 mm that are 0.2-0.3 mm apart, 1 mm fiducials centred >= 3.85 mm from the panel edges,
                     2 mm tooling holes, rails that end above the gold-finger edge; its design rule check is run
-                    here, and gerbers_rails.zip is compared with a fresh plot
+                    here, and gerbers_rails.zip is compared with a fresh plot. With RAILS['top'] (make_rails.py) the
+                    panel is board + gap + rail higher, the top rail ('T') may carry fiducials and tooling holes, the
+                    board's top edge line may be split by its tabs, and the top tabs and their holes are measured
+                    like the side ones
   generated files   bom_jlc.csv, cpl_jlc.csv and jlcpcb/README.md are compared with what gen_jlc.py writes now for the
                     design and the board file, the three drawings with what draw_outline.py draws now (a package put
                     together from another state of the board or edited by hand is refused); the railed board is also
@@ -34,8 +41,9 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
 Multilayer boards (designs with JLC_RULES and LAYERS > 2; older designs are checked as before, as 2-layer boards):
   the copper layer count is the design's; via and plated pad holes may be 0.20 mm where the copper is at least 0.45 mm
   across (JLCPCB's order form: on multilayer boards a 0.2 mm hole costs nothing extra from a 0.45 mm diameter), else
-  0.30 mm; the inner layers (In1..In4 -> .g2 .. .g5) are part of the zip and of the fresh plot; pours of every copper
-  layer are measured; the plated drill file must hold one hit per via, plated pad hole and plated slot.
+  0.30 mm (also on a board without vias: plated pad holes); the inner layers (In1.. -> .g2 .., up to 8 layers and
+  more) are part of the zip and of the fresh plot; pours of every copper layer are measured; the plated drill file
+  must hold one hit per via, plated pad hole and plated slot.
 Exit status 1 when anything fails.   FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 check_jlc.py"""
 import os, sys, re, math, csv, zipfile, importlib, subprocess, tempfile
 import pcbnew
@@ -52,7 +60,7 @@ SILK_LINE, SILK_TEXT = 0.15, 1.0
 FINGER_TO_EDGE, FINGER_HOLE = 1.15, 1.0
 TOL = 0.002
 RAIL_MIN, TAB_MIN, BITE_D, BITE_WEB, FID_EDGE, TOOL_D = 5.0, 5.0, (0.5, 0.8), (0.2, 0.3), 3.85, 2.0     # JLCPCB, 'Mouse bites Panel'
-FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl', '_Cu.g2', '_Cu.g3', '_Cu.g4', '_Cu.g5', '_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo', '_Mask.gts', '_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl')
+FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl') + tuple('_Cu.g%d' % k for k in range(2, 32)) + ('_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo', '_Mask.gts', '_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl')     # inner layers In1.g2 .. In30.g31
 PM = pcbnew.SHAPE_POLY_SET.PM_FAST
 JLC = getattr(D, 'JLC_RULES', False)
 NL = int(getattr(D, 'LAYERS', 2)) if JLC else 2     # copper layers; designs made before JLC_RULES were checked as 2-layer boards
@@ -99,11 +107,12 @@ def copper_objects(b, skip=()):
             out.append(('pour', z.GetNetname(), layer, poly.OutlineCount(), sum(poly.Outline(i).PointCount() for i in range(poly.OutlineCount())), round(poly.Area() / 1e9)))
     return sorted(out, key=repr)
 
-def other_objects(b, skip=(), xlim=None):
+def other_objects(b, skip=(), xlim=None, ymin=None):
     """What copper_objects() leaves out, as comparable tuples: graphics and texts of the footprints (solder mask
     windows, silkscreen), their attributes, pad shapes and margins, the board's own drawings and texts outside
     Edge.Cuts, and the rule areas. With xlim = (lo, hi), board drawings and texts that lie completely outside that x
-    range are left out (the texts on the edge rails)."""
+    range are left out (the texts on the edge rails); with ymin, also those that lie completely above y = ymin (the
+    text on a top rail)."""
     out = []
     def shape(g): return (g.GetShape(), g.GetStart().x, g.GetStart().y, g.GetEnd().x, g.GetEnd().y, g.GetWidth(), g.IsFilled(), g.GetLayer())
     def text(t): return (t.GetText(), t.GetPosition().x, t.GetPosition().y, t.GetTextSize().x, t.GetTextSize().y, t.GetTextThickness(), round(t.GetTextAngleDegrees(), 2), t.IsMirrored(), t.IsVisible(), t.GetLayer())
@@ -121,6 +130,7 @@ def other_objects(b, skip=(), xlim=None):
         if d.GetLayer() == pcbnew.Edge_Cuts: continue
         bb = d.GetBoundingBox()
         if xlim and (bb.GetRight() < FromMM(xlim[0]) or bb.GetX() > FromMM(xlim[1])): continue
+        if ymin is not None and bb.GetBottom() < FromMM(ymin): continue
         out.append(('drawing',) + (text(d) if 'TEXT' in d.GetClass() else shape(d)))
     for z in b.Zones():
         bb = z.GetBoundingBox()
@@ -223,11 +233,7 @@ def main():
     if vias:
         dmin = min(ToMM(v.GetDrillValue()) for v in vias); rmin = min(ToMM(v.GetWidth(pcbnew.F_Cu) if hasattr(v, 'GetFrontWidth') else v.GetWidth()) - ToMM(v.GetDrillValue()) for v in vias)
         info.append('%d vias, smallest hole %.2f mm, smallest (diameter - hole) %.2f mm' % (len(vias), dmin, rmin))
-        if NL > 2:
-            probs, nsmall = small_hole_problems(vias, plated_pads(b)[0])
-            need(not probs, '%d holes break the multilayer small-hole rule, e.g. %s' % (len(probs), probs[:3]))
-            if nsmall: info.append('%d holes below %.2f mm, each with copper >= %.2f mm across' % (nsmall, MIN_DRILL, MIN_DIA_ML))
-        else: need(dmin >= MIN_DRILL - TOL, 'via hole %.2f mm < %.2f (extra charge below 0.3 mm)' % (dmin, MIN_DRILL))
+        if NL <= 2: need(dmin >= MIN_DRILL - TOL, 'via hole %.2f mm < %.2f (extra charge below 0.3 mm)' % (dmin, MIN_DRILL))
         need(rmin >= MIN_RING2 - TOL, 'via diameter - hole = %.2f mm < %.2f' % (rmin, MIN_RING2))
         pts = sorted((ToMM(v.GetPosition().x), ToMM(v.GetPosition().y), ToMM(v.GetDrillValue())) for v in vias)
         worst = 9.0
@@ -238,6 +244,10 @@ def main():
                 if g < worst: worst = g
         info.append('closest via holes: %.2f mm apart (wall to wall)' % worst)
         need(worst >= HOLE_HOLE - TOL, 'via holes %.2f mm apart < %.2f' % (worst, HOLE_HOLE))
+    if NL > 2:                                   # multilayer small holes: vias and plated pad holes, with or without vias
+        probs, nsmall = small_hole_problems(vias, plated_pads(b)[0])
+        need(not probs, '%d holes break the multilayer small-hole rule, e.g. %s' % (len(probs), probs[:3]))
+        if nsmall: info.append('%d holes below %.2f mm, each with copper >= %.2f mm across' % (nsmall, MIN_DRILL, MIN_DIA_ML))
 
     # ---- copper against the left / right edges (edge rails by V-cut) and the top edge
     lo, hi = (SH.get('edge_x') or (0.0, 90.0)) if SH else (0.0, 90.0)
@@ -299,7 +309,7 @@ def main():
         ref = fp.GetReference(); has_paste = any(p.GetLayerSet().Contains(pcbnew.F_Paste) or p.GetLayerSet().Contains(pcbnew.B_Paste) for p in fp.Pads())
         if ref in placed and TWO_SIDED:
             if fp.IsFlipped(): on_back.add(ref)
-            need(not fp.IsFlipped() or gen_jlc.bottom_ok(ref), '%s is assembled by JLCPCB on the back, but BOTTOM_OK does not allow it there' % ref)
+            need(not fp.IsFlipped() or gen_jlc.bottom_ok(ref), '%s is assembled by JLCPCB on the back, but it may not be there (BOTTOM_OK must declare it and its footprint must turn by 180 degrees without harm: gen_jlc.BOTTOM_TURN)' % ref)
         elif ref in placed: need(not fp.IsFlipped(), '%s is assembled by JLCPCB but sits on the back' % ref)
         elif has_paste and getattr(D, 'JLC_RULES', False): bad.append('%s is hand-soldered but has solder paste' % ref)
     if TWO_SIDED:
@@ -366,9 +376,9 @@ def main():
         else: info.append('gerbers.zip: %d files' % len(names))
         cpl = list(csv.DictReader(open(os.path.join(HW, 'jlcpcb', 'cpl_jlc.csv'))))
         need({r['Designator'] for r in cpl} == placed, 'CPL designators differ from the parts JLCPCB places: %s' % sorted({r['Designator'] for r in cpl} ^ placed)[:8])
-        if TWO_SIDED:                    # a Bottom row only for a part on the back that BOTTOM_OK allows there, a Top row for every other
+        if TWO_SIDED:                    # a Bottom row only for a part on the back that gen_jlc.bottom_ok() allows there, a Top row for every other
             wrong = [r['Designator'] for r in cpl if r['Layer'] != ('Bottom' if r['Designator'] in on_back else 'Top') or (r['Layer'] == 'Bottom' and not gen_jlc.bottom_ok(r['Designator']))]
-            need(not wrong, 'CPL layers disagree with the sides of the board or with BOTTOM_OK: %s' % wrong[:8])
+            need(not wrong, 'CPL layers disagree with the sides of the board or with what may go on the bottom side (BOTTOM_OK, gen_jlc.BOTTOM_TURN): %s' % wrong[:8])
         else: need(all(r['Layer'] == 'Top' for r in cpl), 'CPL has bottom-side placements')
         if getattr(D, 'JLC_RULES', False):      # BOM, CPL and notes must be what gen_jlc.py writes now for this design and this board file
             import gen_jlc
@@ -399,7 +409,16 @@ def main():
                 need(all(r['Result'] == 'OK' and r['Library'] in ('Basic', 'Extended') and r['Library'] == cls.get(r['LCSC']) for r in rows),
                      'parts_check.csv: not every part has its declared class (Basic or Extended) and the stock for the order')
                 need({r['LCSC'] for r in rows} == set(cls), 'parts_check.csv does not list the codes that LCSC_CLASS declares (run gen_jlc.py): %s' % sorted({r['LCSC'] for r in rows} ^ set(cls))[:8])
-                info.append('parts_check.csv: %d part numbers, %d Basic and %d Extended as declared' % (len(rows), sum(r['Library'] == 'Basic' for r in rows), sum(r['Library'] == 'Extended' for r in rows)))
+                # the stock for the boards of THIS order: the need is recomputed from the per-board and loss columns
+                # (gen_jlc.py may have been run for another FC_PCBA_QTY)
+                qty = int(os.environ.get('FC_PCBA_QTY', '5')); short = []
+                for r in rows:
+                    try: need_ = int(r['Per board']) * qty + int(r['Loss'] or 0); stock, presale = int(r['Stock']), int(r['Can presale'])
+                    except (KeyError, TypeError, ValueError): short.append('%s (no numbers)' % r.get('LCSC')); continue
+                    if stock < 3 * need_ or presale < need_: short.append('%s: need %d, stock %d, can presale %d' % (r['LCSC'], need_, stock, presale))
+                need(not short, 'parts_check.csv: not enough stock for %d boards (stock >= 3 x need and can presale >= need, need = per board x %d + loss): %s' % (qty, qty, short[:4]))
+                info.append('parts_check.csv: %d part numbers, %d Basic and %d Extended as declared; stock >= 3 x need and can presale >= need for %d boards (FC_PCBA_QTY)'
+                            % (len(rows), sum(r['Library'] == 'Basic' for r in rows), sum(r['Library'] == 'Extended' for r in rows), qty))
             else:
                 need(all(r['Library'] == 'Basic' and r['Result'] == 'OK' for r in rows), 'parts_check.csv: not every part is a Basic part in stock')
                 info.append('parts_check.csv: %d part numbers, all Basic' % len(rows))
@@ -419,12 +438,15 @@ def main():
         if not (os.path.exists(zr) and os.path.exists(rb)): bad.append('no board with edge rails yet (run make_rails.py)')
         else:
             br = pcbnew.LoadBoard(rb); br.BuildConnectivity()
+            TOP = RA.get('top')                  # a top rail joined to the side rails (make_rails.py RAILS['top'])
+            yb0, yb1 = ToMM(bb.GetY()) + 0.05, ToMM(bb.GetBottom()) - 0.05          # the board's top and bottom edge lines
             # 1. the circuit inside the rails is the routed board, object for object
             from collections import Counter
             ca, cb = Counter(copper_objects(b)), Counter(copper_objects(br, skip=('FID', 'MB', 'TH')))
             diff = list((ca - cb).elements()) + list((cb - ca).elements())
             need(not diff, 'the board inside the rails differs from the routed board in %d objects, e.g. %s (run make_rails.py)' % (len(diff), diff[:2]))
-            oa, ob = Counter(other_objects(b, xlim=(lo, hi))), Counter(other_objects(br, skip=('FID', 'MB', 'TH'), xlim=(lo, hi)))
+            ylim = yb0 if TOP else None
+            oa, ob = Counter(other_objects(b, xlim=(lo, hi), ymin=ylim)), Counter(other_objects(br, skip=('FID', 'MB', 'TH'), xlim=(lo, hi), ymin=ylim))
             odiff = list((oa - ob).elements()) + list((ob - oa).elements())
             need(not odiff, 'silkscreen, solder mask, texts, pad details or rule areas of the board inside the rails differ from the routed board in %d objects, e.g. %s (run make_rails.py)' % (len(odiff), odiff[:2]))
             rl, rt = 9.0, 9.0
@@ -435,11 +457,14 @@ def main():
                 else: rl = min(rl, ToMM(g.GetWidth()))
             need(rl >= SILK_LINE - TOL and rt >= SILK_TEXT - TOL, 'silkscreen of the railed board: line %.3f mm, text %.2f mm (minimum %.2f / %.1f)' % (rl, rt, SILK_LINE, SILK_TEXT))
             # 2. its contour: an outline item of the board may be missing in the panel only on the left / right edge lines
-            #    (where the routed gaps and the tabs are), and the panel has no other outline item inside the board
+            #    (where the routed gaps and the tabs are; with a top rail also on the top edge line), and the panel has no
+            #    other outline item inside the board (with a top rail: items on or above the top edge line are the rail's)
             pe, qe = Counter(edge_items(b)), Counter(edge_items(br))
             on_side = lambda it: all(abs(q[0] / 1000.0 - lo) < 0.0015 or abs(q[0] / 1000.0 - hi) < 0.0015 for q in it[1:])
             inside = lambda it: all(lo + 0.0015 < q[0] / 1000.0 < hi - 0.0015 for q in it[1:])
-            lost = [it for it in (pe - qe).elements() if not on_side(it)]; added = [it for it in (qe - pe).elements() if inside(it)]
+            on_top = lambda it: bool(TOP) and all(abs(q[1] / 1000.0 - yb0) < 0.0015 for q in it[1:])
+            above = lambda it: bool(TOP) and all(q[1] / 1000.0 < yb0 + 0.0015 for q in it[1:])
+            lost = [it for it in (pe - qe).elements() if not on_side(it) and not on_top(it)]; added = [it for it in (qe - pe).elements() if inside(it) and not above(it)]
             need(not lost and not added, 'the contour of the board inside the rails is not the contour of the board: %d items missing, %d added, e.g. %s' % (len(lost), len(added), (lost + added)[:2]))
             off2 = sum(1 for d in br.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts for q in (d.GetStart(), d.GetEnd()) if q.x % 1000 or q.y % 1000)
             need(not off2, '%d outline end points of the railed board are not on the 0.001 mm grid' % off2)
@@ -447,14 +472,44 @@ def main():
             panel = outline_polygon(br); rbb = br.GetBoardEdgesBoundingBox()
             px0, py0, px1, py1 = ToMM(rbb.GetX()) + 0.05, ToMM(rbb.GetY()) + 0.05, ToMM(rbb.GetRight()) - 0.05, ToMM(rbb.GetBottom()) - 0.05
             pw, ph = px1 - px0, py1 - py0
-            need(abs(ph - bh) < 0.01, 'the panel is %.2f mm high, the board %.2f mm: nothing may be added above the board or below the gold fingers' % (ph, bh))
+            rail_y, ntab, tabw, webs = {}, 0, [], []
+            if not TOP: need(abs(ph - bh) < 0.01, 'the panel is %.2f mm high, the board %.2f mm: nothing may be added above the board or below the gold fingers' % (ph, bh))
+            else:                                # a top rail: measured on the panel like the side rails
+                need(abs(py1 - yb1) < 0.01, 'the panel reaches %.2f mm below the board: nothing may be added below the gold fingers' % (py1 - yb1))
+                hy = sorted({round(ToMM(d.GetStart().y), 3) for d in br.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts and d.GetShape() == pcbnew.SHAPE_T_SEGMENT
+                             and d.GetStart().y == d.GetEnd().y})
+                tin = [y for y in hy if py0 + TOL < y < yb0 - TOL]
+                if len(tin) != 1: bad.append('T rail: no single inner edge found between the top of the panel and the board (%s)' % tin)
+                else:
+                    yi = tin[0]; trw, tgap = yi - py0, yb0 - yi
+                    need(trw >= RAIL_MIN - TOL, 'T rail is %.2f mm wide (JLCPCB: at least %.0f mm)' % (trw, RAIL_MIN))
+                    need(tgap >= MIN_SLOT - TOL, 'T rail: the routed gap is %.2f mm wide (slots need %.1f mm)' % (tgap, MIN_SLOT))
+                    need(abs(ph - (bh + tgap + trw)) < 0.01, 'the panel is %.2f mm high, the board %.2f mm, the top gap %.2f and the top rail %.2f mm: nothing else may be added above the board' % (ph, bh, tgap, trw))
+                    strip = pcbnew.SHAPE_POLY_SET(panel); strip.BooleanIntersection(rect(px0 - 1, py0 + trw / 2 - 0.05, px1 + 1, py0 + trw / 2 + 0.05), PM)
+                    pc_ = pieces(strip)
+                    if len(pc_) != 1 or abs(pc_[0][0] - px0) > 0.01 or abs(pc_[0][2] - px1) > 0.01: bad.append('T rail is not one piece across the panel')
+                    else: rail_y['T'] = (py0, yi, px0, px1)
             vx = sorted({round(ToMM(d.GetStart().x), 3) for d in br.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts and d.GetShape() == pcbnew.SHAPE_T_SEGMENT
                          and d.GetStart().x == d.GetEnd().x})
             inner = {'L': [x for x in vx if px0 + TOL < x < lo - TOL], 'R': [x for x in vx if hi + TOL < x < px1 - TOL]}
             holes = [(ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), ToMM(p.GetDrillSize().x), f.GetReference()) for f in br.GetFootprints() for p in f.Pads()
                      if f.GetReference().startswith(('MB', 'TH'))]
             fids = [f for f in br.GetFootprints() if f.GetReference().startswith('FID')]
-            rail_y, ntab, tabw, webs = {}, 0, [], []
+            top_mb = [h for h in holes if h[3].startswith('MB') and TOP and lo < h[0] < hi and h[1] < yb0 + 1.0]      # holes of the top tabs (side holes lie outside lo..hi)
+            side_mb = [h for h in holes if h[3].startswith('MB') and h not in top_mb]
+            def tab_holes(where, ta, tb_, hx):
+                """Break-off holes [(position along the edge, d)] across one tab (ta..tb_): at least three, 0.2-0.3 mm apart.
+                Returns the widths of material between them that are out of JLCPCB's range."""
+                cut = sorted((max(ta, y - d / 2), min(tb_, y + d / 2)) for (y, d) in hx if y + d / 2 > ta and y - d / 2 < tb_)
+                need(len(cut) >= 3, '%s has %d break-off holes' % (where, len(cut)))
+                solid = [(ta, cut[0][0])] + [(c0[1], c1[0]) for c0, c1 in zip(cut, cut[1:])] + [(cut[-1][1], tb_)] if cut else [(ta, tb_)]
+                wrong = []
+                for i, (s0, s1) in enumerate(solid):
+                    w = s1 - s0
+                    if w <= TOL: continue
+                    webs.append(w); end = i in (0, len(solid) - 1)
+                    if not (w <= BITE_WEB[1] + TOL and (end or w >= BITE_WEB[0] - TOL)): wrong.append(w)
+                return wrong
             for side in 'LR':
                 if len(inner[side]) != 1: bad.append('%s rail: no single inner edge found between the panel edge and the board (%s)' % (side, inner[side])); continue
                 xi = inner[side][0]; xo = px0 if side == 'L' else px1; xb = lo if side == 'L' else hi
@@ -468,29 +523,38 @@ def main():
                 need(abs(ry0 - py0) < 0.01, '%s rail does not start at the top edge' % side)
                 need(py1 - ry1 >= 2.0 - TOL, '%s rail ends %.2f mm above the gold-finger edge line (at least 2.0 mm wanted, so that the edge is free for bevelling)' % (side, py1 - ry1))
                 gx = (xi + xb) / 2
-                tabs = pcbnew.SHAPE_POLY_SET(panel); tabs.BooleanIntersection(rect(gx - 0.05, py0 - 1, gx + 0.05, py1 + 1), PM)
+                gy0 = rail_y['T'][1] + 0.01 if 'T' in rail_y else py0 - 1          # (with a top rail: below it, in the gap only)
+                tabs = pcbnew.SHAPE_POLY_SET(panel); tabs.BooleanIntersection(rect(gx - 0.05, gy0, gx + 0.05, py1 + 1), PM)
                 tb = [(q[1], q[3]) for q in pieces(tabs)]
                 need(len(tb) >= 2, '%s rail hangs on %d tabs' % (side, len(tb)))
-                hx = sorted((y, d) for (x, y, d, ref) in holes if ref.startswith('MB') and abs(x - xb) < 1.0)
-                for (x, y, d, ref) in holes:
-                    if not ref.startswith('MB') or abs(x - xb) >= 1.0: continue
+                hx = sorted((y, d) for (x, y, d, ref) in side_mb if abs(x - xb) < 1.0)
+                for (x, y, d, ref) in side_mb:
+                    if abs(x - xb) >= 1.0: continue
                     need(BITE_D[0] - TOL <= d <= BITE_D[1] + TOL, '%s: break-off hole of %.2f mm (JLCPCB: %.1f-%.1f mm)' % (ref, d, BITE_D[0], BITE_D[1]))
                     over = (x + d / 2 - xb) if side == 'L' else (xb - (x - d / 2))           # > 0: the hole cuts into the board
                     need(-0.05 - TOL <= over <= TOL, '%s: the hole edge is %.3f mm %s the edge line of the board (it must touch the line from outside)' % (ref, abs(over), 'inside' if over > 0 else 'outside'))
                 for (ta, tb_) in tb:
                     ntab += 1; tabw.append(tb_ - ta)
                     need(tb_ - ta >= TAB_MIN - TOL, '%s rail: the tab at y %.1f mm is %.2f mm wide (JLCPCB: at least %.0f mm with mouse bites)' % (side, (ta + tb_) / 2, tb_ - ta, TAB_MIN))
-                    cut = sorted((max(ta, y - d / 2), min(tb_, y + d / 2)) for (y, d) in hx if y + d / 2 > ta and y - d / 2 < tb_)
-                    need(len(cut) >= 3, '%s rail: the tab at y %.1f mm has %d break-off holes' % (side, (ta + tb_) / 2, len(cut)))
-                    solid = [(ta, cut[0][0])] + [(c0[1], c1[0]) for c0, c1 in zip(cut, cut[1:])] + [(cut[-1][1], tb_)] if cut else [(ta, tb_)]
-                    wrong = []
-                    for i, (s0, s1) in enumerate(solid):
-                        w = s1 - s0
-                        if w <= TOL: continue
-                        webs.append(w); end = i in (0, len(solid) - 1)
-                        if not (w <= BITE_WEB[1] + TOL and (end or w >= BITE_WEB[0] - TOL)): wrong.append(w)
+                    wrong = tab_holes('%s rail: the tab at y %.1f mm' % (side, (ta + tb_) / 2), ta, tb_, hx)
                     need(not wrong, '%s rail, tab at y %.1f mm: %.2f..%.2f mm of material between break-off holes in %d places (JLCPCB: %.1f-%.1f mm)'
                          % (side, (ta + tb_) / 2, min(wrong, default=0), max(wrong, default=0), len(wrong), BITE_WEB[0], BITE_WEB[1]))
+            if 'T' in rail_y:                    # the top tabs: pieces of the panel across the middle of the top gap, holes on the top edge line
+                gy = (rail_y['T'][1] + yb0) / 2
+                tabs = pcbnew.SHAPE_POLY_SET(panel); tabs.BooleanIntersection(rect(lo - TOL, gy - 0.05, hi + TOL, gy + 0.05), PM)
+                tt = [(q[0], q[2]) for q in pieces(tabs)]
+                need(len(tt) >= 2, 'T rail hangs on %d tabs' % len(tt))
+                hx = sorted((x, d) for (x, y, d, ref) in top_mb)
+                for (x, y, d, ref) in top_mb:
+                    need(BITE_D[0] - TOL <= d <= BITE_D[1] + TOL, '%s: break-off hole of %.2f mm (JLCPCB: %.1f-%.1f mm)' % (ref, d, BITE_D[0], BITE_D[1]))
+                    over = (y + d / 2) - yb0                                            # > 0: the hole cuts into the board
+                    need(-0.05 - TOL <= over <= TOL, '%s: the hole edge is %.3f mm %s the top edge line of the board (it must touch the line from outside)' % (ref, abs(over), 'inside' if over > 0 else 'outside'))
+                for (ta, tb_) in tt:
+                    ntab += 1; tabw.append(tb_ - ta)
+                    need(tb_ - ta >= TAB_MIN - TOL, 'T rail: the tab at x %.1f mm is %.2f mm wide (JLCPCB: at least %.0f mm with mouse bites)' % ((ta + tb_) / 2, tb_ - ta, TAB_MIN))
+                    wrong = tab_holes('T rail: the tab at x %.1f mm' % ((ta + tb_) / 2), ta, tb_, hx)
+                    need(not wrong, 'T rail, tab at x %.1f mm: %.2f..%.2f mm of material between break-off holes in %d places (JLCPCB: %.1f-%.1f mm)'
+                         % ((ta + tb_) / 2, min(wrong, default=0), max(wrong, default=0), len(wrong), BITE_WEB[0], BITE_WEB[1]))
             need(len(fids) >= 3, '%d fiducials on the rails (JLCPCB: 3 or 4)' % len(fids))
             def rail_of(x, y):
                 return next(((s, r) for s, r in rail_y.items() if r[2] - TOL <= x <= r[3] + TOL and r[0] - TOL <= y <= r[1] + TOL), (None, None))
@@ -500,9 +564,11 @@ def main():
                 if not r: bad.append('%s is not on a rail' % f.GetReference()); continue
                 cu = [ToMM(p.GetSize().x) for p in f.Pads()]; mk = [ToMM(p.GetSize().x) + 2 * ToMM(p.GetSolderMaskExpansion()) for p in f.Pads()]
                 need(len(cu) == 1 and abs(cu[0] - 1.0) < TOL and abs(mk[0] - 2.0) < TOL, '%s: copper %s mm, mask opening %s mm (JLCPCB: 1 mm, opening twice the copper)' % (f.GetReference(), cu, mk))
-                dist = min(fx - px0 if side == 'L' else px1 - fx, fy - r[0], r[1] - fy); fmin = min(fmin, dist)
+                if side == 'T': dist = min(fy - py0, fx - px0, px1 - fx)            # the top rail: its outer edge and the panel ends
+                else: dist = min(fx - px0 if side == 'L' else px1 - fx, fy - r[0], r[1] - fy)
+                fmin = min(fmin, dist)
                 need(dist >= FID_EDGE - TOL, '%s: centre %.2f mm from the nearest outer edge of the panel (JLCPCB: %.2f mm)' % (f.GetReference(), dist, FID_EDGE))
-                need(min(fx - r[2], r[3] - fx) >= 1.0 - TOL, '%s: its 2 mm mask opening does not fit on the rail' % f.GetReference())
+                need((min(fy - r[0], r[1] - fy) if side == 'T' else min(fx - r[2], r[3] - fx)) >= 1.0 - TOL, '%s: its 2 mm mask opening does not fit on the rail' % f.GetReference())
             nth = 0
             for (x, y, d, ref) in holes:
                 if not ref.startswith('TH'): continue

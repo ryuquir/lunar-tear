@@ -5,6 +5,9 @@ land within check_cpl.FIT = 0.40 mm of a KiCad pad, with as many pads on both si
   USB_C_Receptacle_HRO_TYPE-C-31-M-12_JLC  C165948   EasyEDA names a pad shared by two pins "A1B12" and the shell pads
                                                      "1"-"4"; KiCad has A1 and B12 on one spot and four "S1". Both
                                                      sides are put into one naming (A1+B12, S1) before comparing.
+                                                     The footprint is HRO's land pattern on the EasyEDA origin
+                                                     (famicart.pretty/README.md): its two peg holes and four shell legs
+                                                     must lie within 0.02 mm of the library's.
   microSD_HRO_TF-01A                       C91145    also pad sizes and the two non-plated holes
   L_SXN_SMNR4020                           C135262   also pad sizes
   QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia  C42415655  (and the original with the nine holes, which must NOT fit)
@@ -93,9 +96,14 @@ def main():
         if names == 'usb' and ok0:
             per = sorted(((n, min(math.hypot(x - kx, y - ky) for kn, kx, ky in k2 if kn == n)) for n, x, y in l2), key=lambda t: -t[1])
             print('      largest pad offsets: %s' % ', '.join('%s %.3f' % t for t in per[:4]))
+            mech = []                    # the parts of the connector that fix where it sits: peg holes and shell legs
             for (x, y, dia) in lholes:
-                k = min(kholes, key=lambda h: math.hypot(h[0] - x, h[1] - y))
-                print('      locating hole (%.3f, %.3f) d %.2f: KiCad hole %.3f mm away, d %.2f (information: KiCad\'s holes are kept)' % (x, y, dia, math.hypot(k[0] - x, k[1] - y), k[2]))
+                k = min(kholes, key=lambda h: math.hypot(h[0] - x, h[1] - y)); mech.append(math.hypot(k[0] - x, k[1] - y))
+                print('      peg hole (%.3f, %.3f) d %.2f: footprint hole %.3f mm away, d %.2f' % (x, y, dia, mech[-1], k[2]))
+            for n, x, y in l2:
+                if n == 'S1': mech.append(min(math.hypot(x - kx, y - ky) for kn, kx, ky in k2 if kn == 'S1'))
+            print('      peg holes and shell legs within %.3f mm of the library (0.02 allowed)' % max(mech))
+            if len(lholes) != 2 or len(mech) != 6 or max(mech) > 0.02: bad.append(fpname + ' peg holes / shell legs')
         if extra and ok0:
             size_bad = []
             for n, x, y, w, h in sized:
