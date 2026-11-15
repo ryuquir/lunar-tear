@@ -5,7 +5,13 @@ A board with gold fingers cannot be ordered as "Economic PCBA" (JLCPCB PCB assem
 Support"); it is a "Standard PCBA" order, which needs edge rails and fiducials (JLCPCB adds both). The README written
 next to the files says so and gives the order options and the assembly cost from JLCPCB's price table.
 LCSC part numbers: designs with their own LCSC map (rev E on: Basic parts only) use that map and nothing else;
-older designs read <hw dir>/jlc_parts.json (created from DEFAULT_PARTS on first run; edit it to substitute parts)."""
+older designs read <hw dir>/jlc_parts.json (created from DEFAULT_PARTS on first run; edit it to substitute parts).
+Opt-in design attributes (rev H on; designs without them get exactly the files they got before):
+  LCSC_CLASS = {LCSC code: 'Basic' | 'Extended'}   the parts check takes the declared classes and the stock needed for
+                                                    FC_PCBA_QTY boards (check_declared) instead of "Basic only"
+  ASSEMBLY = 'both', BOTTOM_OK = {...}              JLCPCB also places parts on the bottom side (cpl_table, two_sided)
+  LAYERS > 2 (with JLC_RULES)                       the inner copper layers must be in gerbers.zip
+The assembly estimate adds X-ray inspection for leadless packages and the double-sided setup and stencil."""
 import os, sys, re, csv, json, subprocess, shutil
 sys.path.insert(0, os.path.dirname(__file__))
 import os as _os, importlib as _il
@@ -25,15 +31,61 @@ PARTS_JSON = os.path.join(HW, 'jlc_parts.json')
 # SOIC-8 (W25Q128JVSIQ, C97521; rev G): JLCPCB's footprint SOIC-8_L5.3-W5.3-P1.27-LS8.0-BL has pin 1 at the bottom left
 # of their drawing, which is 270 for a KiCad SOIC at 0 (the common rotation tables agree: "^SOIC-" = 270).
 # check_cpl.py compares every row of the CPL with JLCPCB's library footprint pad by pad; run it on the day of the order.
-CPL_ROT = {'R_Array_Convex_4x0603': 270, 'SOT-23': 180, 'SOIC-8_5.23x5.23mm_P1.27mm': 270}
+# SOT-23-5 (TLV62569DBVR, C141836; rev H): JLCPCB's footprint SOT-23-5_L3.0-W1.7-P0.95-LS2.8-BR has pins 1-3 on the
+# right with pin 1 at the bottom right; a KiCad SOT-23-5 at 0 has pin 1 at the top left: 180 (checked pad by pad
+# against the EasyEDA data of C141836, 2026-11-15). This entry is used only by designs that declare LCSC_CLASS
+# (CPL_ROT_DECLARED_ONLY): rev B-D place SOT-23-5 gates from jlc_parts.json at the KiCad angle, and their files are
+# kept as they were made (they are not ordered any more).
+CPL_ROT = {'R_Array_Convex_4x0603': 270, 'SOT-23': 180, 'SOIC-8_5.23x5.23mm_P1.27mm': 270, 'SOT-23-5': 180}
+CPL_ROT_DECLARED_ONLY = ('SOT-23-5',)
+
+def cpl_correction(fpname):
+    """Degrees added to the KiCad angle of a part with footprint `fpname` ('lib:name') for JLCPCB's library footprint."""
+    name = fpname.split(':')[-1]
+    if name in CPL_ROT_DECLARED_ONLY and not hasattr(D, 'LCSC_CLASS'): return 0
+    return CPL_ROT.get(name, 0)
+
+# Two-sided assembly (designs with ASSEMBLY = 'both'): JLCPCB also places parts on its "Bottom" side, which is KiCad's
+# B.Cu. BOTTOM_OK names what may go there: footprint names ('lib:name' or 'name') or reference prefixes ('R', 'C',
+# 'RN', 'Y'). Only parts that work the same when turned by 180 degrees belong in it (resistors, capacitors, the 1k x4
+# arrays, 3225 crystals), because the bottom-side angle convention below is not stated by JLCPCB itself (see cpl_table).
+def two_sided():
+    return getattr(D, 'ASSEMBLY', 'top') == 'both'
+
+def bottom_ok(ref, fpname=None):
+    """True when the design allows part `ref` to be placed by JLCPCB on the bottom side."""
+    allowed = getattr(D, 'BOTTOM_OK', ()) or ()
+    fpname = fpname or D.PARTS[ref][3]
+    prefix = re.match(r'[A-Za-z_#]*', ref).group()
+    return fpname in allowed or fpname.split(':')[-1] in allowed or prefix in allowed
 
 # JLCPCB "PCB assembly price" (help article, last updated 2026-10-22), Standard PCBA, single-sided, USD
-JLC_PRICE = dict(date='2026-10-22', setup=25.56, stencil=8.21, feeder=1.53, joint=0.0016, board=0.48, packing=0.50, confirm=0.45)
-def assembly_estimate(types, joints, n):
+# (setup2 / stencil2: the same table, double-sided assembly)
+JLC_PRICE = dict(date='2026-10-22', setup=25.56, stencil=8.21, feeder=1.53, joint=0.0016, board=0.48, packing=0.50, confirm=0.45,
+                 setup2=51.12, stencil2=16.42)
+# X-ray inspection, per part, the tier chosen by the number of parts in the order (same table, "X-ray Inspection
+# (Component Quantity)": "required for components such as BGA, QFN, and other leadless packages")
+JLC_XRAY = ((10, 1.64), (50, 0.82), (200, 0.49), (500, 0.33), (1000, 0.25), (3000, 0.16), (99999, 0.082))
+XRAY_PACKAGES = re.compile(r'QFN|DFN|LGA|BGA|SON')      # footprint names of leadless / hidden-joint packages
+
+def xray_count(placed):
+    """Parts per board that JLCPCB X-rays: placed parts whose footprint name names a leadless package."""
+    return sum(1 for ref in placed if XRAY_PACKAGES.search(D.PARTS[ref][3].split(':')[-1]))
+
+def xray_fee(parts):
+    """X-ray fee for `parts` inspected parts in one order."""
+    if parts <= 0: return 0.0
+    return parts * next((rate for top, rate in JLC_XRAY if parts <= top), JLC_XRAY[-1][1])
+
+def assembly_estimate(types, joints, n, xray=0, sides=1):
     """Standard PCBA fees without the parts themselves, a fixture (if JLCPCB quotes one), shipping and tax.
-    The per-joint fee has a floor of $0.48 per board ("single board assembly surcharge")."""
+    The per-joint fee has a floor of $0.48 per board ("single board assembly surcharge"). `xray`: parts per board
+    that are X-rayed (xray_count); `sides`: 2 for double-sided assembly (setup and stencil of the double-sided rows)."""
     P = JLC_PRICE
-    return P['setup'] + P['stencil'] + P['feeder'] * types + max(P['joint'] * joints, P['board']) * n + P['packing'] + P['confirm']
+    if sides == 1: total = P['setup'] + P['stencil'] + P['feeder'] * types + max(P['joint'] * joints, P['board']) * n + P['packing'] + P['confirm']
+    else: total = P['setup2'] + P['stencil2'] + P['feeder'] * types + max(P['joint'] * joints, P['board']) * n + P['packing'] + P['confirm']
+    if xray: total += xray_fee(xray * n)
+    return total
 # files that go into gerbers.zip for designs made to JLCPCB's rules: the fabrication layers and the drill files only
 # (the F.Fab / B.Fab plots are drawings for people; a fab note on them must not reach the order)
 FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl', '_Cu.g2', '_Cu.g3', '_Cu.g4', '_Cu.g5', '_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo',
@@ -526,23 +578,27 @@ ENIG は「抜き差しが 20 回未満の用途なら足りる」「数十回�
 - 部品の向きの補正表（KiBot。JLCPCB 向けの回転の一覧）: https://kibot.readthedocs.io/en/latest/notes_position.html
 '''
 
+def lookup(code):
+    """(catalogue entry of `code` from the JLCPCB parts API, or None; the reason when None)."""
+    import urllib.request, time
+    url = 'https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList'
+    req = urllib.request.Request(url, data=json.dumps({'currentPage': 1, 'pageSize': 30, 'keyword': code}).encode(), headers={'Content-Type': 'application/json'})
+    it, err = None, 'not found'
+    for attempt in range(5):         # the catalogue search now and then answers with an empty list: ask again
+        try:
+            items = ((json.load(urllib.request.urlopen(req, timeout=30)).get('data') or {}).get('componentPageInfo') or {}).get('list') or []
+            it = next((i for i in items if i.get('componentCode') == code), None); err = 'not found'
+        except Exception as e:
+            err = f'lookup failed: {e}'
+        if it: break
+        time.sleep(2.0)
+    return it, err
+
 def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
     """Every LCSC part must be a JLCPCB *Basic* part with plenty of stock (rev E rule). Writes parts_check.csv; exits 1 on failure."""
-    import urllib.request
-    url = 'https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList'
     rows, bad = [], []
-    import time
     for code in sorted(set(codes)):
-        req = urllib.request.Request(url, data=json.dumps({'currentPage': 1, 'pageSize': 30, 'keyword': code}).encode(), headers={'Content-Type': 'application/json'})
-        it, err = None, 'not found'
-        for attempt in range(5):         # the catalogue search now and then answers with an empty list: ask again
-            try:
-                items = ((json.load(urllib.request.urlopen(req, timeout=30)).get('data') or {}).get('componentPageInfo') or {}).get('list') or []
-                it = next((i for i in items if i.get('componentCode') == code), None); err = 'not found'
-            except Exception as e:
-                err = f'lookup failed: {e}'
-            if it: break
-            time.sleep(2.0)
+        it, err = lookup(code)
         if not it: rows.append((code, '?', '?', '?', err)); bad.append(code); continue
         lib, stock = it.get('componentLibraryType'), int(it.get('stockCount') or 0)
         ok = lib == 'base' and stock >= min_stock
@@ -553,6 +609,52 @@ def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
     for r in rows: print('  %-9s %-28s %-8s %9s %s' % tuple(str(x) for x in r))
     if bad: raise SystemExit(f'parts check FAILED for {bad} (must be JLCPCB Basic with stock >= {min_stock})')
     print(f'parts check: all {len(rows)} LCSC parts are JLCPCB Basic with stock >= {min_stock}')
+
+API_CLASS = {'base': 'Basic', 'expand': 'Extended'}      # componentLibraryType of the parts API
+
+def check_declared(per_board, qty=None):
+    """Designs with LCSC_CLASS = {LCSC code: 'Basic' | 'Extended'} (rev H on; Standard PCBA charges the same feeder fee
+    for both classes). `per_board`: {LCSC code: parts per board that JLCPCB places}. For every code:
+      - it is declared, and every declared code is placed (the declaration is the list of what is ordered),
+      - the class in JLCPCB's catalogue is the declared class,
+      - need = per board x FC_PCBA_QTY (boards assembled, default 5) + the catalogue's lossNumber (attrition),
+        stock >= 3 x need and canPresaleNumber (what can be ordered now) >= need.
+    Writes parts_check.csv (the first five columns as for check_basic: LCSC, Part, Library, Stock, Result); exits on failure."""
+    qty = int(os.environ.get('FC_PCBA_QTY', '5')) if qty is None else qty
+    declared = D.LCSC_CLASS
+    rows, bad = [], []
+    for code in sorted(set(per_board) | set(declared)):
+        want = declared.get(code); n = per_board.get(code, 0)
+        if not n:
+            rows.append((code, '?', '?', '?', 'NG', want, 0, '', '', '', 'declared in LCSC_CLASS but not placed')); bad.append(code); continue
+        it, err = lookup(code)
+        if not it: rows.append((code, '?', '?', '?', 'NG', want or '', n, '', '', '', err)); bad.append(code); continue
+        lib = API_CLASS.get(it.get('componentLibraryType'), str(it.get('componentLibraryType')))
+        stock = int(it.get('stockCount') or 0); loss = int(it.get('lossNumber') or 0)
+        presale = it.get('canPresaleNumber'); presale = int(presale) if presale is not None else None
+        need = n * qty + loss
+        why = []
+        if want is None: why.append('class not declared in LCSC_CLASS')
+        elif lib != want: why.append(f'JLCPCB lists it as {lib}, the design declares {want}')
+        if stock < 3 * need: why.append(f'stock {stock} < 3 x {need}')
+        if presale is None: why.append('the catalogue gives no canPresaleNumber')
+        elif presale < need: why.append(f'canPresaleNumber {presale} < {need}')
+        rows.append((code, it.get('componentModelEn'), lib, stock, 'NG' if why else 'OK', want or '', n, need, '' if presale is None else presale, loss, '; '.join(why)))
+        if why: bad.append(code)
+    with open(os.path.join(OUT, 'parts_check.csv'), 'w', newline='') as f:
+        w = csv.writer(f); w.writerow(['LCSC', 'Part', 'Library', 'Stock', 'Result', 'Declared', 'Per board', 'Need', 'Can presale', 'Loss', 'Problem']); w.writerows(rows)
+    for r in rows: print('  %-9s %-28s %-8s %9s %s  declared %-8s per board %3s need %5s presale %6s loss %3s %s' % tuple(str(x) for x in r))
+    rule = f'class as declared, stock >= 3 x need, canPresaleNumber >= need; need = per board x {qty} boards + loss'
+    if bad: raise SystemExit(f'parts check FAILED for {bad} ({rule})')
+    ncls = {c: sum(1 for r in rows if r[2] == c) for c in ('Basic', 'Extended')}
+    print(f'parts check: all {len(rows)} LCSC parts OK ({ncls["Basic"]} Basic, {ncls["Extended"]} Extended; {rule})')
+
+def per_board_counts(bom):
+    """{LCSC code: number of placed parts per board} from the rows of bom_jlc.csv."""
+    out = {}
+    for comment, refs, fp, code in bom[1:]:
+        out[code] = out.get(code, 0) + len(refs.split(','))
+    return out
 
 def _dir(dx, dy):
     """Where a point lies as seen from the part centre, in the view of the notes (from above, gold fingers at the bottom)."""
@@ -697,16 +799,30 @@ def bom_table(warn=True):
 
 def cpl_table(dnp):
     """Rows of cpl_jlc.csv with the header: the positions of the board file (kicad-cli), the angle turned by the offset
-    between KiCad's footprint and the footprint of JLCPCB's part library (CPL_ROT)."""
+    between KiCad's footprint and the footprint of JLCPCB's part library (CPL_ROT).
+    Bottom side (designs with ASSEMBLY = 'both'): Mid X / Mid Y as kicad-cli writes them (seen from the top, X not
+    negated, like for the top side), Rotation = (180 - KiCad angle + CPL_ROT offset) mod 360. kicad-cli (KiCad 7)
+    writes a B.Cu footprint's own orientation as its angle (checked on a test board). JLCPCB's pages say only
+    "Positive values are counter clockwise" ("Pick & Place File for PCB Assembly", 2026-09-09); its KiCad guide
+    (2026) uploads KiCad's position file of both sides with the columns renamed, or recommends the Fabrication Toolkit
+    plugin, which "fixes part rotations/positions for JLCPCB". The mirrored angle is the rule KiBot documents for JLCPCB
+    ("mirror_bottom: ... (180 - component rot + angle). This is used by JLCPCB."): JLCPCB views a bottom part from
+    below, the board turned over left to right, and turns its library footprint counter-clockwise in that view.
+    check_cpl.py places the library footprint that way pad by pad, and also turned by a further 180 degrees (the other
+    way of turning the board over); BOTTOM_OK allows only parts for which both are right, and check_cpl.py wants them
+    at multiples of 90 degrees, where the KiCad angle taken as it is also lands within 180 degrees. The order's
+    placement preview remains the final check. Other designs keep the KiCad angle on the bottom side, as before."""
     import tempfile
     pos = os.path.join(tempfile.mkdtemp(prefix='gen_jlc_'), 'pos.csv')
     subprocess.run(['kicad-cli', 'pcb', 'export', 'pos', '--format', 'csv', '--units', 'mm', '--side', 'both', '-o', pos, PCB], check=True, capture_output=True)
     rows = [['Designator', 'Mid X', 'Mid Y', 'Layer', 'Rotation']]
+    both = two_sided()
     for r in csv.DictReader(open(pos)):
         ref = r['Ref']
         if ref in dnp or ref == 'J1': continue
         rot = float(r['Rot'])
-        if r['Side'] == 'top': rot = (rot + CPL_ROT.get(D.PARTS[ref][3].split(':')[1], 0)) % 360
+        if r['Side'] == 'top': rot = (rot + cpl_correction(D.PARTS[ref][3])) % 360
+        elif both: rot = (180.0 - rot + cpl_correction(D.PARTS[ref][3])) % 360
         rows.append([ref, f"{float(r['PosX']):.4f}mm", f"{float(r['PosY']):.4f}mm", 'Top' if r['Side'] == 'top' else 'Bottom', f"{rot:.1f}"])
     return rows
 
@@ -723,8 +839,9 @@ def order_notes(dnp, placed, ntypes):
         b.BuildConnectivity(); nopen = b.GetConnectivity().GetUnconnectedCount(False)
         byval = lambda v: '・'.join(sorted((r for r, q in D.PARTS.items() if q[2] == v), key=lambda r: (r[0], int(''.join(ch for ch in r if ch.isdigit())))))
         fix = 2 * 8.21                         # price table: 1-29 boards need two fixtures
+        est = lambda n: assembly_estimate(ntypes, joints, n, xray_count(placed), 2 if two_sided() else 1)     # rev G: no X-ray, one side
         num = lambda v: ('%.2f' % v).rstrip('0').rstrip('.') if abs(v * 10 - round(v * 10)) > 1e-9 else '%.1f' % v
-        rep = [('@FIX2@', '%.0f' % (assembly_estimate(ntypes, joints, 2) + fix)), ('@FIX5@', '%.0f' % (assembly_estimate(ntypes, joints, 5) + fix)),
+        rep = [('@FIX2@', '%.0f' % (est(2) + fix)), ('@FIX5@', '%.0f' % (est(5) + fix)),
                ('@NTRACKS@', str(ntr)), ('@NVIAS@', str(nvi)), ('@NOPEN@', str(nopen)), ('@SCHOTTKY@', byval('B5819W')),
                ('@ORIENT@', orientation_notes(b, D)), ('@MASKWEB@', mask_web_note(b)), ('@BRIDGES@', bridge_note(b, D)), ('@SENSE@', sense_note(dnp))]
         if RA:                                 # every number of the rails in the notes comes from the design; check_jlc.py measures the railed board against JLCPCB's limits
@@ -740,7 +857,7 @@ def order_notes(dnp, placed, ntypes):
         else: rep.append(('@PANEL@', '-'))
         for k, v in rep: txt = txt.replace(k, v)
         for k, v in (('@TYPES@', str(ntypes)), ('@PARTS@', str(len(placed))), ('@JOINTS@', str(joints)), ('@PRICEDATE@', JLC_PRICE['date']),
-                     ('@EST2@', '%.0f' % assembly_estimate(ntypes, joints, 2)), ('@EST5@', '%.0f' % assembly_estimate(ntypes, joints, 5)),
+                     ('@EST2@', '%.0f' % est(2)), ('@EST5@', '%.0f' % est(5)),
                      ('@SIZE@', '%.1f × %.1f' % (pcbnew.ToMM(bb.GetWidth()) - 0.1, pcbnew.ToMM(bb.GetHeight()) - 0.1)),
                      ('@TRACK@', '%.2f' % TRK), ('@CLEAR@', '%.2f' % CLR), ('@VIA@', '%.1f' % VIA), ('@VDR@', '%.1f' % VDR)):
             txt = txt.replace(k, v)
@@ -754,7 +871,11 @@ def main():
     # ---- BOM, CPL ----
     bom, dnp, placed, ntypes = bom_table()
     with open(os.path.join(OUT, 'bom_jlc.csv'), 'w', newline='') as f: csv.writer(f).writerows(bom)
-    with open(os.path.join(OUT, 'cpl_jlc.csv'), 'w', newline='') as f: csv.writer(f).writerows(cpl_table(dnp))
+    cpl = cpl_table(dnp)
+    if two_sided():                    # the bottom-side angle is verified only for parts that may be turned by 180 degrees
+        wrong = [r[0] for r in cpl[1:] if r[3] == 'Bottom' and not bottom_ok(r[0])]
+        if wrong: raise SystemExit(f'parts on the bottom side that BOTTOM_OK does not allow: {wrong} (move them to the top or declare them)')
+    with open(os.path.join(OUT, 'cpl_jlc.csv'), 'w', newline='') as f: csv.writer(f).writerows(cpl)
     # ---- Gerbers ----
     fab = os.path.join(HW, 'fab'); z = os.path.join(OUT, 'gerbers.zip')
     if os.path.exists(z): os.remove(z)
@@ -762,6 +883,7 @@ def main():
         import zipfile
         names = sorted(n for n in os.listdir(fab) if n.endswith(FAB_SUFFIX))
         need = ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'F_Silkscreen.gto', 'B_Silkscreen.gbo', 'Edge_Cuts.gm1', 'PTH.drl')
+        need += tuple('In%d_Cu.g%d' % (k, k + 1) for k in range(1, int(getattr(D, 'LAYERS', 2)) - 1))     # inner copper layers
         missing = [k for k in need if not any(n.endswith(k) for n in names)]
         if missing: raise SystemExit(f'fab files missing for the JLCPCB zip: {missing} (run route_pcb.py first)')
         with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as zf:
@@ -769,7 +891,8 @@ def main():
         print('gerbers.zip:', ', '.join(names))
     else:
         shutil.make_archive(z[:-4], 'zip', fab)
-    if hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
+    if hasattr(D, 'LCSC_CLASS'): check_declared(per_board_counts(bom))     # declared Basic / Extended classes, stock for the order
+    elif hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
     with open(os.path.join(OUT, 'README.md'), 'w') as f: f.write(order_notes(dnp, placed, ntypes))
     print('written:', OUT, 'DNP:', dnp)
 

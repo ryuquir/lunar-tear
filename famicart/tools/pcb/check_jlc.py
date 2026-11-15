@@ -15,6 +15,8 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
                     boards up to 1.6 mm), board >= 50 x 50 mm, solder mask fully opened
                     over the finger area, no silkscreen and no plated hole within 1.0 mm of a finger
   Standard PCBA     board >= 70 x 70 mm, all assembled parts on the top side, every part number a Basic part
+                    (designs with LCSC_CLASS: the class each code declares, Basic or Extended; designs with
+                    ASSEMBLY = 'both': parts named by BOTTOM_OK may also sit on the bottom side)
   paste             only on pads of parts that JLCPCB places
   gerbers.zip       fabrication layers and drill files only; every file is compared with a fresh plot of the board
                     (so an archive that was made from another state of the board is refused)
@@ -29,6 +31,11 @@ The limits are the ones quoted in docs/12_rev_g_plan.md ("JLCPCB で作るため
                     design and the board file, the three drawings with what draw_outline.py draws now (a package put
                     together from another state of the board or edited by hand is refused); the railed board is also
                     compared in silkscreen, solder mask, texts, pad details and rule areas
+Multilayer boards (designs with JLC_RULES and LAYERS > 2; older designs are checked as before, as 2-layer boards):
+  the copper layer count is the design's; via and plated pad holes may be 0.20 mm where the copper is at least 0.45 mm
+  across (JLCPCB's order form: on multilayer boards a 0.2 mm hole costs nothing extra from a 0.45 mm diameter), else
+  0.30 mm; the inner layers (In1..In4 -> .g2 .. .g5) are part of the zip and of the fresh plot; pours of every copper
+  layer are measured; the plated drill file must hold one hit per via, plated pad hole and plated slot.
 Exit status 1 when anything fails.   FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 check_jlc.py"""
 import os, sys, re, math, csv, zipfile, importlib, subprocess, tempfile
 import pcbnew
@@ -39,13 +46,21 @@ HW = os.path.abspath(os.environ['FC_HW_DIR'])
 SH = getattr(D, 'SHELL', None)
 
 MIN_TRACK, MIN_DRILL, MIN_RING2, HOLE_HOLE = 0.10, 0.30, 0.10, 0.20
+MIN_DRILL_ML, MIN_DIA_ML = 0.20, 0.45            # multilayer: 0.2 mm holes without extra charge from a 0.45 mm diameter
 EDGE_ROUTED, EDGE_VCUT, MIN_SLOT = 0.20, 0.40, 1.0
 SILK_LINE, SILK_TEXT = 0.15, 1.0
 FINGER_TO_EDGE, FINGER_HOLE = 1.15, 1.0
 TOL = 0.002
 RAIL_MIN, TAB_MIN, BITE_D, BITE_WEB, FID_EDGE, TOOL_D = 5.0, 5.0, (0.5, 0.8), (0.2, 0.3), 3.85, 2.0     # JLCPCB, 'Mouse bites Panel'
-FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl', '_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo', '_Mask.gts', '_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl')
+FAB_SUFFIX = ('_Cu.gtl', '_Cu.gbl', '_Cu.g2', '_Cu.g3', '_Cu.g4', '_Cu.g5', '_Paste.gtp', '_Paste.gbp', '_Silkscreen.gto', '_Silkscreen.gbo', '_Mask.gts', '_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl')
 PM = pcbnew.SHAPE_POLY_SET.PM_FAST
+JLC = getattr(D, 'JLC_RULES', False)
+NL = int(getattr(D, 'LAYERS', 2)) if JLC else 2     # copper layers; designs made before JLC_RULES were checked as 2-layer boards
+INNER = [getattr(pcbnew, 'In%d_Cu' % k) for k in range(1, NL - 1)]
+CU = [pcbnew.F_Cu] + INNER + [pcbnew.B_Cu]          # every copper layer, the outer ones first as before
+CU_NAMES = ','.join(['F.Cu'] + ['In%d.Cu' % k for k in range(1, NL - 1)] + ['B.Cu'])
+INNER_FILES = tuple('In%d_Cu.g%d' % (k, k + 1) for k in range(1, NL - 1))
+TWO_SIDED = getattr(D, 'ASSEMBLY', 'top') == 'both'
 
 def undated(text):
     """A Gerber / drill file without the lines that carry the time of plotting."""
@@ -54,7 +69,7 @@ def undated(text):
 def fresh_plot(pcb):
     """{file name: contents without dates} of the fabrication files, plotted now from the board file."""
     out = tempfile.mkdtemp(prefix='check_jlc_')
-    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', 'F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts', '-o', out + '/', pcb], check=True, capture_output=True)
+    subprocess.run(['kicad-cli', 'pcb', 'export', 'gerbers', '--layers', CU_NAMES + ',F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts', '-o', out + '/', pcb], check=True, capture_output=True)
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', out + '/', pcb], check=True, capture_output=True)
     return {n: undated(open(os.path.join(out, n), errors='replace').read()) for n in sorted(os.listdir(out)) if n.endswith(FAB_SUFFIX)}
 
@@ -78,7 +93,7 @@ def copper_objects(b, skip=()):
             out.append(('pad', fp.GetReference(), p.GetNumber(), p.GetPosition().x, p.GetPosition().y, p.GetSize().x, p.GetSize().y, p.GetDrillSize().x,
                         p.GetNetname(), p.GetLayerSet().FmtHex()))
     for z in b.Zones():
-        for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+        for layer in CU:
             if z.GetIsRuleArea() or not z.IsOnLayer(layer): continue
             poly = z.GetFilledPolysList(layer)
             out.append(('pour', z.GetNetname(), layer, poly.OutlineCount(), sum(poly.Outline(i).PointCount() for i in range(poly.OutlineCount())), round(poly.Area() / 1e9)))
@@ -142,13 +157,33 @@ def pieces(ps):
         out.append((min(xs), min(ys), max(xs), max(ys)))
     return sorted(out, key=lambda r: (r[0], r[1]))
 
+def plated_pads(b):
+    """(plated pad holes, the plated slots among them): through-hole pads with a drill."""
+    pth = [p for fp in b.GetFootprints() for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH and p.GetDrillSize().x > 0]
+    slots = [p for p in pth if p.GetDrillShape() == pcbnew.PAD_DRILL_SHAPE_OBLONG and p.GetDrillSize().x != p.GetDrillSize().y]
+    return pth, slots
+
+def small_hole_problems(vias, pads):
+    """Multilayer rule: a hole below MIN_DRILL must be at least MIN_DRILL_ML with copper at least MIN_DIA_ML across.
+    Returns (problems, number of small holes that follow the rule)."""
+    out, ok = [], 0
+    items = [('via at (%.2f, %.2f)' % (ToMM(v.GetPosition().x), ToMM(v.GetPosition().y)), ToMM(v.GetDrillValue()),
+              ToMM(v.GetWidth(pcbnew.F_Cu) if hasattr(v, 'GetFrontWidth') else v.GetWidth())) for v in vias]
+    items += [('pad %s.%s' % (p.GetParent().GetReference(), p.GetNumber()), ToMM(min(p.GetDrillSize().x, p.GetDrillSize().y)), ToMM(min(p.GetSize().x, p.GetSize().y))) for p in pads]
+    for what, drill, dia in items:
+        if drill >= MIN_DRILL - TOL: continue
+        if drill < MIN_DRILL_ML - TOL: out.append('%s: hole %.2f mm < %.2f' % (what, drill, MIN_DRILL_ML))
+        elif dia < MIN_DIA_ML - TOL: out.append('%s: hole %.2f mm needs copper %.2f mm across, it has %.2f (JLCPCB: below 0.3 mm only from 0.45 mm)' % (what, drill, MIN_DIA_ML, dia))
+        else: ok += 1
+    return out, ok
+
 def main():
     bad, info = [], []
     def need(cond, msg):
         if not cond: bad.append(msg)
     b = pcbnew.LoadBoard(os.path.join(HW, 'famicart.kicad_pcb'))
     ds = b.GetDesignSettings()
-    need(b.GetCopperLayerCount() == 2, 'copper layers: %d (2 expected)' % b.GetCopperLayerCount())
+    need(b.GetCopperLayerCount() == NL, 'copper layers: %d (%d expected)' % (b.GetCopperLayerCount(), NL))
     need(abs(ToMM(ds.GetBoardThickness()) - 1.2) < 1e-6, 'board thickness %.2f mm (1.2 expected)' % ToMM(ds.GetBoardThickness()))
     bb = b.GetBoardEdgesBoundingBox(); bw, bh = ToMM(bb.GetWidth()) - 0.1, ToMM(bb.GetHeight()) - 0.1      # minus the 0.1 mm outline pen
     info.append('board %.1f x %.1f mm' % (bw, bh))
@@ -188,7 +223,11 @@ def main():
     if vias:
         dmin = min(ToMM(v.GetDrillValue()) for v in vias); rmin = min(ToMM(v.GetWidth(pcbnew.F_Cu) if hasattr(v, 'GetFrontWidth') else v.GetWidth()) - ToMM(v.GetDrillValue()) for v in vias)
         info.append('%d vias, smallest hole %.2f mm, smallest (diameter - hole) %.2f mm' % (len(vias), dmin, rmin))
-        need(dmin >= MIN_DRILL - TOL, 'via hole %.2f mm < %.2f (extra charge below 0.3 mm)' % (dmin, MIN_DRILL))
+        if NL > 2:
+            probs, nsmall = small_hole_problems(vias, plated_pads(b)[0])
+            need(not probs, '%d holes break the multilayer small-hole rule, e.g. %s' % (len(probs), probs[:3]))
+            if nsmall: info.append('%d holes below %.2f mm, each with copper >= %.2f mm across' % (nsmall, MIN_DRILL, MIN_DIA_ML))
+        else: need(dmin >= MIN_DRILL - TOL, 'via hole %.2f mm < %.2f (extra charge below 0.3 mm)' % (dmin, MIN_DRILL))
         need(rmin >= MIN_RING2 - TOL, 'via diameter - hole = %.2f mm < %.2f' % (rmin, MIN_RING2))
         pts = sorted((ToMM(v.GetPosition().x), ToMM(v.GetPosition().y), ToMM(v.GetDrillValue())) for v in vias)
         worst = 9.0
@@ -216,7 +255,7 @@ def main():
             pb = pad.GetBoundingBox(); xs += [ToMM(pb.GetX()), ToMM(pb.GetRight())]
     for z in b.Zones():
         if z.GetIsRuleArea(): continue
-        for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+        for layer in CU:
             if not z.IsOnLayer(layer): continue
             poly = z.GetFilledPolysList(layer)
             for i in range(poly.OutlineCount()):
@@ -254,11 +293,19 @@ def main():
     # ---- assembly: placed parts on the top side only, paste only where JLCPCB places a part
     lcsc = getattr(D, 'LCSC', {})
     placed = {ref for ref, (lib, sym, val, fp, _) in D.PARTS.items() if val.split(' (')[0] in lcsc}
+    if TWO_SIDED: import gen_jlc
+    on_back = set()
     for fp in b.GetFootprints():
         ref = fp.GetReference(); has_paste = any(p.GetLayerSet().Contains(pcbnew.F_Paste) or p.GetLayerSet().Contains(pcbnew.B_Paste) for p in fp.Pads())
-        if ref in placed: need(not fp.IsFlipped(), '%s is assembled by JLCPCB but sits on the back' % ref)
+        if ref in placed and TWO_SIDED:
+            if fp.IsFlipped(): on_back.add(ref)
+            need(not fp.IsFlipped() or gen_jlc.bottom_ok(ref), '%s is assembled by JLCPCB on the back, but BOTTOM_OK does not allow it there' % ref)
+        elif ref in placed: need(not fp.IsFlipped(), '%s is assembled by JLCPCB but sits on the back' % ref)
         elif has_paste and getattr(D, 'JLC_RULES', False): bad.append('%s is hand-soldered but has solder paste' % ref)
-    info.append('%d parts for JLCPCB (%d types), all on the top side; %d footprints without paste' % (len(placed), len({D.PARTS[r][2].split(' (')[0] for r in placed}), len(D.PARTS) - len(placed)))
+    if TWO_SIDED:
+        info.append('%d parts for JLCPCB (%d types), %d on the top side and %d on the bottom side; %d footprints without paste'
+                    % (len(placed), len({D.PARTS[r][2].split(' (')[0] for r in placed}), len(placed) - len(on_back), len(on_back), len(D.PARTS) - len(placed)))
+    else: info.append('%d parts for JLCPCB (%d types), all on the top side; %d footprints without paste' % (len(placed), len({D.PARTS[r][2].split(' (')[0] for r in placed}), len(D.PARTS) - len(placed)))
 
     # ---- gold fingers: copper must end before the bevel
     j1 = b.FindFootprintByReference('J1')
@@ -303,11 +350,15 @@ def main():
         names = zipfile.ZipFile(z).namelist()
         extra = [n for n in names if 'Fab' in n or n.endswith('.gbrjob')]
         if getattr(D, 'JLC_RULES', False): need(not extra, 'gerbers.zip carries non-fabrication files: %s' % extra)
-        for k in ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl'):
+        for k in ('F_Cu.gtl', 'B_Cu.gbl', 'F_Mask.gts', 'B_Mask.gbs', 'Edge_Cuts.gm1', 'PTH.drl') + INNER_FILES:
             need(any(n.endswith(k) for n in names), 'gerbers.zip lacks %s' % k)
         drl = [n for n in names if n.endswith('PTH.drl') and 'NPTH' not in n]
         hits = sum(1 for n in drl for line in zipfile.ZipFile(z).read(n).decode('ascii', 'replace').splitlines() if line.startswith('X'))
-        need(hits == len(vias), 'the plated drill file in gerbers.zip has %d holes, the board has %d vias' % (hits, len(vias)))
+        if JLC:                          # one hit per hole: vias, plated pad holes and plated slots (a slot is one G85 line)
+            pth, slots = plated_pads(b)
+            need(hits == len(vias) + len(pth), 'the plated drill file in gerbers.zip has %d holes, the board has %d vias, %d plated pad holes and %d plated slots'
+                 % (hits, len(vias), len(pth) - len(slots), len(slots)))
+        else: need(hits == len(vias), 'the plated drill file in gerbers.zip has %d holes, the board has %d vias' % (hits, len(vias)))
         if getattr(D, 'JLC_RULES', False):
             diff, nplot = archive_differences(z, pcb)
             need(not diff, 'gerbers.zip is not what the board file plots today: %s (run route_pcb.py export and gen_jlc.py)' % diff)
@@ -315,7 +366,10 @@ def main():
         else: info.append('gerbers.zip: %d files' % len(names))
         cpl = list(csv.DictReader(open(os.path.join(HW, 'jlcpcb', 'cpl_jlc.csv'))))
         need({r['Designator'] for r in cpl} == placed, 'CPL designators differ from the parts JLCPCB places: %s' % sorted({r['Designator'] for r in cpl} ^ placed)[:8])
-        need(all(r['Layer'] == 'Top' for r in cpl), 'CPL has bottom-side placements')
+        if TWO_SIDED:                    # a Bottom row only for a part on the back that BOTTOM_OK allows there, a Top row for every other
+            wrong = [r['Designator'] for r in cpl if r['Layer'] != ('Bottom' if r['Designator'] in on_back else 'Top') or (r['Layer'] == 'Bottom' and not gen_jlc.bottom_ok(r['Designator']))]
+            need(not wrong, 'CPL layers disagree with the sides of the board or with BOTTOM_OK: %s' % wrong[:8])
+        else: need(all(r['Layer'] == 'Top' for r in cpl), 'CPL has bottom-side placements')
         if getattr(D, 'JLC_RULES', False):      # BOM, CPL and notes must be what gen_jlc.py writes now for this design and this board file
             import gen_jlc
             bom_now, dnp_now, placed_now, ntypes_now = gen_jlc.bom_table(warn=False)
@@ -340,8 +394,15 @@ def main():
         pc = os.path.join(HW, 'jlcpcb', 'parts_check.csv')
         if os.path.exists(pc):
             rows = list(csv.DictReader(open(pc)))
-            need(all(r['Library'] == 'Basic' and r['Result'] == 'OK' for r in rows), 'parts_check.csv: not every part is a Basic part in stock')
-            info.append('parts_check.csv: %d part numbers, all Basic' % len(rows))
+            cls = getattr(D, 'LCSC_CLASS', None)
+            if cls is not None:          # declared classes: a row may say Extended when the design declares that code Extended
+                need(all(r['Result'] == 'OK' and r['Library'] in ('Basic', 'Extended') and r['Library'] == cls.get(r['LCSC']) for r in rows),
+                     'parts_check.csv: not every part has its declared class (Basic or Extended) and the stock for the order')
+                need({r['LCSC'] for r in rows} == set(cls), 'parts_check.csv does not list the codes that LCSC_CLASS declares (run gen_jlc.py): %s' % sorted({r['LCSC'] for r in rows} ^ set(cls))[:8])
+                info.append('parts_check.csv: %d part numbers, %d Basic and %d Extended as declared' % (len(rows), sum(r['Library'] == 'Basic' for r in rows), sum(r['Library'] == 'Extended' for r in rows)))
+            else:
+                need(all(r['Library'] == 'Basic' and r['Result'] == 'OK' for r in rows), 'parts_check.csv: not every part is a Basic part in stock')
+                info.append('parts_check.csv: %d part numbers, all Basic' % len(rows))
         notes = os.path.join(HW, 'jlcpcb', 'README.md')
         m = re.search(r'配線 (\d+) 本・ビア (\d+) 個・未接続 (\d+)', open(notes).read()) if os.path.exists(notes) else None
         if m: need((int(m.group(1)), int(m.group(2)), int(m.group(3))) == (len(tracks), len(vias), nopen),
