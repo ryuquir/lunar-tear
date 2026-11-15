@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1417" viewBox="0 0 1700 1417" font-family="IPAGothic, 'IPAexGothic', 'Noto Sans CJK JP', 'Yu Gothic', sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40.0" y="52.0" font-size="26" fill="#1c2530" text-anchor="start" font-weight="bold">famicart rev H - board with edge rails for Standard PCBA (both sides, gold fingers at the bottom)</text>
+<text x="40.0" y="88.0" font-size="19" fill="#6b7280" text-anchor="start" font-weight="normal">Dimensions in mm. Rails are joined by mouse-bite tabs (routed, no V-cut). 6 layers, 1.2 mm, ENIG, 30 degree bevel on the gold-finger edge.</text>
+<rect x="332.0" y="190.0" width="1036.0" height="50.0" fill="#d9dde3" stroke="#14532d" stroke-width="2.2"/>
+<text x="850.0" y="222.0" font-size="18" fill="#1c2530" text-anchor="middle" font-weight="normal">EDGE RAIL 5 mm - break off</text>
+<rect x="454.0" y="240.0" width="52.0" height="20.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="453.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="462.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="471.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="480.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="489.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="498.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="507.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="780.0" y="240.0" width="52.0" height="20.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="779.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="788.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="797.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="806.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="815.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="824.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="833.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="1034.0" y="240.0" width="52.0" height="20.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1033.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1042.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1051.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1060.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1069.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1078.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1087.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="1204.0" y="240.0" width="52.0" height="20.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1203.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1212.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1221.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1230.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1239.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1248.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1257.0" cy="257.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="332.0" y="190.0" width="50.0" height="900.0" fill="#d9dde3" stroke="#14532d" stroke-width="2.2"/>
+<text x="364.0" y="688.5" font-size="18" fill="#1c2530" text-anchor="middle" font-weight="normal" transform="rotate(-90 364.0 688.5)">EDGE RAIL 5 mm - break off</text>
+<rect x="1318.0" y="190.0" width="50.0" height="900.0" fill="#d9dde3" stroke="#14532d" stroke-width="2.2"/>
+<text x="1350.0" y="688.5" font-size="18" fill="#1c2530" text-anchor="middle" font-weight="normal" transform="rotate(-90 1350.0 688.5)">EDGE RAIL 5 mm - break off</text>
+<circle cx="472.0" cy="215.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
+<circle cx="1228.0" cy="215.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
+<circle cx="357.0" cy="950.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
+<rect x="382.0" y="304.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="399.0" cy="303.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="312.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="321.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="330.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="339.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="348.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="357.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="382.0" y="594.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="399.0" cy="593.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="602.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="611.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="620.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="629.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="638.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="647.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="382.0" y="834.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="399.0" cy="833.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="842.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="851.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="860.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="869.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="878.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="399.0" cy="887.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1343.0" cy="950.0" r="10.0" fill="#ffffff" stroke="#1c2530" stroke-width="1.2"/>
+<rect x="1298.0" y="329.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1301.0" cy="328.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="337.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="346.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="355.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="364.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="373.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="382.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="1298.0" y="555.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1301.0" cy="554.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="563.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="572.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="581.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="590.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="599.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="608.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<rect x="1298.0" y="834.0" width="20.0" height="52.0" fill="#d9dde3" stroke="#14532d" stroke-width="1.6"/>
+<circle cx="1301.0" cy="833.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="842.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="851.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="860.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="869.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="878.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="1301.0" cy="887.0" r="3.0" fill="#ffffff" stroke="#1c2530" stroke-width="0.8"/>
+<circle cx="370.5" cy="228.5" r="10.0" fill="#ffffff" stroke="#6b7280" stroke-width="0.8"/><circle cx="370.5" cy="228.5" r="5.0" fill="#c9a227"/>
+<circle cx="1329.5" cy="228.5" r="10.0" fill="#ffffff" stroke="#6b7280" stroke-width="0.8"/><circle cx="1329.5" cy="228.5" r="5.0" fill="#c9a227"/>
+<circle cx="370.5" cy="1051.5" r="10.0" fill="#ffffff" stroke="#6b7280" stroke-width="0.8"/><circle cx="370.5" cy="1051.5" r="5.0" fill="#c9a227"/>
+<path d="M458.00,1015.00 A5.00,5.00 0 0 0 453.00,1010.00 L416.00,1010.00 L416.00,942.00 A5.00,5.00 0 0 0 411.00,937.00 L402.00,937.00 L402.00,782.00 L448.50,782.00 A5.00,5.00 0 0 0 453.50,777.00 L453.50,763.00 A5.00,5.00 0 0 0 448.50,758.00 L402.00,758.00 L402.00,260.00 L1298.00,260.00 L1298.00,758.00 L1251.50,758.00 A5.00,5.00 0 0 0 1246.50,763.00 L1246.50,777.00 A5.00,5.00 0 0 0 1251.50,782.00 L1298.00,782.00 L1298.00,937.00 L1289.00,937.00 A5.00,5.00 0 0 0 1284.00,942.00 L1284.00,1010.00 L1247.00,1010.00 A5.00,5.00 0 0 0 1242.00,1015.00 L1242.00,1107.00 L1232.00,1117.00 L468.00,1117.00 L458.00,1107.00 Z" fill="#e3f0e6" stroke="#14532d" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M832.50,777.00 A5.00,5.00 0 0 1 827.50,782.00 L771.50,782.00 A5.00,5.00 0 0 1 766.50,777.00 L766.50,763.00 A5.00,5.00 0 0 1 771.50,758.00 L827.50,758.00 A5.00,5.00 0 0 1 832.50,763.00 Z" fill="#ffffff" stroke="#14532d" stroke-width="2.6"/>
+<rect x="1210.3" y="1040.0" width="26.0" height="65.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1184.9" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1159.5" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1134.1" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1108.7" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1083.3" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1057.9" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1032.5" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="1007.1" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="981.7" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="956.3" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="930.9" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="905.5" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="880.1" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="854.7" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="829.3" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="803.9" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="778.5" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="753.1" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="727.7" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="702.3" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="676.9" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="651.5" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="626.1" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="600.7" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="575.3" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="549.9" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="524.5" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="499.1" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<rect x="473.7" y="1040.0" width="16.0" height="57.0" fill="#c9a227" stroke="#8a6d14" stroke-width="0.8"/>
+<line x1="458.0" y1="1122.0" x2="1242.0" y2="1122.0" stroke="#b42318" stroke-width="5.0"/>
+<text x="850.0" y="1157.0" font-size="22" fill="#b42318" text-anchor="middle" font-weight="bold">GOLD FINGERS on this edge only (60 fingers) - bevel 30 degrees</text>
+<text x="850.0" y="1187.0" font-size="20" fill="#b42318" text-anchor="middle" font-weight="normal">This edge must stay a free routed edge: no rail, no V-cut, no mouse bites</text>
+<line x1="392.0" y1="620.0" x2="552.0" y2="560.0" stroke="#1c2530" stroke-width="1.0"/>
+<text x="558.0" y="556.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">mouse-bite tab 5.2 mm wide: 7 holes of 0.6 mm, 0.3 mm apart,</text>
+<text x="558.0" y="580.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">touching the board edge line from outside (3 tabs on each side)</text>
+<text x="432.0" y="300.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">top rail: 5 mm, 2 mm gap, 4 mouse-bite tabs (the same holes as on the sides)</text>
+<text x="432.0" y="324.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">fiducials: 3 on each side (top and bottom), copper 1 mm, mask opening 2 mm, centre 3.85 mm from the panel edges</text>
+<text x="432.0" y="348.0" font-size="18" fill="#1c2530" text-anchor="start" font-weight="normal">tooling holes: 2.0 mm, not plated (4 in total)</text>
+<text x="850.0" y="850.0" font-size="24" fill="#14532d" text-anchor="middle" font-weight="bold">CARTRIDGE BOARD  89.6 x 85.7</text>
+<text x="850.0" y="880.0" font-size="18" fill="#14532d" text-anchor="middle" font-weight="normal">parts on both sides are placed by JLCPCB</text>
+<line x1="332.0" y1="190.0" x2="332.0" y2="150.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1368.0" y1="190.0" x2="1368.0" y2="150.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="332.0" y1="156.0" x2="1368.0" y2="156.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="332.0,156.0 343.0,152.4 343.0,159.6" fill="#2f5f9e"/>
+<polygon points="1368.0,156.0 1357.0,159.6 1357.0,152.4" fill="#2f5f9e"/>
+<text x="850.0" y="149.0" font-size="20" fill="#2f5f9e" text-anchor="middle" font-weight="normal">103.6 (with rails)</text>
+<line x1="1368.0" y1="190.0" x2="1434.0" y2="190.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1368.0" y1="1117.0" x2="1434.0" y2="1117.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="1428.0" y1="190.0" x2="1428.0" y2="1117.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="1428.0,190.0 1431.6,201.0 1424.4,201.0" fill="#2f5f9e"/>
+<polygon points="1428.0,1117.0 1424.4,1106.0 1431.6,1106.0" fill="#2f5f9e"/>
+<text x="1436.0" y="660.5" font-size="20" fill="#2f5f9e" text-anchor="start" font-weight="normal">92.7</text>
+<line x1="1292.0" y1="1090.0" x2="1292.0" y2="1117.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="1292.0,1090.0 1295.6,1101.0 1288.4,1101.0" fill="#2f5f9e"/>
+<polygon points="1292.0,1117.0 1288.4,1106.0 1295.6,1106.0" fill="#2f5f9e"/>
+<text x="1284.0" y="1109.8" font-size="18" fill="#2f5f9e" text-anchor="end" font-weight="normal">2.7</text>
+<text x="1448.0" y="1084.0" font-size="16" fill="#6b7280" text-anchor="start" font-weight="normal">rails stop above</text>
+<text x="1448.0" y="1104.0" font-size="16" fill="#6b7280" text-anchor="start" font-weight="normal">the finger edge</text>
+<line x1="332.0" y1="1090.0" x2="332.0" y2="1233.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="382.0" y1="1090.0" x2="382.0" y2="1233.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="332.0" y1="1227.0" x2="382.0" y2="1227.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="332.0,1227.0 343.0,1223.4 343.0,1230.6" fill="#2f5f9e"/>
+<polygon points="382.0,1227.0 371.0,1230.6 371.0,1223.4" fill="#2f5f9e"/>
+<text x="357.0" y="1249.0" font-size="18" fill="#2f5f9e" text-anchor="middle" font-weight="normal">5.0</text>
+<line x1="382.0" y1="1090.0" x2="382.0" y2="1273.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="402.0" y1="1090.0" x2="402.0" y2="1273.0" stroke="#2f5f9e" stroke-width="1.0"/>
+<line x1="382.0" y1="1267.0" x2="402.0" y2="1267.0" stroke="#2f5f9e" stroke-width="1.4"/>
+<polygon points="382.0,1267.0 393.0,1263.4 393.0,1270.6" fill="#2f5f9e"/>
+<polygon points="402.0,1267.0 391.0,1270.6 391.0,1263.4" fill="#2f5f9e"/>
+<text x="392.0" y="1289.0" font-size="18" fill="#2f5f9e" text-anchor="middle" font-weight="normal">2.0 gap</text>
+<text x="40.0" y="1332.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">The rails on the left, right and top edges are one frame. The board alone (89.6 x 85.7 mm) is not to be ordered without them:</text>
+<text x="40.0" y="1360.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">the connectors at the top edge need the top rail (parts at least 2.5 mm from the panel edge).</text>
+</svg>
