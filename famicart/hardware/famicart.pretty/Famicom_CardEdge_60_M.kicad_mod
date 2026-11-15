@@ -1,0 +1,91 @@
+# Famicom_CardEdge_60_M -- the Famicom card edge for a board drawn as seen from the BACK of the cartridge.
+#
+# Why: rev H puts its main components on the back of the cartridge and draws the board from that side, so that the
+# back is KiCad's F.Cu and JLCPCB's "Top" (docs/13_rev_h_plan.md, "基板データの描き方"; shells.mirrored() does the
+# same to the shell outline and keep-outs).
+#
+# Geometry, derived from Famicom_CardEdge_60 (drawn from the FRONT: pins 1-30 on F.Cu, pin 1 at x = -37.33 on the
+# left, pins 31-60 on B.Cu, pin N+30 directly behind pin N):
+#   * seen from the back, left and right change places: every pad and Fab label x becomes -x (the footprint origin
+#     stays on the tab centre line at the shoulder; y is unchanged, so the fingers still hang below y = 0);
+#   * the back is now the viewer's side: pins 31-60 move to F.Cu / F.Mask, pins 1-30 to B.Cu / B.Mask;
+#   * so pin 31 is at x = +37.33 on F.Cu (the right end seen from the back) and pin 1 is directly behind it on B.Cu,
+#     pin 60 is at x = -36.83 on F.Cu with pin 30 behind it at x = -37.33 on B.Cu, and pin N+30 is behind pin N
+#     everywhere, exactly as in the original;
+#   * every pad keeps its own size: 1, 30 and 31 are the wide 2.6 x 6.7 pads, 16 is the long 1.6 x 6.7 pad, 46 and 60
+#     are normal 1.6 x 5.7 pads (the original's pad 60 sits 0.5 mm inboard of pad 30 so that their inner edges line up).
+# Placed unflipped (side 'F') with the board drawn from the back, this is the same copper as Famicom_CardEdge_60
+# placed on a board drawn from the front. tests/test_geometry_gen.py checks every pad against the original.
+(footprint "Famicom_CardEdge_60_M" (version 20221018) (generator famicart)
+  (layer "F.Cu")
+  (descr "Famicom 60-pin card edge for a board drawn as seen from the BACK of the cartridge (rev H): the original Famicom_CardEdge_60 mirrored in x, copper layers swapped. Pins 31-60 on F.Cu (left to right seen from the back: 31 on the right), pins 1-30 on B.Cu, pin N+30 behind pin N, every pad keeps its own size (1, 30, 31 wide, 16 long).")
+  (tags "famicom cartridge edge connector")
+  (attr smd exclude_from_pos_files)
+  (fp_text reference "J1" (at 0 -1.5) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text value "Famicom_CardEdge_60" (at 0 12.5) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text user "1" (at 37.5 1.5) (layer "B.Fab") (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror)))
+  (fp_text user "30" (at -37.5 1.5) (layer "B.Fab") (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror)))
+  (fp_text user "31" (at 37.5 1.5) (layer "F.Fab") (effects (font (size 0.8 0.8) (thickness 0.12))))
+  (fp_text user "60" (at -37.5 1.5) (layer "F.Fab") (effects (font (size 0.8 0.8) (thickness 0.12))))
+  (fp_line (start -39.2 0) (end 39.2 0) (stroke (width 0.1) (type dash)) (layer "F.Fab"))
+  (pad "1" smd rect (at 37.330 6.350) (size 2.60 6.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "31" smd rect (at 37.330 6.350) (size 2.60 6.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "2" smd rect (at 34.290 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "32" smd rect (at 34.290 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "3" smd rect (at 31.750 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "33" smd rect (at 31.750 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "4" smd rect (at 29.210 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "34" smd rect (at 29.210 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "5" smd rect (at 26.670 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "35" smd rect (at 26.670 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "6" smd rect (at 24.130 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "36" smd rect (at 24.130 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "7" smd rect (at 21.590 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "37" smd rect (at 21.590 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "8" smd rect (at 19.050 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "38" smd rect (at 19.050 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "9" smd rect (at 16.510 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "39" smd rect (at 16.510 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "10" smd rect (at 13.970 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "40" smd rect (at 13.970 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "11" smd rect (at 11.430 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "41" smd rect (at 11.430 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "12" smd rect (at 8.890 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "42" smd rect (at 8.890 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "13" smd rect (at 6.350 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "43" smd rect (at 6.350 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "14" smd rect (at 3.810 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "44" smd rect (at 3.810 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "15" smd rect (at 1.270 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "45" smd rect (at 1.270 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "16" smd rect (at -1.270 6.350) (size 1.60 6.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "46" smd rect (at -1.270 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "17" smd rect (at -3.810 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "47" smd rect (at -3.810 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "18" smd rect (at -6.350 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "48" smd rect (at -6.350 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "19" smd rect (at -8.890 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "49" smd rect (at -8.890 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "20" smd rect (at -11.430 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "50" smd rect (at -11.430 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "21" smd rect (at -13.970 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "51" smd rect (at -13.970 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "22" smd rect (at -16.510 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "52" smd rect (at -16.510 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "23" smd rect (at -19.050 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "53" smd rect (at -19.050 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "24" smd rect (at -21.590 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "54" smd rect (at -21.590 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "25" smd rect (at -24.130 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "55" smd rect (at -24.130 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "26" smd rect (at -26.670 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "56" smd rect (at -26.670 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "27" smd rect (at -29.210 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "57" smd rect (at -29.210 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "28" smd rect (at -31.750 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "58" smd rect (at -31.750 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "29" smd rect (at -34.290 5.850) (size 1.60 5.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "59" smd rect (at -34.290 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+  (pad "30" smd rect (at -37.330 6.350) (size 2.60 6.70) (layers "B.Cu" "B.Mask") (solder_mask_margin 0.1))
+  (pad "60" smd rect (at -36.830 5.850) (size 1.60 5.70) (layers "F.Cu" "F.Mask") (solder_mask_margin 0.1))
+)

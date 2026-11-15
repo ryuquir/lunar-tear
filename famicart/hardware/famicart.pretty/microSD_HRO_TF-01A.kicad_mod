@@ -1,0 +1,37 @@
+# microSD_HRO_TF-01A -- HRO TF-01A push-push microSD socket with card detect (LCSC C91145, JLCPCB Extended).
+# Drawn from JLCPCB's library footprint (EasyEDA "TF-SMD_TF-01A"), so that its origin, pad numbers and pads are the ones JLCPCB
+# places with: 13 SMD pads (1-8 card contacts at 1.1 mm pitch, 9 card detect, 10-13 shell tabs) and two 1.0 mm
+# non-plated locating holes, all taken over to 0.001 mm; the Fab outline is the library's body outline (14.76 x 14.50 mm),
+# the courtyard is body and pads plus 0.25 mm, the card mouth is the +y edge. Pin functions as in the EasyEDA symbol
+# (not checked against the HRO drawing). tests/check_footprints_easyeda.py compares it with the library footprint.
+(footprint "microSD_HRO_TF-01A" (version 20221018) (generator famicart)
+  (layer "F.Cu")
+  (descr "microSD socket, push-push with card detect, HRO TF-01A (LCSC C91145): pads, holes and body from JLCPCB's library footprint TF-SMD_TF-01A. Pins 1-8 card contacts (1 DAT2, 2 CD/DAT3, 3 CMD, 4 VDD, 5 CLK, 6 VSS, 7 DAT0, 8 DAT1), 9 card detect, 10-13 shell (GND). Card mouth at +y.")
+  (tags "micro SD TF card socket push-push detect")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 -6.925) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text value "TF-01A" (at 0 3.825) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text user "${REFERENCE}" (at 0 2.325) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_rect (start -7.38 -4.925) (end 7.38 9.575) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -8.61 -6.18) (end 8.61 9.82) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_line (start -7.49 -3.451) (end -7.49 4.001) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (fp_line (start -7.49 6.551) (end -7.49 8.075) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (fp_line (start 7.49 -3.451) (end 7.49 4.001) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (fp_line (start 7.49 6.551) (end 7.49 8.075) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (fp_line (start 1.94 -6.276) (end 2.54 -6.276) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (pad "1" smd rect (at 2.24 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "2" smd rect (at 1.14 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "3" smd rect (at 0.04 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "4" smd rect (at -1.06 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "5" smd rect (at -2.16 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "6" smd rect (at -3.26 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "7" smd rect (at -4.36 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "8" smd rect (at -5.46 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "9" smd rect (at -6.56 -5.276) (size 0.6 1.3) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "10" smd rect (at -7.76 -4.426) (size 1.2 1.4) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "11" smd rect (at -7.76 5.276) (size 1.2 2) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "12" smd rect (at 7.76 5.276) (size 1.2 2) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "13" smd rect (at 6.92 -4.426) (size 1.2 1.4) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "" np_thru_hole circle (at -4.95 5.566) (size 1 1) (drill 1) (layers "*.Cu" "*.Mask"))
+  (pad "" np_thru_hole circle (at 3.05 5.566) (size 1 1) (drill 1) (layers "*.Cu" "*.Mask"))
+)

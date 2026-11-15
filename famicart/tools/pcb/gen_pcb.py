@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Build hardware/famicart.kicad_pcb from design.py: footprints, nets, placement, outline, GND pours.
-Routing is done afterwards by route_pcb.py (Freerouting)."""
+Routing is done afterwards by route_pcb.py (Freerouting).
+Optional design attributes (rev H on; a design without them gets exactly the board it always got):
+  PLANES     {layer name: [(net, polygon | 'board'), ...]}: the pours of every layer (plane_map(); later entries of a
+             layer have the higher priority). Without it: In1 GND and the last inner layer +3V3 on 4 / 6 layers.
+  OUTER_GND  True: board-wide GND pours on F.Cu and B.Cu as well (always so on 2 layers).
+  EP_VIAS    {'footprint': name(s), 'grid': 3, 'pitch': 1.1, 'drill': 0.3, 'dia': 0.5, 'net': 'GND'}: board vias in
+             the exposed pad of every footprint of that name (add_ep_vias(); for footprints without vias of their
+             own, e.g. famicart:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia)."""
 import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 import pcbnew
@@ -145,6 +152,77 @@ def add_zone(board, net, layer, pts, clearance=0.25):
     z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
     board.Add(z); return z
 
+# ---------------------------------------------------------------------------------------------- opt-in: rev H on
+# Designs up to rev G set none of PLANES / OUTER_GND / EP_VIAS; for them main() takes the code paths it always took.
+
+def plane_map(nl, planes=None, outer_gnd=None):
+    """The copper pours of a board as {layer name: [(net, polygon in board mm | 'board'), ...]}.
+    planes: the design's PLANES (layers it does not name get no pour), else the plan used up to rev G: In1 GND and the
+    last inner layer +3V3 on 4 / 6 layers (In2 / In4), no inner planes on 2 layers. outer_gnd: the design's OUTER_GND,
+    else True on 2 layers and False on more: when true, F.Cu and B.Cu get a board-wide GND pour unless PLANES names
+    them itself. 'board' is the body of the board above the card-edge tab (0.5 mm inside the outline rectangle).
+    Within one layer the entries are listed in rising priority: a later polygon (an island of +1V1 in a +3V3 plane)
+    wins over an earlier one ('board' first)."""
+    if planes is None:
+        planes = {'In1.Cu': [('GND', 'board')], ('In2.Cu' if nl == 4 else 'In4.Cu'): [('+3V3', 'board')]} if nl >= 4 else {}
+    m = {layer: list(entries) for layer, entries in planes.items()}
+    if (nl == 2) if outer_gnd is None else bool(outer_gnd):
+        for layer in ('F.Cu', 'B.Cu'): m.setdefault(layer, [('GND', 'board')])
+    return m
+
+def copper_layer_names(nl):
+    """Names of the copper layers of an nl-layer board, outer layers first."""
+    return ['F.Cu', 'B.Cu'] + ['In%d.Cu' % i for i in range(1, nl - 1)]
+
+def add_planes(board, netmap, nl, body, planes, outer_gnd):
+    """Pours from plane_map(); returns [(layer name, net, priority)] in the order added."""
+    done = []
+    for layer, entries in plane_map(nl, planes, outer_gnd).items():
+        if layer not in copper_layer_names(nl): raise SystemExit('PLANES: %s is not a copper layer of a %d-layer board' % (layer, nl))
+        for prio, (net, poly) in enumerate(entries):
+            if net not in netmap: raise SystemExit('PLANES: net %s (%s) is not in the design' % (net, layer))
+            z = add_zone(board, netmap[net], board.GetLayerID(layer), body if poly == 'board' else [tuple(p) for p in poly])
+            if prio: z.SetAssignedPriority(prio)
+            done.append((layer, net, prio))
+    return done
+
+def ep_via_points(pad, grid, pitch):
+    """Board positions (mm) of a grid x grid via array centred on `pad`, turned with the pad."""
+    import math
+    a = math.radians(pad.GetOrientationDegrees()); c, s = math.cos(a), math.sin(a)
+    cx, cy = ToMM(pad.GetPosition().x), ToMM(pad.GetPosition().y)
+    off = [(i - (grid - 1) / 2.0) * pitch for i in range(grid)]
+    # KiCad turns counter-clockwise on screen with y pointing down: (x, y) -> (x cos + y sin, -x sin + y cos)
+    return [(round(cx + u * c + v * s, 6), round(cy - u * s + v * c, 6)) for v in off for u in off]
+
+def add_ep_vias(board, netmap, cfg):
+    """Board vias (PCB_VIA, through, locked) in the exposed pad of every footprint named in cfg['footprint'] (one name
+    or a list; the name without or with its library): cfg = D.EP_VIAS = {'footprint': ..., 'grid': 3, 'pitch': 1.1,
+    'drill': 0.3, 'dia': 0.5, 'net': 'GND', 'pad': '81'}. The exposed pad is the pad numbered cfg['pad'] (default: the
+    largest SMD pad of the footprint); the net is cfg['net'] (default: the pad's net) and must be the pad's net.
+    Returns the number of vias."""
+    names = cfg['footprint'] if isinstance(cfg['footprint'], (list, tuple)) else [cfg['footprint']]
+    grid, pitch = int(cfg.get('grid', 3)), float(cfg.get('pitch', 1.1))
+    drill, dia = float(cfg.get('drill', 0.3)), float(cfg.get('dia', 0.5))
+    n = 0
+    for fp in board.GetFootprints():
+        fpid = fp.GetFPIDAsString()
+        if fpid not in names and fpid.split(':')[-1] not in names: continue
+        smd = [p for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD and p.IsOnCopperLayer()]
+        if 'pad' in cfg: smd = [p for p in smd if p.GetNumber() == str(cfg['pad'])]
+        if not smd: raise SystemExit('EP_VIAS: %s has no exposed pad' % fp.GetReference())
+        ep = max(smd, key=lambda p: p.GetSize().x * p.GetSize().y)
+        net = cfg.get('net') or ep.GetNetname()
+        if not net or net not in netmap: raise SystemExit('EP_VIAS: %s: no net %r for the exposed-pad vias' % (fp.GetReference(), net))
+        if ep.GetNetname() and ep.GetNetname() != net: raise SystemExit('EP_VIAS: %s pad %s is on %s, not %s' % (fp.GetReference(), ep.GetNumber(), ep.GetNetname(), net))
+        half = (grid - 1) / 2.0 * pitch + dia / 2
+        if half > min(ToMM(ep.GetSize().x), ToMM(ep.GetSize().y)) / 2 + 1e-6: raise SystemExit('EP_VIAS: the via grid does not fit the exposed pad of %s' % fp.GetReference())
+        for (x, y) in ep_via_points(ep, grid, pitch):
+            v = pcbnew.PCB_VIA(board); v.SetPosition(mm(x, y)); v.SetViaType(pcbnew.VIATYPE_THROUGH)
+            v.SetWidth(FromMM(dia)); v.SetDrill(FromMM(drill)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+            v.SetNet(netmap[net]); v.SetLocked(True); board.Add(v); n += 1
+    return n
+
 def main():
     board = pcbnew.BOARD()
     ds = board.GetDesignSettings()
@@ -155,6 +233,11 @@ def main():
     ds.m_TrackMinWidth = FromMM(TRK); ds.m_ViasMinSize = FromMM(VIA); ds.m_MinThroughDrill = FromMM(VDR)
     ds.m_MinClearance = FromMM(CLR); ds.m_HoleToHoleMin = FromMM(0.25); ds.m_ViasMinAnnularWidth = FromMM((VIA - VDR) / 2 - 0.005); ds.m_HoleClearance = FromMM(0.2)
     ds.m_SolderMaskMinWidth = FromMM(0.0); ds.m_SolderMaskExpansion = FromMM(0.0); ds.m_CopperEdgeClearance = FromMM(0.3)
+    EPV = getattr(D, 'EP_VIAS', None)
+    if EPV:     # the exposed-pad vias may be smaller than the design's via: the board minimums must admit them
+        ed, er = float(EPV.get('dia', 0.5)), float(EPV.get('drill', 0.3))
+        ds.m_ViasMinSize = FromMM(min(VIA, ed)); ds.m_MinThroughDrill = FromMM(min(VDR, er))
+        ds.m_ViasMinAnnularWidth = FromMM(min((VIA - VDR) / 2, (ed - er) / 2) - 0.005)
     nc = ds.m_NetSettings.m_DefaultNetClass
     nc.SetTrackWidth(FromMM(TRK)); nc.SetClearance(FromMM(CLR)); nc.SetViaDiameter(FromMM(VIA)); nc.SetViaDrill(FromMM(VDR))
 
@@ -263,6 +346,8 @@ def main():
     # 4-layer boards: GND / +3V3 are inner planes. Give every SMD pad of those nets a fixed via stub so the
     # autorouter never has to route them (dsn_export drops these nets); the KiCad zone fill does the rest.
     PLANE_NETS = {'GND': pcbnew.In1_Cu, '+3V3': (pcbnew.In2_Cu if NL == 4 else pcbnew.In4_Cu)} if (NL >= 4 and os.environ.get('FC_STUBS', '0') == '1') else {}   # FC_STUBS=1: fixed via stubs; default: the router fans out power on the inner layers
+    if PLANE_NETS and getattr(D, 'PLANES', None) is not None:      # the design's own plane map: nets poured over the whole board on an inner layer
+        PLANE_NETS = {ents[0][0]: board.GetLayerID(l) for l, ents in D.PLANES.items() if l not in ('F.Cu', 'B.Cu') and ents and ents[0][1] == 'board'}
     stub_groups = []
     def add_via(x, y, net):
         v = pcbnew.PCB_VIA(board); v.SetPosition(mm(x, y)); v.SetViaType(pcbnew.VIATYPE_THROUGH)
@@ -409,6 +494,9 @@ def main():
             for t in doomed: board.Remove(t)
             print('stub cleanup round', _round, ': removed', len(doomed), 'stub items for', len(pts), 'DRC points')
 
+    # exposed-pad vias (D.EP_VIAS): real board vias in the exposed pad of each QFN that has none of its own
+    if EPV: print('exposed-pad vias:', add_ep_vias(board, netmap, EPV))
+
     # outline: body + card-edge tab with 1 mm chamfers at the tab tip
     W, H, T = BOARD_W, BODY_H, TOTAL_H
     x0, x1 = TAB_X0, TAB_X0 + TAB_W
@@ -464,7 +552,10 @@ def main():
             t.SetLayer(pcbnew.F_Cu); t.SetNet(netmap[net]); board.Add(t)
     # GND pours on both layers over the body (not the tab)
     body = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
-    if NL >= 4:   # inner planes: In1 = GND, last inner = +3V3 (6 layers: In2/In3 are extra signal layers)
+    if getattr(D, 'PLANES', None) is not None or getattr(D, 'OUTER_GND', None) is not None:
+        for layer, net, prio in add_planes(board, netmap, NL, body, getattr(D, 'PLANES', None), getattr(D, 'OUTER_GND', None)):
+            print('pour: %-6s %-8s priority %d' % (layer, net, prio))
+    elif NL >= 4:   # inner planes: In1 = GND, last inner = +3V3 (6 layers: In2/In3 are extra signal layers)
         add_zone(board, netmap['GND'], pcbnew.In1_Cu, body)
         add_zone(board, netmap['+3V3'], pcbnew.In2_Cu if NL == 4 else pcbnew.In4_Cu, body)
     else:

@@ -1,6 +1,8 @@
 """Famicom (HVC) cartridge shell geometry for the board generator, in board coordinates (mm):
 x = 0..90 left to right seen from the FRONT (pins 1-30 side, pin 1 on the left), y = 0 at the top edge, increasing
 toward the card edge; the card-edge shoulder (tab base) is at y = body_h. h = body_h - y is the height above the shoulder.
+mirrored(shell) gives the same shell seen from the BACK (x -> 90 - x, front and back keep-outs swapped), for a board
+whose main component side is the back of the cartridge and is drawn as KiCad's front (rev H).
 
 Sources (see docs/04_hardware.md, "## 基板外形" with the 2026-11-09 correction, and "### 大型シェル（任天堂 HVC-ExROM 系）"):
   * HVC-TGROM-01 (standard / small shell): nesdev "Famicom cartridge dimensions" table (A 90, A.2 81, A.2.1 43, A.2.2 33,
@@ -116,3 +118,45 @@ def rect_body(body_h):
     """Plain rectangle (rev A-F, kept for regenerating old revisions)."""
     return dict(name='rectangle', body_h=body_h, outline_body=[(TAB_X0, body_h), (0, body_h), (0, 0), (W, 0), (W, body_h), (TAB_X1, body_h)],
                 cutouts=[], route_keepouts=[], comp_keepouts=[])
+
+# ---------------------------------------------------------------------------------------------- board drawn from the back
+# A board whose main component side is the BACK of the cartridge (rev H, docs/13_rev_h_plan.md "基板データの描き方") is
+# drawn as seen from the back: that side is then KiCad's F.Cu and JLCPCB's "Top". Seen from the back, left and right
+# change places (x -> W - x; y, the tab and the shoulder stay where they are) and the shell's front keep-outs (ribs, the
+# O2 post: the label side) belong to KiCad's B side, its back keep-outs (the two lower posts) to KiCad's F side.
+# Card-edge pins 31-60 then lie on F.Cu, pins 1-30 on B.Cu (famicart.pretty/Famicom_CardEdge_60_M).
+_MIRROR_TAG = ' (mirrored)'
+_POLY_LISTS = ('cutouts', 'route_keepouts')          # lists of polygons
+_X_RANGES = ('usb_top', 'edge_x')                    # (x_lo, x_hi) pairs
+_PLAIN = ('name', 'body_h', 'fillet_r', 'mirrored')  # copied (name and the flag are handled below)
+
+def _mx(p): return (round(W - p[0], 9), p[1])      # rounded: 90 - 84.2 is 5.8, not 5.799999999999997
+
+def _mpoly(poly):
+    """A polygon mirrored in x. The point order is reversed as well, so the polygon keeps its sense of rotation and
+    the outline body still runs from the left tab corner (TAB_X0, body_h) over the top to (TAB_X1, body_h)."""
+    return [_mx(p) for p in reversed(poly)]
+
+def mirrored(shell):
+    """The shell as seen from the BACK of the cartridge (see the comment above): every x becomes W - x in the outline
+    body, the cut-outs, the routing keep-outs, the fillet points and the x ranges (usb_top, edge_x), and the component
+    keep-outs move to the other side ('F' <-> 'B'). The name gets ' (mirrored)' and the dict carries mirrored=True.
+    Mirroring a mirrored shell gives the original back (same numbers up to float rounding, same name, no flag).
+    Keys this function does not know are refused, so that a new kind of geometry cannot pass through unmirrored."""
+    unknown = set(shell) - set(_PLAIN) - set(_POLY_LISTS) - set(_X_RANGES) - {'outline_body', 'comp_keepouts', 'fillets'}
+    if unknown: raise ValueError('shells.mirrored: do not know how to mirror %s' % sorted(unknown))
+    out = {k: shell[k] for k in _PLAIN if k in shell}
+    if shell.get('mirrored'):
+        out.pop('mirrored'); out['name'] = shell['name'][:-len(_MIRROR_TAG)] if shell['name'].endswith(_MIRROR_TAG) else shell['name']
+    else:
+        out['mirrored'] = True; out['name'] = shell['name'] + _MIRROR_TAG
+    body = shell['outline_body']
+    assert abs(body[0][0] - TAB_X0) < 1e-9 and abs(body[-1][0] - TAB_X1) < 1e-9, 'outline_body must run from (TAB_X0, H) to (TAB_X1, H)'
+    out['outline_body'] = _mpoly(body)
+    for k in _POLY_LISTS:
+        if k in shell: out[k] = [_mpoly(p) for p in shell[k]]
+    out['comp_keepouts'] = [({'F': 'B', 'B': 'F'}[side], _mpoly(p)) for side, p in shell['comp_keepouts']]
+    if 'fillets' in shell: out['fillets'] = [_mx(p) for p in shell['fillets']]
+    for k in _X_RANGES:
+        if k in shell: out[k] = (round(W - shell[k][1], 9), round(W - shell[k][0], 9))
+    return out

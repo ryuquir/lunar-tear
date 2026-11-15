@@ -1,0 +1,66 @@
+# USB_C_Receptacle_HRO_TYPE-C-31-M-12_JLC -- KiCad's USB_C_Receptacle_HRO_TYPE-C-31-M-12 (KiCad 7 library) with
+# the footprint origin moved to the origin of JLCPCB's library footprint of the part (LCSC C165948, EasyEDA
+# "USB-C_SMD-TYPE-C-31-M-12_1"). JLCPCB places the part with ITS footprint at the CPL position, so the two origins have
+# to be the same point: every pad, hole, line and text is 1.53 mm further in +y (toward the mouth) than in KiCad's
+# footprint (pad sizes, holes and numbers are KiCad's). One change besides: the silkscreen line across the mouth is
+# left out and the two side lines end 0.5 mm before the mouth (KiCad's run 0.25 mm past it), because the mouth stands
+# at the board's top edge (rev H) and the board edge would cut them off.
+# The offset is the mean y offset of the 16 EasyEDA pads from their KiCad pads: 12 signal pads, four of them named
+# for two pins each ("A1B12" = KiCad's A1 and B12 on one spot), and the four shell pads "1"-"4" = KiCad's "S1". The
+# signal pads alone are 1.57 mm off, the shell pads 1.42 mm. After the move every EasyEDA pad centre lies within
+# 0.11 mm of its KiCad pad centre (tests/check_footprints_easyeda.py; check_cpl.py allows 0.40 mm).
+# The pin names stay KiCad's (A1, B12, S1, ...): the CPL check needs a name map for this part.
+(footprint "USB_C_Receptacle_HRO_TYPE-C-31-M-12_JLC" (version 20211014) (generator famicart)
+  (layer "F.Cu")
+  (descr "USB Type-C receptacle for USB 2.0 and PD, HRO TYPE-C-31-M-12 (LCSC C165948): KiCad's USB_C_Receptacle_HRO_TYPE-C-31-M-12 with its origin moved to the origin of JLCPCB's library footprint (USB-C_SMD-TYPE-C-31-M-12_1), all items 1.53 mm further in +y; http://www.krhro.com/uploads/soft/180320/1-1P320120243.pdf")
+  (tags "usb usb-c 2.0 pd")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 -4.115) (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value "USB_C_Receptacle_HRO_TYPE-C-31-M-12" (at 0 6.63) (layer "F.Fab")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text user "${REFERENCE}" (at 0 1.53) (layer "F.Fab")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_line (start 4.7 -0.37) (end 4.7 1.63) (layer "F.SilkS") (width 0.12))
+  (fp_line (start -4.7 3.53) (end -4.7 4.68) (layer "F.SilkS") (width 0.12))
+  (fp_line (start -4.7 -0.37) (end -4.7 1.63) (layer "F.SilkS") (width 0.12))
+  (fp_line (start 4.7 3.53) (end 4.7 4.68) (layer "F.SilkS") (width 0.12))
+  (fp_line (start -5.32 -3.74) (end 5.32 -3.74) (layer "F.CrtYd") (width 0.05))
+  (fp_line (start 5.32 -3.74) (end 5.32 5.68) (layer "F.CrtYd") (width 0.05))
+  (fp_line (start -5.32 5.68) (end 5.32 5.68) (layer "F.CrtYd") (width 0.05))
+  (fp_line (start -5.32 -3.74) (end -5.32 5.68) (layer "F.CrtYd") (width 0.05))
+  (fp_line (start -4.47 -2.12) (end -4.47 5.18) (layer "F.Fab") (width 0.1))
+  (fp_line (start -4.47 -2.12) (end 4.47 -2.12) (layer "F.Fab") (width 0.1))
+  (fp_line (start -4.47 5.18) (end 4.47 5.18) (layer "F.Fab") (width 0.1))
+  (fp_line (start 4.47 -2.12) (end 4.47 5.18) (layer "F.Fab") (width 0.1))
+  (pad "" np_thru_hole circle (at 2.89 -1.07) (size 0.65 0.65) (drill 0.65) (layers *.Cu *.Mask))
+  (pad "" np_thru_hole circle (at -2.89 -1.07) (size 0.65 0.65) (drill 0.65) (layers *.Cu *.Mask))
+  (pad "A1" smd rect (at -3.25 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A4" smd rect (at -2.45 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A5" smd rect (at -1.25 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A6" smd rect (at -0.25 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A7" smd rect (at 0.25 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A8" smd rect (at 1.25 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A9" smd rect (at 2.45 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "A12" smd rect (at 3.25 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B1" smd rect (at 3.25 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B4" smd rect (at 2.45 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B5" smd rect (at 1.75 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B6" smd rect (at 0.75 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B7" smd rect (at -0.75 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B8" smd rect (at -1.75 -2.515) (size 0.3 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B9" smd rect (at -2.45 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "B12" smd rect (at -3.25 -2.515) (size 0.6 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "S1" thru_hole oval (at -4.32 2.58) (size 1 1.6) (drill oval 0.6 1.2) (layers *.Cu *.Mask))
+  (pad "S1" thru_hole oval (at -4.32 -1.6) (size 1 2.1) (drill oval 0.6 1.7) (layers *.Cu *.Mask))
+  (pad "S1" thru_hole oval (at 4.32 -1.6) (size 1 2.1) (drill oval 0.6 1.7) (layers *.Cu *.Mask))
+  (pad "S1" thru_hole oval (at 4.32 2.58) (size 1 1.6) (drill oval 0.6 1.2) (layers *.Cu *.Mask))
+  (model "${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_HRO_TYPE-C-31-M-12.wrl"
+    (offset (xyz 0 -1.53 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
+)

@@ -1,0 +1,19 @@
+# L_SXN_SMNR4020 -- shielded SMD power inductor 4.0 x 4.0 mm, SXN SMNR4020 series (2.2 uH: LCSC C135262, JLCPCB Extended).
+# Drawn from JLCPCB's library footprint (EasyEDA "IND-SMD_L4.0-W4.0_LQH44PN2R2MP0L"): two 1.5 x 4.0 mm pads 3.6 mm apart (centres), origin in the
+# middle, body outline 4.0 x 4.0 mm on the Fab layer, courtyard pads and body plus 0.25 mm. No polarity.
+# tests/check_footprints_easyeda.py compares it with the library footprint.
+(footprint "L_SXN_SMNR4020" (version 20221018) (generator famicart)
+  (layer "F.Cu")
+  (descr "Shielded power inductor 4.0 x 4.0 mm, SXN SMNR4020 (2.2 uH: LCSC C135262): pads and body from JLCPCB's library footprint IND-SMD_L4.0-W4.0_LQH44PN2R2MP0L")
+  (tags "inductor SMNR4020 4020")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 -3.2) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text value "SMNR4020" (at 0 3.2) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+  (fp_text user "${REFERENCE}" (at 0 0) (layer "F.Fab") (effects (font (size 0.8 0.8) (thickness 0.12))))
+  (fp_rect (start -2 -2) (end 2 2) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -2.8 -2.25) (end 2.8 2.25) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_line (start -0.75 -2.15) (end 0.75 -2.15) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (fp_line (start -0.75 2.15) (end 0.75 2.15) (stroke (width 0.15) (type default)) (layer "F.SilkS"))
+  (pad "1" smd rect (at -1.8 0) (size 1.5 4) (layers "F.Cu" "F.Paste" "F.Mask"))
+  (pad "2" smd rect (at 1.8 0) (size 1.5 4) (layers "F.Cu" "F.Paste" "F.Mask"))
+)

@@ -12,6 +12,10 @@ around the tab base): module bodies, USB connectors, courtyards and pads are all
 Outlines prepared for JLCPCB (shells.hvc_large with relief / side_inset, rev G on): the left and right edges carry the
 assembly edge rails, normally joined by V-cut, and JLCPCB wants copper at least 0.4 mm from a V-cut edge, so bodies and
 pads keep FC_SIDE_MARGIN (0.4 mm) from those two edges.
+Edge connectors (rev H on: D.EDGE_CONNECTORS, the references of e.g. the USB-C and microSD sockets whose mouths are
+flush with the top edge): their body (courtyard) may cross the TOP edge, and only there, within the shell's usb_top x
+window; their pads stay on the board like every other pad. A board drawn from the back uses shells.mirrored(), whose
+usb_top window is mirrored and whose keep-outs are already on the KiCad side they apply to.
 Exit status 1 when anything fails.   FC_DESIGN=design_reve2 FC_HW_DIR=... python3 check_place.py"""
 import os, sys, importlib
 import numpy as np
@@ -25,6 +29,7 @@ SH = getattr(D, 'SHELL', None)
 G = 0.05; MARGIN = float(os.environ.get('FC_EDGE_MARGIN', '0.3'))
 SIDE = float(os.environ.get('FC_SIDE_MARGIN', '0.4'))                                # to a V-cut (edge rail) side edge
 BODY = {'RPi_Pico_SMD': 1.6, 'RPi_Pico_SMD_Short': 1.6, 'XIAO-RP2350-Edge': 1.0}      # modules: USB connector overhang past the marked end (mm)
+EDGE = tuple(getattr(D, 'EDGE_CONNECTORS', ()))                                        # parts that may cross the top edge (usb_top window)
 
 def pip(px, py, poly):
     """vectorised point-in-polygon (even-odd)"""
@@ -123,12 +128,20 @@ def main():
         if p_ko: bad.append(f'{ref} ({side}) pads on a shell rib/post keep-out: {",".join(p_ko)}')
         if p_tab: bad.append(f'{ref} ({side}) pads reach below the card-edge shoulder band: {",".join(p_tab)}')
         m = (PX >= rx0) & (PX <= rx1) & (PY >= ry0) & (PY <= ry1)
-        if (m & ~ok).any(): bad.append(f'{ref} ({side}) leaves the board / hits a cut-out or the edge margin: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
+        if ref in EDGE:
+            # a connector whose mouth is at the top edge: past the top edge (and through its margin) inside usb_top only
+            win = SH.get('usb_top') if SH else None
+            if not win: bad.append(f'{ref} ({side}) is listed in EDGE_CONNECTORS but the shell has no usb_top window')
+            out_ok = ((PY < MARGIN + G) & (PX >= win[0]) & (PX <= win[1])) if win else np.zeros(board.shape, bool)
+            if (m & ~ok & ~out_ok).any(): bad.append(f'{ref} ({side}) edge connector leaves the board other than past the top edge within the usb_top window: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
+        elif (m & ~ok).any(): bad.append(f'{ref} ({side}) leaves the board / hits a cut-out or the edge margin: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
         if (m & ko[side]).any(): bad.append(f'{ref} ({side}) sits on a shell rib/post keep-out: [{rx0:.2f},{ry0:.2f}]-[{rx1:.2f},{ry1:.2f}]')
         if usb_m is not None: m = m | usb_m
         hit = set(np.unique(occ[side][m])) - {0}
         for h in hit: bad.append(f'{ref} ({side}) overlaps {owner[side][h]}')
         occ[side][m] = idx + 1; owner[side][idx + 1] = ref
+    missing = [r for r in EDGE if b.FindFootprintByReference(r) is None]
+    if missing: bad.append('EDGE_CONNECTORS names parts that are not on the board: %s' % ','.join(missing))
     print('placement check:', 'OK' if not bad else f'{len(bad)} problems')
     for x in bad: print('  ', x)
     sys.exit(1 if bad else 0)
