@@ -8296,7 +8296,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Module:RaspberryPi_Pico_SMD"
+		(property "Footprint" "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut"
 			(at 38.1 99.06 0)
 			(hide yes)
 			(show_name no)
@@ -10154,7 +10154,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Module:RaspberryPi_Pico_SMD"
+		(property "Footprint" "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut"
 			(at 144.78 99.06 0)
 			(hide yes)
 			(show_name no)
@@ -10410,7 +10410,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Module:RaspberryPi_Pico_SMD"
+		(property "Footprint" "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut"
 			(at 248.92 99.06 0)
 			(hide yes)
 			(show_name no)

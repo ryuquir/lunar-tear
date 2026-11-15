@@ -10,13 +10,18 @@ Steps
     against data/jlcpcb_basic_parts_*.csv, Extended parts against data/jlcpcb_extended_parts.csv,
     which tools/jlc_parts.py refreshes), is the part the circuit means, can be assembled on a
     Standard PCBA order and is in stock
- 3. check that every standard footprint exists in the KiCad library, has a pad for every pin of
-    its symbol and is the package JLCPCB supplies; check the board's own design rules and the
-    datasheet facts written down in design/circuit.py (selfcheck)
- 4. write kicad/ (symbol library, schematic sheets, project file)
- 5. kicad-cli: upgrade to the KiCad 10 format, ERC, netlist, PDF
- 6. compare KiCad's netlist with the model, pin by pin
- 7. write out/ (BOM with sourcing, net list, reports, cost estimate)
+ 3. write the board's own footprints (design/footprints.py -> kicad/fcjamma.pretty) and check the
+    facts from the makers' drawings written down there
+ 4. check that every footprint exists, has a pad for every pin of its symbol and is the package
+    JLCPCB supplies (a footprint of the board's own library: the part it was drawn for); check the
+    board's own design rules and the datasheet facts written down in design/circuit.py (selfcheck)
+ 5. write kicad/ (symbol library, schematic sheets, project file)
+ 6. kicad-cli: upgrade to the KiCad 10 format, ERC, netlist, PDF
+ 7. compare KiCad's netlist with the model, pin by pin
+ 8. write out/ (BOM with sourcing, net list, reports, cost estimate)
+ 9. out/footprints/: KiCad reads the board's footprints back (tools/check_footprints.py, with the
+    system Python's pcbnew) and draws them (SVG), the 1:1 check print of the cartridge slot (PDF)
+    and an overview picture (PNG)
 """
 import csv
 import datetime
@@ -31,10 +36,13 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "design"))
 
-from fcgen import kicad_out, parts as P          # noqa: E402
+from fcgen import fp_sheets, kicad_out, parts as P          # noqa: E402
 from fcgen.model import SymDef, JLC, JLCX, AKI, DONOR, PCB   # noqa: E402
+import footprints as FPL                                     # noqa: E402  (design/footprints.py)
 
 KICAD_FP = "/usr/share/kicad/footprints"
+FPLIB_DIR = os.path.join(ROOT, "kicad", "fcjamma.pretty")
+SYSTEM_PYTHON = "/usr/bin/python3"           # KiCad's pcbnew module comes with the system Python
 KICAD_TEMPLATE = "/usr/share/kicad/template"
 CFG = os.environ.get("FCJAMMA_KICAD_CONFIG", "/tmp/fcjamma-kicad-config")
 
@@ -144,8 +152,7 @@ PACKAGE_OF_FOOTPRINT = [
 # Footprints of JLCPCB-assembled parts whose package column is free text ("SMD", "Plugin", "-"): each was compared by hand
 # with the maker's drawing (README chapter 6).  A JLCPCB part on a footprint that is neither here nor in the table fails the build.
 HAND_CHECKED_FOOTPRINTS = {
-    "SW_Push_1P1T_XKB_TS-1187A": "C318884", "SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm": "C92645",
-    "USB_C_Receptacle_HRO_TYPE-C-31-M-12": "C165948", "RaspberryPi_Pico_SMD": "C41407547", "DIP-40_W15.24mm_Socket": "C2874018",
+    "SW_Push_1P1T_XKB_TS-1187A": "C318884", "USB_C_Receptacle_HRO_TYPE-C-31-M-12": "C165948", "DIP-40_W15.24mm_Socket": "C2874018",
 }
 
 
@@ -167,9 +174,17 @@ def check_footprints(design, problems, custom):
             continue
         lib, name = p.footprint.split(":")
         if lib == "fcjamma":
-            custom.add(p.footprint)
-            continue
-        path = os.path.join(KICAD_FP, f"{lib}.pretty", f"{name}.kicad_mod")
+            custom.add(name)
+            path = os.path.join(FPLIB_DIR, f"{name}.kicad_mod")
+            if not os.path.exists(path):
+                problems.append(f"footprint: {p.ref} -> {p.footprint} is not drawn in design/footprints.py")
+                continue
+            want = FPL.PART_OF.get(name, "unknown")
+            code = p.code if p.src in (JLC, JLCX) else None
+            if want != (code or None):
+                problems.append(f"footprint: {p.ref} ({p.value}, {code}) sits on {name}, which design/footprints.py drew for {want}")
+        else:
+            path = os.path.join(KICAD_FP, f"{lib}.pretty", f"{name}.kicad_mod")
         if not os.path.exists(path):
             problems.append(f"footprint: {p.ref} -> {p.footprint} not found in the KiCad library")
             continue
@@ -178,6 +193,8 @@ def check_footprints(design, problems, custom):
         missing = sorted(n for n in p.conn if n not in pads_of[path])
         if missing:
             problems.append(f"footprint: {p.ref} ({p.value}) has pins {missing} that {name} has no pad for")
+        if lib == "fcjamma":
+            continue
         code = p.code if p.src in (JLC, JLCX) else socketed.get(p.ref)
         row = basic.get(code) or ext.get(code)
         text, exact = expected_package(name)
@@ -522,10 +539,56 @@ def write_outputs(design, outdir):
                 w.writerow([p.sheet, p.ref, p.value, num, nm, net if net is not None else "(NC)"])
 
 
+def footprint_outputs(expected, env, kdir, odir, problems, warnings):
+    """out/footprints/: KiCad's read-back of the board's footprints, their drawings, the cartridge check print."""
+    fdir = os.path.join(odir, "footprints")
+    os.makedirs(fdir, exist_ok=True)
+    for f in os.listdir(fdir):
+        if f.endswith((".svg", ".json", ".pdf", ".png")):
+            os.remove(os.path.join(fdir, f))
+    epath = os.path.join(fdir, "expected.json")
+    fp_sheets.write_json(expected, epath)
+    line = "not read back by KiCad"
+    if os.path.exists(SYSTEM_PYTHON) and run([SYSTEM_PYTHON, "-c", "import pcbnew"], env, ROOT)[0] == 0:
+        rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "check_footprints.py"), FPLIB_DIR, epath], env, ROOT)
+        line = out.splitlines()[-1] if out else "no output"
+        if rc:
+            problems += [f"footprint read back by KiCad: {x}" for x in out.splitlines()[:-1]] or [f"footprint read-back failed: {out[-300:]}"]
+    else:
+        warnings.append("KiCad's pcbnew module is not available to the system Python; the footprints were not read back")
+    rc, out = run(["kicad-cli", "fp", "export", "svg", "-o", fdir, FPLIB_DIR], env, kdir)
+    if rc:
+        problems.append("kicad-cli could not draw the board's footprints: " + out[-300:])
+    for f in os.listdir(fdir):
+        if f.endswith(".svg"):               # keep rebuilds identical: drop the plot date from the title
+            p = os.path.join(fdir, f)
+            text = re.sub(r" date \d{4}-\d{2}-\d{2}T[\d:]+ ", " ", open(p, encoding="utf-8").read())
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(text)
+    cart = {k: v[0] for k, v in expected[FPL.CART]["pads"].items()}
+    svg = fp_sheets.cart_check_svg(cart, f"fcjamma:{FPL.CART}", "WingTAT ED60BGFBK drawing Rev A; NESdev wiki 'Cartridge connector' "
+                                   "(2026-08-31); OpenFC HVC-CPU-07")
+    err = fp_sheets.render_pdf(svg, os.path.join(fdir, "J8_cartridge_slot_1to1_check.pdf"))
+    if err:
+        warnings.append(f"the cartridge check print was not rendered ({err})")
+    captions = {FPL.JAMMA: ("J1 JAMMA の金フィンガー", "表 1〜28・裏 A〜f、ピッチ 3.96、キー溝は 7/H（外形は基板側で描く）"),
+                FPL.CART: ("J8 カセット端子 ED60BGFBK", "ラベル面が 1〜30（下の列）、31 は 1 の真裏、穴 1.0"),
+                FPL.TRIM: ("RV1 半固定抵抗 3362P", "時計回りで 3 番側（音が大きく）、穴 0.9"),
+                FPL.DIP: ("SW3 DIP スイッチ DS-04RP", "穴 1.0 に拡大、ON は 5〜8 番の側"),
+                FPL.PICO: ("U25〜U27 Pico 2", "TP7 の真下に直径 2.5 mm の禁止域（銅もマスク開口も無し）")}
+    err = fp_sheets.overview_png(fdir, [FPL.JAMMA, FPL.CART, FPL.TRIM, FPL.DIP, FPL.PICO], captions,
+                                 os.path.join(fdir, "footprints_overview.png"))
+    if err:
+        warnings.append(f"the footprint overview was not rendered ({err})")
+    return line
+
+
 def main():
     import circuit
     design, flags = circuit.build()
     problems, warnings, custom = [], [], set()
+    fp_expected, (fp_failed, fp_facts) = FPL.write_library(FPLIB_DIR)
+    problems += [f"footprint fact does not hold: {text}" for text in fp_failed]
     check_rule(design, problems, warnings)
     check_footprints(design, problems, custom)
     check_design_rules(design, problems)
@@ -578,6 +641,7 @@ def main():
         write_outputs(design, odir)
     except Exception as e:      # for example a part that is missing from the data files; the list below says which
         problems.append(f"writing out/ failed: {type(e).__name__}: {e}")
+    fp_line = footprint_outputs(fp_expected, env, kdir, odir, problems, warnings)
 
     by = {}
     for p in design.parts.values():
@@ -601,8 +665,8 @@ def main():
         print(f"  ({c['kinds']} kinds of parts, {c['SMT kinds']} of them SMT; {c['SMT joints']} SMT joints, {c['hand-soldered joints']} hand-soldered joints; "
           "not counted: see out/cost_estimate.csv)")
     print("ERC:", erc_line)
-    if custom:
-        print("custom footprints still to be drawn:", ", ".join(sorted(custom)))
+    print(f"board footprints: {len(fp_expected)} drawn ({', '.join(sorted(custom))} used), {fp_facts - len(fp_failed)}/{fp_facts} "
+          f"drawing facts hold; {fp_line}")
     for w in warnings:
         print("WARNING:", w)
     if problems:

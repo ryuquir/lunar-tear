@@ -51,15 +51,15 @@ JLCX,C282339,74HCT595 (PPU A0-7),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1
 JLCX,C282339,74HCT595 (PPU A8-13),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U13,JLCPCB (SMT Assembly),6561,0.2388,
 JLCX,C282339,74HCT595 (control),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U14,JLCPCB (SMT Assembly),6561,0.2388,"QA R/W, QB PPU /RD, QC PPU /WR, QD latch off, QE M2, QF low = U15 drives the data bus"
 JLCX,C282339,74HCT595 (data to cartridge),"74HCT595D,118",Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,1,,U15,JLCPCB (SMT Assembly),6561,0.2388,drives the data bus only while a mapper register is being written
-JLCX,C92645,DS-04RP (DIP switch 4),DS-04RP,Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,1,,SW3,JLCPCB (Wave Soldering),14606,0.3626,"1: off = CPU and PPU chips fitted, on = emulation (it also unlocks the dump drivers); 2-4: for the firmware"
+JLCX,C92645,DS-04RP (DIP switch 4),DS-04RP,fcjamma:SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm,1,,SW3,JLCPCB (Wave Soldering),14606,0.3626,"1: off = CPU and PPU chips fitted, on = emulation (it also unlocks the dump drivers); 2-4: for the firmware"
 JLCX,C5173310,"ED60BGFBK (60-pin card edge, 2.54 mm)",ED60BGFBK,fcjamma:Famicom_Cart_60,1,,J8,JLCPCB (Wave Soldering),296,1.358,made for 1.57 mm cards; its fit with Famicom cartridges has to be tried with a sample before the order
 JLCX,C47143,IS62C256AL (video RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U8,JLCPCB (SMT Assembly),2021,3.3279,
 JLCX,C47143,IS62C256AL (work RAM),IS62C256AL-45TLI,Package_SO:TSOP-I-28_11.8x8mm_P0.55mm,1,,U3,JLCPCB (SMT Assembly),2021,3.3279,
 JLCX,C283912,LMV7219,LMV7219M5X/NOPB,Package_TO_SOT_SMD:SOT-23-5,1,,U9,JLCPCB (SMT Assembly),745,0.7576,"high while the pixel is brighter than the threshold; 7 ns, against a pixel time of 186 ns; on +3V3, so its output suits the Pico"
 JLCX,C113367,PAM8302A,PAM8302AASCR,Package_SO:MSOP-8_3x3mm_P0.65mm,1,,U19,JLCPCB (SMT Assembly),20283,0.4107,"class D, gain 15 (23.5 dB), 1.3 W into 8 ohm at 1 % distortion (1.5 W at 10 %); powered from +5V, not through the +5V_SW switch"
-JLCX,C41407547,Pico 2 A (video),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U25,JLCPCB (SMT Assembly),480,9.2916,
-JLCX,C41407547,Pico 2 B (bus),Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U26,JLCPCB (SMT Assembly),480,9.2916,
-JLCX,C41407547,"Pico 2 C (I/O, management)",Raspberry Pi Pico 2,Module:RaspberryPi_Pico_SMD,1,,U27,JLCPCB (SMT Assembly),480,9.2916,
+JLCX,C41407547,Pico 2 A (video),Raspberry Pi Pico 2,fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut,1,,U25,JLCPCB (SMT Assembly),480,9.2916,
+JLCX,C41407547,Pico 2 B (bus),Raspberry Pi Pico 2,fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut,1,,U26,JLCPCB (SMT Assembly),480,9.2916,
+JLCX,C41407547,"Pico 2 C (I/O, management)",Raspberry Pi Pico 2,fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut,1,,U27,JLCPCB (SMT Assembly),480,9.2916,
 JLCX,C86819,SMAJ15A,SMAJ15A/TR13,Diode_SMD:D_SMA,4,,D7 D8 D9 D10,JLCPCB (SMT Assembly),88864,0.0475,"takes the coil's turn-off current: nothing flows up to 15 V (coil supplies above that are not allowed), the drain stays below 25 V (the transistor stands 30 V)"
 JLCX,C262042,TLC-LSMD300D (3 A hold),TLC-LSMD300D,Fuse:Fuse_2920_7451Metric,1,,F1,JLCPCB (SMT Assembly),10660,0.1527,"resettable fuse: holds 3 A, trips at 6 A"
 JLCX,C55266,TPS2553,TPS2553DBVR,Package_TO_SOT_SMD:SOT-23-6,1,,U29,JLCPCB (SMT Assembly),48326,0.5531,"off while EN is low or +5V is below 2.4 V; limits the current to 1.2-1.4 A; nothing flows back from +5V_SW to +5V; /FAULT pulls the I_5VSW bit low on over-current (after 7.5 ms), over-temperature or reverse voltage.  7 V is the part's absolute maximum; in a short circuit it switches off and on thermally until Pico C lowers EN"

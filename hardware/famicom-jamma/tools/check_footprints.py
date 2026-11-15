@@ -19,6 +19,11 @@ TOL = 0.001          # mm
 ATTR = {pcbnew.PAD_ATTRIB_PTH: "thru_hole", pcbnew.PAD_ATTRIB_NPTH: "np_thru_hole",
         pcbnew.PAD_ATTRIB_SMD: "smd", pcbnew.PAD_ATTRIB_CONN: "connect"}
 
+# the names in the files and the names pcbnew.LayerName() returns
+DISPLAY_NAME = {"F.SilkS": "F.Silkscreen", "B.SilkS": "B.Silkscreen", "F.CrtYd": "F.Courtyard", "B.CrtYd": "B.Courtyard",
+                "Cmts.User": "User.Comments", "Dwgs.User": "User.Drawings", "Eco1.User": "User.Eco1", "Eco2.User": "User.Eco2",
+                "F.Adhes": "F.Adhesive", "B.Adhes": "B.Adhesive"}
+
 
 def mm(v):
     return pcbnew.ToMM(v)
@@ -92,16 +97,30 @@ def main():
         zones = [z for z in fp.Zones() if z.GetIsRuleArea()]
         if len(zones) != want.get("keepouts", 0):
             problems.append(f"{name}: {len(zones)} keep-out areas, expected {want.get('keepouts', 0)}")
-        for z, wz in zip(zones, want.get("keepout_boxes", [])):
+        for z, wz, wr in zip(zones, want.get("keepout_boxes", []), want.get("keepout_rules", [])):
             bb = z.GetBoundingBox()
             box = [mm(bb.GetLeft()), mm(bb.GetTop()), mm(bb.GetRight()), mm(bb.GetBottom())]
             if any(abs(a - b) > 0.05 for a, b in zip(box, wz)):
-                problems.append(f"{name}: keep-out spans {[round(v, 3) for v in box]}, expected about {wz}")
+                problems.append(f"{name}: keep-out '{z.GetZoneName()}' spans {[round(v, 3) for v in box]}, expected about {wz}")
+            got_rules = {"tracks": z.GetDoNotAllowTracks(), "vias": z.GetDoNotAllowVias(), "pads": z.GetDoNotAllowPads(),
+                         "copperpour": z.GetDoNotAllowZoneFills(), "footprints": z.GetDoNotAllowFootprints()}
+            for key, forbidden in got_rules.items():
+                if (wr.get(key) == "not_allowed") != forbidden:
+                    problems.append(f"{name}: keep-out '{z.GetZoneName()}' {'forbids' if forbidden else 'allows'} {key}")
         attrs = fp.GetAttributes()
         for flag, wanted in (("exclude_from_pos_files", pcbnew.FP_EXCLUDE_FROM_POS_FILES),
                              ("exclude_from_bom", pcbnew.FP_EXCLUDE_FROM_BOM)):
             if (flag in want.get("attr", [])) != bool(attrs & wanted):
                 problems.append(f"{name}: attribute {flag} is {'set' if attrs & wanted else 'not set'}")
+        if ("allow_soldermask_bridges" in want.get("attr", [])) != fp.AllowSolderMaskBridges():
+            problems.append(f"{name}: allow_soldermask_bridges is {fp.AllowSolderMaskBridges()}")
+        layers = {}
+        for g in fp.GraphicalItems():
+            layers[pcbnew.LayerName(g.GetLayer())] = layers.get(pcbnew.LayerName(g.GetLayer()), 0) + 1
+        for layer, count in want.get("graphics", {}).items():
+            shown = DISPLAY_NAME.get(layer, layer)
+            if layers.get(shown, 0) != count:
+                problems.append(f"{name}: {layers.get(shown, 0)} drawings on {layer}, expected {count}")
     for p in problems:
         print(p)
     print(f"checked {len(expected)} footprints with KiCad {pcbnew.Version()}: {len(problems)} differences")

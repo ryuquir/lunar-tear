@@ -62,6 +62,14 @@ class Footprint:
         for p, q in (((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))):
             self.line(p, q, layer, width)
 
+    def arc(self, start, mid, end, layer, width=0.12):
+        self.items.append(["fp_arc", ["start", *_xy(start)], ["mid", *_xy(mid)], ["end", *_xy(end)], _stroke(width), ["layer", Q(layer)]])
+
+    def polyline(self, pts, layer, width, closed=False):
+        seq = list(pts) + ([pts[0]] if closed else [])
+        for a, b in zip(seq, seq[1:]):
+            self.line(a, b, layer, width)
+
     def text(self, s, at, layer, size=1.0, thickness=0.15, rot=0, mirror=False):
         eff = _font(size, thickness)
         if mirror:
@@ -82,18 +90,9 @@ class Footprint:
         self.items.append(node)
 
     # ---------------------------------------------------------------- rule areas
-    def keepout(self, layers, pts, tracks=True, vias=True, pads=True, copperpour=True, footprints=False):
-        """A keep-out rule area: True means 'not allowed'."""
-        def rule(flag):
-            return "not_allowed" if flag else "allowed"
-        layer_node = ["layer", Q(layers[0])] if len(layers) == 1 else ["layers", *[Q(x) for x in layers]]
-        self.items.append(["zone", layer_node, ["hatch", "full", "0.508"], ["connect_pads", ["clearance", "0"]],
-                           ["min_thickness", "0.254"],
-                           ["keepout", ["tracks", rule(tracks)], ["vias", rule(vias)], ["pads", rule(pads)],
-                            ["copperpour", rule(copperpour)], ["footprints", rule(footprints)]],
-                           ["placement", ["enabled", "no"], ["sheetname", Q("")]],
-                           ["fill", ["thermal_gap", "0.508"], ["thermal_bridge_width", "0.508"], ["island_removal_mode", "0"]],
-                           ["polygon", ["pts", *[["xy", *_xy(p)] for p in pts]]]])
+    def keepout(self, layers, pts, name, tracks=True, vias=True, pads=True, copperpour=True, footprints=False):
+        """A keep-out rule area: True means 'not allowed'.  The name is what board rules (.kicad_dru) refer to."""
+        self.items.append(keepout_zone(layers, pts, name, tracks, vias, pads, copperpour, footprints))
 
     # ---------------------------------------------------------------- file
     def tree(self):
@@ -107,8 +106,55 @@ class Footprint:
         return head + self.items + [["embedded_fonts", "no"]]
 
 
+def keepout_zone(layers, pts, name, tracks=True, vias=True, pads=True, copperpour=True, footprints=False):
+    def rule(flag):
+        return "not_allowed" if flag else "allowed"
+    layer_node = ["layer", Q(layers[0])] if len(layers) == 1 else ["layers", *[Q(x) for x in layers]]
+    return ["zone", layer_node, ["name", Q(name)], ["hatch", "full", "0.5"], ["connect_pads", ["clearance", "0"]],
+            ["min_thickness", "0.25"],
+            ["keepout", ["tracks", rule(tracks)], ["vias", rule(vias)], ["pads", rule(pads)],
+             ["copperpour", rule(copperpour)], ["footprints", rule(footprints)]],
+            ["placement", ["enabled", "no"], ["sheetname", Q("")]],
+            ["fill", ["thermal_gap", "0.5"], ["thermal_bridge_width", "0.5"], ["island_removal_mode", "0"]],
+            ["polygon", ["pts", *[["xy", *_xy(p)] for p in pts]]]]
+
+
 def circle_points(c, r, n=32):
     return [(c[0] + r * math.cos(2 * math.pi * k / n), c[1] + r * math.sin(2 * math.pi * k / n)) for k in range(n)]
+
+
+def expected(tree):
+    """What KiCad should read from this footprint: pads (keyed by number, or by position when unnumbered),
+    keep-out areas with their bounding boxes, and the attributes.  tools/check_footprints.py compares it with KiCad."""
+    out = {"pads": {}, "keepouts": 0, "keepout_boxes": [], "keepout_rules": [], "attr": []}
+    for p in find(tree, "pad"):
+        at, size = first(p, "at"), first(p, "size")
+        x, y = float(at[1]), float(at[2])
+        drill = first(p, "drill")
+        d = 0.0
+        if drill is not None:
+            nums = [v for v in drill[1:] if not isinstance(v, list) and v != "oval"]
+            d = float(nums[0]) if nums else 0.0
+        key = str(p[1]) or f"(no number) {x:.3f},{y:.3f}"
+        out["pads"].setdefault(key, []).append({"x": x, "y": y, "kind": p[2], "w": float(size[1]), "h": float(size[2]),
+                                                "drill": d, "layers": [str(v) for v in first(p, "layers")[1:]]})
+    for z in find(tree, "zone"):
+        ko = first(z, "keepout")
+        if ko is None:
+            continue
+        pts = [(float(v[1]), float(v[2])) for v in first(first(z, "polygon"), "pts")[1:] if v[0] == "xy"]
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        out["keepouts"] += 1
+        out["keepout_boxes"].append([min(xs), min(ys), max(xs), max(ys)])
+        out["keepout_rules"].append({r[0]: r[1] for r in ko[1:]})
+    attr = first(tree, "attr")
+    out["attr"] = [str(a) for a in attr[1:]] if attr else []
+    out["graphics"] = {}
+    for x in tree:
+        if isinstance(x, list) and x and x[0] in ("fp_line", "fp_rect", "fp_circle", "fp_arc", "fp_poly", "fp_text"):
+            layer = str(first(x, "layer")[1])
+            out["graphics"][layer] = out["graphics"].get(layer, 0) + 1
+    return out
 
 
 def add_uuids(tree, name):

@@ -1,0 +1,3204 @@
+{
+ "Famicom_Cart_60": {
+  "attr": [
+   "through_hole"
+  ],
+  "graphics": {
+   "Dwgs.User": 3,
+   "F.CrtYd": 1,
+   "F.Fab": 5,
+   "F.SilkS": 7
+  },
+  "keepout_boxes": [],
+  "keepout_rules": [],
+  "keepouts": 0,
+  "pads": {
+   "1": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -36.83,
+     "y": 2.54
+    }
+   ],
+   "10": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -13.97,
+     "y": 2.54
+    }
+   ],
+   "11": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -11.43,
+     "y": 2.54
+    }
+   ],
+   "12": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -8.89,
+     "y": 2.54
+    }
+   ],
+   "13": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -6.35,
+     "y": 2.54
+    }
+   ],
+   "14": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -3.81,
+     "y": 2.54
+    }
+   ],
+   "15": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -1.27,
+     "y": 2.54
+    }
+   ],
+   "16": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 1.27,
+     "y": 2.54
+    }
+   ],
+   "17": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 3.81,
+     "y": 2.54
+    }
+   ],
+   "18": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 6.35,
+     "y": 2.54
+    }
+   ],
+   "19": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 8.89,
+     "y": 2.54
+    }
+   ],
+   "2": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -34.29,
+     "y": 2.54
+    }
+   ],
+   "20": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 11.43,
+     "y": 2.54
+    }
+   ],
+   "21": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 13.97,
+     "y": 2.54
+    }
+   ],
+   "22": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 16.51,
+     "y": 2.54
+    }
+   ],
+   "23": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 19.05,
+     "y": 2.54
+    }
+   ],
+   "24": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 21.59,
+     "y": 2.54
+    }
+   ],
+   "25": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 24.13,
+     "y": 2.54
+    }
+   ],
+   "26": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 26.67,
+     "y": 2.54
+    }
+   ],
+   "27": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 29.21,
+     "y": 2.54
+    }
+   ],
+   "28": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 31.75,
+     "y": 2.54
+    }
+   ],
+   "29": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 34.29,
+     "y": 2.54
+    }
+   ],
+   "3": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -31.75,
+     "y": 2.54
+    }
+   ],
+   "30": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 36.83,
+     "y": 2.54
+    }
+   ],
+   "31": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -36.83,
+     "y": -2.54
+    }
+   ],
+   "32": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -34.29,
+     "y": -2.54
+    }
+   ],
+   "33": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -31.75,
+     "y": -2.54
+    }
+   ],
+   "34": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -29.21,
+     "y": -2.54
+    }
+   ],
+   "35": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -26.67,
+     "y": -2.54
+    }
+   ],
+   "36": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -24.13,
+     "y": -2.54
+    }
+   ],
+   "37": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -21.59,
+     "y": -2.54
+    }
+   ],
+   "38": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -19.05,
+     "y": -2.54
+    }
+   ],
+   "39": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -16.51,
+     "y": -2.54
+    }
+   ],
+   "4": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -29.21,
+     "y": 2.54
+    }
+   ],
+   "40": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -13.97,
+     "y": -2.54
+    }
+   ],
+   "41": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -11.43,
+     "y": -2.54
+    }
+   ],
+   "42": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -8.89,
+     "y": -2.54
+    }
+   ],
+   "43": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -6.35,
+     "y": -2.54
+    }
+   ],
+   "44": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -3.81,
+     "y": -2.54
+    }
+   ],
+   "45": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -1.27,
+     "y": -2.54
+    }
+   ],
+   "46": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 1.27,
+     "y": -2.54
+    }
+   ],
+   "47": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 3.81,
+     "y": -2.54
+    }
+   ],
+   "48": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 6.35,
+     "y": -2.54
+    }
+   ],
+   "49": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 8.89,
+     "y": -2.54
+    }
+   ],
+   "5": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -26.67,
+     "y": 2.54
+    }
+   ],
+   "50": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 11.43,
+     "y": -2.54
+    }
+   ],
+   "51": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 13.97,
+     "y": -2.54
+    }
+   ],
+   "52": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 16.51,
+     "y": -2.54
+    }
+   ],
+   "53": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 19.05,
+     "y": -2.54
+    }
+   ],
+   "54": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 21.59,
+     "y": -2.54
+    }
+   ],
+   "55": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 24.13,
+     "y": -2.54
+    }
+   ],
+   "56": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 26.67,
+     "y": -2.54
+    }
+   ],
+   "57": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 29.21,
+     "y": -2.54
+    }
+   ],
+   "58": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 31.75,
+     "y": -2.54
+    }
+   ],
+   "59": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 34.29,
+     "y": -2.54
+    }
+   ],
+   "6": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -24.13,
+     "y": 2.54
+    }
+   ],
+   "60": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 36.83,
+     "y": -2.54
+    }
+   ],
+   "7": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -21.59,
+     "y": 2.54
+    }
+   ],
+   "8": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -19.05,
+     "y": 2.54
+    }
+   ],
+   "9": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": -16.51,
+     "y": 2.54
+    }
+   ]
+  }
+ },
+ "JAMMA_Edge_56": {
+  "attr": [
+   "exclude_from_pos_files",
+   "exclude_from_bom",
+   "allow_soldermask_bridges"
+  ],
+  "graphics": {
+   "B.CrtYd": 1,
+   "B.Mask": 1,
+   "B.SilkS": 3,
+   "Cmts.User": 2,
+   "F.CrtYd": 1,
+   "F.Fab": 12,
+   "F.Mask": 1,
+   "F.SilkS": 3
+  },
+  "keepout_boxes": [
+   [
+    -4.24,
+    -1.2,
+    111.16,
+    0.5
+   ],
+   [
+    -4.24,
+    -9.0,
+    111.16,
+    -1.2
+   ],
+   [
+    -4.24,
+    -11.0,
+    111.16,
+    -9.0
+   ]
+  ],
+  "keepout_rules": [
+   {
+    "copperpour": "not_allowed",
+    "footprints": "allowed",
+    "pads": "not_allowed",
+    "tracks": "not_allowed",
+    "vias": "not_allowed"
+   },
+   {
+    "copperpour": "not_allowed",
+    "footprints": "allowed",
+    "pads": "allowed",
+    "tracks": "not_allowed",
+    "vias": "not_allowed"
+   },
+   {
+    "copperpour": "not_allowed",
+    "footprints": "allowed",
+    "pads": "allowed",
+    "tracks": "allowed",
+    "vias": "not_allowed"
+   }
+  ],
+  "keepouts": 3,
+  "pads": {
+   "1": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 0.0,
+     "y": -5.6
+    }
+   ],
+   "10": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 35.64,
+     "y": -5.6
+    }
+   ],
+   "11": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 39.6,
+     "y": -5.6
+    }
+   ],
+   "12": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 43.56,
+     "y": -5.6
+    }
+   ],
+   "13": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 47.52,
+     "y": -5.6
+    }
+   ],
+   "14": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 51.48,
+     "y": -5.6
+    }
+   ],
+   "15": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 55.44,
+     "y": -5.6
+    }
+   ],
+   "16": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 59.4,
+     "y": -5.6
+    }
+   ],
+   "17": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 63.36,
+     "y": -5.6
+    }
+   ],
+   "18": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 67.32,
+     "y": -5.6
+    }
+   ],
+   "19": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 71.28,
+     "y": -5.6
+    }
+   ],
+   "2": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 3.96,
+     "y": -5.6
+    }
+   ],
+   "20": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 75.24,
+     "y": -5.6
+    }
+   ],
+   "21": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 79.2,
+     "y": -5.6
+    }
+   ],
+   "22": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 83.16,
+     "y": -5.6
+    }
+   ],
+   "23": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 87.12,
+     "y": -5.6
+    }
+   ],
+   "24": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 91.08,
+     "y": -5.6
+    }
+   ],
+   "25": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 95.04,
+     "y": -5.6
+    }
+   ],
+   "26": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 99.0,
+     "y": -5.6
+    }
+   ],
+   "27": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 102.96,
+     "y": -5.6
+    }
+   ],
+   "28": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 106.92,
+     "y": -5.6
+    }
+   ],
+   "3": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 7.92,
+     "y": -5.6
+    }
+   ],
+   "4": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 11.88,
+     "y": -5.6
+    }
+   ],
+   "5": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 15.84,
+     "y": -5.6
+    }
+   ],
+   "6": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 19.8,
+     "y": -5.6
+    }
+   ],
+   "8": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 27.72,
+     "y": -5.6
+    }
+   ],
+   "9": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 2.3,
+     "x": 31.68,
+     "y": -5.6
+    }
+   ],
+   "A": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 0.0,
+     "y": -5.6
+    }
+   ],
+   "B": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 3.96,
+     "y": -5.6
+    }
+   ],
+   "C": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 7.92,
+     "y": -5.6
+    }
+   ],
+   "D": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 11.88,
+     "y": -5.6
+    }
+   ],
+   "E": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 15.84,
+     "y": -5.6
+    }
+   ],
+   "F": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 19.8,
+     "y": -5.6
+    }
+   ],
+   "J": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 27.72,
+     "y": -5.6
+    }
+   ],
+   "K": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 31.68,
+     "y": -5.6
+    }
+   ],
+   "L": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 35.64,
+     "y": -5.6
+    }
+   ],
+   "M": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 39.6,
+     "y": -5.6
+    }
+   ],
+   "N": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 43.56,
+     "y": -5.6
+    }
+   ],
+   "P": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 47.52,
+     "y": -5.6
+    }
+   ],
+   "R": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 51.48,
+     "y": -5.6
+    }
+   ],
+   "S": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 55.44,
+     "y": -5.6
+    }
+   ],
+   "T": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 59.4,
+     "y": -5.6
+    }
+   ],
+   "U": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 63.36,
+     "y": -5.6
+    }
+   ],
+   "V": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 67.32,
+     "y": -5.6
+    }
+   ],
+   "W": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 71.28,
+     "y": -5.6
+    }
+   ],
+   "X": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 75.24,
+     "y": -5.6
+    }
+   ],
+   "Y": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 79.2,
+     "y": -5.6
+    }
+   ],
+   "Z": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 83.16,
+     "y": -5.6
+    }
+   ],
+   "a": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 87.12,
+     "y": -5.6
+    }
+   ],
+   "b": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 91.08,
+     "y": -5.6
+    }
+   ],
+   "c": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 95.04,
+     "y": -5.6
+    }
+   ],
+   "d": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 99.0,
+     "y": -5.6
+    }
+   ],
+   "e": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 102.96,
+     "y": -5.6
+    }
+   ],
+   "f": [
+    {
+     "drill": 0.0,
+     "h": 8.8,
+     "kind": "connect",
+     "layers": [
+      "B.Cu",
+      "B.Mask"
+     ],
+     "w": 2.3,
+     "x": 106.92,
+     "y": -5.6
+    }
+   ]
+  }
+ },
+ "RaspberryPi_Pico2_SMD_TP7KeepOut": {
+  "attr": [
+   "smd"
+  ],
+  "graphics": {
+   "Cmts.User": 4,
+   "Dwgs.User": 5,
+   "F.CrtYd": 1,
+   "F.Fab": 17,
+   "F.SilkS": 57
+  },
+  "keepout_boxes": [
+   [
+    -0.25,
+    -6.25,
+    2.25,
+    -3.75
+   ]
+  ],
+  "keepout_rules": [
+   {
+    "copperpour": "not_allowed",
+    "footprints": "allowed",
+    "pads": "not_allowed",
+    "tracks": "not_allowed",
+    "vias": "not_allowed"
+   }
+  ],
+  "keepouts": 1,
+  "pads": {
+   "(no number) -2.425,-20.970": [
+    {
+     "drill": 0.0,
+     "h": 1.45,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.05,
+     "x": -2.425,
+     "y": -20.97
+    }
+   ],
+   "(no number) -2.540,23.900": [
+    {
+     "drill": 0.0,
+     "h": 3.8,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 2.2,
+     "x": -2.54,
+     "y": 23.9
+    }
+   ],
+   "(no number) -2.725,-24.000": [
+    {
+     "drill": 0.0,
+     "h": 1.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.1,
+     "x": -2.725,
+     "y": -24.0
+    }
+   ],
+   "(no number) -8.890,-1.270": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -1.27
+    }
+   ],
+   "(no number) -8.890,-11.430": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -11.43
+    }
+   ],
+   "(no number) -8.890,-13.970": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -13.97
+    }
+   ],
+   "(no number) -8.890,-16.510": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -16.51
+    }
+   ],
+   "(no number) -8.890,-19.050": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -19.05
+    }
+   ],
+   "(no number) -8.890,-21.590": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -21.59
+    }
+   ],
+   "(no number) -8.890,-24.130": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -24.13
+    }
+   ],
+   "(no number) -8.890,-3.810": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -3.81
+    }
+   ],
+   "(no number) -8.890,-6.350": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -6.35
+    }
+   ],
+   "(no number) -8.890,-8.890": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": -8.89
+    }
+   ],
+   "(no number) -8.890,1.270": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 1.27
+    }
+   ],
+   "(no number) -8.890,11.430": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 11.43
+    }
+   ],
+   "(no number) -8.890,13.970": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 13.97
+    }
+   ],
+   "(no number) -8.890,16.510": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 16.51
+    }
+   ],
+   "(no number) -8.890,19.050": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 19.05
+    }
+   ],
+   "(no number) -8.890,21.590": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 21.59
+    }
+   ],
+   "(no number) -8.890,24.130": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 24.13
+    }
+   ],
+   "(no number) -8.890,3.810": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 3.81
+    }
+   ],
+   "(no number) -8.890,6.350": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 6.35
+    }
+   ],
+   "(no number) -8.890,8.890": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": -8.89,
+     "y": 8.89
+    }
+   ],
+   "(no number) 0.000,23.900": [
+    {
+     "drill": 0.0,
+     "h": 3.8,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 2.2,
+     "x": 0.0,
+     "y": 23.9
+    }
+   ],
+   "(no number) 2.425,-20.970": [
+    {
+     "drill": 0.0,
+     "h": 1.45,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.05,
+     "x": 2.425,
+     "y": -20.97
+    }
+   ],
+   "(no number) 2.540,23.900": [
+    {
+     "drill": 0.0,
+     "h": 3.8,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 2.2,
+     "x": 2.54,
+     "y": 23.9
+    }
+   ],
+   "(no number) 2.725,-24.000": [
+    {
+     "drill": 0.0,
+     "h": 1.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.1,
+     "x": 2.725,
+     "y": -24.0
+    }
+   ],
+   "(no number) 8.890,-1.270": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -1.27
+    }
+   ],
+   "(no number) 8.890,-11.430": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -11.43
+    }
+   ],
+   "(no number) 8.890,-13.970": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -13.97
+    }
+   ],
+   "(no number) 8.890,-16.510": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -16.51
+    }
+   ],
+   "(no number) 8.890,-19.050": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -19.05
+    }
+   ],
+   "(no number) 8.890,-21.590": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -21.59
+    }
+   ],
+   "(no number) 8.890,-24.130": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -24.13
+    }
+   ],
+   "(no number) 8.890,-3.810": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -3.81
+    }
+   ],
+   "(no number) 8.890,-6.350": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -6.35
+    }
+   ],
+   "(no number) 8.890,-8.890": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": -8.89
+    }
+   ],
+   "(no number) 8.890,1.270": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 1.27
+    }
+   ],
+   "(no number) 8.890,11.430": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 11.43
+    }
+   ],
+   "(no number) 8.890,13.970": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 13.97
+    }
+   ],
+   "(no number) 8.890,16.510": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 16.51
+    }
+   ],
+   "(no number) 8.890,19.050": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 19.05
+    }
+   ],
+   "(no number) 8.890,21.590": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 21.59
+    }
+   ],
+   "(no number) 8.890,24.130": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 24.13
+    }
+   ],
+   "(no number) 8.890,3.810": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 3.81
+    }
+   ],
+   "(no number) 8.890,6.350": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 6.35
+    }
+   ],
+   "(no number) 8.890,8.890": [
+    {
+     "drill": 0.0,
+     "h": 2.2,
+     "kind": "smd",
+     "layers": [
+      "F.Paste"
+     ],
+     "w": 3.8,
+     "x": 8.89,
+     "y": 8.89
+    }
+   ],
+   "1": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": -9.69,
+     "y": -24.13
+    }
+   ],
+   "10": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -1.27
+    }
+   ],
+   "11": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 1.27
+    }
+   ],
+   "12": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 3.81
+    }
+   ],
+   "13": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": -9.69,
+     "y": 6.35
+    }
+   ],
+   "14": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 8.89
+    }
+   ],
+   "15": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 11.43
+    }
+   ],
+   "16": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 13.97
+    }
+   ],
+   "17": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 16.51
+    }
+   ],
+   "18": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": -9.69,
+     "y": 19.05
+    }
+   ],
+   "19": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 21.59
+    }
+   ],
+   "2": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -21.59
+    }
+   ],
+   "20": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": 24.13
+    }
+   ],
+   "21": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 24.13
+    }
+   ],
+   "22": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 21.59
+    }
+   ],
+   "23": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": 9.69,
+     "y": 19.05
+    }
+   ],
+   "24": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 16.51
+    }
+   ],
+   "25": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 13.97
+    }
+   ],
+   "26": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 11.43
+    }
+   ],
+   "27": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 8.89
+    }
+   ],
+   "28": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": 9.69,
+     "y": 6.35
+    }
+   ],
+   "29": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 3.81
+    }
+   ],
+   "3": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": -9.69,
+     "y": -19.05
+    }
+   ],
+   "30": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": 1.27
+    }
+   ],
+   "31": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -1.27
+    }
+   ],
+   "32": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -3.81
+    }
+   ],
+   "33": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": 9.69,
+     "y": -6.35
+    }
+   ],
+   "34": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -8.89
+    }
+   ],
+   "35": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -11.43
+    }
+   ],
+   "36": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -13.97
+    }
+   ],
+   "37": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -16.51
+    }
+   ],
+   "38": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": 9.69,
+     "y": -19.05
+    }
+   ],
+   "39": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -21.59
+    }
+   ],
+   "4": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -16.51
+    }
+   ],
+   "40": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 9.69,
+     "y": -24.13
+    }
+   ],
+   "5": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -13.97
+    }
+   ],
+   "6": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -11.43
+    }
+   ],
+   "7": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -8.89
+    }
+   ],
+   "8": [
+    {
+     "drill": 0.0,
+     "h": 0.8,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": -9.69,
+     "y": -6.35
+    }
+   ],
+   "9": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -9.69,
+     "y": -3.81
+    }
+   ],
+   "D1": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": -2.54,
+     "y": 23.9
+    }
+   ],
+   "D2": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 1.6,
+     "x": 0.0,
+     "y": 23.9
+    }
+   ],
+   "D3": [
+    {
+     "drill": 0.0,
+     "h": 1.6,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask"
+     ],
+     "w": 3.2,
+     "x": 2.54,
+     "y": 23.9
+    }
+   ],
+   "TP1": [
+    {
+     "drill": 0.0,
+     "h": 1.5,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.5,
+     "x": 0.0,
+     "y": -21.0
+    }
+   ],
+   "TP2": [
+    {
+     "drill": 0.0,
+     "h": 1.5,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.5,
+     "x": 1.0,
+     "y": -24.3
+    }
+   ],
+   "TP3": [
+    {
+     "drill": 0.0,
+     "h": 1.5,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.5,
+     "x": -1.0,
+     "y": -24.3
+    }
+   ],
+   "TP4": [
+    {
+     "drill": 0.0,
+     "h": 1.5,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.5,
+     "x": -2.5,
+     "y": -17.5
+    }
+   ],
+   "TP5": [
+    {
+     "drill": 0.0,
+     "h": 1.5,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.5,
+     "x": -2.5,
+     "y": -15.0
+    }
+   ],
+   "TP6": [
+    {
+     "drill": 0.0,
+     "h": 1.5,
+     "kind": "smd",
+     "layers": [
+      "F.Cu",
+      "F.Mask",
+      "F.Paste"
+     ],
+     "w": 1.5,
+     "x": -2.5,
+     "y": -12.5
+    }
+   ]
+  }
+ },
+ "SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm": {
+  "attr": [
+   "through_hole"
+  ],
+  "graphics": {
+   "F.CrtYd": 1,
+   "F.Fab": 19,
+   "F.SilkS": 26
+  },
+  "keepout_boxes": [],
+  "keepout_rules": [],
+  "keepouts": 0,
+  "pads": {
+   "1": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 0.0,
+     "y": 0.0
+    }
+   ],
+   "2": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 0.0,
+     "y": 2.54
+    }
+   ],
+   "3": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 0.0,
+     "y": 5.08
+    }
+   ],
+   "4": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 0.0,
+     "y": 7.62
+    }
+   ],
+   "5": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 7.62,
+     "y": 7.62
+    }
+   ],
+   "6": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 7.62,
+     "y": 5.08
+    }
+   ],
+   "7": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 7.62,
+     "y": 2.54
+    }
+   ],
+   "8": [
+    {
+     "drill": 1.0,
+     "h": 1.7,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.7,
+     "x": 7.62,
+     "y": 0.0
+    }
+   ]
+  }
+ },
+ "Trimmer_Bourns_3362P": {
+  "attr": [
+   "through_hole"
+  ],
+  "graphics": {
+   "F.CrtYd": 1,
+   "F.Fab": 6,
+   "F.SilkS": 7
+  },
+  "keepout_boxes": [],
+  "keepout_rules": [],
+  "keepouts": 0,
+  "pads": {
+   "1": [
+    {
+     "drill": 0.9,
+     "h": 1.6,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.6,
+     "x": -2.54,
+     "y": 1.27
+    }
+   ],
+   "2": [
+    {
+     "drill": 0.9,
+     "h": 1.6,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.6,
+     "x": 0.0,
+     "y": -1.27
+    }
+   ],
+   "3": [
+    {
+     "drill": 0.9,
+     "h": 1.6,
+     "kind": "thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "w": 1.6,
+     "x": 2.54,
+     "y": 1.27
+    }
+   ]
+  }
+ }
+}

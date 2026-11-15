@@ -28145,7 +28145,7 @@
 		(comp
 			(ref "SW3")
 			(value "DS-04RP (DIP switch 4)")
-			(footprint "Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm")
+			(footprint "fcjamma:SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm")
 			(fields
 				(field
 					(name "Source") "JLCX")
@@ -28156,7 +28156,7 @@
 				(field
 					(name "hierarchy_path") "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/a4faf3a2-0886-55e7-85f8-41c3fd8cfd93")
 				(field
-					(name "Footprint") "Button_Switch_THT:SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm")
+					(name "Footprint") "fcjamma:SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm")
 				(field
 					(name "Datasheet")
 				)
@@ -30633,7 +30633,7 @@
 		(comp
 			(ref "U25")
 			(value "Pico 2 A (video)")
-			(footprint "Module:RaspberryPi_Pico_SMD")
+			(footprint "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut")
 			(fields
 				(field
 					(name "Source") "JLCX")
@@ -30642,7 +30642,7 @@
 				(field
 					(name "hierarchy_path") "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/05f4455c-c276-5a9f-8b14-80206e0fe770")
 				(field
-					(name "Footprint") "Module:RaspberryPi_Pico_SMD")
+					(name "Footprint") "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut")
 				(field
 					(name "Datasheet")
 				)
@@ -30838,7 +30838,7 @@
 		(comp
 			(ref "U26")
 			(value "Pico 2 B (bus)")
-			(footprint "Module:RaspberryPi_Pico_SMD")
+			(footprint "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut")
 			(fields
 				(field
 					(name "Source") "JLCX")
@@ -30847,7 +30847,7 @@
 				(field
 					(name "hierarchy_path") "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/05f4455c-c276-5a9f-8b14-80206e0fe770")
 				(field
-					(name "Footprint") "Module:RaspberryPi_Pico_SMD")
+					(name "Footprint") "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut")
 				(field
 					(name "Datasheet")
 				)
@@ -31043,7 +31043,7 @@
 		(comp
 			(ref "U27")
 			(value "Pico 2 C (I/O, management)")
-			(footprint "Module:RaspberryPi_Pico_SMD")
+			(footprint "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut")
 			(fields
 				(field
 					(name "Source") "JLCX")
@@ -31052,7 +31052,7 @@
 				(field
 					(name "hierarchy_path") "/1de4cc9a-e2b8-52b0-afce-c09c3cf75d48/05f4455c-c276-5a9f-8b14-80206e0fe770")
 				(field
-					(name "Footprint") "Module:RaspberryPi_Pico_SMD")
+					(name "Footprint") "fcjamma:RaspberryPi_Pico2_SMD_TP7KeepOut")
 				(field
 					(name "Datasheet")
 				)
