@@ -215,6 +215,27 @@ static void t_158(int *checks, int *fails) {
     rb(0, 0x80);
     wr(0xA000, 1);
     TM_CHECK(tm_nt(&c, 1) == 0 && tm_nt(&c, 2) == 1 && tm_chr_bank(&c, 0) == 0x80, "64 H, chr");
+    /* PRG modes (nesdev wiki RAMBO-1): P=0 $8000 R6, $A000 R7, $C000 RF; P=1 $8000 RF, $A000 R7, $C000 R6; $E000 last */
+    rb(0x06, 3); rb(0x07, 5); rb(0x0F, 7);
+    TM_CHECK(tm_prg_bank(&c, 4) == 3 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 7 && tm_prg_bank(&c, 7) == 15, "64 P=0 prg R6/R7/RF/last");
+    wr(0x8000, 0x46);
+    TM_CHECK(tm_prg_bank(&c, 4) == 7 && tm_prg_bank(&c, 5) == 5 && tm_prg_bank(&c, 6) == 3 && tm_prg_bank(&c, 7) == 15, "64 P=1 prg RF/R7/R6/last (prg %u %u %u)", tm_prg_bank(&c, 4), tm_prg_bank(&c, 5), tm_prg_bank(&c, 6));
+    /* CPU-cycle mode: a $C001 write resets the /4 prescaler, so a latch of 0 reaches 0 at the 4th cycle after it */
+    wr(0xE000, 0); wr(0xC000, 0); wr(0xC001, 1);          /* cycle mode */
+    cart_cpu_cycle(&c); cart_cpu_cycle(&c);               /* the prescaler is now mid-count (2 of 4) */
+    TM_CHECK(!c.irq_line, "64 cycle mode: no irq while disabled");
+    wr(0xE001, 0); wr(0xC001, 1);                         /* restart: prescaler back to 0 */
+    int fired = -1;
+    for (int k = 1; k <= 12 && fired < 0; k++) { cart_cpu_cycle(&c); if (c.irq_line) fired = k; }
+    TM_CHECK(fired == 4 + 3, "64 cycle mode: prescaler restarts at $C001 (irq after %d cycles, expected 4 + the 3-cycle assertion delay)", fired);
+    /* $E000 also drops an IRQ that is still waiting out its assertion delay */
+    wr(0xE000, 0); wr(0xE001, 0); wr(0xC001, 1);
+    int k = 0;
+    while (k < 12 && !c.s.rambo1.irq_delay) { cart_cpu_cycle(&c); k++; }   /* counter reached 0: IRQ pending, not yet asserted */
+    TM_CHECK(c.s.rambo1.irq_delay && !c.irq_line, "64 irq pending before $E000");
+    wr(0xE000, 0);
+    for (k = 0; k < 8; k++) cart_cpu_cycle(&c);
+    TM_CHECK(!c.irq_line, "64 $E000 cancels a pending (delayed) IRQ");
 }
 
 void tm_unl(int *checks, int *fails) {

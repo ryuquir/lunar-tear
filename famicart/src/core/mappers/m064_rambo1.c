@@ -8,7 +8,8 @@ static void rb_sync(cart_t *c) {
     else for (unsigned i = 0; i < 2; i++) { b[(m + i * 2) & 7] = (uint8_t)(s->chr[i] & ~1); b[(m + i * 2 + 1) & 7] = (uint8_t)(s->chr[i] | 1); }
     for (unsigned i = 0; i < 4; i++) b[((m ^ 4) + i) & 7] = s->chr[2 + i];
     for (unsigned i = 0; i < 8; i++) cart_set_chr1k(c, i, b[i]);
-    if (s->bank & 0x40) { cart_set_prg8k(c, 0, s->prg[2]); cart_set_prg8k(c, 1, s->prg[0]); cart_set_prg8k(c, 2, s->prg[1]); }
+    /* P=1: $8000 = RF, $A000 = R7 (both modes), $C000 = R6 (nesdev wiki RAMBO-1, PRG table) */
+    if (s->bank & 0x40) { cart_set_prg8k(c, 0, s->prg[2]); cart_set_prg8k(c, 1, s->prg[1]); cart_set_prg8k(c, 2, s->prg[0]); }
     else { cart_set_prg8k(c, 0, s->prg[0]); cart_set_prg8k(c, 1, s->prg[1]); cart_set_prg8k(c, 2, s->prg[2]); }
     cart_set_prg8k(c, 3, -1);
     /* 158 (Tengen 800037): CHR A17 drives CIRAM A10 like TxSROM; a nametable fetch (PPU A12 = 0) uses the
@@ -24,8 +25,10 @@ static void rb_write(cart_t *c, uint16_t a, uint8_t v) {
     case 0x8001: { unsigned r = s->bank & 0x0F; if (r < 6) s->chr[r] = v; else if (r == 6 || r == 7) s->prg[r - 6] = v; else if (r == 8 || r == 9) s->chr[6 + (r - 8)] = v; else if (r == 0xF) s->prg[2] = v; } break;
     case 0xA000: s->mirroring = v & 1; break;
     case 0xC000: s->irq_latch = v; return;
-    case 0xC001: s->irq_reload = 1; s->irq_mode = v & 1; s->irq_counter = 0; return;
-    case 0xE000: s->irq_enable = 0; cart_irq(c, false); return;
+    /* $C001 also resets the CPU-cycle /4 prescaler: the next cycle-mode clock comes 4 cycles later (nesdev wiki RAMBO-1) */
+    case 0xC001: s->irq_reload = 1; s->irq_mode = v & 1; s->irq_counter = 0; s->prg_mode = 0; return;
+    /* $E000 disables AND acknowledges pending interrupts, including one still waiting out its assertion delay (nesdev wiki) */
+    case 0xE000: s->irq_enable = 0; s->irq_delay = 0; cart_irq(c, false); return;
     case 0xE001: s->irq_enable = 1; return;
     }
     rb_sync(c);
