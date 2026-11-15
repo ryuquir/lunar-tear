@@ -135,7 +135,10 @@ def draw_outline(board):
         g.text(px(notch_x) + 10, py((n0 + n1) / 2) + 6, '左右の切り欠き（奥行き %.2f × 高さ %.1f）' % (notch_x - lo, n1 - n0), 18, INK, 'start')
         cut = SH['cutouts'][0]; cx0, cx1 = min(p[0] for p in cut), max(p[0] for p in cut); cy0, cy1 = min(p[1] for p in cut), max(p[1] for p in cut)
         g.hdim(px(cx0), px(cx1), py(cy0) - 26, '%.1f' % (cx1 - cx0), ext=py(cy0), size=18)
-        g.text(px(hi) - 70, py(cy1) + 30, 'スリット %.1f × %.1f（中心線から右へ %.2f〜%.2f）' % (cx1 - cx0, cy1 - cy0, cx0 - W / 2, cx1 - W / 2), 18, INK, 'end')
+        if MIR and cx1 <= W / 2:   # seen from the back the slit lies left of the centre line
+            g.text(px(hi) - 70, py(cy1) + 30, 'スリット %.1f × %.1f（中心線から左へ %.2f〜%.2f）' % (cx1 - cx0, cy1 - cy0, W / 2 - cx1, W / 2 - cx0), 18, INK, 'end')
+        else:
+            g.text(px(hi) - 70, py(cy1) + 30, 'スリット %.1f × %.1f（中心線から右へ %.2f〜%.2f）' % (cx1 - cx0, cy1 - cy0, cx0 - W / 2, cx1 - W / 2), 18, INK, 'end')
         g.line(px(step_x) + 4, py(step_y) - 4, px(step_x) + 46, py(step_y) - 40, INK, 1.0)
         g.text(px(step_x) + 50, py(step_y) - 44, '内側の角は R%.1f（切り欠き・スリット・下段、計 %d か所）' % (SH['fillet_r'], len(SH['fillets'])), 18, INK, 'start')
     g.line(px(X1 - CH / 2) + 3, py(T - CH / 2) + 3, px(X1) + 34, py(T) + 30, INK, 1.0)
@@ -157,6 +160,8 @@ def draw_placement(board):
     g = Svg(int(ox * 2 + 2 * W * S + gap), int(oy + T * S + 150))
     g.text(ox, 52, 'famicart %s　部品の配置' % D.REV, 34, INK, 'start', 'bold')
     names = getattr(D, 'DRAW_NAMES', NAMES)
+    if MIR and not (hasattr(D, 'DRAW_NAMES') and hasattr(D, 'DRAW_NOTES')):
+        raise SystemExit('draw_outline: a board drawn from the back needs DRAW_NAMES and DRAW_NOTES (the defaults describe rev G modules)')
     if MIR:
         g.text(ox, 92, '名前のある部品と、ほかの部品（灰色）。KiCad の表 (F) がシェルの裏、KiCad の裏 (B) がシェルの表。それぞれその面から見た向き。単位 mm', 21, MUTED, 'start')
         views = ((False, False, ox, '裏（主な部品面。裏から見た図、基板データの向き）'), (True, True, ox + W * S + gap, '表（ラベル面。表から見た図。左右が入れ替わる）'))
@@ -191,7 +196,9 @@ def draw_placement(board):
                 usb = None                      # modules: pads 1 and the last pad sit at the USB end
                 ends = [q for q in fp.Pads() if q.GetNumber() in ('1', '40' if 'Pico' in fp.GetValue() else '14')]
                 module = any(k in fp.GetFPIDAsString() for k in ('Pico', 'XIAO'))
-                if len(ends) == 2 and ref.startswith('U') and ref != 'U7' and module:
+                # the module-only filter is for new designs (drawn from the back, or with their own labels); older
+                # designs keep their drawings byte-identical
+                if len(ends) == 2 and ref.startswith('U') and ref != 'U7' and (module or not (MIR or hasattr(D, 'DRAW_NAMES'))):
                     ex = sum(ToMM(q.GetPosition().x) for q in ends) / 2 - ToMM(fp.GetPosition().x)
                     ey = sum(ToMM(q.GetPosition().y) for q in ends) / 2 - ToMM(fp.GetPosition().y)
                     usb = ((-1 if flip else 1) * (1 if ex > 0 else -1), 0) if abs(ex) > abs(ey) else (0, 1 if ey > 0 else -1)

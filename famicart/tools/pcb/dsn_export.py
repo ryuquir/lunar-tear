@@ -87,11 +87,16 @@ def pad_padstack(pad, fp_flipped):
         shapes = [f'(shape (rect {l} {-hx} {-hy} {hx} {hy}))' for l in layers]
     return name, f'(padstack {q(name)} ' + ' '.join(shapes) + ' (attach off))'
 
+def npth_hole(pad):
+    """True for a real hole (NPTH attribute or a drill); False for paste-only or mask-only apertures."""
+    return pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH or pad.GetDrillSize().x > 0
+
 def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False, net_width=None, plane_map=None,
            own_via_padstacks=False):
     """plane_map: the design's PLANES (layer roles, set_layers); planes: B.Cu zones as Specctra planes (old option);
     own_via_padstacks: existing vias of another size than via_dia / via_drill get a padstack of their own."""
     set_layers(board, plane_map)
+    new_rules = plane_map is not None or own_via_padstacks   # rev H on; older designs keep their DSN byte-identical
     padstacks = {}
     images = {}
     placements = []
@@ -105,6 +110,8 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
         ox, oy = ToMM(pos.x), -ToMM(pos.y)
         placements.append((img_name, fp.GetReference(), U(ox), U(oy), 'front', rot))
         for pad in fp.Pads():                             # NPTH mounting holes of EVERY instance (also the ones sharing an image)
+            if pad.GetNumber() == '' and new_rules and not npth_hole(pad):
+                continue                                  # unnumbered paste/mask aperture (e.g. QFN paste windows): no hole
             if pad.GetNumber() == '':
                 pp = pad.GetPosition(); d = max(ToMM(pad.GetDrillSize().x), ToMM(pad.GetSize().x)) + 2 * 0.5
                 npth_keepouts.append(f'    (keepout "npth_{fp.GetReference()}_{len(npth_keepouts)}" (circle signal {U(d)} {U(ToMM(pp.x))} {-U(ToMM(pp.y))}))')

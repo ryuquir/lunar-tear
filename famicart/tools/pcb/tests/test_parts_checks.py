@@ -126,13 +126,17 @@ def build_board(hw, D, vias=((30.0, 34.0, 0.5, 0.3), (34.0, 34.0, 0.45, 0.2)), e
     subprocess.run(['kicad-cli', 'pcb', 'export', 'drill', '--format', 'excellon', '--excellon-separate-th', '-o', fab + '/', pcb], check=True, capture_output=True)
     return pcb
 
+# the JLCPCB catalogue categories (componentTypeEn) of the fixture parts, as the parts API gave them on 2026-11-15
+CATEGORY = {'C141836': 'DC-DC Converters', 'C2286': 'LED Indication - Discrete', 'C165948': 'USB Connectors',
+            'C25100': 'Chip Resistor - Surface Mount', 'C20197': 'Resistor Networks, Arrays', 'C362368': 'Crystals'}
+
 def catalogue(overrides=None):
     """Simulated parts API: an entry per code with the declared class and ample stock (overrides: {code: {field: value}})."""
     D = sys.modules['design_selftest']
     def lookup(code):
         cls = D.LCSC_CLASS.get(code, 'Basic')
         it = dict(componentCode=code, componentModelEn='part ' + code, componentLibraryType={'Basic': 'base', 'Extended': 'expand'}[cls],
-                  stockCount=100000, canPresaleNumber=100000, lossNumber=3)
+                  stockCount=100000, canPresaleNumber=100000, lossNumber=3, componentTypeEn=CATEGORY.get(code, 'Unknown'))
         it.update((overrides or {}).get(code, {}))
         return it, ''
     return lookup
@@ -200,6 +204,15 @@ def test_declared(gen_jlc, D, hw):
     check(head.endswith(',Problem,Boards') and all(r['Boards'] == '5' for r in rows.values()), 'parts_check.csv: the number of boards checked for (Boards) is the last column (5 by default)')
     check(rows['C141836']['Library'] == 'Extended' and rows['C2286']['Library'] == 'Basic', 'the Library column carries the class from the catalogue')
     check(rows['C2286']['Need'] == str(8 * 5 + 3), 'need = per board x 5 boards (default FC_PCBA_QTY) + lossNumber')
+    D.LCSC_CLASS['C362368'] = 'Extended'
+    gen_jlc.lookup = catalogue({'C362368': dict(componentTypeEn='Oscillators')})
+    code, out = run(lambda: gen_jlc.check_declared(dict(per, C362368=1), bottom_codes={'C362368'}))
+    rows = {r['LCSC']: r for r in csv.DictReader(open(os.path.join(hw, 'jlcpcb', 'parts_check.csv')))}
+    check(code is not None and 'catalogued as' in rows['C362368']['Problem'], 'a bottom-side part on an allowed land but catalogued as an oscillator is refused')
+    gen_jlc.lookup = catalogue({})
+    code, out = run(lambda: gen_jlc.check_declared(dict(per, C362368=1), bottom_codes={'C362368'}))
+    check(code is None, 'the same part catalogued as a crystal passes on the bottom side')
+    del D.LCSC_CLASS['C362368']
     code, out, rows, _ = case({'C2286': dict(componentLibraryType='expand')})
     check(code is not None and rows['C2286']['Result'] == 'NG' and 'declares Basic' in rows['C2286']['Problem'], 'a Basic declaration of an Extended part fails')
     code, out, rows, _ = case({'C141836': dict(componentLibraryType='base')})

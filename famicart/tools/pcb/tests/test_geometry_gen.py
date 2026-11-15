@@ -134,6 +134,8 @@ TRACK, CLEAR, VIA_DIA, VIA_DRILL = 0.15, 0.15, 0.5, 0.3
 BODY_H = SHELL['body_h']
 ASSEMBLY = 'both'
 BOTTOM_OK = {'C'}
+DRAW_NAMES = {'U1': 'U1 RP2350B（自己テスト）'}
+DRAW_NOTES = ['rev H のツールの自己テスト用の基板（実物ではない）']
 QFN = 'famicart:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia'
 PARTS = {
  'J1': ('famicart', 'Famicom_CardEdge_60', 'Famicom 60-pin edge', 'famicart:Famicom_CardEdge_60_M', (45.0, 75.0, 0, 'F')),

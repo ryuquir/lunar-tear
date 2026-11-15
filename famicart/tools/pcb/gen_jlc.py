@@ -788,7 +788,11 @@ def check_basic(codes, min_stock=int(os.environ.get('FC_MIN_STOCK', '20000'))):
 
 API_CLASS = {'base': 'Basic', 'expand': 'Extended'}      # componentLibraryType of the parts API
 
-def check_declared(per_board, qty=None):
+# JLCPCB catalogue categories (componentTypeEn) of the parts that may sit on the bottom side: the footprint gate
+# (bottom_ok) cannot tell a crystal from a 4-pin oscillator on the same land, or a ceramic capacitor from a tantalum
+BOTTOM_CATEGORIES = ('Chip Resistor - Surface Mount', 'Multilayer Ceramic Capacitors MLCC - SMD/SMT', 'Resistor Networks, Arrays', 'Crystals')
+
+def check_declared(per_board, qty=None, bottom_codes=()):
     """Designs with LCSC_CLASS = {LCSC code: 'Basic' | 'Extended'} (rev H on; Standard PCBA charges the same feeder fee
     for both classes). `per_board`: {LCSC code: parts per board that JLCPCB places}. For every code:
       - it is declared, and every declared code is placed (the declaration is the list of what is ordered),
@@ -815,6 +819,8 @@ def check_declared(per_board, qty=None):
         if want is None: why.append('class not declared in LCSC_CLASS')
         elif lib != want: why.append(f'JLCPCB lists it as {lib}, the design declares {want}')
         if stock < 3 * need: why.append(f'stock {stock} < 3 x {need}')
+        if code in bottom_codes and it.get('componentTypeEn') not in BOTTOM_CATEGORIES:
+            why.append(f"on the bottom side but catalogued as {it.get('componentTypeEn')!r} (bottom parts must be {', '.join(BOTTOM_CATEGORIES)})")
         if presale is None: why.append('the catalogue gives no canPresaleNumber')
         elif presale < need: why.append(f'canPresaleNumber {presale} < {need}')
         rows.append((code, it.get('componentModelEn'), lib, stock, 'NG' if why else 'OK', want or '', n, need, '' if presale is None else presale, loss, '; '.join(why), qty))
@@ -1095,7 +1101,9 @@ def main():
         print('gerbers.zip:', ', '.join(names))
     else:
         shutil.make_archive(z[:-4], 'zip', fab)
-    if hasattr(D, 'LCSC_CLASS'): check_declared(per_board_counts(bom))     # declared Basic / Extended classes, stock for the order
+    if hasattr(D, 'LCSC_CLASS'):     # declared Basic / Extended classes, stock for the order, catalogue category of bottom parts
+        code_of = {ref: row[3] for row in bom[1:] for ref in row[1].split(',')}
+        check_declared(per_board_counts(bom), bottom_codes={code_of[r[0]] for r in cpl[1:] if r[3] == 'Bottom' and r[0] in code_of})
     elif hasattr(D, 'LCSC'): check_basic([v[0] for v in D.LCSC.values()])
     with open(os.path.join(OUT, 'README.md'), 'w') as f: f.write(order_notes(dnp, placed, ntypes))
     print('written:', OUT, 'DNP:', dnp)
