@@ -1,0 +1,34 @@
+(version 1)
+
+(rule "TP7 keep-out: no via, pad or track"
+    (constraint disallow via pad track)
+    (condition "A.intersectsArea('TP7 keep-out')"))
+
+(rule "TP7 keep-out: solder mask stays closed"
+    (layer "F.Mask")
+    (constraint disallow graphic text zone pad via)
+    (condition "A.intersectsArea('TP7 keep-out')"))
+
+(rule "JAMMA fingers: no vias near the fingers"
+    (constraint disallow via)
+    (condition "A.intersectsArea('JAMMA tip: no copper') || A.intersectsArea('JAMMA contact band: fingers only') || A.intersectsArea('JAMMA finger roots: no vias or pour')"))
+
+(rule "JAMMA fingers: no tracks in the tip and contact bands"
+    (constraint disallow track)
+    (condition "A.intersectsArea('JAMMA tip: no copper') || A.intersectsArea('JAMMA contact band: fingers only')"))
+
+(rule "Vias under a Pico are tented"
+    (constraint disallow via)
+    (condition "A.Type == 'Via' && (A.intersectsCourtyard('U25') || A.intersectsCourtyard('U26') || A.intersectsCourtyard('U27')) && (A.Front_tenting == 'Not tented' || A.Back_tenting == 'Not tented')"))
+
+(rule "JLCPCB: silkscreen 0.15 from copper pads"
+    (condition "A.existsOnLayer('F.Cu') || A.existsOnLayer('B.Cu') || B.existsOnLayer('F.Cu') || B.existsOnLayer('B.Cu')")
+    (constraint silk_clearance (min 0.15mm)))
+
+(rule "JLCPCB: pad holes 0.45 apart"
+    (condition "A.Type == 'Pad' && B.Type == 'Pad'")
+    (constraint hole_to_hole (min 0.45mm)))
+
+(rule "JLCPCB: annular ring of through-hole pads 0.25"
+    (condition "A.Type == 'Pad'")
+    (constraint annular_width (min 0.25mm)))

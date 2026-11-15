@@ -2560,6 +2560,12 @@
 				(value "power.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -2621,6 +2627,12 @@
 			(property
 				(name "Sheetfile")
 				(value "power.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -2686,6 +2698,12 @@
 				(value "power.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -2747,6 +2765,12 @@
 			(property
 				(name "Sheetfile")
 				(value "power.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -2812,6 +2836,12 @@
 				(value "power.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -2873,6 +2903,12 @@
 			(property
 				(name "Sheetfile")
 				(value "power.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -3834,6 +3870,12 @@
 				(value "cpu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "Solder Jumper SPDT")
 			)
@@ -3907,6 +3949,12 @@
 			(property
 				(name "Sheetfile")
 				(value "cpu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -7521,6 +7569,12 @@
 				(value "cpu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -7584,6 +7638,12 @@
 				(value "cpu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -7645,6 +7705,12 @@
 			(property
 				(name "Sheetfile")
 				(value "cpu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -9212,6 +9278,12 @@
 			(property
 				(name "Sheetfile")
 				(value "ppu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -12409,6 +12481,12 @@
 				(value "ppu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -12472,6 +12550,12 @@
 				(value "ppu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -12533,6 +12617,12 @@
 			(property
 				(name "Sheetfile")
 				(value "ppu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -22643,6 +22733,12 @@
 				(value "audio.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -22704,6 +22800,12 @@
 			(property
 				(name "Sheetfile")
 				(value "audio.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -25445,6 +25547,12 @@
 			(property
 				(name "Sheetfile")
 				(value "jamma.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(sheetpath
 				(names "/jamma/")
@@ -30292,6 +30400,12 @@
 				(value "mcu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -30353,6 +30467,12 @@
 			(property
 				(name "Sheetfile")
 				(value "mcu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -30418,6 +30538,12 @@
 				(value "mcu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -30479,6 +30605,12 @@
 			(property
 				(name "Sheetfile")
 				(value "mcu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")
@@ -30544,6 +30676,12 @@
 				(value "mcu.kicad_sch")
 			)
 			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
+			)
+			(property
 				(name "ki_keywords")
 				(value "test point tp")
 			)
@@ -30605,6 +30743,12 @@
 			(property
 				(name "Sheetfile")
 				(value "mcu.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "exclude_from_pos_files")
 			)
 			(property
 				(name "ki_keywords")

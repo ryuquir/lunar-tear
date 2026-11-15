@@ -1,8 +1,9 @@
 """Sheets drawn from the board's own footprints: a 1:1 check print of the cartridge slot (A4, PDF) and an overview picture.
 
 Both are rendered by Chromium through Playwright (node), as mech/floorplan.py does.  The check print is drawn from the
-pad table that tools/check_footprints.py has confirmed KiCad reads, in millimetres on an A4 page, so that it prints at
-true size when the printer is set to 100 % ('actual size').
+generator's pad table (which tools/check_footprints.py compares with what KiCad reads), in millimetres on an A4 page, so
+that it prints at true size when the printer is set to 100 % ('actual size').  A sheet is first rendered under a
+temporary name and replaces the old one only when rendering succeeded.
 """
 import html
 import json
@@ -72,7 +73,7 @@ def cart_check_svg(pads, footprint_name, sources):
         ("確かめ方", True),
         ("1. 上の 100 mm の線を定規で測る。0.5 mm 以上ずれていたら印刷し直す。", False),
         ("2. サンプルの端子が届いたら: この紙を段ボールか発泡スチロールの板に貼り、端子の足 60 本を ＋ 印に刺す。", False),
-        ("　 全部の足が丸の中に入れば、穴の位置（2.54 mm 間隔、列の間 5.08 mm）は合っている。", False),
+        ("　 全部の足が内側の丸（穴の大きさ 1.0 mm）の中に入れば、穴の位置（2.54 mm 間隔、列の間 5.08 mm）は合っている。", False),
         ("3. カセットの向き: カセットのラベル面を自分に向け、端子を下にして、端子を図の 1〜30 番の列に重ねる。左端の端子が 1 番。", False),
         ("　 任天堂製のカセットなら、ラベル面の 1・16・30 番の端子はほかより長く、端の近くまで伸びている。", False),
         ("　 テスターの導通で、ラベル面の左端（1 番）と左から 16 番目（16 番）が鳴れば正しい（どちらも GND）。鳴らなければ知らせてください。", False),
@@ -87,27 +88,38 @@ def cart_check_svg(pads, footprint_name, sources):
 
 
 def _node(js, cwd):
-    return subprocess.run(["node", "-e", js], capture_output=True, text=True, cwd=cwd)
+    """Run a Playwright script; return '' or the reason it failed."""
+    try:
+        r = subprocess.run(["node", "-e", js], capture_output=True, text=True, cwd=cwd)
+    except OSError as e:                       # no node
+        return f"cannot run node: {e}"
+    return "" if r.returncode == 0 else (r.stderr.strip()[:200] or "no Chromium")
 
 
 def render_pdf(svg_text, pdf_path):
     """A4 landscape PDF at true size.  The dates inside the PDF are replaced, so that a rebuild writes the same bytes."""
-    page = pdf_path[:-4] + ".html"
-    with open(page, "w", encoding="utf-8") as f:
-        f.write('<!doctype html><html><head><meta charset="utf-8"><style>@page{size:297mm 210mm;margin:0}'
-                'html,body{margin:0;padding:0}svg{display:block}</style></head><body>' + svg_text + "</body></html>")
-    js = ("const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();"
-          f"await p.goto('file://{page}');await p.pdf({{path:'{pdf_path}',width:'297mm',height:'210mm',printBackground:true,"
-          "preferCSSPageSize:true,margin:{top:'0',right:'0',bottom:'0',left:'0'}});await b.close();})()"
-          ".catch(e=>{console.error(e.message);process.exit(1)});")
-    r = _node(js, os.path.dirname(pdf_path))
-    os.remove(page)
-    if r.returncode:
-        return r.stderr.strip()[:200] or "no Chromium"
-    data = open(pdf_path, "rb").read()
-    data = re.sub(rb"D:\d{14}", b"D:20000101000000", data)
-    open(pdf_path, "wb").write(data)
-    return ""
+    page, tmp = pdf_path[:-4] + ".tmp.html", pdf_path[:-4] + ".tmp.pdf"
+    try:
+        with open(page, "w", encoding="utf-8") as f:
+            f.write('<!doctype html><html><head><meta charset="utf-8"><style>@page{size:297mm 210mm;margin:0}'
+                    'html,body{margin:0;padding:0}svg{display:block}</style></head><body>' + svg_text + "</body></html>")
+        js = ("const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();"
+              f"await p.goto('file://{page}');await p.pdf({{path:'{tmp}',width:'297mm',height:'210mm',printBackground:true,"
+              "preferCSSPageSize:true,margin:{top:'0',right:'0',bottom:'0',left:'0'}});await b.close();})()"
+              ".catch(e=>{console.error(e.message);process.exit(1)});")
+        err = _node(js, os.path.dirname(pdf_path))
+        if err:
+            return err
+        data = open(tmp, "rb").read()
+        data = re.sub(rb"D:\d{14}", b"D:20000101000000", data)
+        with open(tmp, "wb") as f:
+            f.write(data)
+        os.replace(tmp, pdf_path)
+        return ""
+    finally:
+        for f in (page, tmp):
+            if os.path.exists(f):
+                os.remove(f)
 
 
 def overview_png(svg_dir, names, captions, png_path):
@@ -123,7 +135,7 @@ def overview_png(svg_dir, names, captions, png_path):
     for name, w, h in cells:
         blocks.append(f'<figure><img src="{name}.svg" style="width:{w * scale:.0f}px;height:{h * scale:.0f}px">'
                       f'<figcaption><b>{html.escape(captions[name][0])}</b><br>{html.escape(captions[name][1])}</figcaption></figure>')
-    page = os.path.join(svg_dir, "_overview.html")
+    page, tmp = os.path.join(svg_dir, "_overview.tmp.html"), png_path[:-4] + ".tmp.png"
     with open(page, "w", encoding="utf-8") as f:
         f.write('<!doctype html><html><head><meta charset="utf-8"><style>body{margin:24px;background:#fff;'
                 'font-family:"Noto Sans CJK JP",sans-serif;font-size:15px}h1{font-size:22px}figure{display:inline-block;'
@@ -132,11 +144,17 @@ def overview_png(svg_dir, names, captions, png_path):
                 '<h1>基板の自作フットプリント（KiCad の書き出し。縮尺は共通: 1 mm = 7 px）</h1>' + "".join(blocks) + "</body></html>")
     js = ("const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();"
           "const p=await b.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});"
-          f"await p.goto('file://{page}');await p.waitForTimeout(300);await p.screenshot({{path:'{png_path}',fullPage:true}});"
+          f"await p.goto('file://{page}');await p.waitForTimeout(300);await p.screenshot({{path:'{tmp}',fullPage:true}});"
           "await b.close();})().catch(e=>{console.error(e.message);process.exit(1)});")
-    r = _node(js, svg_dir)
-    os.remove(page)
-    return "" if r.returncode == 0 else (r.stderr.strip()[:200] or "no Chromium")
+    try:
+        err = _node(js, svg_dir)
+        if not err:
+            os.replace(tmp, png_path)
+        return err
+    finally:
+        for f in (page, tmp):
+            if os.path.exists(f):
+                os.remove(f)
 
 
 def write_json(obj, path):

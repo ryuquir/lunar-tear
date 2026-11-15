@@ -355,7 +355,7 @@
 	)
 	(fp_rect
 		(start -4.24 0.5)
-		(end 111.16 -10.5)
+		(end 111.16 -10.1)
 		(stroke
 			(width 0)
 			(type solid)
@@ -366,7 +366,7 @@
 	)
 	(fp_rect
 		(start -4.24 0.5)
-		(end 111.16 -10.5)
+		(end 111.16 -10.1)
 		(stroke
 			(width 0)
 			(type solid)
@@ -479,7 +479,7 @@
 	)
 	(fp_rect
 		(start -4.24 0.5)
-		(end 111.16 -12)
+		(end 111.16 -15)
 		(stroke
 			(width 0.05)
 			(type solid)
@@ -490,7 +490,7 @@
 	)
 	(fp_rect
 		(start -4.24 0.5)
-		(end 111.16 -12)
+		(end 111.16 -15)
 		(stroke
 			(width 0.05)
 			(type solid)

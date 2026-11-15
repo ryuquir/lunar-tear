@@ -11,6 +11,9 @@ class Q(str):
     """A quoted string."""
 
 
+ESCAPES = {"n": "\n", "r": "\r", "t": "\t", "\\": "\\", '"': '"'}
+
+
 def _tokens(text):
     i, n = 0, len(text)
     while i < n:
@@ -24,7 +27,8 @@ def _tokens(text):
             j, out = i + 1, []
             while text[j] != '"':
                 if text[j] == "\\":
-                    out.append(text[j + 1])
+                    nxt = text[j + 1]
+                    out.append(ESCAPES.get(nxt, "\\" + nxt))      # an unknown escape is kept as written
                     j += 2
                 else:
                     out.append(text[j])
@@ -59,7 +63,7 @@ def parse(text):
 
 def _atom(a):
     if isinstance(a, Q):
-        return '"' + a.replace("\\", "\\\\").replace('"', '\\"') + '"'
+        return '"' + a.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t") + '"'
     if isinstance(a, float):
         return fmt(a)
     return str(a)

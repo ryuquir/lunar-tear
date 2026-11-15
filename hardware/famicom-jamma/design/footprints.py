@@ -11,11 +11,20 @@ Five footprints:
   Trimmer_Bourns_3362P RV1 BOCHEN 3362P-1-103 trimmer (C118956), Bourns 3362P pin pattern
   SW_DIP_x04_...     SW3  copy of KiCad's 4-way DIP switch with 1.0 mm holes for HRO DS-04RP (C92645)
   RaspberryPi_Pico2_SMD_TP7KeepOut  U25-U27  copy of KiCad's Pico SMD footprint with the Pico 2 TP7 keep-out
+
+The keep-out areas carry names.  On a board whose project finds this library, KiCad 10.0.8's DRC does not report
+vias (or other parts' pads) inside a footprint's keep-out, only tracks and pour; the rules in BOARD_RULES below,
+which tools/build.py writes as kicad/fcjamma.kicad_dru, name the areas and do report them, and tools/check_rules.py
+proves on a test board that each one fires.
+
+facts() lists what the sources say, checked on what was drawn; every failure stops the build.
 """
+import hashlib
+import math
 import os
 
 from fcgen import footprint_out as F
-from fcgen.sexpr import find, first
+from fcgen.sexpr import find, first, fmt
 
 KICAD_FP = "/usr/share/kicad/footprints"
 
@@ -29,22 +38,25 @@ PICO = "RaspberryPi_Pico2_SMD_TP7KeepOut"
 # None: the footprint is part of the bare board itself.
 PART_OF = {JAMMA: None, CART: "C5173310", TRIM: "C118956", DIP: "C92645", PICO: "C41407547"}
 
-SILK_MIN = 0.15        # JLCPCB legend: 'Minimum Line Width ≥0.15mm', text height ≥1.0 mm, pad to silkscreen 0.15 mm
+SILK_MIN = 0.15        # JLCPCB legend: 'Minimum Line Width ≥0.15mm', 'Minimum text height 40 mil (1.0mm)', pad to silk 0.15
 
 
 # ---------------------------------------------------------------------------------------------- JAMMA edge
 # Sources: research sheet reference/02_jamma_interface.md 1.2.3 (22 design values) and 1.3 (JLCPCB gold fingers);
-# JST GEC-561 'PC board layout (viewed from component side)'; Hirose CR7E drawing ADC-016737-72-02; Sullins EBM28D;
-# JLCPCB help 'JLCPCB Gold Fingers' and 'Instructions for Chamfering Gold Fingers'.
+# JST GEC-561 'PC board layout (viewed from component side)'; Hirose CR7 catalogue 'PCB Dimensions 3.96 pitch' and drawing
+# ADC-016737-72-02; Sullins EBM28D; JLCPCB help 'JLCPCB Gold Fingers' and 'Instructions for Chamfering Gold Fingers'.
 # Origin: on the board tip line, at the centre of finger 1/A.  +X towards 28/f.  The board lies at negative Y.
 JAMMA_PITCH = 3.96                 # 106.92 between 1 and 28 meets JST 106.92 ± 0.05 and Hirose 106.98 ± 0.08
-JAMMA_FINGER = (2.30, 8.80)        # width: Hirose 2.3 ± 0.1, JST 2.3 ± 0.035; length: 1.2 to 10.0 from the tip
+JAMMA_FINGER = (2.30, 8.80)        # width: Hirose 2.3 ± 0.1 (JST prints '2.3 ±0.35 (.091 ±.001)'); length: 1.2 to 10.0 from the tip
 JAMMA_FINGER_Y = -5.6              # centre; copper 1.2 from the tip (JLCPCB 30° bevel set-back about 1.13)
 JAMMA_LETTERS = "ABCDEFHJKLMNPRSTUVWXYZabcdef"   # solder side; G, I, O, Q are not used (Hirose, Sullins)
 JAMMA_KEY_INDEX = 6                # position 7/H is the key slot
-JAMMA_TONGUE = (-3.74, 110.66)     # 114.4 wide: inside JST's 114.4-114.6 at the JLCPCB outline tolerance of ±0.2
-JAMMA_KEY = (23.76, 3.0, 11.5)     # key slot centre, width, depth: covers every key (Sullins 2.36, Hirose CR1 2.0)
+JAMMA_TONGUE = (-3.74, 110.66)     # 114.4 nominal, so that +0.2 routing never exceeds JST's 114.6 maximum (Hirose: 114.6-114.8)
+JAMMA_KEY = (23.76, 3.0, 11.5)     # key slot centre, width, depth: covers every key (Sullins 2.36, Hirose CR1 2.0; Hirose slot 2.5 x 11)
 JAMMA_SHOULDER = -12.0             # body wider than the tongue from 12 mm up: the housing's ears reach 10.5
+JAMMA_MASK_END = -10.1             # the open mask band ends 0.1 past the fingers, so that no track can run bare across it
+JAMMA_TOP = -15.0                  # courtyard: no part within 15 mm of the tip (through-hole parts 5 mm from the fingers)
+JAMMA_X = (-4.24, 111.16)          # the tongue plus 0.5 mm on each side
 
 
 def jamma_edge():
@@ -59,16 +71,16 @@ def jamma_edge():
         x = JAMMA_PITCH * i
         fp.pad(num, "connect", "rect", (x, JAMMA_FINGER_Y), JAMMA_FINGER, ["F.Cu", "F.Mask"])
         fp.pad(letter, "connect", "rect", (x, JAMMA_FINGER_Y), JAMMA_FINGER, ["B.Cu", "B.Mask"])
-    x0, x1 = -4.24, 111.16              # the tongue plus 0.5 mm on each side
+    x0, x1 = JAMMA_X
     for layer in ("F.Mask", "B.Mask"):  # JLCPCB: 'The gold finger area must have the solder mask fully opened'
-        fp.rect((x0, 0.5), (x1, -10.5), layer, width=0, fill=True)
+        fp.rect((x0, 0.5), (x1, JAMMA_MASK_END), layer, width=0, fill=True)
     band = lambda y0, y1: [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     # the bevelled strip ('this area can not have copper'), the contact band (fingers only), the finger roots (no vias)
     fp.keepout(["F.Cu", "B.Cu"], band(0.5, -1.2), "JAMMA tip: no copper")
     fp.keepout(["F.Cu", "B.Cu"], band(-1.2, -9.0), "JAMMA contact band: fingers only", pads=False)
     fp.keepout(["F.Cu", "B.Cu"], band(-9.0, -11.0), "JAMMA finger roots: no vias or pour", tracks=False, pads=False)
     for layer in ("F.CrtYd", "B.CrtYd"):
-        fp.rect((x0, 0.5), (x1, JAMMA_SHOULDER), layer, width=0.05)
+        fp.rect((x0, 0.5), (x1, JAMMA_TOP), layer, width=0.05)
     kx, kw, kd = JAMMA_KEY
     t0, t1 = JAMMA_TONGUE
     fp.polyline([(t0, JAMMA_SHOULDER), (t0, -0.5), (t0 + 0.5, 0), (kx - kw / 2 - 0.5, 0), (kx - kw / 2, -0.5), (kx - kw / 2, -kd),
@@ -78,8 +90,8 @@ def jamma_edge():
         fp.text(text, (x, -13.4), "F.SilkS", 1.2, 0.18)
     for text, x in (("A", -2.4), ("f", 109.3), ("SOLDER SIDE A-f", 53.46)):
         fp.text(text, (x, -13.4), "B.SilkS", 1.2, 0.18, mirror=True)
-    fp.line((-6.15, -15.0), (113.07, -15.0), "Cmts.User", 0.10)
-    fp.text("THT parts beyond this line (>= 5 mm from the fingers)", (53.46, -15.8), "Cmts.User", 1.0, 0.15)
+    fp.line((-6.15, JAMMA_TOP), (113.07, JAMMA_TOP), "Cmts.User", 0.10)
+    fp.text("THT parts beyond this line (>= 5 mm from the fingers)", (53.46, JAMMA_TOP - 0.8), "Cmts.User", 1.0, 0.15)
     return fp.tree()
 
 
@@ -166,9 +178,11 @@ def trimmer():
 # ---------------------------------------------------------------------------------------------- DIP switch (copy)
 # Sources: HRO drawing 'MULTIFUNCTIONAL SWITCHES' DS-□□□□ REV. A (LCSC/JLCPCB C92645): hole Ø0.97 ± 0.05, pitch 2.54,
 # rows 7.62 ± 0.1, leads 0.60 x 0.20, body 9.60 x 11.72; the maker numbers only the switches.  KiCad's pad n faces
-# pad 9-n, so switch n joins pad n (I_DIPn) to pad 9-n (GND) when the part's '1' is at pads 1/8 and 'ON' over pads 5-8.
+# pad 9-n, so switch n joins pad n (I_DIPn) to pad 9-n (GND) when the part's '1' is at pads 1/8 and 'ON' over pads 5-8
+# (JLCPCB's own footprint for C92645 also puts the switch numbers beside pads 1-4).
 DIP_LIB = os.path.join(KICAD_FP, "Button_Switch_THT.pretty", "SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm.kicad_mod")
 DIP_DRILL, DIP_PAD = 1.00, 1.70             # JLCPCB finishes a 1.0 drill at 0.92-1.13, around the maker's 0.97
+DIP_BODY = (-0.99, -2.05, 8.61, 9.67)       # HRO body 9.60 x 11.72 centred on (3.81, 3.81)
 
 
 def widen_silk(tree):
@@ -183,15 +197,26 @@ def widen_silk(tree):
                     w[1] = str(SILK_MIN)
 
 
+def _inside(x, box):
+    """Every point of a drawing lies inside the box (x0, y0, x1, y1)."""
+    pts = [first(x, k) for k in ("start", "end", "center", "mid")] + (list(first(x, "pts")[1:]) if first(x, "pts") else [])
+    pts = [(float(p[1]), float(p[2])) for p in pts if p is not None]
+    return bool(pts) and all(box[0] <= px <= box[2] and box[1] <= py <= box[3] for px, py in pts)
+
+
 def dip_switch():
     def edit(tree):
         for p in find(tree, "pad"):
-            first(p, "drill")[1] = "1"
+            first(p, "drill")[1] = fmt(DIP_DRILL)
             size = first(p, "size")
-            size[1] = size[2] = "1.7"
+            size[1] = size[2] = fmt(DIP_PAD)
             rr = first(p, "roundrect_rratio")
             if rr:
-                rr[1] = "0.147059"                       # 0.25 mm corner radius, KiCad's convention for 1.7 mm pads
+                rr[1] = fmt(round(0.25 / DIP_PAD, 6))          # 0.25 mm corner radius, KiCad's convention
+        for x in [x for x in tree if isinstance(x, list) and x and x[0].startswith("fp_")]:
+            # KiCad draws the switch levers on the silkscreen; under the fitted part they only print on bare board
+            if str(first(x, "layer")[1]) == "F.SilkS" and _inside(x, DIP_BODY):
+                tree.remove(x)
         widen_silk(tree)
         crt = [x for x in find(tree, "fp_rect") if str(first(x, "layer")[1]) == "F.CrtYd"]
         assert len(crt) == 1
@@ -215,10 +240,16 @@ def dip_switch():
 # Sources: Raspberry Pi Pico 2 datasheet (Release 5) Figures 3, 5 and 6, and its STEP model RP-009061-CA: every pad of
 # KiCad's footprint matches; TP7 (1V1, new on the Pico 2, must not be soldered) is at (+1.0, -5.0) from the module centre.
 # KiCad's footprint already keeps copper 0.2 mm off TP7 (two 1.9 mm zones on F.Cu and F.Paste); this copy replaces them with
-# one 2.5 mm circle on F.Cu and F.Mask, so that no copper and no mask opening can sit under TP7.
+# one 2.5 mm circle on F.Cu and F.Mask.  Together with the board rules (BOARD_RULES) no copper and no mask opening can
+# sit under TP7.
 PICO_LIB = os.path.join(KICAD_FP, "Module.pretty", "RaspberryPi_Pico_SMD.kicad_mod")
 PICO_TP7, PICO_TP7_R = (1.0, -5.0), 1.25
 PICO_TP7_ZONE = "TP7 keep-out"
+
+# The KiCad library files the two copies were checked against on 2026-11-15 (kicad-footprints 10.0.8): a library update
+# must not change the copies unseen.
+LIBRARY_SHA256 = {PICO_LIB: "b4b6e8c3f30d560dd69cf7306216269a72e45ccf906d4304ace34ee587040701",
+                  DIP_LIB: "0a4713dac17ddbb198bb4ad25baf6bc76ea5dd1f1373d6d537704adbf1522847"}
 
 
 def pico2():
@@ -233,7 +264,7 @@ def pico2():
         tree.insert(idx, zone)
     return F.derive(PICO_LIB, PICO, "Raspberry Pi Pico 2 soldered flat (reflow), KiCad's RaspberryPi_Pico_SMD with the module's TP7 "
                     "(1.1 V, Pico 2 only, at +1.0/-5.0) under a 2.5 mm keep-out on F.Cu and F.Mask: no copper and no mask "
-                    "opening there (Pico 2 datasheet, Figure 5)", edit)
+                    "opening there (Pico 2 datasheet, Figure 5; enforced by the board rules in kicad/fcjamma.kicad_dru)", edit)
 
 
 def insert_before_pads(tree, items):
@@ -241,12 +272,55 @@ def insert_before_pads(tree, items):
     tree[idx:idx] = items
 
 
+# ---------------------------------------------------------------------------------------------- board rules
+# Written by tools/build.py as kicad/fcjamma.kicad_dru.  Each rule was tried with kicad-cli 10.0.8, and tools/check_rules.py
+# proves on every build that it reports a probe placed where it forbids.  The JLCPCB rules (capabilities page, read
+# 2026-11-15: 'Pad To Silkscreen 0.15mm', 'Pad Hole-to-Hole Spacing 0.45mm', 'PTH annular ring ... Recommended 0.25 mm')
+# only make KiCad's defaults stricter; the silkscreen rule leaves out paste-only stencil openings, which are not copper.
+JAMMA_AREAS = ("JAMMA tip: no copper", "JAMMA contact band: fingers only", "JAMMA finger roots: no vias or pour")
+BOARD_RULES = """(version 1)
+
+(rule "TP7 keep-out: no via, pad or track"
+    (constraint disallow via pad track)
+    (condition "A.intersectsArea('TP7 keep-out')"))
+
+(rule "TP7 keep-out: solder mask stays closed"
+    (layer "F.Mask")
+    (constraint disallow graphic text zone pad via)
+    (condition "A.intersectsArea('TP7 keep-out')"))
+
+(rule "JAMMA fingers: no vias near the fingers"
+    (constraint disallow via)
+    (condition "A.intersectsArea('JAMMA tip: no copper') || A.intersectsArea('JAMMA contact band: fingers only') || A.intersectsArea('JAMMA finger roots: no vias or pour')"))
+
+(rule "JAMMA fingers: no tracks in the tip and contact bands"
+    (constraint disallow track)
+    (condition "A.intersectsArea('JAMMA tip: no copper') || A.intersectsArea('JAMMA contact band: fingers only')"))
+
+(rule "Vias under a Pico are tented"
+    (constraint disallow via)
+    (condition "A.Type == 'Via' && (A.intersectsCourtyard('U25') || A.intersectsCourtyard('U26') || A.intersectsCourtyard('U27')) && (A.Front_tenting == 'Not tented' || A.Back_tenting == 'Not tented')"))
+
+(rule "JLCPCB: silkscreen 0.15 from copper pads"
+    (condition "A.existsOnLayer('F.Cu') || A.existsOnLayer('B.Cu') || B.existsOnLayer('F.Cu') || B.existsOnLayer('B.Cu')")
+    (constraint silk_clearance (min 0.15mm)))
+
+(rule "JLCPCB: pad holes 0.45 apart"
+    (condition "A.Type == 'Pad' && B.Type == 'Pad'")
+    (constraint hole_to_hole (min 0.45mm)))
+
+(rule "JLCPCB: annular ring of through-hole pads 0.25"
+    (condition "A.Type == 'Pad'")
+    (constraint annular_width (min 0.25mm)))
+"""
+
+
 # ---------------------------------------------------------------------------------------------- library and facts
 BUILDERS = {JAMMA: jamma_edge, CART: cart60, TRIM: trimmer, DIP: dip_switch, PICO: pico2}
 
 
 def write_library(libdir):
-    """Write every footprint; return {name: expected} for tools/check_footprints.py and the list of failed facts."""
+    """Write every footprint; return {name: expected} for tools/check_footprints.py and (failed facts, number of facts)."""
     os.makedirs(libdir, exist_ok=True)
     for f in os.listdir(libdir):
         if f.endswith(".kicad_mod"):
@@ -260,55 +334,205 @@ def write_library(libdir):
     return expected, facts(expected, trees)
 
 
-def _pads(exp, name):
-    return {k: v[0] for k, v in exp[name]["pads"].items() if not k.startswith("(no number)")}
+def _one(exp, name):
+    """{number: pad}, keeping only numbered pads; a number drawn twice makes the facts that use it fail."""
+    out = {}
+    for k, v in exp[name]["pads"].items():
+        if not k.startswith("(no number)"):
+            if len(v) != 1:
+                raise ValueError(f"{name}: pad '{k}' is drawn {len(v)} times")
+            out[k] = v[0]
+    return out
+
+
+def _near(a, b, tol=1e-6):
+    return abs(a - b) <= tol
+
+
+def _drawings(exp, name, kind=None, layer=None):
+    return [d for d in exp[name]["drawings"] if (kind is None or d["type"] == kind) and (layer is None or d["layer"] == layer)]
+
+
+def _rect_is(d, x0, y0, x1, y1):
+    (ax, ay), (bx, by) = d["pts"]
+    return (_near(min(ax, bx), min(x0, x1)) and _near(max(ax, bx), max(x0, x1))
+            and _near(min(ay, by), min(y0, y1)) and _near(max(ay, by), max(y0, y1)))
+
+
+def _sha256(path):
+    return hashlib.sha256(open(path, "rb").read()).hexdigest()
 
 
 def facts(exp, trees):
-    """Statements from the sources, checked on what was drawn.  Each failure is a build problem."""
-    out = []
-    j = _pads(exp, JAMMA)
-    numbers = [str(n) for n in range(1, 29) if n != 7]
-    letters = [c for c in JAMMA_LETTERS if c != "H"]
-    out += [(sorted(j) == sorted(numbers + letters), "JAMMA: 54 fingers, 1-28 and A-f without 7 and H"),
-            (all(j[n]["layers"] == ["F.Cu", "F.Mask"] and j[c]["layers"] == ["B.Cu", "B.Mask"] for n, c in zip(numbers, letters)),
-             "JAMMA: 1-28 on the parts side, A-f on the solder side, no paste"),
-            (all(abs(j[n]["x"] - j[c]["x"]) < 1e-9 for n, c in zip(numbers, letters)), "JAMMA: each letter is behind its number"),
-            (abs(j["28"]["x"] - j["1"]["x"] - 106.92) < 1e-6, "JAMMA: 1 to 28 is 106.92 (JST 106.92 ± 0.05, Hirose 106.98 ± 0.08)"),
-            (all(abs(j[n]["y"] + j[n]["h"] / 2 + 1.2) < 1e-6 and abs(j[n]["y"] - j[n]["h"] / 2 + 10.0) < 1e-6 for n in numbers),
-             "JAMMA: fingers from 1.2 to 10.0 mm above the tip"),
-            (all(j[n]["kind"] == "connect" for n in j), "JAMMA: edge-connector pads (copper and mask, never paste)")]
-    c = _pads(exp, CART)
-    out += [(sorted(c, key=int) == [str(n) for n in range(1, 61)], "cartridge: pads 1-60"),
-            (all(abs(c[str(n + 30)]["x"] - c[str(n)]["x"]) < 1e-9 and abs(c[str(n)]["y"] - c[str(n + 30)]["y"] - 5.08) < 1e-9
-                 for n in range(1, 31)), "cartridge: pin n + 30 directly behind pin n, rows 5.08 apart"),
-            (c["1"]["x"] < 0 < c["1"]["y"], "cartridge: pin 1 at the left of the label row (+Y)"),
-            (abs(c["30"]["x"] - c["1"]["x"] - 73.66) < 1e-6, "cartridge: 30 contacts at 2.54"),
-            (all((p["w"] - p["drill"]) / 2 >= 0.25 for p in c.values()), "cartridge: annular ring at least 0.25 (JLCPCB)"),
-            (all(0.85 <= p["drill"] - 0.08 and p["drill"] + 0.13 <= 1.15 + 1e-9 for p in c.values()),
-             "cartridge: the finished hole (+0.13/-0.08) stays inside the maker's Ø1.00 ± 0.15")]
-    t = _pads(exp, TRIM)
-    out += [(sorted(t) == ["1", "2", "3"] and abs(t["3"]["x"] - t["1"]["x"] - 5.08) < 1e-9 and abs(t["1"]["y"] - t["2"]["y"] - 2.54) < 1e-9,
-             "trimmer: pins 1 and 3 5.08 apart, pin 2 2.54 towards the far edge (Bourns 3362P)"),
-            (all(p["drill"] - 0.08 - 0.55 >= 0.2 for p in t.values()), "trimmer: the smallest finished hole clears a 0.55 lead by 0.2")]
-    d = _pads(exp, DIP)
-    out += [(sorted(d) == [str(n) for n in range(1, 9)] and all(p["drill"] == 1.0 and p["w"] == 1.7 for p in d.values()),
-             "DIP switch: 8 pads, 1.0 mm holes, 1.7 mm lands"),
-            (all(abs(d[str(n)]["y"] - d[str(9 - n)]["y"]) < 1e-9 and abs(d[str(9 - n)]["x"] - d[str(n)]["x"] - 7.62) < 1e-9 for n in range(1, 5)),
-             "DIP switch: pad n faces pad 9 - n across 7.62")]
-    lib = F.expected(F.derive(PICO_LIB, "x", "", lambda tr: None))
-    pz = exp[PICO]
-    out += [(pz["pads"] == lib["pads"], "Pico 2: every pad is KiCad's, unchanged"),
-            (pz["keepouts"] == 1 and abs(pz["keepout_boxes"][0][0] - (PICO_TP7[0] - PICO_TP7_R)) < 1e-3
-             and abs(pz["keepout_boxes"][0][3] - (PICO_TP7[1] + PICO_TP7_R)) < 1e-3, "Pico 2: one 2.5 mm keep-out centred on TP7"),
-            (not any(abs(p["x"] - PICO_TP7[0]) < PICO_TP7_R + p["w"] / 2 and abs(p["y"] - PICO_TP7[1]) < PICO_TP7_R + p["h"] / 2
-                     for k, v in pz["pads"].items() for p in v if any(l in ("F.Cu", "F.Mask", "*.Cu", "*.Mask") for l in p["layers"])),
-             "Pico 2: no pad reaches the TP7 keep-out")]
-    for name, tree in trees.items():
-        for x in tree:
-            if isinstance(x, list) and x and x[0].startswith("fp_") and str(first(x, "layer")[1]) in ("F.SilkS", "B.SilkS"):
-                st = first(x, "stroke")
-                if st is not None and float(first(st, "width")[1]) < SILK_MIN and x[0] != "fp_poly":
-                    out.append((False, f"{name}: a silkscreen line is thinner than JLCPCB's 0.15 mm"))
-                    break
-    return [text for ok, text in out if not ok], len(out)
+    """Statements from the sources, checked on what was drawn.  A statement that cannot be evaluated counts as failed."""
+    F_ = []
+
+    def fact(text, fn):
+        F_.append((text, fn))
+
+    # ---- JAMMA: written out again, apart from JAMMA_LETTERS, from the JAMMA pin-out (G, I, O, Q unused; 7/H = key)
+    jamma_pairs = [("1", "A"), ("2", "B"), ("3", "C"), ("4", "D"), ("5", "E"), ("6", "F"), ("8", "J"), ("9", "K"), ("10", "L"),
+                   ("11", "M"), ("12", "N"), ("13", "P"), ("14", "R"), ("15", "S"), ("16", "T"), ("17", "U"), ("18", "V"),
+                   ("19", "W"), ("20", "X"), ("21", "Y"), ("22", "Z"), ("23", "a"), ("24", "b"), ("25", "c"), ("26", "d"),
+                   ("27", "e"), ("28", "f")]
+
+    def jamma_pads_right():
+        j = _one(exp, JAMMA)
+        if len(j) != 54:
+            return False
+        for num, letter in jamma_pairs:
+            x = 3.96 * (int(num) - 1)
+            for key, layers in ((num, ["F.Cu", "F.Mask"]), (letter, ["B.Cu", "B.Mask"])):
+                p = j[key]
+                if not (p["kind"] == "connect" and p["shape"] == "rect" and _near(p["x"], x) and _near(p["y"], -5.6)
+                        and _near(p["w"], 2.30) and _near(p["h"], 8.80) and _near(p["rot"], 0) and p["layers"] == layers):
+                    return False
+        return True
+    fact("JAMMA: 54 fingers 2.30 x 8.80 at 3.96, 1.2-10.0 mm from the tip, 1-28 on the parts side and A-f behind them "
+         "(G, I, O, Q unused, 7/H the key), no paste, not turned", jamma_pads_right)
+    fact("JAMMA: 1 to 28 is 106.92 (JST 106.92 ± 0.05, Hirose 106.98 ± 0.08)",
+         lambda: _near(_one(exp, JAMMA)["28"]["x"] - _one(exp, JAMMA)["1"]["x"], 106.92))
+    fact("JAMMA: the key slot is centred on position 7 (6 x 3.96)", lambda: _near(JAMMA_KEY[0], 6 * 3.96))
+    fact("JAMMA: the solder mask is open over the whole finger band on both sides, 0.1 mm past the finger ends",
+         lambda: all(any(d["fill"] and _rect_is(d, -4.24, 0.5, 111.16, -10.1) for d in _drawings(exp, JAMMA, "fp_rect", layer))
+                     for layer in ("F.Mask", "B.Mask")))
+
+    def jamma_keepouts_right():
+        e = exp[JAMMA]
+        want = {"JAMMA tip: no copper": ([0.5, -1.2], {"tracks": "not_allowed", "vias": "not_allowed", "pads": "not_allowed",
+                                                         "copperpour": "not_allowed", "footprints": "allowed"}),
+                "JAMMA contact band: fingers only": ([-1.2, -9.0], {"tracks": "not_allowed", "vias": "not_allowed", "pads": "allowed",
+                                                                     "copperpour": "not_allowed", "footprints": "allowed"}),
+                "JAMMA finger roots: no vias or pour": ([-9.0, -11.0], {"tracks": "allowed", "vias": "not_allowed", "pads": "allowed",
+                                                                         "copperpour": "not_allowed", "footprints": "allowed"})}
+        if sorted(e["keepout_names"]) != sorted(want):
+            return False
+        for i, n in enumerate(e["keepout_names"]):
+            (ya, yb), rules = want[n]
+            box = e["keepout_boxes"][i]
+            if not (e["keepout_layers"][i] == ["B.Cu", "F.Cu"] and e["keepout_rules"][i] == rules and _near(box[0], -4.24)
+                    and _near(box[2], 111.16) and _near(box[1], min(ya, yb)) and _near(box[3], max(ya, yb))):
+                return False
+        return True
+    fact("JAMMA: three keep-outs on both copper layers: no copper in the bevel (0-1.2), fingers only in the contact band "
+         "(1.2-9.0), no vias or pour at the finger roots (9.0-11.0)", jamma_keepouts_right)
+    fact("JAMMA: courtyard on both sides to 15 mm from the tip (through-hole parts at least 5 mm from the fingers)",
+         lambda: all(any(_rect_is(d, -4.24, 0.5, 111.16, -15.0) for d in _drawings(exp, JAMMA, "fp_rect", layer))
+                     for layer in ("F.CrtYd", "B.CrtYd")))
+    fact("JAMMA: left out of the BOM and the position file, mask bridges allowed between fingers",
+         lambda: sorted(exp[JAMMA]["attr"]) == ["allow_soldermask_bridges", "exclude_from_bom", "exclude_from_pos_files"])
+
+    # ---- cartridge slot
+    def cart_pads_right():
+        c = _one(exp, CART)
+        if sorted(c, key=int) != [str(n) for n in range(1, 61)]:
+            return False
+        for n in range(1, 61):
+            k = (n - 1) % 30
+            x, y = -36.83 + 2.54 * k, (2.54 if n <= 30 else -2.54)
+            p = c[str(n)]
+            if not (_near(p["x"], x) and _near(p["y"], y) and p["kind"] == "thru_hole" and p["shape"] == ("rect" if n == 1 else "circle")
+                    and _near(p["drill"], 1.00) and _near(p["w"], 1.70) and _near(p["h"], 1.70) and p["layers"] == ["*.Cu", "*.Mask"]):
+                return False
+        return True
+    fact("cartridge: 60 holes of 1.0 on 2.54 x 5.08 (WingTAT ED60BGFBK); 1-30 on the label row (+Y) from -X, 31-60 behind them; "
+         "pad 1 square", cart_pads_right)
+    fact("cartridge: the finished hole (+0.13/-0.08) stays inside the maker's Ø1.00 ± 0.15, ring at least 0.25, lands at most 1.9",
+         lambda: all(0.85 <= p["drill"] - 0.08 and p["drill"] + 0.13 <= 1.15 + 1e-9 and (p["w"] - p["drill"]) / 2 >= 0.25 and p["w"] <= 1.9
+                     for p in _one(exp, CART).values()))
+    fact("cartridge: 'CART LABEL' is printed on the label side (+Y)",
+         lambda: any(d["text"] == "CART LABEL" and d["pts"][0][1] > 2.54 for d in _drawings(exp, CART, "fp_text", "F.SilkS")))
+    fact("cartridge: a JLCPCB part (in the BOM and the position file), through hole",
+         lambda: exp[CART]["attr"] == ["through_hole"])
+
+    # ---- trimmer
+    def trim_pads_right():
+        t = _one(exp, TRIM)
+        if sorted(t) != ["1", "2", "3"]:
+            return False
+        x1, y1 = t["1"]["x"], t["1"]["y"]
+        return (_near(t["3"]["x"] - x1, 5.08) and _near(t["3"]["y"] - y1, 0) and _near(t["2"]["x"] - x1, 2.54)
+                and _near(t["2"]["y"] - y1, -2.54) and all(p["kind"] == "thru_hole" for p in t.values()))
+    fact("trimmer: pin 3 at +5.08 from pin 1, pin 2 (wiper) at +2.54 and 2.54 towards the far edge (Bourns 3362P)", trim_pads_right)
+    fact("trimmer: the finished hole clears a 0.55 lead by 0.2 and stays at most 1.1; ring at least 0.25",
+         lambda: all(p["drill"] - 0.08 - 0.55 >= 0.2 - 1e-9 and p["drill"] + 0.13 <= 1.1 and (p["w"] - p["drill"]) / 2 >= 0.25
+                     for p in _one(exp, TRIM).values()))
+    fact("trimmer: the clockwise arrow ends on the pin-3 side, where '+' is",
+         lambda: any(d["pts"][2][0] > d["pts"][0][0] and d["pts"][2][0] > 0 for d in _drawings(exp, TRIM, "fp_arc", "F.SilkS")))
+
+    # ---- DIP switch
+    def dip_pads_right():
+        d = _one(exp, DIP)
+        if sorted(d) != [str(n) for n in range(1, 9)]:
+            return False
+        ok = all(_near(p["drill"], DIP_DRILL) and _near(p["w"], DIP_PAD) and p["kind"] == "thru_hole" for p in d.values())
+        for n in range(1, 5):
+            a, b = d[str(n)], d[str(9 - n)]
+            ok = ok and _near(a["x"], 0) and _near(a["y"], 2.54 * (n - 1)) and _near(b["x"] - a["x"], 7.62) and _near(b["y"], a["y"])
+        return ok
+    fact("DIP switch: pads 1-4 on one row at 2.54, pad n faces pad 9 - n across 7.62, 1.0 holes, 1.7 lands", dip_pads_right)
+    fact("DIP switch: the 1.0 drill finishes at 0.92-1.13, around the maker's Ø0.97, and clears the 0.60 x 0.20 lead (0.63 across)",
+         lambda: _near(DIP_DRILL, 1.0) and DIP_DRILL - 0.08 >= 0.633 + 0.2)
+    fact("DIP switch: 'ON' is printed on the pad 5-8 side (+X)",
+         lambda: any(d["text"] == "ON" and d["pts"][0][0] > 7.62 for d in _drawings(exp, DIP, "fp_text", "F.SilkS")))
+    fact("DIP switch: no silkscreen under the fitted part",
+         lambda: not any(all(DIP_BODY[0] <= x <= DIP_BODY[2] and DIP_BODY[1] <= y <= DIP_BODY[3] for x, y in d["pts"])
+                         for d in _drawings(exp, DIP, layer="F.SilkS")))
+
+    # ---- Pico 2
+    fact("Pico 2 and DIP copies: the KiCad library files are the ones checked on 2026-11-15",
+         lambda: all(_sha256(p) == h for p, h in LIBRARY_SHA256.items()))
+
+    def pico_pads_unchanged():
+        def pad_nodes(tree):
+            return [[x for x in p if not (isinstance(x, list) and x and x[0] == "uuid")] for p in find(tree, "pad")]
+        from fcgen.sexpr import parse
+        return pad_nodes(trees[PICO]) == pad_nodes(parse(open(PICO_LIB, encoding="utf-8").read()))
+    fact("Pico 2: every pad is KiCad's, unchanged (shape, angle, paste offset and all)", pico_pads_unchanged)
+
+    def tp7_right():
+        e = exp[PICO]
+        if e["keepouts"] != 1 or e["keepout_names"] != [PICO_TP7_ZONE] or e["keepout_layers"] != [["F.Cu", "F.Mask"]]:
+            return False
+        if e["keepout_rules"][0] != {"tracks": "not_allowed", "vias": "not_allowed", "pads": "not_allowed",
+                                     "copperpour": "not_allowed", "footprints": "allowed"}:
+            return False
+        x0, y0, x1, y1 = e["keepout_boxes"][0]
+        return (_near((x0 + x1) / 2, 1.0, 1e-3) and _near((y0 + y1) / 2, -5.0, 1e-3)
+                and _near(x1 - x0, 2.5, 1e-3) and _near(y1 - y0, 2.5, 1e-3))
+    fact("Pico 2: one keep-out, 2.5 mm across, centred on TP7 at (+1.0, -5.0), on F.Cu and F.Mask, forbidding tracks, vias, pads "
+         "and pour", tp7_right)
+    fact("Pico 2: no pad of the module reaches the TP7 keep-out",
+         lambda: not any(math.hypot(max(abs(p["x"] - 1.0) - p["w"] / 2, 0), max(abs(p["y"] + 5.0) - p["h"] / 2, 0)) < 1.25
+                         for v in exp[PICO]["pads"].values() for p in v
+                         if any(layer in ("F.Cu", "F.Mask", "*.Cu", "*.Mask") for layer in p["layers"])))
+
+    # ---- silkscreen on every footprint
+    def silk_ok():
+        for name, tree in trees.items():
+            for x in tree:
+                if not (isinstance(x, list) and x and x[0] in ("fp_line", "fp_rect", "fp_circle", "fp_arc", "fp_poly", "fp_text", "property")):
+                    continue
+                layer = first(x, "layer")
+                if layer is None or str(layer[1]) not in ("F.SilkS", "B.SilkS"):
+                    continue
+                if x[0] in ("fp_text", "property"):
+                    font = first(first(x, "effects"), "font")
+                    size, thick = first(font, "size"), first(font, "thickness")
+                    if float(size[1]) < 1.0 or float(size[2]) < 1.0 or float(thick[1]) < SILK_MIN:
+                        return False
+                elif x[0] != "fp_poly" or str(first(x, "fill")[1]) not in ("yes", "solid"):
+                    if float(first(first(x, "stroke"), "width")[1]) < SILK_MIN:
+                        return False
+        return True
+    fact("silkscreen: lines at least 0.15 wide, text at least 1.0 high and 0.15 thick (JLCPCB)", silk_ok)
+
+    failed = []
+    for text, fn in F_:
+        try:
+            ok = bool(fn())
+        except Exception as e:          # a missing or doubled pad: the fact fails instead of the build crashing
+            ok, text = False, f"{text} (could not be evaluated: {type(e).__name__}: {e})"
+        if not ok:
+            failed.append(text)
+    return failed, len(F_)

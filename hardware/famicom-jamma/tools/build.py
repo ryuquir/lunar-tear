@@ -30,6 +30,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -540,37 +541,52 @@ def write_outputs(design, outdir):
 
 
 def footprint_outputs(expected, env, kdir, odir, problems, warnings):
-    """out/footprints/: KiCad's read-back of the board's footprints, their drawings, the cartridge check print."""
+    """kicad/fcjamma.kicad_dru and out/footprints/: KiCad's read-back of the board's footprints, the proof that the board
+    rules report what the keep-outs forbid, the footprints' drawings and the cartridge check print.  An output that
+    cannot be made is left as it was (and the build says so), never deleted."""
+    with open(os.path.join(kdir, "fcjamma.kicad_dru"), "w", encoding="utf-8") as f:
+        f.write(FPL.BOARD_RULES)
     fdir = os.path.join(odir, "footprints")
     os.makedirs(fdir, exist_ok=True)
-    for f in os.listdir(fdir):
-        if f.endswith((".svg", ".json", ".pdf", ".png")):
-            os.remove(os.path.join(fdir, f))
     epath = os.path.join(fdir, "expected.json")
     fp_sheets.write_json(expected, epath)
-    line = "not read back by KiCad"
-    if os.path.exists(SYSTEM_PYTHON) and run([SYSTEM_PYTHON, "-c", "import pcbnew"], env, ROOT)[0] == 0:
+    lines = []
+    have_pcbnew = os.path.exists(SYSTEM_PYTHON) and run([SYSTEM_PYTHON, "-c", "import pcbnew"], env, ROOT)[0] == 0
+    if have_pcbnew:
         rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "check_footprints.py"), FPLIB_DIR, epath], env, ROOT)
-        line = out.splitlines()[-1] if out else "no output"
+        lines.append(out.splitlines()[-1] if out else "no output from check_footprints.py")
         if rc:
             problems += [f"footprint read back by KiCad: {x}" for x in out.splitlines()[:-1]] or [f"footprint read-back failed: {out[-300:]}"]
+        with tempfile.TemporaryDirectory(prefix="fcjamma-rules-") as work:
+            rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "check_rules.py"), kdir, os.path.join(work, "board")], env, ROOT)
+        lines.append(out.splitlines()[-1] if out else "no output from check_rules.py")
+        if rc:
+            problems += [f"board rule: {x}" for x in out.splitlines()[:-1]] or [f"board-rule check failed: {out[-300:]}"]
+    elif os.environ.get("FCJAMMA_WITHOUT_PCBNEW") == "1":
+        warnings.append("FCJAMMA_WITHOUT_PCBNEW=1: the footprints were not read back and the board rules were not proved")
+        lines.append("not read back by KiCad")
     else:
-        warnings.append("KiCad's pcbnew module is not available to the system Python; the footprints were not read back")
-    rc, out = run(["kicad-cli", "fp", "export", "svg", "-o", fdir, FPLIB_DIR], env, kdir)
-    if rc:
-        problems.append("kicad-cli could not draw the board's footprints: " + out[-300:])
-    for f in os.listdir(fdir):
-        if f.endswith(".svg"):               # keep rebuilds identical: drop the plot date from the title
-            p = os.path.join(fdir, f)
-            text = re.sub(r" date \d{4}-\d{2}-\d{2}T[\d:]+ ", " ", open(p, encoding="utf-8").read())
-            with open(p, "w", encoding="utf-8") as fh:
-                fh.write(text)
+        problems.append("KiCad's pcbnew module is not available to the system Python, so the footprints cannot be read back "
+                        "(set FCJAMMA_WITHOUT_PCBNEW=1 to build without that check)")
+    with tempfile.TemporaryDirectory(prefix="fcjamma-svg-") as tmp:
+        rc, out = run(["kicad-cli", "fp", "export", "svg", "-o", tmp, FPLIB_DIR], env, kdir)
+        made = sorted(f for f in os.listdir(tmp) if f.endswith(".svg"))
+        if rc or len(made) != len(expected):
+            problems.append("kicad-cli could not draw the board's footprints: " + out[-300:])
+        else:
+            for f in os.listdir(fdir):
+                if f.endswith(".svg"):
+                    os.remove(os.path.join(fdir, f))
+            for f in made:                       # keep rebuilds identical: drop the plot date from the title
+                text = re.sub(r" date \d{4}-\d{2}-\d{2}T[\d:]+ ", " ", open(os.path.join(tmp, f), encoding="utf-8").read())
+                with open(os.path.join(fdir, f), "w", encoding="utf-8") as fh:
+                    fh.write(text)
     cart = {k: v[0] for k, v in expected[FPL.CART]["pads"].items()}
     svg = fp_sheets.cart_check_svg(cart, f"fcjamma:{FPL.CART}", "WingTAT ED60BGFBK drawing Rev A; NESdev wiki 'Cartridge connector' "
                                    "(2026-08-31); OpenFC HVC-CPU-07")
     err = fp_sheets.render_pdf(svg, os.path.join(fdir, "J8_cartridge_slot_1to1_check.pdf"))
     if err:
-        warnings.append(f"the cartridge check print was not rendered ({err})")
+        warnings.append(f"the cartridge check print was not rendered; the old one is kept ({err})")
     captions = {FPL.JAMMA: ("J1 JAMMA の金フィンガー", "表 1〜28・裏 A〜f、ピッチ 3.96、キー溝は 7/H（外形は基板側で描く）"),
                 FPL.CART: ("J8 カセット端子 ED60BGFBK", "ラベル面が 1〜30（下の列）、31 は 1 の真裏、穴 1.0"),
                 FPL.TRIM: ("RV1 半固定抵抗 3362P", "時計回りで 3 番側（音が大きく）、穴 0.9"),
@@ -579,8 +595,8 @@ def footprint_outputs(expected, env, kdir, odir, problems, warnings):
     err = fp_sheets.overview_png(fdir, [FPL.JAMMA, FPL.CART, FPL.TRIM, FPL.DIP, FPL.PICO], captions,
                                  os.path.join(fdir, "footprints_overview.png"))
     if err:
-        warnings.append(f"the footprint overview was not rendered ({err})")
-    return line
+        warnings.append(f"the footprint overview was not rendered; the old one is kept ({err})")
+    return "; ".join(lines)
 
 
 def main():

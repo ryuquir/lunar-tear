@@ -3,6 +3,252 @@
   "attr": [
    "through_hole"
   ],
+  "drawings": [
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -41.4,
+      -4.78
+     ],
+     [
+      41.4,
+      4.78
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": true,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -36.83,
+      5.0
+     ],
+     [
+      -37.48,
+      6.1
+     ],
+     [
+      -36.18,
+      6.1
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -38.6,
+      5.7
+     ]
+    ],
+    "text": "1",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      36.83,
+      5.7
+     ]
+    ],
+    "text": "30",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -36.83,
+      -5.7
+     ]
+    ],
+    "text": "31",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      36.83,
+      -5.7
+     ]
+    ],
+    "text": "60",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      0.0,
+      6.0
+     ]
+    ],
+    "text": "CART LABEL",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -41.245,
+      -4.625
+     ],
+     [
+      41.245,
+      -4.625
+     ],
+     [
+      41.245,
+      4.625
+     ],
+     [
+      -40.245,
+      4.625
+     ],
+     [
+      -41.245,
+      3.625
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -39.52,
+      -1.0
+     ],
+     [
+      39.52,
+      1.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -38.85,
+      -3.75
+     ],
+     [
+      -40.37,
+      3.75
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      38.85,
+      -3.75
+     ],
+     [
+      40.37,
+      3.75
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      0.0,
+      0.0
+     ]
+    ],
+    "text": "${REFERENCE}",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      -41.75,
+      -6.85
+     ],
+     [
+      41.75,
+      6.85
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      -39.2,
+      -0.6
+     ],
+     [
+      39.2,
+      0.6
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      -54.0,
+      -8.5
+     ],
+     [
+      54.0,
+      8.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      0.0,
+      -9.4
+     ]
+    ],
+    "text": "cartridge shell about 108 x 17 (provisional; measure a real one)",
+    "type": "fp_text"
+   }
+  ],
   "graphics": {
    "Dwgs.User": 3,
    "F.CrtYd": 1,
@@ -10,6 +256,8 @@
    "F.SilkS": 7
   },
   "keepout_boxes": [],
+  "keepout_layers": [],
+  "keepout_names": [],
   "keepout_rules": [],
   "keepouts": 0,
   "pads": {
@@ -22,6 +270,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 1.7,
      "x": -36.83,
      "y": 2.54
@@ -36,6 +286,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -13.97,
      "y": 2.54
@@ -50,6 +302,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -11.43,
      "y": 2.54
@@ -64,6 +318,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -8.89,
      "y": 2.54
@@ -78,6 +334,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -6.35,
      "y": 2.54
@@ -92,6 +350,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -3.81,
      "y": 2.54
@@ -106,6 +366,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -1.27,
      "y": 2.54
@@ -120,6 +382,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 1.27,
      "y": 2.54
@@ -134,6 +398,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 3.81,
      "y": 2.54
@@ -148,6 +414,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 6.35,
      "y": 2.54
@@ -162,6 +430,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 8.89,
      "y": 2.54
@@ -176,6 +446,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -34.29,
      "y": 2.54
@@ -190,6 +462,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 11.43,
      "y": 2.54
@@ -204,6 +478,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 13.97,
      "y": 2.54
@@ -218,6 +494,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 16.51,
      "y": 2.54
@@ -232,6 +510,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 19.05,
      "y": 2.54
@@ -246,6 +526,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 21.59,
      "y": 2.54
@@ -260,6 +542,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 24.13,
      "y": 2.54
@@ -274,6 +558,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 26.67,
      "y": 2.54
@@ -288,6 +574,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 29.21,
      "y": 2.54
@@ -302,6 +590,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 31.75,
      "y": 2.54
@@ -316,6 +606,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 34.29,
      "y": 2.54
@@ -330,6 +622,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -31.75,
      "y": 2.54
@@ -344,6 +638,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 36.83,
      "y": 2.54
@@ -358,6 +654,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -36.83,
      "y": -2.54
@@ -372,6 +670,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -34.29,
      "y": -2.54
@@ -386,6 +686,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -31.75,
      "y": -2.54
@@ -400,6 +702,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -29.21,
      "y": -2.54
@@ -414,6 +718,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -26.67,
      "y": -2.54
@@ -428,6 +734,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -24.13,
      "y": -2.54
@@ -442,6 +750,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -21.59,
      "y": -2.54
@@ -456,6 +766,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -19.05,
      "y": -2.54
@@ -470,6 +782,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -16.51,
      "y": -2.54
@@ -484,6 +798,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -29.21,
      "y": 2.54
@@ -498,6 +814,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -13.97,
      "y": -2.54
@@ -512,6 +830,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -11.43,
      "y": -2.54
@@ -526,6 +846,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -8.89,
      "y": -2.54
@@ -540,6 +862,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -6.35,
      "y": -2.54
@@ -554,6 +878,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -3.81,
      "y": -2.54
@@ -568,6 +894,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -1.27,
      "y": -2.54
@@ -582,6 +910,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 1.27,
      "y": -2.54
@@ -596,6 +926,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 3.81,
      "y": -2.54
@@ -610,6 +942,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 6.35,
      "y": -2.54
@@ -624,6 +958,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 8.89,
      "y": -2.54
@@ -638,6 +974,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -26.67,
      "y": 2.54
@@ -652,6 +990,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 11.43,
      "y": -2.54
@@ -666,6 +1006,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 13.97,
      "y": -2.54
@@ -680,6 +1022,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 16.51,
      "y": -2.54
@@ -694,6 +1038,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 19.05,
      "y": -2.54
@@ -708,6 +1054,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 21.59,
      "y": -2.54
@@ -722,6 +1070,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 24.13,
      "y": -2.54
@@ -736,6 +1086,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 26.67,
      "y": -2.54
@@ -750,6 +1102,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 29.21,
      "y": -2.54
@@ -764,6 +1118,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 31.75,
      "y": -2.54
@@ -778,6 +1134,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 34.29,
      "y": -2.54
@@ -792,6 +1150,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -24.13,
      "y": 2.54
@@ -806,6 +1166,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 36.83,
      "y": -2.54
@@ -820,6 +1182,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -21.59,
      "y": 2.54
@@ -834,6 +1198,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -19.05,
      "y": 2.54
@@ -848,6 +1214,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": -16.51,
      "y": 2.54
@@ -860,6 +1228,364 @@
    "exclude_from_pos_files",
    "exclude_from_bom",
    "allow_soldermask_bridges"
+  ],
+  "drawings": [
+   {
+    "fill": true,
+    "layer": "F.Mask",
+    "pts": [
+     [
+      -4.24,
+      0.5
+     ],
+     [
+      111.16,
+      -10.1
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": true,
+    "layer": "B.Mask",
+    "pts": [
+     [
+      -4.24,
+      0.5
+     ],
+     [
+      111.16,
+      -10.1
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      -4.24,
+      0.5
+     ],
+     [
+      111.16,
+      -15.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "B.CrtYd",
+    "pts": [
+     [
+      -4.24,
+      0.5
+     ],
+     [
+      111.16,
+      -15.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -3.74,
+      -12.0
+     ],
+     [
+      -3.74,
+      -0.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -3.74,
+      -0.5
+     ],
+     [
+      -3.24,
+      0.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -3.24,
+      0.0
+     ],
+     [
+      21.76,
+      0.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      21.76,
+      0.0
+     ],
+     [
+      22.26,
+      -0.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      22.26,
+      -0.5
+     ],
+     [
+      22.26,
+      -11.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      22.26,
+      -11.5
+     ],
+     [
+      25.26,
+      -11.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      25.26,
+      -11.5
+     ],
+     [
+      25.26,
+      -0.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      25.26,
+      -0.5
+     ],
+     [
+      25.76,
+      0.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      25.76,
+      0.0
+     ],
+     [
+      110.16,
+      0.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      110.16,
+      0.0
+     ],
+     [
+      110.66,
+      -0.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      110.66,
+      -0.5
+     ],
+     [
+      110.66,
+      -12.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      110.66,
+      -12.0
+     ],
+     [
+      -3.74,
+      -12.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -2.4,
+      -13.4
+     ]
+    ],
+    "text": "1",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      109.3,
+      -13.4
+     ]
+    ],
+    "text": "28",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      53.46,
+      -13.4
+     ]
+    ],
+    "text": "JAMMA PARTS SIDE 1-28",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "B.SilkS",
+    "pts": [
+     [
+      -2.4,
+      -13.4
+     ]
+    ],
+    "text": "A",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "B.SilkS",
+    "pts": [
+     [
+      109.3,
+      -13.4
+     ]
+    ],
+    "text": "f",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "B.SilkS",
+    "pts": [
+     [
+      53.46,
+      -13.4
+     ]
+    ],
+    "text": "SOLDER SIDE A-f",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      -6.15,
+      -15.0
+     ],
+     [
+      113.07,
+      -15.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      53.46,
+      -15.8
+     ]
+    ],
+    "text": "THT parts beyond this line (>= 5 mm from the fingers)",
+    "type": "fp_text"
+   }
   ],
   "graphics": {
    "B.CrtYd": 1,
@@ -890,6 +1616,25 @@
     111.16,
     -9.0
    ]
+  ],
+  "keepout_layers": [
+   [
+    "B.Cu",
+    "F.Cu"
+   ],
+   [
+    "B.Cu",
+    "F.Cu"
+   ],
+   [
+    "B.Cu",
+    "F.Cu"
+   ]
+  ],
+  "keepout_names": [
+   "JAMMA tip: no copper",
+   "JAMMA contact band: fingers only",
+   "JAMMA finger roots: no vias or pour"
   ],
   "keepout_rules": [
    {
@@ -925,6 +1670,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 0.0,
      "y": -5.6
@@ -939,6 +1686,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 35.64,
      "y": -5.6
@@ -953,6 +1702,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 39.6,
      "y": -5.6
@@ -967,6 +1718,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 43.56,
      "y": -5.6
@@ -981,6 +1734,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 47.52,
      "y": -5.6
@@ -995,6 +1750,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 51.48,
      "y": -5.6
@@ -1009,6 +1766,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 55.44,
      "y": -5.6
@@ -1023,6 +1782,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 59.4,
      "y": -5.6
@@ -1037,6 +1798,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 63.36,
      "y": -5.6
@@ -1051,6 +1814,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 67.32,
      "y": -5.6
@@ -1065,6 +1830,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 71.28,
      "y": -5.6
@@ -1079,6 +1846,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 3.96,
      "y": -5.6
@@ -1093,6 +1862,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 75.24,
      "y": -5.6
@@ -1107,6 +1878,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 79.2,
      "y": -5.6
@@ -1121,6 +1894,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 83.16,
      "y": -5.6
@@ -1135,6 +1910,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 87.12,
      "y": -5.6
@@ -1149,6 +1926,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 91.08,
      "y": -5.6
@@ -1163,6 +1942,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 95.04,
      "y": -5.6
@@ -1177,6 +1958,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 99.0,
      "y": -5.6
@@ -1191,6 +1974,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 102.96,
      "y": -5.6
@@ -1205,6 +1990,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 106.92,
      "y": -5.6
@@ -1219,6 +2006,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 7.92,
      "y": -5.6
@@ -1233,6 +2022,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 11.88,
      "y": -5.6
@@ -1247,6 +2038,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 15.84,
      "y": -5.6
@@ -1261,6 +2054,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 19.8,
      "y": -5.6
@@ -1275,6 +2070,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 27.72,
      "y": -5.6
@@ -1289,6 +2086,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 31.68,
      "y": -5.6
@@ -1303,6 +2102,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 0.0,
      "y": -5.6
@@ -1317,6 +2118,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 3.96,
      "y": -5.6
@@ -1331,6 +2134,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 7.92,
      "y": -5.6
@@ -1345,6 +2150,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 11.88,
      "y": -5.6
@@ -1359,6 +2166,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 15.84,
      "y": -5.6
@@ -1373,6 +2182,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 19.8,
      "y": -5.6
@@ -1387,6 +2198,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 27.72,
      "y": -5.6
@@ -1401,6 +2214,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 31.68,
      "y": -5.6
@@ -1415,6 +2230,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 35.64,
      "y": -5.6
@@ -1429,6 +2246,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 39.6,
      "y": -5.6
@@ -1443,6 +2262,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 43.56,
      "y": -5.6
@@ -1457,6 +2278,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 47.52,
      "y": -5.6
@@ -1471,6 +2294,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 51.48,
      "y": -5.6
@@ -1485,6 +2310,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 55.44,
      "y": -5.6
@@ -1499,6 +2326,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 59.4,
      "y": -5.6
@@ -1513,6 +2342,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 63.36,
      "y": -5.6
@@ -1527,6 +2358,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 67.32,
      "y": -5.6
@@ -1541,6 +2374,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 71.28,
      "y": -5.6
@@ -1555,6 +2390,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 75.24,
      "y": -5.6
@@ -1569,6 +2406,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 79.2,
      "y": -5.6
@@ -1583,6 +2422,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 83.16,
      "y": -5.6
@@ -1597,6 +2438,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 87.12,
      "y": -5.6
@@ -1611,6 +2454,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 91.08,
      "y": -5.6
@@ -1625,6 +2470,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 95.04,
      "y": -5.6
@@ -1639,6 +2486,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 99.0,
      "y": -5.6
@@ -1653,6 +2502,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 102.96,
      "y": -5.6
@@ -1667,6 +2518,8 @@
       "B.Cu",
       "B.Mask"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.3,
      "x": 106.92,
      "y": -5.6
@@ -1677,6 +2530,1472 @@
  "RaspberryPi_Pico2_SMD_TP7KeepOut": {
   "attr": [
    "smd"
+  ],
+  "drawings": [
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -23.07
+     ],
+     [
+      -11.09,
+      -23.07
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -23.07
+     ],
+     [
+      -10.61,
+      -22.65
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -20.53
+     ],
+     [
+      -10.61,
+      -20.11
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -17.99
+     ],
+     [
+      -10.61,
+      -17.57
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -15.45
+     ],
+     [
+      -10.61,
+      -15.03
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -12.91
+     ],
+     [
+      -10.61,
+      -12.49
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -10.37
+     ],
+     [
+      -10.61,
+      -9.95
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -7.83
+     ],
+     [
+      -10.61,
+      -7.41
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -5.29
+     ],
+     [
+      -10.61,
+      -4.87
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -2.75
+     ],
+     [
+      -10.61,
+      -2.33
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      -0.21
+     ],
+     [
+      -10.61,
+      0.21
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      2.33
+     ],
+     [
+      -10.61,
+      2.75
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      4.87
+     ],
+     [
+      -10.61,
+      5.29
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      7.41
+     ],
+     [
+      -10.61,
+      7.83
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      9.95
+     ],
+     [
+      -10.61,
+      10.37
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      12.49
+     ],
+     [
+      -10.61,
+      12.91
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      15.03
+     ],
+     [
+      -10.61,
+      15.45
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      17.57
+     ],
+     [
+      -10.61,
+      17.99
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      20.11
+     ],
+     [
+      -10.61,
+      20.53
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.61,
+      22.65
+     ],
+     [
+      -10.61,
+      23.07
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.579676,
+      -25.19
+     ],
+     [
+      -11.09,
+      -25.19
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.0,
+      -25.61
+     ],
+     [
+      -7.51,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.0,
+      25.61
+     ],
+     [
+      -6.162061,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -7.51,
+      -25.61
+     ],
+     [
+      -6.16206,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -5.237939,
+      -25.61
+     ],
+     [
+      -4.235,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -4.235,
+      -25.61
+     ],
+     [
+      4.235,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -3.6,
+      25.61
+     ],
+     [
+      -5.237939,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -1.48,
+      25.61
+     ],
+     [
+      -1.06,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      1.06,
+      25.61
+     ],
+     [
+      1.48,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      4.235,
+      -25.61
+     ],
+     [
+      5.237939,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      5.237939,
+      25.61
+     ],
+     [
+      3.6,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      6.162061,
+      -25.61
+     ],
+     [
+      7.51,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      6.162061,
+      25.61
+     ],
+     [
+      10.0,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.0,
+      -25.61
+     ],
+     [
+      7.51,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -23.07
+     ],
+     [
+      10.61,
+      -22.65
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -20.53
+     ],
+     [
+      10.61,
+      -20.11
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -17.99
+     ],
+     [
+      10.61,
+      -17.57
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -15.45
+     ],
+     [
+      10.61,
+      -15.03
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -12.91
+     ],
+     [
+      10.61,
+      -12.49
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -10.37
+     ],
+     [
+      10.61,
+      -9.95
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -7.83
+     ],
+     [
+      10.61,
+      -7.41
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -5.29
+     ],
+     [
+      10.61,
+      -4.87
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -2.75
+     ],
+     [
+      10.61,
+      -2.33
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      -0.21
+     ],
+     [
+      10.61,
+      0.21
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      2.33
+     ],
+     [
+      10.61,
+      2.75
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      4.87
+     ],
+     [
+      10.61,
+      5.29
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      7.41
+     ],
+     [
+      10.61,
+      7.83
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      9.95
+     ],
+     [
+      10.61,
+      10.37
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      12.49
+     ],
+     [
+      10.61,
+      12.91
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      15.03
+     ],
+     [
+      10.61,
+      15.45
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      17.57
+     ],
+     [
+      10.61,
+      17.99
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      20.11
+     ],
+     [
+      10.61,
+      20.53
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.61,
+      22.65
+     ],
+     [
+      10.61,
+      23.07
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.579676,
+      -25.19
+     ],
+     [
+      -10.357938,
+      -25.493944
+     ],
+     [
+      -10.0,
+      -25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -10.0,
+      25.61
+     ],
+     [
+      -10.357937,
+      25.493944
+     ],
+     [
+      -10.579676,
+      25.189937
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.0,
+      -25.61
+     ],
+     [
+      10.357937,
+      -25.493944
+     ],
+     [
+      10.579676,
+      -25.189937
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.579676,
+      25.189937
+     ],
+     [
+      10.357958,
+      25.493991
+     ],
+     [
+      10.0,
+      25.61
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      -5.7,
+      -23.5
+     ],
+     [
+      -4.65,
+      -23.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      -5.7,
+      23.5
+     ],
+     [
+      -4.65,
+      23.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      5.7,
+      -23.5
+     ],
+     [
+      6.75,
+      -23.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      5.7,
+      23.5
+     ],
+     [
+      6.75,
+      23.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "Dwgs.User",
+    "pts": [
+     [
+      10.5,
+      -0.47
+     ],
+     [
+      2.12,
+      -0.47
+     ],
+     [
+      1.9,
+      -0.7
+     ],
+     [
+      1.9,
+      -1.6
+     ],
+     [
+      2.37,
+      -2.07
+     ],
+     [
+      5.65,
+      -2.07
+     ],
+     [
+      5.9,
+      -2.3
+     ],
+     [
+      5.9,
+      -3.2
+     ],
+     [
+      5.2,
+      -3.9
+     ],
+     [
+      4.55,
+      -3.9
+     ],
+     [
+      4.3,
+      -4.15
+     ],
+     [
+      4.3,
+      -11.05
+     ],
+     [
+      4.85,
+      -11.6
+     ],
+     [
+      7.15,
+      -11.6
+     ],
+     [
+      7.78,
+      -12.23
+     ],
+     [
+      10.5,
+      -12.23
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      -4.5,
+      -27.3
+     ],
+     [
+      4.5,
+      -27.3
+     ],
+     [
+      4.5,
+      -25.75
+     ],
+     [
+      11.54,
+      -25.75
+     ],
+     [
+      11.54,
+      26.55
+     ],
+     [
+      -11.54,
+      26.55
+     ],
+     [
+      -11.54,
+      -25.75
+     ],
+     [
+      -4.5,
+      -25.75
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -10.5,
+      -24.5
+     ],
+     [
+      -9.5,
+      -25.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -10.5,
+      25.0
+     ],
+     [
+      -10.5,
+      -24.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -9.5,
+      -25.5
+     ],
+     [
+      10.0,
+      -25.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -4.625,
+      -14.075
+     ],
+     [
+      -4.625,
+      -12.925
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -2.375,
+      -14.075
+     ],
+     [
+      -2.375,
+      -12.925
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      10.0,
+      25.5
+     ],
+     [
+      -10.0,
+      25.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      10.5,
+      -25.0
+     ],
+     [
+      10.5,
+      25.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -6.5,
+      -21.1
+     ],
+     [
+      -4.9,
+      -20.3
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -6.2,
+      -21.1
+     ],
+     [
+      -5.2,
+      -20.3
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -5.1,
+      -15.625
+     ],
+     [
+      -1.9,
+      -11.375
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -10.0,
+      25.5
+     ],
+     [
+      -10.353553,
+      25.353553
+     ],
+     [
+      -10.5,
+      25.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -4.625,
+      -14.075
+     ],
+     [
+      -3.5,
+      -15.2
+     ],
+     [
+      -2.375,
+      -14.075
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -2.375,
+      -12.925
+     ],
+     [
+      -3.5,
+      -11.8
+     ],
+     [
+      -4.625,
+      -12.925
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      10.0,
+      -25.5
+     ],
+     [
+      10.353553,
+      -25.353553
+     ],
+     [
+      10.5,
+      -25.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      10.5,
+      25.0
+     ],
+     [
+      10.353553,
+      25.353553
+     ],
+     [
+      10.0,
+      25.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      3.79,
+      -21.2
+     ],
+     [
+      3.79,
+      -26.2
+     ],
+     [
+      4.0,
+      -26.2
+     ],
+     [
+      4.0,
+      -26.8
+     ],
+     [
+      -4.0,
+      -26.8
+     ],
+     [
+      -4.0,
+      -26.2
+     ],
+     [
+      -3.79,
+      -26.2
+     ],
+     [
+      -3.79,
+      -21.2
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      1.0,
+      -5.635
+     ]
+    ],
+    "text": "Copper",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      1.0,
+      -5.0
+     ]
+    ],
+    "text": "Keep",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      1.0,
+      -4.365
+     ]
+    ],
+    "text": "Out",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      5.08,
+      -7.62
+     ]
+    ],
+    "text": "AGND Plane",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      0.0,
+      0.0
+     ]
+    ],
+    "text": "${REFERENCE}",
+    "type": "fp_text"
+   }
   ],
   "graphics": {
    "Cmts.User": 4,
@@ -1692,6 +4011,15 @@
     2.25,
     -3.75
    ]
+  ],
+  "keepout_layers": [
+   [
+    "F.Cu",
+    "F.Mask"
+   ]
+  ],
+  "keepout_names": [
+   "TP7 keep-out"
   ],
   "keepout_rules": [
    {
@@ -1714,6 +4042,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "oval",
      "w": 1.05,
      "x": -2.425,
      "y": -20.97
@@ -1727,6 +4057,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.2,
      "x": -2.54,
      "y": 23.9
@@ -1742,6 +4074,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "oval",
      "w": 1.1,
      "x": -2.725,
      "y": -24.0
@@ -1755,6 +4089,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -1.27
@@ -1768,6 +4104,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -11.43
@@ -1781,6 +4119,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -13.97
@@ -1794,6 +4134,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -16.51
@@ -1807,6 +4149,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -19.05
@@ -1820,6 +4164,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -21.59
@@ -1833,6 +4179,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -24.13
@@ -1846,6 +4194,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -3.81
@@ -1859,6 +4209,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -6.35
@@ -1872,6 +4224,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": -8.89
@@ -1885,6 +4239,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 1.27
@@ -1898,6 +4254,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 11.43
@@ -1911,6 +4269,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 13.97
@@ -1924,6 +4284,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 16.51
@@ -1937,6 +4299,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 19.05
@@ -1950,6 +4314,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 21.59
@@ -1963,6 +4329,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 24.13
@@ -1976,6 +4344,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 3.81
@@ -1989,6 +4359,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 6.35
@@ -2002,6 +4374,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": -8.89,
      "y": 8.89
@@ -2015,6 +4389,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.2,
      "x": 0.0,
      "y": 23.9
@@ -2030,6 +4406,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "oval",
      "w": 1.05,
      "x": 2.425,
      "y": -20.97
@@ -2043,6 +4421,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 2.2,
      "x": 2.54,
      "y": 23.9
@@ -2058,6 +4438,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "oval",
      "w": 1.1,
      "x": 2.725,
      "y": -24.0
@@ -2071,6 +4453,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -1.27
@@ -2084,6 +4468,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -11.43
@@ -2097,6 +4483,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -13.97
@@ -2110,6 +4498,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -16.51
@@ -2123,6 +4513,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -19.05
@@ -2136,6 +4528,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -21.59
@@ -2149,6 +4543,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -24.13
@@ -2162,6 +4558,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -3.81
@@ -2175,6 +4573,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -6.35
@@ -2188,6 +4588,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": -8.89
@@ -2201,6 +4603,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 1.27
@@ -2214,6 +4618,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 11.43
@@ -2227,6 +4633,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 13.97
@@ -2240,6 +4648,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 16.51
@@ -2253,6 +4663,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 19.05
@@ -2266,6 +4678,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 21.59
@@ -2279,6 +4693,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 24.13
@@ -2292,6 +4708,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 3.81
@@ -2305,6 +4723,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 6.35
@@ -2318,6 +4738,8 @@
      "layers": [
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "rect",
      "w": 3.8,
      "x": 8.89,
      "y": 8.89
@@ -2332,6 +4754,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": -9.69,
      "y": -24.13
@@ -2346,6 +4770,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -1.27
@@ -2360,6 +4786,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 1.27
@@ -2374,6 +4802,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 3.81
@@ -2388,6 +4818,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": -9.69,
      "y": 6.35
@@ -2402,6 +4834,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 8.89
@@ -2416,6 +4850,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 11.43
@@ -2430,6 +4866,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 13.97
@@ -2444,6 +4882,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 16.51
@@ -2458,6 +4898,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": -9.69,
      "y": 19.05
@@ -2472,6 +4914,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 21.59
@@ -2486,6 +4930,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -21.59
@@ -2500,6 +4946,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": 24.13
@@ -2514,6 +4962,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 24.13
@@ -2528,6 +4978,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 21.59
@@ -2542,6 +4994,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": 9.69,
      "y": 19.05
@@ -2556,6 +5010,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 16.51
@@ -2570,6 +5026,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 13.97
@@ -2584,6 +5042,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 11.43
@@ -2598,6 +5058,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 8.89
@@ -2612,6 +5074,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": 9.69,
      "y": 6.35
@@ -2626,6 +5090,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 3.81
@@ -2640,6 +5106,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": -9.69,
      "y": -19.05
@@ -2654,6 +5122,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": 1.27
@@ -2668,6 +5138,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -1.27
@@ -2682,6 +5154,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -3.81
@@ -2696,6 +5170,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": 9.69,
      "y": -6.35
@@ -2710,6 +5186,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -8.89
@@ -2724,6 +5202,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -11.43
@@ -2738,6 +5218,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -13.97
@@ -2752,6 +5234,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -16.51
@@ -2766,6 +5250,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": 9.69,
      "y": -19.05
@@ -2780,6 +5266,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -21.59
@@ -2794,6 +5282,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -16.51
@@ -2808,6 +5298,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 9.69,
      "y": -24.13
@@ -2822,6 +5314,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -13.97
@@ -2836,6 +5330,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -11.43
@@ -2850,6 +5346,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -8.89
@@ -2864,6 +5362,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "custom",
      "w": 1.6,
      "x": -9.69,
      "y": -6.35
@@ -2878,6 +5378,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -9.69,
      "y": -3.81
@@ -2892,6 +5394,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 90.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": -2.54,
      "y": 23.9
@@ -2906,6 +5410,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 270.0,
+     "shape": "custom",
      "w": 1.6,
      "x": 0.0,
      "y": 23.9
@@ -2920,6 +5426,8 @@
       "F.Cu",
       "F.Mask"
      ],
+     "rot": 90.0,
+     "shape": "roundrect",
      "w": 3.2,
      "x": 2.54,
      "y": 23.9
@@ -2935,6 +5443,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.5,
      "x": 0.0,
      "y": -21.0
@@ -2950,6 +5460,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.5,
      "x": 1.0,
      "y": -24.3
@@ -2965,6 +5477,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.5,
      "x": -1.0,
      "y": -24.3
@@ -2980,6 +5494,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.5,
      "x": -2.5,
      "y": -17.5
@@ -2995,6 +5511,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.5,
      "x": -2.5,
      "y": -15.0
@@ -3010,6 +5528,8 @@
       "F.Mask",
       "F.Paste"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.5,
      "x": -2.5,
      "y": -12.5
@@ -3021,12 +5541,532 @@
   "attr": [
    "through_hole"
   ],
+  "drawings": [
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -1.38,
+      -2.66
+     ],
+     [
+      -1.38,
+      -1.277
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -1.38,
+      -2.66
+     ],
+     [
+      0.003,
+      -2.66
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -1.14,
+      -2.42
+     ],
+     [
+      -1.14,
+      10.04
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -1.14,
+      -2.42
+     ],
+     [
+      8.76,
+      -2.42
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -1.14,
+      10.04
+     ],
+     [
+      8.76,
+      10.04
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      8.76,
+      -2.42
+     ],
+     [
+      8.76,
+      10.04
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      -3.05,
+      -2.67
+     ],
+     [
+      11.62,
+      10.29
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -1.08,
+      -1.36
+     ],
+     [
+      -0.08,
+      -2.36
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -1.08,
+      9.98
+     ],
+     [
+      -1.08,
+      -1.36
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -0.08,
+      -2.36
+     ],
+     [
+      8.7,
+      -2.36
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      3.133333,
+      -0.635
+     ],
+     [
+      3.133333,
+      0.635
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      3.133333,
+      1.905
+     ],
+     [
+      3.133333,
+      3.175
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      3.133333,
+      4.445
+     ],
+     [
+      3.133333,
+      5.715
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      3.133333,
+      6.985
+     ],
+     [
+      3.133333,
+      8.255
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      8.7,
+      -2.36
+     ],
+     [
+      8.7,
+      9.98
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      8.7,
+      9.98
+     ],
+     [
+      -1.08,
+      9.98
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": true,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      -0.635
+     ],
+     [
+      3.133333,
+      0.635
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      -0.635
+     ],
+     [
+      5.84,
+      0.635
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": true,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      1.905
+     ],
+     [
+      3.133333,
+      3.175
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      1.905
+     ],
+     [
+      5.84,
+      3.175
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": true,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      4.445
+     ],
+     [
+      3.133333,
+      5.715
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      4.445
+     ],
+     [
+      5.84,
+      5.715
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": true,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      6.985
+     ],
+     [
+      3.133333,
+      8.255
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      1.78,
+      6.985
+     ],
+     [
+      5.84,
+      8.255
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      5.365,
+      -1.4975
+     ]
+    ],
+    "text": "on",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      7.27,
+      3.81
+     ]
+    ],
+    "text": "${REFERENCE}",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.2,
+      3.81
+     ]
+    ],
+    "text": "ON",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      9.5,
+      5.2
+     ],
+     [
+      10.9,
+      5.2
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.9,
+      5.2
+     ],
+     [
+      10.5,
+      4.9
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      10.9,
+      5.2
+     ],
+     [
+      10.5,
+      5.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -2.2,
+      0.0
+     ]
+    ],
+    "text": "1",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -2.2,
+      2.54
+     ]
+    ],
+    "text": "2",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -2.2,
+      5.08
+     ]
+    ],
+    "text": "3",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -2.2,
+      7.62
+     ]
+    ],
+    "text": "4",
+    "type": "fp_text"
+   }
+  ],
   "graphics": {
    "F.CrtYd": 1,
    "F.Fab": 19,
-   "F.SilkS": 26
+   "F.SilkS": 14
   },
   "keepout_boxes": [],
+  "keepout_layers": [],
+  "keepout_names": [],
   "keepout_rules": [],
   "keepouts": 0,
   "pads": {
@@ -3039,6 +6079,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.7,
      "x": 0.0,
      "y": 0.0
@@ -3053,6 +6095,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 0.0,
      "y": 2.54
@@ -3067,6 +6111,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 0.0,
      "y": 5.08
@@ -3081,6 +6127,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 0.0,
      "y": 7.62
@@ -3095,6 +6143,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 7.62,
      "y": 7.62
@@ -3109,6 +6159,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 7.62,
      "y": 5.08
@@ -3123,6 +6175,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 7.62,
      "y": 2.54
@@ -3137,6 +6191,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.7,
      "x": 7.62,
      "y": 0.0
@@ -3148,12 +6204,248 @@
   "attr": [
    "through_hole"
   ],
+  "drawings": [
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -3.45,
+      -2.23
+     ],
+     [
+      3.45,
+      4.87
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      0.0,
+      0.97
+     ],
+     [
+      2.0,
+      0.97
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -1.385,
+      0.97
+     ],
+     [
+      1.385,
+      0.97
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      0.0,
+      -0.415
+     ],
+     [
+      0.0,
+      2.355
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      -2.7,
+      2.85
+     ],
+     [
+      -2.3,
+      2.85
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "F.Fab",
+    "pts": [
+     [
+      0.0,
+      3.95
+     ]
+    ],
+    "text": "${REFERENCE}",
+    "type": "fp_text"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -3.6,
+      -2.38
+     ],
+     [
+      3.6,
+      5.02
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": true,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -3.95,
+      1.27
+     ],
+     [
+      -4.55,
+      0.92
+     ],
+     [
+      -4.55,
+      1.62
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -2.5,
+      -3.36
+     ],
+     [
+      -0.087,
+      -4.029
+     ],
+     [
+      2.347,
+      -3.445
+     ]
+    ],
+    "text": null,
+    "type": "fp_arc"
+   },
+   {
+    "fill": true,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      3.078,
+      -2.97
+     ],
+     [
+      2.512,
+      -3.754
+     ],
+     [
+      2.183,
+      -3.136
+     ]
+    ],
+    "text": null,
+    "type": "fp_poly"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      3.5,
+      -3.4
+     ],
+     [
+      4.5,
+      -3.4
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      4.0,
+      -3.9
+     ],
+     [
+      4.0,
+      -2.9
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.SilkS",
+    "pts": [
+     [
+      -4.1,
+      -3.9
+     ],
+     [
+      -3.1,
+      -3.9
+     ]
+    ],
+    "text": null,
+    "type": "fp_line"
+   },
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      -4.7,
+      -4.3
+     ],
+     [
+      4.7,
+      5.15
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   }
+  ],
   "graphics": {
    "F.CrtYd": 1,
    "F.Fab": 6,
    "F.SilkS": 7
   },
   "keepout_boxes": [],
+  "keepout_layers": [],
+  "keepout_names": [],
   "keepout_rules": [],
   "keepouts": 0,
   "pads": {
@@ -3166,6 +6458,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "roundrect",
      "w": 1.6,
      "x": -2.54,
      "y": 1.27
@@ -3180,6 +6474,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.6,
      "x": 0.0,
      "y": -1.27
@@ -3194,6 +6490,8 @@
       "*.Cu",
       "*.Mask"
      ],
+     "rot": 0.0,
+     "shape": "circle",
      "w": 1.6,
      "x": 2.54,
      "y": 1.27

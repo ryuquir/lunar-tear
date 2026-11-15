@@ -3,7 +3,7 @@
 	(generator "fcgen")
 	(generator_version "10.0")
 	(layer "F.Cu")
-	(descr "Raspberry Pi Pico 2 soldered flat (reflow), KiCad's RaspberryPi_Pico_SMD with the module's TP7 (1.1 V, Pico 2 only, at +1.0/-5.0) under a 2.5 mm keep-out on F.Cu and F.Mask: no copper and no mask opening there (Pico 2 datasheet, Figure 5)")
+	(descr "Raspberry Pi Pico 2 soldered flat (reflow), KiCad's RaspberryPi_Pico_SMD with the module's TP7 (1.1 V, Pico 2 only, at +1.0/-5.0) under a 2.5 mm keep-out on F.Cu and F.Mask: no copper and no mask opening there (Pico 2 datasheet, Figure 5; enforced by the board rules in kicad/fcjamma.kicad_dru)")
 	(tags "module usb pcb swd")
 	(property "Reference" "REF**"
 		(at 11.7475 24.765 0)

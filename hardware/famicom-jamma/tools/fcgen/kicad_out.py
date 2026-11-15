@@ -12,7 +12,7 @@ import uuid
 
 import kicad_sch_api as ksa
 
-from .model import SymDef, PIN_TYPES
+from .model import SymDef, PIN_TYPES, PCB
 
 GRID = 2.54
 CHAR = 1.15          # approximate width of one label character at 1.27 mm text size
@@ -156,8 +156,10 @@ def _balanced(t, i):
     raise ValueError("unbalanced")
 
 
-def tidy_properties(t, dnp_refs):
-    """Hide every field except Reference and Value, and mark DNP parts."""
+def tidy_properties(t, dnp_refs, board_refs=()):
+    """Hide every field except Reference and Value, mark DNP parts, and keep the parts that are made by the
+    bare board itself (test points, solder jumpers, the JAMMA fingers) out of KiCad's BOM and position file,
+    as their footprints are."""
     out, i = [], 0
     for m in re.finditer(r'\(property "([^"]+)" "', t):
         name = m.group(1)
@@ -179,6 +181,15 @@ def tidy_properties(t, dnp_refs):
         s0 = t.rfind("(dnp no)", 0, k)
         if s0 >= 0 and t.rfind("(symbol", 0, k) < s0:
             t = t[:s0] + "(dnp yes)" + t[s0 + 8:]
+    for ref in board_refs:
+        k = t.find(f'(property "Reference" "{ref}"')
+        start = t.rfind("(symbol", 0, k)
+        if k < 0 or start < 0:
+            continue
+        head = t[start:k].replace("(in_bom yes)", "(in_bom no)").replace("(in_pos_files yes)", "(in_pos_files no)")
+        if "(in_pos_files" not in head:          # kicad-sch-api writes no such field; KiCad's upgrade would add it as 'yes'
+            head = head.replace("(on_board yes)", "(on_board yes)\n\t\t(in_pos_files no)", 1)
+        t = t[:start] + head + t[k:]
     return t
 
 
@@ -296,7 +307,8 @@ def write_project(design, outdir, power_flag_nets):
         path = os.path.join(outdir, f"{sh.key}.kicad_sch")
         sch.save(path)
         inject(path, items)
-        files.append((path, [p.ref for p in parts if p.dnp], [p.ref for p in parts if p.horizontal and len(p.conn) == 2]))
+        files.append((path, [p.ref for p in parts if p.dnp], [p.ref for p in parts if p.horizontal and len(p.conn) == 2],
+                      [p.ref for p in parts if p.src == PCB]))
 
     # power flags on the root sheet
     for i, net in enumerate(power_flag_nets):
@@ -308,8 +320,8 @@ def write_project(design, outdir, power_flag_nets):
     rpath = os.path.join(outdir, f"{name}.kicad_sch")
     root.save(rpath)
     inject(rpath, root_items)
-    files.append((rpath, [], []))
-    for path, dnp, lying in files:
+    files.append((rpath, [], [], []))
+    for path, dnp, lying, board in files:
         t = open(path, encoding="utf-8").read()
-        open(path, "w", encoding="utf-8").write(place_two_pin_text(tidy_properties(t, dnp), lying))
+        open(path, "w", encoding="utf-8").write(place_two_pin_text(tidy_properties(t, dnp, board), lying))
     return rpath, [f[0] for f in files]

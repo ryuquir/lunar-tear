@@ -123,37 +123,67 @@ def circle_points(c, r, n=32):
     return [(c[0] + r * math.cos(2 * math.pi * k / n), c[1] + r * math.sin(2 * math.pi * k / n)) for k in range(n)]
 
 
+def _pts(node, key):
+    return [[float(v[1]), float(v[2])] for v in first(node, key)[1:] if isinstance(v, list) and v[0] == "xy"]
+
+
+def _xyf(node, key):
+    v = first(node, key)
+    return [float(v[1]), float(v[2])]
+
+
 def expected(tree):
-    """What KiCad should read from this footprint: pads (keyed by number, or by position when unnumbered),
-    keep-out areas with their bounding boxes, and the attributes.  tools/check_footprints.py compares it with KiCad."""
-    out = {"pads": {}, "keepouts": 0, "keepout_boxes": [], "keepout_rules": [], "attr": []}
+    """What KiCad should read from this footprint: every pad (keyed by number, or by position when unnumbered),
+    every keep-out area, every drawing and the attributes.  tools/check_footprints.py compares it with KiCad."""
+    out = {"pads": {}, "keepouts": 0, "keepout_boxes": [], "keepout_rules": [], "keepout_layers": [], "keepout_names": [],
+           "attr": [], "graphics": {}, "drawings": []}
     for p in find(tree, "pad"):
         at, size = first(p, "at"), first(p, "size")
         x, y = float(at[1]), float(at[2])
+        rot = float(at[3]) if len(at) > 3 else 0.0
         drill = first(p, "drill")
         d = 0.0
         if drill is not None:
             nums = [v for v in drill[1:] if not isinstance(v, list) and v != "oval"]
             d = float(nums[0]) if nums else 0.0
         key = str(p[1]) or f"(no number) {x:.3f},{y:.3f}"
-        out["pads"].setdefault(key, []).append({"x": x, "y": y, "kind": p[2], "w": float(size[1]), "h": float(size[2]),
-                                                "drill": d, "layers": [str(v) for v in first(p, "layers")[1:]]})
+        out["pads"].setdefault(key, []).append({"x": x, "y": y, "rot": rot, "kind": str(p[2]), "shape": str(p[3]),
+                                                "w": float(size[1]), "h": float(size[2]), "drill": d,
+                                                "layers": [str(v) for v in first(p, "layers")[1:]]})
     for z in find(tree, "zone"):
         ko = first(z, "keepout")
         if ko is None:
             continue
-        pts = [(float(v[1]), float(v[2])) for v in first(first(z, "polygon"), "pts")[1:] if v[0] == "xy"]
-        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        pts = _pts(first(z, "polygon"), "pts")
+        xs, ys = [q[0] for q in pts], [q[1] for q in pts]
+        layer_node = first(z, "layers") or first(z, "layer")
+        name = first(z, "name")
         out["keepouts"] += 1
         out["keepout_boxes"].append([min(xs), min(ys), max(xs), max(ys)])
         out["keepout_rules"].append({r[0]: r[1] for r in ko[1:]})
+        out["keepout_layers"].append(sorted(str(v) for v in layer_node[1:]))
+        out["keepout_names"].append(str(name[1]) if name else "")
     attr = first(tree, "attr")
     out["attr"] = [str(a) for a in attr[1:]] if attr else []
-    out["graphics"] = {}
     for x in tree:
-        if isinstance(x, list) and x and x[0] in ("fp_line", "fp_rect", "fp_circle", "fp_arc", "fp_poly", "fp_text"):
-            layer = str(first(x, "layer")[1])
-            out["graphics"][layer] = out["graphics"].get(layer, 0) + 1
+        if not (isinstance(x, list) and x and x[0] in ("fp_line", "fp_rect", "fp_circle", "fp_arc", "fp_poly", "fp_text")):
+            continue
+        layer = str(first(x, "layer")[1])
+        out["graphics"][layer] = out["graphics"].get(layer, 0) + 1
+        fill = first(x, "fill")
+        item = {"type": x[0], "layer": layer, "fill": bool(fill and fill[1] in ("yes", "solid")), "text": None}
+        if x[0] in ("fp_line", "fp_rect"):
+            item["pts"] = [_xyf(x, "start"), _xyf(x, "end")]
+        elif x[0] == "fp_circle":
+            item["pts"] = [_xyf(x, "center"), _xyf(x, "end")]
+        elif x[0] == "fp_arc":
+            item["pts"] = [_xyf(x, "start"), _xyf(x, "mid"), _xyf(x, "end")]
+        elif x[0] == "fp_poly":
+            item["pts"] = _pts(x, "pts")
+        else:
+            item["pts"] = [_xyf(x, "at")]
+            item["text"] = str(x[2])
+        out["drawings"].append(item)
     return out
 
 
