@@ -416,29 +416,14 @@ EP_VIAS = {'footprint': QFN, 'grid': 3, 'pitch': 1.1, 'drill': 0.3, 'dia': 0.5, 
 def _poly(pts):
     """[(x', h)] -> board polygon"""
     return [at(xp, h) for xp, h in pts]
-def _rect(xp0, h0, xp1, h1): return _poly([(xp0, h0), (xp1, h0), (xp1, h1), (xp0, h1)])
-def _core_island(xp, hc, rot):
-    """+1V1 on In2 under one chip: a bar through DVDD 10 / 51 (QFN frame y -1.0 .. 0.6) and a stub down to DVDD 32. The bar
-    goes round the 3 x 3 exposed-pad vias (+-1.35 mm, 0.25 mm zone clearance) as a U (inner edge +-1.75, bottom 1.75 .. 2.6):
-    a straight bar through them would fill as seven pieces and leave DVDD 10, 51 and 32 unjoined."""
-    s = 1 if rot == 0 else -1
-    pts = [(-4.4, -1.0), (-1.75, -1.0), (-1.75, 1.75), (1.75, 1.75), (1.75, -1.0), (4.4, -1.0), (4.4, 0.6), (2.6, 0.6), (2.6, 2.6),
-           (1.0, 2.6), (1.0, 4.0), (0.2, 4.0), (0.2, 2.6), (-2.6, 2.6), (-2.6, 0.6), (-4.4, 0.6)]
-    return _poly([(xp + s * x, hc - s * y) for x, y in pts])
 # Layers (docs/13 "層の役目", drawn from the back): F.Cu (6) back, main parts, QFN fan-out, USB; In1 (5) GND; In2 (4)
-# power: the +3V3 plane with +1V1 islands under each chip and at its supply, V5_IN at the two converter inputs;
-# In3 (3) signal; In4 (2) GND; B.Cu (1) front: passives, fingers 1-30, pads. F.Cu and B.Cu get a GND pour (OUTER_GND).
-# +1V1 islands that the routed board leaves without any via of +1V1 (island_vias.py finds no room for one): a floating
-# island would only cut a hole into the +3V3 plane, so the routed board drops it and so does this map ('OUT' = the
-# island at the +1V1 output). Filled in from the routed board (docs/13 "配線の結果"): U3's three DVDD pins and their
-# 100 nF are joined by 0.4 mm tracks on B.Cu, under the chip, with no room for a via into the island.
-ISLANDS_DROPPED = {'U3'}
-PLANES = {'In1.Cu': [('GND', 'board')],
-          'In2.Cu': [('+3V3', 'board')] + [('+1V1', _core_island(*CHIP_XY[u])) for u in sorted(CHIP_XY) if u not in ISLANDS_DROPPED]
-                    + [('+1V1', _rect(-20.8, 46.9, -13.2, 51.2))] * ('OUT' not in ISLANDS_DROPPED)      # +1V1 output: L2, 2 x 22 uF
-                    + [('V5_IN', _rect(-25.5, 51.6, -18.6, 56.0)),                   # +1V1 converter: VIN, EN, input 10 uF, trunk via
-                       ('V5_IN', _rect(11.8, 69.4, 24.6, 74.4))],                    # trunk via, D11, +3V3 converter: input 10 uF, VIN, EN
-          'In4.Cu': [('GND', 'board')]}
+# the +3V3 plane, whole; In3 (3) signal; In4 (2) GND; B.Cu (1) front: passives, fingers 1-30, pads. F.Cu and B.Cu get a
+# GND pour (OUTER_GND).
+# In2 used to carry islands: +1V1 under each chip and at the +1V1 output, V5_IN at the two converter inputs. On the routed
+# board every one of them hung on one via per piece and carried no current: taking all ten out changed no supply drop by
+# 0.1 mV (power_drop.py), while In3's fast nets crossed their edges. +1V1 and V5_IN are tracks (NET_WIDTH, WIDEN_FIRST,
+# the pre-routed trunk); the plane under the chips is whole (docs/13 "配線の結果").
+PLANES = {'In1.Cu': [('GND', 'board')], 'In2.Cu': [('+3V3', 'board')], 'In4.Cu': [('GND', 'board')]}
 # Wider tracks for the supply nets the router draws (V5_IN from the trunk to the converter pads, VBUS, the switch nodes,
 # +1V1 to the 24 DVDD pins). With PLANES the DSN gives every net of this map a width class for ALL its connections, so
 # +5V is not in it: its other connections (pin 31 / C8, RN18, the BAV99 cathodes, the 2.2k / 100k / 10k pull-ups and V5S)
@@ -455,9 +440,9 @@ WIDEN_FIRST = {'+1V1': 0.8}
 #  * GND: a strap as wide as rev G's from each ground finger (1: B, x' +37.33, 1.6 mm; 16: B, x' -1.27, 1.2 mm) up into
 #    the B.Cu pour.
 #  * V5_IN trunk, 0.5 mm on B.Cu (docs/13 layer 1 carries the supply trunk): D10's cathode -> via -> up the left margin
-#    and at 45 degrees (clear of the notch) into the U9 | U2 channel at x' -28 -> TP3 -> via into the In2 V5_IN island of
-#    the +1V1 converter; from there up to h 63.5, along it under J3 / U16 (free on B) to x' 12.85 and a via into the
-#    island of D11 and the +3V3 converter. The converter pads reach the islands through the router's vias.
+#    and at 45 degrees (clear of the notch) into the U9 | U2 channel at x' -28 -> TP3 -> via up to F.Cu at the +1V1
+#    converter; from there up to h 63.5, along it under J3 / U16 (free on B) to x' 12.85 and a via up to D11 and the
+#    +3V3 converter. The router joins the converter pads to the two vias on F.Cu (0.5 mm).
 PREROUTE = [('+5V', 0.8, _poly([(-37.33, -3.4), (-37.33, 1.2), (-41.4, 1.2)]), 'B.Cu'),
             ('+5V', 0.8, _poly([(-40.4, 1.2), (-41.4, 1.2), (-42.1, 1.9), (-42.1, 4.6), (-42.1, 6.7), (-42.1, 7.9), (-43.65, 9.0)])),
             ('GND', 1.6, _poly([(37.33, -3.1), (37.33, 1.4)]), 'B.Cu'), ('GND', 1.2, _poly([(-1.27, -3.3), (-1.27, 1.6)]), 'B.Cu'),

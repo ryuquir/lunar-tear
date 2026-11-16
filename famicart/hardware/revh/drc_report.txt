@@ -1,5 +1,5 @@
 ** Drc report for /home/user/lunar-tear/famicart/hardware/revh/famicart.kicad_pcb **
-** Created on 2026-11-16 08:27:06 **
+** Created on 2026-11-16 08:37:21 **
 
 ** Found 210 DRC violations **
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.

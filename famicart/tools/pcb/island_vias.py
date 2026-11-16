@@ -16,6 +16,9 @@ when its copper touches the fill (its centre may lie outside).
 KiCad removes an isolated piece of a zone only when another piece of that zone is joined; a zone none of whose pieces is
 joined keeps its whole fill. With --drop-isolated, such zones (no spot for a via anywhere in them) are taken off the
 board, so no floating copper is left on the plane layer; the plane around them fills the space at the next zone fill.
+First of all, zones on a plane layer whose net the design's PLANES no longer names on that layer are taken off the board
+(rev H: all the In2 islands went when they turned out to carry no current), so a board routed before such a change
+follows the design without being routed again.
     FC_DESIGN=design_revh python3 island_vias.py board.kicad_pcb [--dry] [--drop-isolated]"""
 import os, sys, re, math, argparse, tempfile, importlib
 import pcbnew
@@ -139,8 +142,25 @@ def drc_vias(path, ours):
                 if abs(vx - float(x)) < 0.002 and abs(vy - float(y)) < 0.002: bad.add((vx, vy))
     return bad
 
+def unlisted_zones(board):
+    """Zones on the layers of PLANES whose net PLANES does not name on that layer (the design dropped them)."""
+    out = []
+    for lname, entries in (getattr(D, 'PLANES', None) or {}).items():
+        lid = board.GetLayerID(lname); nets = {net for net, shape in entries}
+        out += [z for z in board.Zones() if not z.GetIsRuleArea() and z.IsOnLayer(lid) and z.GetNetname() not in nets]
+    return out
+
 def main():
     skip = set(); added = {}
+    board = pcbnew.LoadBoard(args.pcb); gone = unlisted_zones(board)
+    for z in gone:
+        bb = z.GetBoundingBox()
+        print('  %s: %s zone on %s at (%.1f, %.1f)-(%.1f, %.1f) is not in the design\'s PLANES' % ('would remove' if args.dry else 'removed', z.GetNetname(),
+              board.GetLayerName(z.GetFirstLayer()), ToMM(bb.GetX()), ToMM(bb.GetY()), ToMM(bb.GetRight()), ToMM(bb.GetBottom())))
+        if not args.dry: board.Remove(z)
+    print('island_vias: %d zones that the design no longer lists' % len(gone))
+    if gone and not args.dry:
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones()); pcbnew.SaveBoard(args.pcb, board)
     for rnd in range(args.rounds):
         board = pcbnew.LoadBoard(args.pcb); pcbnew.ZONE_FILLER(board).Fill(board.Zones())
         vias = [t for t in board.GetTracks() if t.GetClass() == 'PCB_VIA']
