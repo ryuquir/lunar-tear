@@ -768,9 +768,15 @@ def main():
         open(npath, "w", encoding="utf-8").write(text)
         kn, kc = parse_netlist(npath)
         compare(design, kn, kc, problems)
-    rc, out = run(["kicad-cli", "sch", "export", "pdf", "-o", os.path.join(odir, f"{design.name}_schematic.pdf"), root], env, kdir)
+    pdf = os.path.join(odir, f"{design.name}_schematic.pdf")
+    rc, out = run(["kicad-cli", "sch", "export", "pdf", "-o", pdf, root], env, kdir)
     if rc:
         problems.append("kicad-cli pdf export failed: " + out[-200:])
+    elif os.path.exists(pdf):          # keep rebuilds identical: a fixed date of the same length keeps the PDF's offsets
+        data = open(pdf, "rb").read()
+        data = re.sub(rb"/CreationDate \(D:[0-9:]{19}\)", b"/CreationDate (D:2000:01:01:00:00:00)", data)
+        with open(pdf, "wb") as f:
+            f.write(data)
     try:
         write_outputs(design, odir)
     except Exception as e:      # for example a part that is missing from the data files; the list below says which
