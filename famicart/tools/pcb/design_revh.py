@@ -6,7 +6,7 @@ on a 6-layer board for the Nintendo LARGE (MMC5) Famicom shell, every part place
   U3  /IRQ, expansion audio, CIRAM /CE + A10; sees the whole CPU bus (ZA/ZD)  row 1, centre (2 mm right of the front O2 post)
   U4  CPU-bus extension (permanent), XLINK to U1 and U8, IRQ4                  row 2, right edge, above U8
   U5  PPU-bus extension (permanent), XLINK to U2 and U9, IRQ5                  row 2, left edge, above U9
-  U6  hub: USB-C, microSD (4-bit / SPI1), SWD master of the other seven, nRST, VSEL, V5S / VBUS_S, EXT; U7 on QMI CS1
+  U6  hub: USB-C, microSD (4-bit / SPI0), SWD master of the other seven, nRST, VSEL, V5S / VBUS_S, EXT; U7 on QMI CS1
   U8  compute only (CPU side), XLINK-48 / -89                                 row 1, right edge
   U9  compute only (PPU side), XLINK-59 / -89                                 row 1, left edge
   U7  W25Q128JVSIQ on the hub's QSPI chip select 1 (GPIO47, 2.2k pull-up)
@@ -191,6 +191,10 @@ RING = [(-3.3, -2.2, 0, C0402, '100n', '+3V3'),           # pin 5   IOVDD
         (0.6, 3.3, 90, C0402, '100n', '+1V1')]            # pin 32  DVDD
 # U3 sits over the front O2 post (x' +-1.2, h 38.25-40.65): its right column stands upright further out, so that the
 # post lands between the column and the exposed-pad vias
+# The power pins each ring capacitor serves, in RING's order (RING_POST keeps the same order): decap_links.py joins them
+RING_PINS = [(5,), (10,), (15,), (41,), (50,), (51,), (59,), (60,), (76,), (68, 69), (61, 64), (24,), (29,), (32,)]
+assert len(RING_PINS) == len(RING)
+DECAP = {}                                                 # capacitor ref -> (part ref, power pins it serves)
 RING_POST = RING[:3] + [(4.0, 2.9, 90, C0402, '100n', '+3V3'), (4.0, 0.9, 90, C0402, '100n', '+3V3'), (4.0, -1.1, 90, C0402, '100n', '+1V1'),
                         (4.0, -3.1, 90, C0402, '100n', '+3V3'), (5.0, -3.4, 90, C0402, '100n', '+3V3')] + RING[8:]
 FLASH_Y = -10.1                                            # flash centre in the QFN frame (courtyards 1.6 mm apart)
@@ -217,9 +221,9 @@ def chip(n, xp, hc, rot, run, fx=2.0, ring=RING, xtal_dx=0.0, link=None, link_x=
     P(fl, 'Memory_Flash', 'W25Q128JVS', 'W25Q128JVSIQ', SOIC8, x_, h_, rot)
     for p, s in {1: 'SS', 2: 'SD1', 3: 'SD2', 5: 'SD0', 6: 'SCLK', 7: 'SD3'}.items(): c(fl, p, f'QSPI{n}_{s}')
     c(fl, 4, 'GND'); c(fl, 8, '+3V3')
-    cap('100n', C0402, *o(fx + fcap_dx, FLASH_Y - 1.9), '+3V3', rot=rot, side='B')
+    DECAP[cap('100n', C0402, *o(fx + fcap_dx, FLASH_Y - 1.9), '+3V3', rot=rot, side='B')] = (fl, (8,))
     # decoupling ring (KiCad B)
-    for (ox, oy, a, fp, val, net) in ring: cap(val, fp, *o(ox, oy), net, rot=a + rot, side='B')
+    for (ox, oy, a, fp, val, net), pins in zip(ring, RING_PINS): DECAP[cap(val, fp, *o(ox, oy), net, rot=a + rot, side='B')] = (ref, pins)
     # crystal group behind pins 30 / 31 (KiCad B): XIN - crystal pin 1, XOUT - 1k - crystal pin 3, 12 pF on each side
     y = f'Y{n}'; P(y, 'Device', 'Crystal_GND24', '12MHz', XTAL, *o(xtal_dx, 6.2), rot, 'B')
     c(y, 1, f'XIN{n}'); c(y, 3, f'XOUT{n}_R'); c(y, 2, 'GND'); c(y, 4, 'GND')
@@ -376,8 +380,8 @@ res('27', 1.0, HUB_H + 6.6, 'USB_DP_R', 'USB_DP', fp=R0402); res('27', 2.1, HUB_
 # pair; CC pads on top (towards J7), and 1.1 mm under them for the pair on its way left to the 27 ohm
 for xp_, cc in ((2.5, 'CC2'), (4.15, 'CC2'), (8.2, 'CC1'), (9.85, 'CC1')): res('10k', xp_, 65.3, cc, 'GND', rot=270)
 res('10k', 8.6, 62.3, 'VBUS', 'VBUS_S', rot=0); res('10k', 11.75, 62.3, 'VBUS_S', 'GND', rot=0)     # VBUS / 2 on hub ADC2 (GPIO42)
-# microSD TF-01A at the top edge, card mouth up: CLK GPIO26, CMD 27 (100k), DAT0 28 (100k), DAT1-2 29-30 (100k), DAT3/CS 31
-# (10k), CD 32 (internal pull-up), 4.7 uF at VDD (KiCad B)
+# microSD TF-01A at the top edge, card mouth up: CLK GPIO2 (SPI0 SCK), CMD 3 (SPI0 TX, 100k), DAT0 4 (SPI0 RX, 100k), DAT1-2
+# 5-6 (100k), DAT3/CS 7 (10k), CD 1 (internal pull-up), 4.7 uF at VDD (KiCad B)
 P('J3', 'famicart', 'TF-01A', 'TF-01A', 'famicart:microSD_HRO_TF-01A', -18.2, H - 9.4, 180)   # symbol with the shell tabs 10-13
 for p, nn in {1: 'SD_DAT2', 2: 'SD_DAT3', 3: 'SD_CMD', 4: '+3V3', 5: 'SD_CLK', 6: 'GND', 7: 'SD_DAT0', 8: 'SD_DAT1', 9: 'SD_CD',
               10: 'GND', 11: 'GND', 12: 'GND', 13: 'GND'}.items(): c('J3', p, nn)
@@ -433,6 +437,21 @@ NET_WIDTH = {'V5_IN': 0.5, 'VBUS': 0.5, 'SW_1V1': 0.5, 'SW_3V3': 0.5, '+1V1': 0.
 # the ground stitching take the room: the far chips' feed (U4: 100 mm of 0.4 mm track) sets the drop of the core supply
 # (docs/13 "配線の結果": 35 mV of the 39 mV budget at 0.4 mm with all eight chips at 240 MHz).
 WIDEN_FIRST = {'+1V1': 0.8}
+# nudge_vias.py: the antipads of these two vias came 0.23 mm apart in the planes and left a 0.074 mm web on In1 / In2 / In4
+# (review/planes.py; JLCPCB's narrowest inner copper is 0.09 mm). 0.03 mm apart more keeps the web whole
+VIA_NUDGE = [('VSEL_S', 2.0068, 38.3917, -0.0275, 0.0119, 'away from the X89_8_D1 via at (3.139, 37.900)')]
+# decap_links.py, besides the vias and links it finds from DECAP: spots the supply review found (KiCad mm, before x' / h).
+# The second V5_IN via at D10 comes from its second-via step (the trunk's only F.Cu-B.Cu via there)
+DECAP_EXTRA = {
+    'vias': [('GND', 20.66, 21.20, 0.4, 'U21 GND pin: its F.Cu pour piece had no GND via within 12 mm'),
+             ('GND', 21.66, 21.20, 0.3, 'U21 GND pin, in the pad'),
+             ('GND', 31.87, 26.12, 0.4, 'C142-C144 (1.1 V output) GND pour piece'),
+             ('GND', 29.90, 25.75, 0.4, 'C143 GND'), ('GND', 30.30, 24.75, 0.4, 'C144 GND'),
+             ('+3V3', 75.00, 3.50, 0.3, '3.3 V inductor L1 output: vias in the pad into the +3V3 plane'),
+             ('+3V3', 75.00, 4.50, 0.3, '3.3 V inductor L1 output, second via'),
+             ('GND', 43.73, 73.60, 0.4, 'top of the GND strap from finger 16')],
+    'links': [('U20', '5', 'R37', '1', 'FB_3V3 straight from the 3.3 V converter to its divider'),
+              ('U21', '5', 'R30', '2', 'FB_1V1 straight from the 1.1 V converter to its divider')]}
 # Tracks and vias laid before routing (gen_pcb.py PREROUTE with a layer, PREROUTE_VIAS; the router keeps them):
 #  * +5V trunk (docs/13 "電源"): finger 30 is on B.Cu (x' -37.33). 0.8 mm up from the finger on B and left under the
 #    shoulder to two vias at x' -40.4 / -41.4 (left of finger 60's way up on F), then on F through the +5V pads of C4 and
@@ -515,6 +534,11 @@ RULE_AREAS = [('tab_inner_keepout', [(5.3, H), (84.7, H), (84.7, H + 11.2), (5.3
 # Parts that cross the top edge (mouths flush with it, docs/13 "捨て基板"); check_place.py lets their body cross it within
 # the shell's usb_top window by at most EDGE_OVERHANG (default 1.0 mm)
 EDGE_CONNECTORS = ('J3', 'J7')
+# the four USB-C shell legs (J7 S1, GND) are the board's only plated holes: JLCPCB solders them by hand or selectively, and a
+# leg that is one piece with the GND planes does not take the solder. The GND zones on these layers give plated holes
+# thermal reliefs (SMD pads stay solid); F.Cu keeps solid joints, its pour there is small pieces between the USB tracks and
+# one leg would get a single spoke (gen_pcb.py add_zone, sync_values.py)
+THT_THERMAL_LAYERS = ('In1.Cu', 'In4.Cu', 'B.Cu')
 # KiCad B (JLCPCB Bottom, the label side): only the 100 nF / 4.7 uF decoupling, the crystal groups (crystal, 12 pF, XOUT
 # 1k) and the LINK arrays sit there; these are their footprints (gen_jlc.bottom_ok also wants BOTTOM_TURN footprints)
 BOTTOM_OK = {C0402, C0603, R0402, XTAL, RARR}
@@ -535,7 +559,7 @@ DRAW_NAMES = {'U1': 'U1 CPU バス', 'U2': 'U2 PPU バス', 'U3': 'U3 IRQ・音�
               'J2': 'J2', 'J4': 'J4', 'J5': 'J5', 'J6': 'J6'}
 DRAW_NOTES = ['8 個の RP2350B（U1〜U6・U8・U9）は、それぞれ自分の 16 MB フラッシュ（U11〜U19）と 12 MHz 水晶を持つ。U7 はハブの 2 個目のフラッシュ。',
               '裏（KiCad の表）にチップ・フラッシュ・電源・コネクタ・スイッチ・LED、表（ラベル面）にコンデンサ・水晶・LINK の抵抗アレイとパッドだけ。',
-              '端子の上の帯は rev G と同じ部品の本体側の回路（裏に移し、左右を反転）。USB-C（J7）と microSD（J3）は上端。まだ配線していない。']
+              '端子の上の帯は rev G と同じ部品の本体側の回路（裏に移し、左右を反転）。USB-C（J7）と microSD（J3）は上端。6 層・線幅と間隔 0.12 mm で配線済み（未接続 0、規則違反 0）。']
 
 # LCSC part numbers (docs/13 "部品表", 24 types); gen_jlc.py checks the classes, stock and pre-sale numbers
 LCSC = {

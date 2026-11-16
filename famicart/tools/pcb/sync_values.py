@@ -4,7 +4,8 @@
 BOM, CPL and the schematic are written from the design file; the board's footprints carry the value they had when
 gen_pcb.py placed them. When only a value changes after routing (rev H: 1k arrays replaced by 680 ohm arrays on the data
 lines, same footprint, same nets), the board would keep the old text. This tool sets every footprint's Value to the
-design's and stops (exit 1) if anything else differs: a reference missing on either side, or another footprint.
+design's and stops (exit 1) if anything else differs: a reference missing on either side, or another footprint. The zones
+on the design's THT_THERMAL_LAYERS give plated holes thermal reliefs (gen_pcb.py does the same on a new board).
     FC_DESIGN=design_revh python3 sync_values.py board.kicad_pcb [--dry]"""
 import os, sys, argparse, importlib
 import pcbnew
@@ -25,8 +26,13 @@ def main():
     for b in bad: print('sync_values:', b)
     if bad: return 1
     for ref, old, new in changed: print('  %-6s %s -> %s' % (ref, old, new))
-    print('sync_values: %d of %d values changed%s' % (len(changed), len(D.PARTS), ' (dry run)' if args.dry else ''))
-    if changed and not args.dry: pcbnew.SaveBoard(args.pcb, board)
+    thermal = 0                # the design's THT_THERMAL_LAYERS (gen_pcb.py add_zone): zones there give plated holes thermal reliefs
+    for z in board.Zones():
+        if not z.GetIsRuleArea() and board.GetLayerName(z.GetLayer()) in getattr(D, 'THT_THERMAL_LAYERS', ()) \
+                and z.GetPadConnection() != pcbnew.ZONE_CONNECTION_THT_THERMAL:
+            z.SetPadConnection(pcbnew.ZONE_CONNECTION_THT_THERMAL); thermal += 1
+    print('sync_values: %d of %d values changed, %d zones set to thermal reliefs for plated holes%s' % (len(changed), len(D.PARTS), thermal, ' (dry run)' if args.dry else ''))
+    if (changed or thermal) and not args.dry: pcbnew.SaveBoard(args.pcb, board)
     return 0
 
 if __name__ == '__main__':

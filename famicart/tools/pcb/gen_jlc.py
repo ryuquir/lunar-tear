@@ -655,7 +655,8 @@ Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）に
 答えに応じて変える所:
 - 1) が「面取りできない」の場合: 止まって確認する（捨て基板を外して端子の辺に付ける提案は断る）。
 - 2) が「この捨て基板では実装できない」の場合: 足りない寸法を聞き、設計の `RAILS` を直してデータを作り直す。
-- 4)・5) で追加料金がある場合: 4 章の見積もりに加える（`docs/13_rev_h_plan.md` の費用の表の「加わりうるもの」）。
+- 4) が「はんだ付けしない」「手はんだの追加料金」または答えが無い場合: 止まって確認する（USB-C の口金は 4 本の足で基板に留まる）。
+- 5) で追加料金がある場合: 4 章の見積もりに加える（`docs/13_rev_h_plan.md` の費用の表の「加わりうるもの」）。
 
 ## 2. PCB の指定（Instant Quote → Add gerber file → `gerbers_rails.zip`）
 | 項目 | 指定 |
@@ -670,7 +671,7 @@ Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）に
 | Surface Finish | **ENIG**、Gold Thickness は **2 U"** |
 | Outer Copper Weight | 1 oz |
 | Inner Copper Weight | **0.5 oz** |
-| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)**（既定のまま。設計値: 標準のビアは穴 @VDR@ mm・径 @VIA@ mm、穴 0.3 mm 未満のビア @NSMALL@ 個は径 0.45 mm 以上。注文画面: 多層で径 0.45 mm 以上なら 0.2 mm の穴も追加料金なし。「0.2mm」を選ぶと見積もりが上がる）|
+| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)**（既定のまま。@SMALLVIA_JA@「0.2mm」を選ぶと見積もりが上がる）|
 | Via Covering | **Epoxy Filled & Capped**（6 層では無料。QFN の中央パッドのビアもこれで埋める）|
 | Board Outline Tolerance | ±0.2 mm（Regular）|
 | Mark on PCB | **Remove Mark** |
@@ -689,8 +690,8 @@ PCB Remark（そのまま貼る）:
 > 2) Gold fingers are on ONE edge only: the bottom edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge
 > 30 degrees. This edge must stay a free routed edge; the rails end @ENDGAP@ mm above it.
 > 3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
-> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: @VDR@ mm holes; the vias with 0.2 mm holes have pads of at least 0.45 mm, so I
-> left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads.
+> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. @SMALLVIA_EN@ All vias epoxy filled and capped, including the vias in the QFN exposed pads
+> and the vias in other pads.
 > 5) You may shorten the finger copper to your standard setback for the bevel.
 > 6) The solder mask window over the gold fingers is intentional. The outline has two side notches, one inner slot and cut corners
 > beside the tab; inner corners are drawn with R 0.5 mm. Please keep them as drawn.
@@ -1078,6 +1079,9 @@ def order_notes(dnp, placed, ntypes):
         import pcbnew, gen_pcb
         b = pcbnew.LoadBoard(PCB); bb = b.GetBoardEdgesBoundingBox()
         joints = sum(len(list(fp.Pads())) for fp in b.GetFootprints() if fp.GetReference() in placed)
+        if getattr(D, 'LCSC_CLASS', None):     # rev H on: solder joints only; paste-only apertures (no copper) and plain holes are not joints
+            joints = sum(1 for fp in b.GetFootprints() if fp.GetReference() in placed for p in fp.Pads()
+                         if p.IsOnCopperLayer() and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH)
         TRK, CLR, VIA, VDR = gen_pcb.rules()
         ntr = sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_TRACK'); nvi = sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_VIA')
         RA = getattr(D, 'RAILS', None); bw, bh = pcbnew.ToMM(bb.GetWidth()) - 0.1, pcbnew.ToMM(bb.GetHeight()) - 0.1
@@ -1113,8 +1117,15 @@ def order_notes(dnp, placed, ntypes):
             rep += [('@NBASIC@', str(sum(1 for row in bom[1:] if cls.get(row[3]) == 'Basic'))), ('@NEXT@', str(sum(1 for row in bom[1:] if cls.get(row[3]) == 'Extended'))),
                     ('@NEXTCODES@', str(len(ext))), ('@EXTENDED@', '、'.join('%s %s' % (c, names[c]) for c in ext) or 'なし'),
                     ('@NTOP@', str(sides.count('Top'))), ('@NBOTTOM@', str(sides.count('Bottom'))), ('@XRAY@', str(xray_count(placed))),
-                    ('@LAYERS@', str(b.GetCopperLayerCount())), ('@NSMALL@', str(sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_VIA' and pcbnew.ToMM(t.GetDrillValue()) < 0.3 - 0.002))),
+                    ('@LAYERS@', str(b.GetCopperLayerCount())),
                     ('@NRP@', str(nrp)), ('@PREBUY2@', str(2 * nrp)), ('@PREBUY5@', str(5 * nrp))]
+            nsmall = sum(1 for t in b.GetTracks() if t.GetClass() == 'PCB_VIA' and pcbnew.ToMM(t.GetDrillValue()) < 0.3 - 0.002)
+            if nsmall:                         # the order form: 0.2 mm holes cost nothing extra on multilayer boards when the pad is 0.45 mm or more
+                rep += [('@SMALLVIA_JA@', '設計値: 標準のビアは穴 @VDR@ mm・径 @VIA@ mm、穴 0.3 mm 未満のビア %d 個は径 0.45 mm 以上。注文画面: 多層で径 0.45 mm 以上なら 0.2 mm の穴も追加料金なし。' % nsmall),
+                        ('@SMALLVIA_EN@', 'Vias: @VDR@ mm holes; the %d vias with 0.2 mm holes have pads of at least 0.45 mm, so I left "Min via hole size" at 0.3mm/(0.4/0.45mm).' % nsmall)]
+            else:
+                rep += [('@SMALLVIA_JA@', '設計値: ビアはすべて穴 @VDR@ mm・径 @VIA@ mm で、穴 0.3 mm 未満のビアは無い。'),
+                        ('@SMALLVIA_EN@', 'Vias: all @VDR@ mm holes with @VIA@ mm pads, none smaller, so I left "Min via hole size" at 0.3mm/(0.4/0.45mm).')]
         for k, v in rep: txt = txt.replace(k, v)
         for k, v in (('@TYPES@', str(ntypes)), ('@PARTS@', str(len(placed))), ('@JOINTS@', str(joints)), ('@PRICEDATE@', JLC_PRICE['date']),
                      ('@EST2@', '%.0f' % est(2)), ('@EST5@', '%.0f' % est(5)),

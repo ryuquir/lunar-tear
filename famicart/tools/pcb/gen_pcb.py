@@ -198,6 +198,8 @@ def add_zone(board, net, layer, pts, clearance=0.25):
     z.SetLocalClearance(FromMM(clearance)); z.SetMinThickness(FromMM(0.25)); z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
     z.SetThermalReliefGap(FromMM(0.3)); z.SetThermalReliefSpokeWidth(FromMM(0.3)); z.SetIsFilled(False)
     z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+    if board.GetLayerName(layer) in getattr(D, 'THT_THERMAL_LAYERS', ()):     # rev H: plated holes get thermal reliefs here, SMD pads stay solid
+        z.SetPadConnection(pcbnew.ZONE_CONNECTION_THT_THERMAL)
     board.Add(z); return z
 
 # ---------------------------------------------------------------------------------------------- opt-in: rev H on

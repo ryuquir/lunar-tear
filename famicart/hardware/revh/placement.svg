@@ -400,5 +400,5 @@
 <text x="1570.0" y="752.9" font-size="22" fill="#1c2530" text-anchor="middle" font-weight="bold">J2</text>
 <text x="70.0" y="1097.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・8 個の RP2350B（U1〜U6・U8・U9）は、それぞれ自分の 16 MB フラッシュ（U11〜U19）と 12 MHz 水晶を持つ。U7 はハブの 2 個目のフラッシュ。</text>
 <text x="70.0" y="1129.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・裏（KiCad の表）にチップ・フラッシュ・電源・コネクタ・スイッチ・LED、表（ラベル面）にコンデンサ・水晶・LINK の抵抗アレイとパッドだけ。</text>
-<text x="70.0" y="1161.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・端子の上の帯は rev G と同じ部品の本体側の回路（裏に移し、左右を反転）。USB-C（J7）と microSD（J3）は上端。まだ配線していない。</text>
+<text x="70.0" y="1161.0" font-size="19" fill="#1c2530" text-anchor="start" font-weight="normal">・端子の上の帯は rev G と同じ部品の本体側の回路（裏に移し、左右を反転）。USB-C（J7）と microSD（J3）は上端。6 層・線幅と間隔 0.12 mm で配線済み（未接続 0、規則違反 0）。</text>
 </svg>

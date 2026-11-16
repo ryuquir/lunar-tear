@@ -15,7 +15,7 @@ Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）に
 | `rails.png` | 捨て基板の位置の図。JLCPCB への問い合わせに添付する |
 | `parts_check.csv`、`cpl_check.csv` | 部品の区分（宣言した Basic / Extended）・在庫と、部品の向きの検査結果 |
 
-このデータの基板は、配線 9078 本・ビア 926 個・未接続 0。
+このデータの基板は、配線 9747 本・ビア 1146 個・未接続 0。
 
 ## 1. 注文の種類と、捨て基板
 - 金フィンガー付きの基板は **Economic PCBA では受け付けられない**。**Standard PCBA** で、実装は**両面**（Top 136 点、Bottom 160 点）、
@@ -48,7 +48,8 @@ Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）に
 答えに応じて変える所:
 - 1) が「面取りできない」の場合: 止まって確認する（捨て基板を外して端子の辺に付ける提案は断る）。
 - 2) が「この捨て基板では実装できない」の場合: 足りない寸法を聞き、設計の `RAILS` を直してデータを作り直す。
-- 4)・5) で追加料金がある場合: 4 章の見積もりに加える（`docs/13_rev_h_plan.md` の費用の表の「加わりうるもの」）。
+- 4) が「はんだ付けしない」「手はんだの追加料金」または答えが無い場合: 止まって確認する（USB-C の口金は 4 本の足で基板に留まる）。
+- 5) で追加料金がある場合: 4 章の見積もりに加える（`docs/13_rev_h_plan.md` の費用の表の「加わりうるもの」）。
 
 ## 2. PCB の指定（Instant Quote → Add gerber file → `gerbers_rails.zip`）
 | 項目 | 指定 |
@@ -63,7 +64,7 @@ Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）に
 | Surface Finish | **ENIG**、Gold Thickness は **2 U"** |
 | Outer Copper Weight | 1 oz |
 | Inner Copper Weight | **0.5 oz** |
-| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)**（既定のまま。設計値: 標準のビアは穴 0.3 mm・径 0.5 mm、穴 0.3 mm 未満のビア 0 個は径 0.45 mm 以上。注文画面: 多層で径 0.45 mm 以上なら 0.2 mm の穴も追加料金なし。「0.2mm」を選ぶと見積もりが上がる）|
+| Min via hole size/diameter | **0.3mm/(0.4/0.45mm)**（既定のまま。設計値: ビアはすべて穴 0.3 mm・径 0.5 mm で、穴 0.3 mm 未満のビアは無い。「0.2mm」を選ぶと見積もりが上がる）|
 | Via Covering | **Epoxy Filled & Capped**（6 層では無料。QFN の中央パッドのビアもこれで埋める）|
 | Board Outline Tolerance | ±0.2 mm（Regular）|
 | Mark on PCB | **Remove Mark** |
@@ -82,8 +83,8 @@ PCB Remark（そのまま貼る）:
 > 2) Gold fingers are on ONE edge only: the bottom edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge
 > 30 degrees. This edge must stay a free routed edge; the rails end 2.7 mm above it.
 > 3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
-> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: 0.3 mm holes; the vias with 0.2 mm holes have pads of at least 0.45 mm, so I
-> left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads.
+> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: all 0.3 mm holes with 0.5 mm pads, none smaller, so I left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads
+> and the vias in other pads.
 > 5) You may shorten the finger copper to your standard setback for the bevel.
 > 6) The solder mask window over the gold fingers is intentional. The outline has two side notches, one inner slot and cut corners
 > beside the tab; inner corners are drawn with R 0.5 mm. Please keep them as drawn.
@@ -132,7 +133,7 @@ PCB Remark（そのまま貼る）:
 | 実装費（Standard・両面、X 線検査込み） | 約 US$ 125 | 約 US$ 152 |
 | 治具（Fixture）費 2 個が加わった場合 | 約 US$ 141 | 約 US$ 169 |
 
-- 内訳: 両面のセットアップ $51.12 + ステンシル $16.42 + フィーダー $1.53 × 25 種類 + はんだ付け $0.0016 × 1611 接点 × 枚数
+- 内訳: 両面のセットアップ $51.12 + ステンシル $16.42 + フィーダー $1.53 × 25 種類 + はんだ付け $0.0016 × 1575 接点 × 枚数
   （1 枚あたり最低 $0.48）+ X 線検査 8 個/枚 × 枚数（料金表の段階で 1 個 $0.82〜$1.64）+ 梱包 $0.50 + 配置確認 $0.45。
 - PCB 代（5 枚、6 層、上の捨て基板込み、ENIG 2 U"・金フィンガー・30° 面取り・1.2 mm・Epoxy Filled & Capped・Confirm Production file 込み、
   送料別。2026-11-14 の見積もり画面）: 約 US$ 75。最小ビアに「0.2mm」を選ぶと約 US$ 113 になる（だから既定のままにする）。

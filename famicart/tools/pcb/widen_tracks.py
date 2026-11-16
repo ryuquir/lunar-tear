@@ -15,7 +15,7 @@ import pcbnew
 from pcbnew import ToMM, FromMM
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser(); ap.add_argument('pcb'); ap.add_argument('--net', action='append', default=[], help='NET=width_mm, in addition to D.NET_WIDTH')
-ap.add_argument('--first-only', action='store_true', help='(internal) the pass of the design\'s WIDEN_FIRST nets alone')
+ap.add_argument('--first-only', action='store_true', help='the pass of the design\'s WIDEN_FIRST nets alone (finish_package.sh runs it before decap_links.py)')
 args = ap.parse_args()
 D = importlib.import_module(os.environ.get('FC_DESIGN', 'design'))
 WANT = dict(getattr(D, 'NET_WIDTH', {}))

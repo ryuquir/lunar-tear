@@ -64,9 +64,11 @@
 | 2) この捨て基板で両面の実装ができるか | できない、または条件つき | **止まって確認。** 足りない点を聞き取って依頼者に伝える。データの作り直しが要る |
 | 3) Delivery Format | Panel by Customer | この文書のとおりに選ぶ |
 | 3) Delivery Format | Single PCB | Delivery Format を Single PCB にする。追加料金の説明があれば依頼者に伝える |
-| 4)・5) 追加料金 | 追加料金がある | 金額を依頼者に伝える（止まって確認） |
+| 4) USB-C の 4 本の金属の足（スルーホール）を実装ではんだ付けするか | する（追加料金なし） | 次へ進む |
+| 4) USB-C の 4 本の金属の足（スルーホール）を実装ではんだ付けするか | しない、手はんだの追加料金がかかる、または答えが無い | **止まって確認。** USB-C はケースの外から抜き差しするので、足がはんだ付けされていないと口金が外れる |
+| 5) X 線検査の対象 | 追加料金がある | 金額を依頼者に伝える（止まって確認） |
 
-2 営業日たっても回答が無い場合、回答があいまいな場合、質問 1)〜3) のどれかに答えが無い場合は、支払いへ進まずに、止まって依頼者に確認してください。
+2 営業日たっても回答が無い場合、回答があいまいな場合、質問 1)〜4) のどれかに答えが無い場合は、支払いへ進まずに、止まって依頼者に確認してください。
 
 ### 基板（PCB）の指定
 
@@ -104,7 +106,7 @@ PCB Remark に貼る文（`jlcpcb_pcb_remark.txt` と同じ内容）:
 > 1) This is ONE board with edge rails that I drew myself on the left, right and top edges (one frame, 5.0 mm wide), joined by mouse-bite tabs (5.2 mm wide, 0.6 mm holes) across a 2.0 mm routed gap: panel 103.6 x 92.7 mm, one board per panel. 3 fiducials on each side (top and bottom) and 4 tooling holes (2.0 mm) are on the rails. Please do NOT add other rails and do NOT add V-cut.
 > 2) Gold fingers are on ONE edge only: the bottom edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge 30 degrees. This edge must stay a free routed edge; the rails end 2.7 mm above it.
 > 3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
-> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: 0.3 mm holes; the vias with 0.2 mm holes have pads of at least 0.45 mm, so I left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads.
+> 4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: all 0.3 mm holes with 0.5 mm pads, none smaller, so I left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads and the vias in other pads.
 > 5) You may shorten the finger copper to your standard setback for the bevel.
 > 6) The solder mask window over the gold fingers is intentional. The outline has two side notches, one inner slot and cut corners beside the tab; inner corners are drawn with R 0.5 mm. Please keep them as drawn.
 
@@ -167,7 +169,7 @@ PCB Remark に貼る文（`jlcpcb_pcb_remark.txt` と同じ内容）:
 ## 止まって確認する場面
 
 - 注文の確定と支払いの直前（依頼者が上限金額を決めて任せていて、合計がその範囲に収まる場合を除く）。
-- JLCPCB のサポートが、面取りできない、この捨て基板では実装できない、と答えたとき。回答が無い、あいまい、質問 1)〜3) のどれかに答えが無いとき。追加料金の説明があったとき。
+- JLCPCB のサポートが、面取りできない、この捨て基板では実装できない、USB-C の足をはんだ付けしない、と答えたとき。回答が無い、あいまい、質問 1)〜4) のどれかに答えが無いとき。追加料金の説明があったとき。
 - 注文フォームで、この文書の表にある値を選べないとき。最初から選ばれている値が無い項目や、選ぶと追加料金が出る項目に当たったとき。読み込まれた大きさや層の数が違うとき。
 - Remark が欄に入りきらないとき。
 - 部品の照合画面で、**宣言済みの一覧に無い Extended の行**、**在庫が足りない行**、不一致、未選択があるとき（宣言済みの Extended 8 品番の行は止まる理由にならない）。
@@ -188,7 +190,7 @@ PCB Remark に貼る文（`jlcpcb_pcb_remark.txt` と同じ内容）:
 
 - 基板の名前は famicart rev H。ファミリーコンピュータ用のカセット基板で、大きさは 89.6 × 85.7 mm（捨て基板込み 103.6 × 92.7 mm）、6 層、板厚 1.2 mm。部品は Top 136 点・Bottom 160 点。
 - データは機械的な検査（配線の未接続 0、設計ルールの違反 0、JLCPCB の製造条件、部品の向き、部品の区分と在庫）に合格している。実物での動作確認はまだで、今回が最初の製造になる。そのため数量は最少にしてある。
-- この文書とフォルダのデータは、配線 9078 本・ビア 926 個の版のもの（`jlcpcb_order_notes.md` の冒頭に同じ数字がある）。数字が違うデータを渡された場合は、止まって確認する。
+- この文書とフォルダのデータは、配線 9747 本・ビア 1146 個の版のもの（`jlcpcb_order_notes.md` の冒頭に同じ数字がある）。数字が違うデータを渡された場合は、止まって確認する。
 - この発注に含まれないもの: カセットの外側のケース、USB ケーブル。
 - 細かい理由や JLCPCB の条件の出典は `jlcpcb_order_notes.md` にある。
 

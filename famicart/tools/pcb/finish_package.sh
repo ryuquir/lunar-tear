@@ -2,9 +2,10 @@
 # Everything that follows the routing, in the one order that keeps board, archives, notes and drawings in step:
 #   the board's Value fields follow the design (a value that changed after routing),
 #   give every power island of a plane layer a via of its net (designs with PLANES; an island zone it has to drop must
-#   be taken out of the design's PLANES by hand: the tool names it),
-#   reinforce track ends that only just reach their pad or via, widen the supply tracks, add ground stitching, rule
-#   check and Gerber files, placement check, BOM, order package,
+#   be taken out of the design's PLANES by hand: the tool names it), move the design's VIA_NUDGE vias (plane webs),
+#   reinforce track ends that only just reach their pad or via, widen the design's first nets (rev H: +1V1), short
+#   copper at every decoupling capacitor (designs with DECAP: plane vias, direct links, second vias), widen the other
+#   supply tracks, add ground stitching, rule check and Gerber files, placement check, BOM, order package,
 #   board with edge rails, drawings (SVG and PNG), the two checks of the package, supply drop.
 # Usage (in tools/pcb):  FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg ./finish_package.sh [width in mm wanted for +5V and GND tracks, default 0.5]
 # Stops at the first step that fails. check_cpl.py and gen_jlc.py need the network (JLCPCB part catalogue, EasyEDA footprints).
@@ -14,7 +15,10 @@ cd "$(dirname "$0")"
 B="$FC_HW_DIR/famicart.kicad_pcb"
 python3 sync_values.py "$B"
 python3 island_vias.py "$B" --drop-isolated
+python3 nudge_vias.py "$B"
 python3 anchor_tracks.py "$B"
+python3 widen_tracks.py "$B" --first-only
+python3 decap_links.py "$B"
 python3 widen_tracks.py "$B" --net +5V="${1:-0.5}" --net GND="${1:-0.5}"
 python3 stitch_gnd.py "$B"
 python3 route_pcb.py export
