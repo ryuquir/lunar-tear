@@ -23,9 +23,10 @@ bevelled), mech/floorplan.py (body size, hole positions); JLCPCB (read 2026-11-1
 Panel', and the mouse-bite guide (both quoted in design/footprints.py at the edge rails); 'Design Optimization:
 Specifications for Adding Process Edges and Positioning Holes' (5 mm rails, 2 mm tooling holes 'Centered on process
 edge', 1 mm fiducials 3.85 from the edge; a tooling hole near a milling path weakens the rail); 'How to Add Edge Rails
-and Fiducials' (fiducial copper 3.35 from the board edge); the blog 'What Are Fiducial Marks? How They Improve SMT
-Assembly Accuracy' (https://jlcpcb.com/blog/fiducial-marks, updated 2026-09-09: the 3.35 mm keeps the marks from being
-'obscured by the clamps, rails, or tooling fixtures that hold the PCB in place on the conveyor'); 'Terms and Conditions
+and Fiducials' (3.35 mm from the board edge); the blog 'Fiducial Marks in PCB and SMT Assembly: A Complete Guide to
+Accuracy and Design Rules' (https://jlcpcb.com/blog/fiducial-marks, updated 2026-09-09: 3.35 mm 'including its
+clearance area', so that the marks are not 'obscured by the clamps, rails, or tooling fixtures that hold the PCB in
+place on the conveyor'); 'Terms and Conditions
 of JLCPCB Assembly Service' 2.3 (parts' bodies 2.5 mm from the board's edge, checked in mech/floorplan.py and
 tools/make_board.py).
 """
@@ -73,8 +74,9 @@ HOLE_FOOTPRINT = "MountingHole:MountingHole_3.2mm_M3"
 HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 99.0), (216.0, 99.0), (110.0, 121.0)]
 
 # Fiducials for the assembly machine, on the rails: 1 mm copper, 2 mm mask opening, centred 3.85 from the panel's outer
-# edge (JLCPCB's figures; the copper then keeps its 3.35 mm from the edge, which the conveyor's clamps hold); three, not
-# symmetric.  They sit level with the lowest and the highest tab, where the rail is held, not on the rails' free ends.
+# edge (JLCPCB's capabilities page and figures; the copper then keeps its 3.35 mm from the edge, which the conveyor's
+# clamps hold, the 2 mm opening 2.85 mm; JLCPCB's texts ask for 3.35 mm to the opening, which a centre at 4.35 would
+# give: support question 3a); three, not symmetric.  They sit level with the lowest and the highest tab, where the rail is held, not on the rails' free ends.
 # There the nearest routed edge is the round end of a slot beside the tab: 2.82 from the copper, 2.32 from the mask
 # opening (nothing clamps there; JLCPCB is asked, support question 3a).
 FIDUCIAL_FOOTPRINT = "Fiducial:Fiducial_1mm_Mask2mm"

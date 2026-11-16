@@ -123,6 +123,10 @@ def main():
     date = sys.argv[sys.argv.index("--date") + 1] if "--date" in sys.argv else datetime.date.today().isoformat()
     if os.path.exists(out):
         sys.exit(f"{out} exists already; give a new directory")
+    for left in ("failed", "unchecked"):     # out/ then shows a build that did not pass every check (tools/build.py)
+        if os.path.exists(os.path.join(PROJECT, "out", left)):
+            sys.exit(f"out/{left}/ exists: the last build did not pass every check, so out/ does not match kicad/. "
+                     "Run tools/build.py until it prints OK, then make the package.")
     rev = design_rev()
     version_text = f"版: rev {rev} / {date}"
     os.makedirs(out)

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Prove that the board rules (kicad/fcjamma.kicad_dru) report what they forbid, and nothing the board needs.
+"""Prove that the board rules (the project's fcjamma.kicad_dru) report what they forbid, and nothing the board needs.
 
     /usr/bin/python3 tools/check_rules.py <kicad project folder> <work folder> <KiCad netlist>
 
@@ -319,7 +319,10 @@ def main():
             problems.append(f"the rule '{RULES[key]}' reports a via in a free place")
     unproved = sorted(set(RULES) - {k for _, k, _ in probes.values()})
     problems += [f"the rule '{RULES[k]}' has no probe" for k in unproved]
-    in_file = re.findall(r'\(rule "([^"]+)"', open(os.path.join(project, "fcjamma.kicad_dru"), encoding="utf-8").read())
+    # every top-level (rule ...) of the file, whatever the spacing and whether its name is quoted or not
+    forms = sx_parse("(" + open(os.path.join(project, "fcjamma.kicad_dru"), encoding="utf-8").read() + ")")
+    in_file = [str(f[1]) if len(f) > 1 and not isinstance(f[1], list) else "(no name)"
+               for f in forms if isinstance(f, list) and f and f[0] == "rule"]
     problems += [f"the rules file has a rule this script does not probe: '{n}'" for n in in_file if n not in RULES.values()]
     problems += [f"the rule '{n}' is not in the rules file" for n in RULES.values() if n not in in_file]
     problems += [f"the rules file has the rule '{n}' {in_file.count(n)} times" for n in sorted(set(in_file)) if in_file.count(n) > 1]

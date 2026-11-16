@@ -7,9 +7,13 @@ out/*.png
 # the repository root ignores every "tools/" directory; this one holds the generator
 !tools/
 kicad/~*.lck
-# the KiCad project of a build that failed (tools/build.py), to be looked at
+# the KiCad project of a build that failed, or whose board could not be checked (tools/build.py), to be looked at
 out/failed/
+out/unchecked/
+# a half-done copy, if a build was stopped while it put the project into kicad/
+.kicad-new-*/
 # KiCad's own autosave and backup files, if the board is opened in KiCad
 kicad/_autosave-*
 kicad/#auto_saved_files#
 kicad/*-bak
+kicad/.history/

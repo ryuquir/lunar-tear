@@ -29,7 +29,7 @@ JAMMA ハーネス側に使われる 0.156in(3.96mm)ピッチ 56極(28×2)カー
 **Hirose CR7E-30DB-3.96E(72) 個別図面 ADC-016737-72-02(2018-05-14)** — [chipdip 経由 PDF](https://static.chipdip.ru/lib/690/DOC043690981.pdf)
 - 接点めっき「(接触部)Ni2.5µm+Au0.2µm」、端子「(実装部)Ni2.5µm+Sn2µm」、絶縁体ポリカーボネート UL94V-2。
 - 「(8.5)(基板挿入深さ)」、「5.3±0.4(接点位置)」(本体上面=挿入口から接点までの距離)、接触幅「(2)(接触巾)」、ピッチ 3.96±0.2。
-- → 推論: 基板を 8.5mm 挿入したとき、接点は基板端から約 8.5−5.3 = **3.2±0.4mm** の位置でフィンガに触れる。
+- → 推論: 基板を 8.5mm 挿入したとき、接点は基板端から約 8.5−5.3 = **3.2±0.4mm** の位置でフィンガに触れる。（2026-11-16 訂正: この読み方は誤り。図面の寸法線は溝の底、つまり差し込んだ基板の先端が当たる面から接点まで引かれているので、接点は基板の先端から 5.3 ± 0.4mm でフィンガに触れる。`reference/02_jamma_interface.md` の「接点位置」の行と `footprint_specs.md` を参照）
 - Digi-Key では CR7E-56DB-3.96E(72) が "Obsolete" 表示(検索結果要約経由、[Digi-Key](https://www.digikey.com.au/en/products/detail/hirose-electric-co-ltd/CR7E-56DB-3-96E-72/8561491))。CR7E-56DA-3.96E は「Conn Card Edge 56 POS 3.96mm Solder ST Panel Mount」(検索要約経由、[electronicsdatasheets](https://www.electronicsdatasheets.com/manufacturers/hirose-electric-uk-ltd/parts/cr7e-56da-396e))。DA 版の個別図面は入手できず、未確認。
 
 **Sullins Female Card Edge .156" [3.96mm], .431" insulator(EBM28D… = 28/56 position)** — [Sullins catalog p.74–75 PDF](https://s3.amazonaws.com/catalogspreads-pdf/PAGE74-75%20.156%20LP%20DS%20EYE%20RA.pdf)(Digi-Key EBM28DRXH 製品ページから辿った公式カタログ)
@@ -184,7 +184,7 @@ JLCPCB(リジッド FR-4)は電解硬質金を提供せず、フィンガは ENI
 
 ## 6. 推奨 KiCad フットプリント仕様(このまま作図可能な寸法)
 
-> 2026-11-16 追記: この節の値は古い。基板に使っている値は `reference/02_jamma_interface.md` 1.2.3 の表（2026-11-16 更新）と `footprint_specs.md`、正本は `hardware/famicom-jamma/design/footprints.py`。主な違いは、フィンガーが先端から 1.6〜10.0mm（この節は 1.2〜10.0）、先端から 1.6mm までの銅禁止（同 1.2mm）、マスク開口が先端〜10.1mm（同 10.5mm）、部品禁止が先端から 15mm まで（同 12mm）。5 節の「先端〜1.2mm は銅禁止」も同じく 1.6mm に変わった。
+> 2026-11-16 追記: この節と 4・5 節の寸法の値は使わない。基板に使っている値は `reference/02_jamma_interface.md` 1.2.3 の表（「本シートで変更」と「2026-11-16」の行）と `footprint_specs.md`、正本は `hardware/famicom-jamma/design/footprints.py`。主な違い（この節の値をかっこ内に書く）: ピッチ 3.96mm（3.9624）、1 番と 28 番の間 106.92mm（106.985）、タングの幅 114.4mm（114.6）、外側のフィンガーの中心からタングの横まで 3.74mm（3.81）、キー溝の中心 23.76mm（23.774）、フィンガーは先端から 1.6〜10.0mm（1.2〜10.0）、先端から 1.6mm までは銅禁止（1.2mm）、マスクの開口は先端〜10.1mm（10.5mm）、部品の禁止は先端から 15mm まで（12mm）、相手の接点は先端から 5.3 ± 0.4mm（Hirose。この節は約 3.2）。
 
 ### Takeaway
 下表の値で、パーツ面(F.Cu)1–28・ハンダ面(B.Cu)A–f の両面 SMD パッドと Edge.Cuts を作れば、Hirose/Sullins 両図面と JLCPCB(ENIG・30°面取り)の制約を同時に満たす。各値の採用理由は右列(推論を含む)。

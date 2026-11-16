@@ -28,7 +28,8 @@ Steps
     and the schematic parity, in the staged project
 11. if the whole build has no problem: the staged project replaces the generated files in kicad/, and
     out/board/ gets the board's DRC summary and drawings; otherwise kicad/ and out/board/ stay as they
-    were and the staged project is kept in out/failed/kicad/ to be looked at
+    were and the staged project is kept in out/failed/kicad/ to be looked at (out/unchecked/kicad/ when
+    the board could not be checked for want of pcbnew).  The rest of out/ always shows the latest build.
 """
 import csv
 import datetime
@@ -52,8 +53,9 @@ import board as BRD                                          # noqa: E402  (desi
 from fcgen.sexpr import parse as sx_parse, find as sx_find, first as sx_first   # noqa: E402
 
 KICAD_FP = "/usr/share/kicad/footprints"
-# KiCad's own files beside a project, never generated: kept in kicad/ when a passing build replaces the generated files
-LOCAL_FILES = re.compile(r"(\.kicad_prl$|^~.*\.lck$|-backups$|^fp-info-cache$|^_autosave-|^#auto_saved_files#$|-bak$)")
+# KiCad's own files beside a project (local settings, locks, backups, caches, autosaves, its local history), never
+# generated: a build neither copies them out of its staging folder nor touches them in kicad/
+LOCAL_FILES = re.compile(r"(\.kicad_prl$|^~.*\.lck$|-backups$|^fp-info-cache$|^_autosave-|^#auto_saved_files#$|-bak$|^\.history$)")
 SYSTEM_PYTHON = "/usr/bin/python3"           # KiCad's pcbnew module comes with the system Python
 KICAD_TEMPLATE = "/usr/share/kicad/template"
 CFG = os.environ.get("FCJAMMA_KICAD_CONFIG", "/tmp/fcjamma-kicad-config")
@@ -556,7 +558,7 @@ def write_outputs(design, outdir):
 
 
 def footprint_outputs(expected, env, kdir, odir, netlist, problems, warnings):
-    """kicad/fcjamma.kicad_dru and out/footprints/: KiCad's read-back of the board's footprints, the proof that the board
+    """The staged project's fcjamma.kicad_dru, and out/footprints/: KiCad's read-back of the board's footprints, the proof that the board
     rules report what the keep-outs forbid, the footprints' drawings and the cartridge check print.  An output that
     cannot be made is left as it was (and the build says so), never deleted."""
     fplib = os.path.join(kdir, "fcjamma.pretty")
@@ -655,7 +657,8 @@ def load_plan():
 
 def check_plan(problems):
     """The placement plan (mech/floorplan.py) and design/board.py must describe the same board, and the plan's own check
-    (parts inside the body, apart, clear of the holes, the JAMMA band and the tabs) must pass.  Needs no pcbnew."""
+    (parts inside the body, apart, clear of the holes, the JAMMA band and the tabs, 2.5 mm from the edges without a rail,
+    through-hole parts 2.5 mm from every edge) must pass.  Needs no pcbnew."""
     plan = load_plan()
     k0, k1, kd = BRD.key_slot()
     finger_top = -(FPL.JAMMA_FINGER_Y - FPL.JAMMA_FINGER[1] / 2)
@@ -679,7 +682,7 @@ def check_plan(problems):
 
 
 def board_outputs(design, env, kdir, odir, problems, warnings):
-    """kicad/fcjamma.kicad_pcb (tools/make_board.py), KiCad's DRC and schematic parity on it, and out/board/."""
+    """The staged project's fcjamma.kicad_pcb (tools/make_board.py), KiCad's DRC and schematic parity on it, and out/board/."""
     try:
         return _board_outputs(design, env, kdir, odir, problems, warnings)
     except Exception as e:             # a fault in this step is a problem on the list, not a traceback after it
@@ -726,8 +729,8 @@ def _board_outputs(design, env, kdir, odir, problems, warnings):
         if os.environ.get("FCJAMMA_WITHOUT_PCBNEW") != "1":
             problems.append("KiCad's pcbnew module is not available to the system Python, so the board cannot be built")
         else:
-            warnings.append("the board was not rebuilt or checked (no pcbnew): kicad/fcjamma.kicad_pcb and out/board/ are "
-                            "from an earlier build")
+            warnings.append("the board was not rebuilt or checked (no pcbnew): kicad/ and out/board/ are from an earlier "
+                            "build")
         return "board not built (no pcbnew)"
     k = BRD.to_kicad
     j1 = design.parts["J1"]
@@ -813,43 +816,66 @@ def _board_outputs(design, env, kdir, odir, problems, warnings):
 
 
 def install_project(stage, kdir):
-    """Put the staged project into kicad/: every generated file is replaced, KiCad's local files stay, and so does the board
-    when this build did not make one (no pcbnew)."""
-    keep_board = not os.path.exists(os.path.join(stage, "fcjamma.kicad_pcb"))
+    """Put the staged project into kicad/.  Only what the generator owns is replaced: every entry the stage has, and sheets
+    (*.kicad_sch) the design no longer has; KiCad's local files and anything else in kicad/ are left alone.  The stage is
+    first copied beside kicad/ (the step that can run out of space), and only then moved in entry by entry, so that a
+    failed copy leaves kicad/ as it was."""
+    names = sorted(n for n in os.listdir(stage) if not LOCAL_FILES.search(n))
     os.makedirs(kdir, exist_ok=True)
-    for name in os.listdir(kdir):
-        if LOCAL_FILES.search(name) or (keep_board and name == "fcjamma.kicad_pcb"):
-            continue
-        path = os.path.join(kdir, name)
-        shutil.rmtree(path) if os.path.isdir(path) and not os.path.islink(path) else os.remove(path)
-    for name in os.listdir(stage):
-        if not LOCAL_FILES.search(name):
-            src = os.path.join(stage, name)
+    new = tempfile.mkdtemp(prefix=".kicad-new-", dir=os.path.dirname(kdir))
+    try:
+        for n in names:
+            src = os.path.join(stage, n)
             if os.path.isdir(src):
-                shutil.copytree(src, os.path.join(kdir, name))
+                shutil.copytree(src, os.path.join(new, n), ignore=lambda d, ns: [x for x in ns if LOCAL_FILES.search(x)])
             else:
-                shutil.copy(src, os.path.join(kdir, name))
+                shutil.copy(src, os.path.join(new, n))
+        for n in os.listdir(kdir):
+            if n.endswith(".kicad_sch") and n not in names:
+                os.remove(os.path.join(kdir, n))
+        for n in names:
+            dst = os.path.join(kdir, n)
+            if os.path.isdir(dst) and not os.path.islink(dst):
+                os.replace(dst, os.path.join(new, n + ".old"))
+            os.replace(os.path.join(new, n), dst)
+    finally:
+        shutil.rmtree(new, ignore_errors=True)
+
+
+def keep_project(stage, folder):
+    """Copy a staged project that was not put into kicad/ to out/<folder>/kicad/, in place of an earlier one."""
+    shutil.rmtree(folder, ignore_errors=True)
+    shutil.copytree(stage, os.path.join(folder, "kicad"), ignore=lambda d, ns: [x for x in ns if LOCAL_FILES.search(x)])
 
 
 def main():
     import circuit
     design, flags = circuit.build()
     final_kdir, odir = os.path.join(ROOT, "kicad"), os.path.join(ROOT, "out")
-    failed_dir = os.path.join(odir, "failed")
+    failed_dir, unchecked_dir = os.path.join(odir, "failed"), os.path.join(odir, "unchecked")
     # Everything KiCad reads (symbols, schematic, footprints, rules, project, board) is written into a staging folder, also
-    # named kicad/, and checked there.  Only when the whole build has no problem does it replace the generated files in
-    # kicad/, so that kicad/ always holds the last project that passed every check (and out/board/ its board's drawings);
-    # a project that fails is kept in out/failed/kicad/ to be looked at.
+    # named kicad/, and checked there.  Only when the whole build has no problem, the board included, does it replace the
+    # generated files in kicad/, so that kicad/ always holds the last project that passed every check (and out/board/ its
+    # board's drawings).  A project that fails is kept in out/failed/kicad/ to be looked at; one whose board could not be
+    # checked (no pcbnew) in out/unchecked/kicad/.  The rest of out/ always shows the latest build, passed or not.
+    for d in (failed_dir, unchecked_dir, os.path.join(odir, "board", "fcjamma_failed.kicad_pcb")):   # nothing stale stays
+        shutil.rmtree(d, ignore_errors=True) if os.path.isdir(d) else (os.remove(d) if os.path.exists(d) else None)
     stage_root = tempfile.mkdtemp(prefix="fcjamma-build-")
     try:
         kdir = os.path.join(stage_root, "kicad")
         os.makedirs(kdir)
-        build_in(design, flags, kdir, final_kdir, odir, failed_dir)
+        try:
+            build_in(design, flags, kdir, final_kdir, odir, failed_dir, unchecked_dir)
+        except Exception:
+            keep_project(kdir, failed_dir)
+            print("the build stopped; its KiCad project, as far as it got, is in out/failed/kicad/; kicad/ and out/board/ "
+                  "keep the last project that passed")
+            raise
     finally:
         shutil.rmtree(stage_root, ignore_errors=True)
 
 
-def build_in(design, flags, kdir, final_kdir, odir, failed_dir):
+def build_in(design, flags, kdir, final_kdir, odir, failed_dir, unchecked_dir):
     problems, warnings, custom = [], [], set()
     fp_expected, (fp_failed, fp_facts) = FPL.write_library(os.path.join(kdir, "fcjamma.pretty"))
     problems += [f"footprint fact does not hold: {text}" for text in fp_failed]
@@ -939,20 +965,20 @@ def build_in(design, flags, kdir, final_kdir, odir, failed_dir):
     for w in warnings:
         print("WARNING:", w)
     if problems:
-        shutil.rmtree(failed_dir, ignore_errors=True)
-        shutil.copytree(kdir, os.path.join(failed_dir, "kicad"), ignore=lambda d, names: [n for n in names if LOCAL_FILES.search(n)])
+        keep_project(kdir, failed_dir)
         print("this build's KiCad project is in out/failed/kicad/; kicad/ and out/board/ keep the last project that passed")
         print(f"PROBLEMS ({len(problems)}):")
         for p in problems:
             print("  -", p)
         sys.exit(1)
+    if not os.path.exists(os.path.join(kdir, "fcjamma.kicad_pcb")):
+        # without pcbnew the footprints, the rules and the board were not checked: kicad/ is left as it was
+        keep_project(kdir, unchecked_dir)
+        print("OK: model and KiCad netlist agree; parts rule satisfied; the board was NOT built or checked (no pcbnew), so "
+              "kicad/ was left as it was and this build's project is in out/unchecked/kicad/")
+        return
     install_project(kdir, final_kdir)
-    shutil.rmtree(failed_dir, ignore_errors=True)
-    old_failed = os.path.join(odir, "board", "fcjamma_failed.kicad_pcb")     # where earlier versions of this script kept it
-    if os.path.exists(old_failed):
-        os.remove(old_failed)
-    print("OK: model and KiCad netlist agree; parts rule satisfied" + ("" if "not built" not in board_line else
-          "; the board was NOT built or checked (no pcbnew)"))
+    print("OK: model and KiCad netlist agree; parts rule satisfied")
 
 
 if __name__ == "__main__":

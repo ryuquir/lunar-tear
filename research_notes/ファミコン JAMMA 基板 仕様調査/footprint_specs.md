@@ -4,7 +4,7 @@
 
 基板の自作フットプリント 7 種（部品用 5 種と、2026-11-16 に足した捨て基板用の 2 種）の寸法と、その出典をまとめる。
 2026-11-16 の変更（段階 2-2a のレビューによる）: JAMMA の金フィンガーを先端から 1.6 mm に下げた。JAMMA の部品の禁止範囲を、タングの根元の横でフィンガーから 5 mm まで広げた。捨て基板のミシン目と治具穴を足した（9 章）。
-寸法の正本は `hardware/famicom-jamma/design/footprints.py` で、`tools/build.py` が毎回 `kicad/fcjamma.pretty` を書き出す。
+寸法の正本は `hardware/famicom-jamma/design/footprints.py` で、`tools/build.py` が毎回作業用のフォルダに書き出し、ビルド全体が通ったときに `kicad/fcjamma.pretty` に入る。
 
 **調べ方**
 - 4 つの組に分けて、組ごとに別の担当が、メーカー図面と規格の一次資料から寸法を取った。
@@ -276,7 +276,7 @@
 | 穴の列の位置 | 本体の側で、穴が内側から縁に接する（列の中心が縁から 0.3 mm 内側）。折った跡の出っ張りが外形から出ない。溝の丸い端は列の端の穴のほうへふくらむので、端の穴と溝の間に 0.37 mm の板が残る（8 個では 0.13 mm で、外形の公差 ±0.2 より薄かった。3 回目のレビューの指摘で 7 個にした。`tools/make_board.py` が 0.3 mm 以上を確かめる） | 推論（KiKit の通例と同じ側。手引きは「枠の中心線上、または基板に 3 分の 1 かかる位置」とする） |
 | 禁止域 | 名前「Breakaway tab: keep clear」。どの穴からも 5 mm（本体の縁から 5.6 mm、列の中心から ±8.5 mm）。部品・パッド・ビア・線・ベタを置かない（折るときに基板が曲がる）。基板の規則「Breakaway tabs: …」で DRC が報告する（はじめは本体側 5 mm × ±6.5 mm で、列の端の先では 3 mm しかなかった） | 推論 |
 | 治具穴（`ToolingHole_2.0mm_NPTH`） | めっき無し 2.0 mm。レールの幅の中央 | JLCPCB「For SMT assembly at JLCPCB, use 5 mm tooling edges, 2 mm tooling holes, and 1 mm fiducials centered at 3.85 mm from the panel edges」、図「Tooling hole: 2 mm diameter, Centered on process edge」 |
-| 位置合わせマーク | KiCad の `Fiducial_1mm_Mask2mm`。外側の縁から中心まで 3.85 mm（銅の縁まで 3.35 mm）。いちばん下といちばん上のつなぎの高さ（レールが支えられている所）に置く | JLCPCB「How to Add Edge Rails and Fiducials」: 銅 1 mm、マスクの開口はその 2 倍、3〜4 個、縁から 3.35 mm 以上（文は「keep-out area を含めて」とするが、図では銅の縁まで測っている。5 mm のレールで 2 mm の開口の縁まで 3.35 mm は取れない）。理由は JLCPCB のブログ「What Are Fiducial Marks?」: 「This specific clearance is crucial to ensure the fiducials are not obscured by the clamps, rails, or tooling fixtures that hold the PCB in place on the conveyor.」。つなぎの横の溝の丸い端までは、銅から 2.82 mm（マスクの縁から 2.32 mm）で、そこは爪がつかむ所ではない（事前質問 3a） |
+| 位置合わせマーク | KiCad の `Fiducial_1mm_Mask2mm`。外側の縁から中心まで 3.85 mm（銅の縁まで 3.35 mm）。いちばん下といちばん上のつなぎの高さ（レールが支えられている所）に置く | JLCPCB「How to Add Edge Rails and Fiducials」: 銅 1 mm、マスクの開口はその 2 倍、3〜4 個、縁から 3.35 mm 以上。JLCPCB の書き方は 2 通りある。文（この記事と下のブログ「Rule: A clearance of at least 3.35 mm is necessary between the board edge and the fiducial mark, including its clearance area.」）は開口（keep-out）を含めて 3.35 mm とする。図（この記事の 3.35 mm の図、捨て基板の作り方の図の 3.85 mm）と能力表（「1 mm fiducials centered at 3.85 mm from the panel edges」）は、中心を 3.85 mm（銅の縁まで 3.35、2 mm の開口の縁まで 2.85 mm）にしている。この基板は図と能力表に合わせ、どちらでよいかを事前質問 3a で聞く（開口の縁まで 3.35 mm にするなら、中心を 4.35 mm にする）。3.35 mm の理由はJLCPCB のブログ「Fiducial Marks in PCB and SMT Assembly: A Complete Guide to Accuracy and Design Rules」（ページ名「What Are Fiducial Marks? How They Improve SMT Assembly Accuracy」）: 「This specific clearance is crucial to ensure the fiducials are not obscured by the clamps, rails, or tooling fixtures that hold the PCB in place on the conveyor.」。つなぎの横の溝の丸い端までは、銅から 2.82 mm（マスクの縁から 2.32 mm）で、そこは爪がつかむ所ではない（事前質問 3a） |
 | 属性 | ミシン目と治具穴は基板だけの部品（`board_only`）、部品表と位置ファイルから外す | — |
 
 基板の規則「JLCPCB: pad holes 0.45 apart」は、ミシン目（参照番号 MB）の穴どうしを除く。ミシン目の穴は 0.3 mm 間隔で、JLCPCB の能力表の範囲（0.2〜0.3）の中、手引きの最小（0.3）にあたる。
@@ -286,6 +286,6 @@
 - JLCPCB「How to Add Edge Rails and Fiducials for PCB Assembly Orders」（2026-09-09 更新）: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order
 - JLCPCB「Design Optimization: Specifications for Adding Process Edges and Positioning Holes」（2026-09-09 更新。治具穴は「Centered on process edge」、治具穴が削った縁に近いとレールが折れやすい）: https://jlcpcb.com/help/article/specifications-for-adding-process-edges-and-positioning-holes
 - JLCPCB「Technical Guidance: Mouse Bite Panelization Guide」（2026-11-10 更新）: https://jlcpcb.com/blog/mouse-bite-panelization-guide
-- JLCPCB「What Are Fiducial Marks? How They Improve SMT Assembly Accuracy」（2025-11-21 公開、2026-09-09 更新）: https://jlcpcb.com/blog/fiducial-marks
+- JLCPCB「Fiducial Marks in PCB and SMT Assembly: A Complete Guide to Accuracy and Design Rules」（ページ名「What Are Fiducial Marks? How They Improve SMT Assembly Accuracy」。2025-11-21 公開、2026-09-09 更新）: https://jlcpcb.com/blog/fiducial-marks
 - JLCPCB「Terms and Conditions of JLCPCB Assembly Service」（2026-09-09 更新。2.3「The distance between the body of the components and the edge of the board must be equal or greater than 2.5mm.」、5.5 捨て基板などが合わないときは JLCPCB が足すか直す、5.13 レールに検査用の印を入れる）: https://jlcpcb.com/help/article/terms-and-conditions-of-jlcpcb-assembly-service
 - JLCPCB「JLCPCB Gold Fingers」（2026-11-10 更新。V カットの面付けではフィンガーを面取りできない、銅の後退の図）

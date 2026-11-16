@@ -61,10 +61,12 @@ BITE_WEB = 0.3                  # JLCPCB's mouse-bite guide: at least 0.3 of boa
 TOOLING_HOLE = 2.0              # JLCPCB: 2 mm tooling holes
 HOLE_WALL = 1.0                 # our choice: no hole's wall within 1 mm of a routed edge (JLCPCB: a tooling hole near a milling path
                                 # weakens the rail); the tooling holes keep 1.5, the mounting holes 2.4
-FIDUCIAL_EDGE = 3.35            # JLCPCB: fiducial copper at least 3.35 mm from the board's edge (where the conveyor holds the panel)
+FIDUCIAL_EDGE = 3.35            # JLCPCB: 3.35 mm from the board's edge, where the conveyor holds the panel; measured to the copper, as
+                                # JLCPCB's figures do (centre 3.85); its texts say 'including' the 2 mm opening (support question 3a)
 FIDUCIAL_CLEAR = 1.0            # our choice: nothing routed or drilled within 1 mm of a fiducial's mask opening
 EDGE_PARTS = 2.5                # JLCPCB assembly terms, 2.3: 'The distance between the body of the components and the edge of the
-                                # board must be equal or greater than 2.5mm'; the rails give it on the left and right edges
+                                # board must be equal or greater than 2.5mm'; the rails give it on the left and right edges, where
+                                # only through-hole parts must keep it too (README chapter 8)
 HOLE_EDGE = 4.0                 # mounting holes at least 4 mm from the edges (02_jamma_interface.md 1.2.3)
 HOLE_TIP = 12.0                 # and not within 12 mm of the tip
 PANEL_MAX = 250.0               # JLCPCB: PCBA panels up to 250 x 250 mm
@@ -568,7 +570,7 @@ def facts(path, spec):
     # over a slot or off the board (J1's reaches 0.5 past the tip on purpose; the tooling holes and fiducials are checked above)
     bare = [r for r, f in fps.items() if f.GetCourtyard(pcbnew.F_CrtYd).OutlineCount() + f.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() == 0]
     fact(not bare, f"every footprint has a courtyard ({', '.join(sorted(bare)[:5]) or 'all do'})")
-    astray, near_edge = [], []
+    astray, near_edge, parts = [], [], set()
     for ref, f in sorted(fps.items()):
         if ref == "J1" or re.fullmatch(r"(TH|FID)\d+", ref):
             continue
@@ -584,15 +586,19 @@ def facts(path, spec):
                 astray.append(f"{ref} x {cx0:.2f}-{cx1:.2f}, {off_board.Area() / 1e12:.2f} mm² off the board")
             if re.fullmatch(r"(H|MB)\d+", ref):          # holes and mouse bites are not parts with a body
                 continue
+            parts.add(ref)
             cy0, cy1 = design((0, mm(cb.GetBottom())))[1], design((0, mm(cb.GetTop())))[1]
             beside = cx0 < BRD.TONGUE_X0 or cx1 > BRD.TONGUE_X0 + BRD.TONGUE_W     # over the body's lower edge, not the tongue
             gap = min(BRD.TOP - cy1, cy0 - BRD.Y0 if beside else 99.0)
+            if f.GetAttributes() & pcbnew.FP_THROUGH_HOLE:                          # through hole: the left and right edges too
+                gap = min(gap, cx0, BRD.BODY_W - cx1)
             if gap < EDGE_PARTS - 1e-6:
                 near_edge.append(f"{ref} {gap:.2f} mm")
     fact(not astray, f"every part's courtyard lies on the body, between its left and right edges and inside the outline "
          f"({'; '.join(astray[:3]) or 'all do'})")
-    fact(not near_edge, f"every part's courtyard keeps {EDGE_PARTS:g} mm from the edges without a rail: the top edge and the "
-         f"body's lower edge beside the tongue (JLCPCB) ({'; '.join(near_edge[:3]) or 'all do'})")
+    fact(not near_edge, f"every part's courtyard keeps {EDGE_PARTS:g} mm from the edges without a rail (the top edge, the body's "
+         f"lower edge beside the tongue; JLCPCB), a through-hole part's from every edge (parts placed so far: {len(parts)}"
+         + (f"; too near: {len(near_edge)}, {'; '.join(near_edge[:3])})" if near_edge else ", all clear)"))
 
     # ---- settings
     fact(board.GetCopperLayerCount() == 2, f"two copper layers ({board.GetCopperLayerCount()})")
