@@ -6,7 +6,8 @@ those nets then cannot be routed again and the number of open connections grows.
 transaction on a copy of the board:
   1. route one open connection, removing what is in the way (finish_route.py --only NET, tracks of the nets in the
      protect list stay),
-  2. route everything that this opened, using free room only (finish_route.py --no-rip),
+  2. route the nets whose tracks step 1 removed, using free room only (finish_route.py --no-rip --only those nets;
+     the connections that were open before were already tried in free room),
   3. keep the copy if it has fewer open connections than before and no rule error. A copy with the same number, but
      with another connection open, is kept as a sideways step once per such state (the next try starts from there).
      Otherwise the copy is thrown away, the nets that could not be routed again are protected, and the connection is
@@ -50,7 +51,7 @@ def main():
             if f.endswith('.riphistory.json'): os.remove(os.path.join(work, f))
         log = run(trial, '--only', net, '--rounds', '1', '--protect', ','.join(sorted(protect.get(net, ()))))
         ripped = sorted(set(re.findall(r"'([^']+)'", ' '.join(re.findall(r'ripping up \d+ items of (\[[^\]]*\])', log)))))
-        run(trial, '--no-rip', '--rounds', '3')
+        if ripped: run(trial, '--no-rip', '--rounds', '2', '--only', ','.join(ripped))
         now, err = state(trial)
         better = len(now) < len(opens) and err == 0
         sideways = len(now) == len(opens) and err == 0 and frozenset(now) not in seen       # another connection is open instead: a new position to try from

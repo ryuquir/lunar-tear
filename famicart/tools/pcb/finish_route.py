@@ -9,7 +9,7 @@ the plane reliably covers. Re-runs zone fill + DRC after each round.
   python3 finish_route.py board.kicad_pcb [--track 0.12] [--clear 0.1] [--via 0.5 --drill 0.2]
 Without options the track width, clearance and via size come from the design file (FC_DESIGN) when it defines them.
   --no-rip             only use free room (no track of another net is removed)
-  --only NET           work on the open connections of one net
+  --only NET[,NET]     work on the open connections of these nets only
   --protect NET,NET    tracks of these nets are never removed
 Layer roles: the design's PLANES when it has one (dsn_export.layer_roles: inner layers with a board-wide pour are plane
 layers, their nets the plane nets; a via that finishes a plane net must lie inside that net's filled plane), else the
@@ -30,7 +30,7 @@ ap.add_argument('pcb'); ap.add_argument('--track', type=float, default=None); ap
 ap.add_argument('--via', type=float, default=None); ap.add_argument('--drill', type=float, default=None)
 ap.add_argument('--grid', type=float, default=0.05); ap.add_argument('--rounds', type=int, default=10); ap.add_argument('--cleanup-only', action='store_true')
 ap.add_argument('--no-rip', action='store_true', help='never remove a track of another net: route only where there is room')
-ap.add_argument('--only', default=None, help='work on the open connections of this net only')
+ap.add_argument('--only', default=None, help='work on the open connections of these nets only (comma-separated)')
 ap.add_argument('--protect', default='', help='comma-separated nets whose tracks may not be removed')
 args = ap.parse_args()
 import importlib as _il
@@ -399,7 +399,7 @@ def main():
             a = item_at(board, ax, ay, ad); b = item_at(board, bx, by, bd)
             if a is None or b is None: print('  cannot resolve items:', ad, '|', bd); continue
             net = a.GetNetname()
-            if args.only and net != args.only: continue
+            if args.only and net not in args.only.split(','): continue
             by_item, comps = net_islands(board, net, sig_layers)
             ca, cb = by_item[a.m_Uuid.AsString()], by_item[b.m_Uuid.AsString()]
             if ca == cb: print(f'  {net}: already joined'); continue
