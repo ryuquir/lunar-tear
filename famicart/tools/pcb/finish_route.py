@@ -189,14 +189,21 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
     history = history or {}
     soft_items = []          # (item, [(k, flat cells)], via_cells)
     holes = []
+    HC = ToMM(board.GetDesignSettings().m_HoleClearance)    # copper to the edge of a hole of another net (NPTH: no copper ring)
     for fp in board.GetFootprints():
         for p in fp.Pads():
-            if p.GetDrillSize().x > 0: holes.append((ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), ToMM(p.GetDrillSize().x) / 2))
+            hole = None
+            if p.GetDrillSize().x > 0:
+                hole = (ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), ToMM(max(p.GetDrillSize().x, p.GetDrillSize().y)) / 2)   # slots: the long side
+                holes.append(hole)
             if p.GetNetname() == net: continue
             for kind, prm, lay in shapes_of(p):
                 ls = range(nl) if lay == 'ALL' else ([LID[lay]] if lay in LID else [])
                 for k in ls: raster(hard[k], kind, prm, C + W / 2 + 0.01)
                 if lay == 'ALL' or lay in LID: raster(hard_via, kind, prm, C + VR + 0.01)
+            if hole:                                        # the hole clearance can be larger than the copper clearance
+                for k in range(nl): raster(hard[k], 'circ', hole, HC + W / 2 + 0.01)
+                raster(hard_via, 'circ', hole, max(0.25 + DR, HC + VR) + 0.01)
     for (hx, hy, hr) in holes: raster(hard_via, 'circ', (hx, hy, hr), 0.25 + DR + 0.01)
     # rule areas that forbid tracks / vias (card-edge tab, shell notches and slot): hard obstacles. All of them are
     # axis-aligned rectangles in this project, so the bounding box is the area itself.
@@ -309,7 +316,12 @@ def emit(board, path, plane_via, net, sig_layers):
     ni = board.FindNet(net); n_t = n_v = 0
     def P(j, i): return VECTOR2I(FromMM(i * G), FromMM(j * G))
     def add_via(j, i):
-        v = pcbnew.PCB_VIA(board); v.SetPosition(P(j, i)); v.SetViaType(pcbnew.VIATYPE_THROUGH); v.SetWidth(FromMM(2 * VR)); v.SetDrill(FromMM(2 * DR))
+        nonlocal n_v
+        pos = P(j, i)
+        if any(t.GetClass() == 'PCB_VIA' and t.GetNetCode() == ni.GetNetCode() and abs(t.GetPosition().x - pos.x) < FromMM(0.01)
+               and abs(t.GetPosition().y - pos.y) < FromMM(0.01) for t in board.GetTracks()):
+            n_v -= 1; return                                # a via of this net is already there (holes_co_located)
+        v = pcbnew.PCB_VIA(board); v.SetPosition(pos); v.SetViaType(pcbnew.VIATYPE_THROUGH); v.SetWidth(FromMM(2 * VR)); v.SetDrill(FromMM(2 * DR))
         v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(ni); board.Add(v)
     run = [path[0]]
     def flush(run):
