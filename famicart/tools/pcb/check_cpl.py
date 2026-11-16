@@ -30,7 +30,7 @@ KiCad angle taken as it is (what JLCPCB's KiCad guide uploads without the plugin
 readings.
 Writes jlcpcb/cpl_check.csv. Exit status 1 when a row does not fit, 2 when the library could not be read.
     FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg python3 check_cpl.py"""
-import os, sys, csv, json, math, importlib, urllib.request
+import os, sys, csv, json, math, time, importlib, urllib.request
 import pcbnew
 from pcbnew import ToMM
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -54,7 +54,12 @@ STACK = 0.01            # mm: board pads this much farther than the nearest one 
 def library_pads(code):
     """[(pad number, x, y)] of the JLCPCB library footprint, mm from the footprint origin, y pointing down."""
     req = urllib.request.Request(API % code, headers={'User-Agent': 'check-cpl/1.0', 'Accept': 'application/json'})
-    d = json.load(urllib.request.urlopen(req, timeout=40))['result']
+    for attempt in range(4):         # the library now and then answers 403 / 5xx once: ask again a little later (same request)
+        try:
+            d = json.load(urllib.request.urlopen(req, timeout=40))['result']; break
+        except Exception:
+            if attempt == 3: raise
+            time.sleep(5.0 * (attempt + 1))
     data = d['packageDetail']['dataStr']; ox, oy = float(data['head']['x']), float(data['head']['y'])
     pads = []
     for shape in data['shape']:

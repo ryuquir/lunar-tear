@@ -11,6 +11,12 @@ A position is used when, on BOTH layers, the via's copper stays inside the fille
   1.0 mm (centre to centre) from every other via, and outside every rule area that forbids vias.
 A piece of pour that this leaves without any via gets one on a finer search, where both layers allow it.
 Afterwards the zones are filled again and the design rules checked; a via that takes part in a violation is removed.
+Designs with PLANES (rev H on: the vias also go through a power plane and an inner signal layer) add three conditions,
+so that the stitching does not spoil the inner layers:
+  1.5 mm (centre to centre) from every other via: two antipads of 1.0 mm in the power plane keep a web of copper,
+  0.55 mm + half the track width from every track on an inner layer: the via's antipad in the plane next to that layer
+  does not open under the track,
+  outside every island of a plane layer (the outline grown by 0.7 mm): a hole of 1.0 mm would cut a narrow island.
     FC_DESIGN=design_revg python3 stitch_gnd.py board.kicad_pcb [--grid 2.0]"""
 import os, sys, re, math, argparse, tempfile, importlib
 import pcbnew
@@ -21,7 +27,35 @@ args = ap.parse_args()
 D = importlib.import_module(os.environ.get('FC_DESIGN', 'design'))
 VIA, DRILL = float(getattr(D, 'VIA_DIA', 0.5)), float(getattr(D, 'VIA_DRILL', 0.3))
 INSIDE, PAD_GAP, VIA_PITCH = 0.15, 0.45, 1.0
+PLANE_MAP = getattr(D, 'PLANES', None)
+if PLANE_MAP: VIA_PITCH = 1.5
+INNER_GAP, ISLAND_GAP = 0.55, 0.7
 PM = pcbnew.SHAPE_POLY_SET.PM_FAST
+
+def inner_obstacles(board):
+    """(tracks on inner layers as (ax, ay, bx, by, half width), islands of the plane layers grown by ISLAND_GAP) for
+    designs with PLANES; two empty lists otherwise."""
+    if not PLANE_MAP: return [], []
+    outer = (pcbnew.F_Cu, pcbnew.B_Cu)
+    tracks = [(ToMM(t.GetStart().x), ToMM(t.GetStart().y), ToMM(t.GetEnd().x), ToMM(t.GetEnd().y), ToMM(t.GetWidth()) / 2)
+              for t in board.GetTracks() if t.GetClass() != 'PCB_VIA' and t.GetLayer() not in outer]
+    islands = []
+    for lname, entries in PLANE_MAP.items():
+        lid = board.GetLayerID(lname); main = {n for n, shape in entries if shape == 'board'}
+        for z in board.Zones():
+            if z.GetIsRuleArea() or not z.IsOnLayer(lid) or z.GetNetname() in main: continue
+            ol = pcbnew.SHAPE_POLY_SET(z.Outline()); ol.Inflate(FromMM(ISLAND_GAP), 16); islands.append(ol)
+    return tracks, islands
+
+def seg_dist(px, py, ax, ay, bx, by):
+    dx, dy = bx - ax, by - ay; L2 = dx * dx + dy * dy
+    t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
+    return math.hypot(px - ax - t * dx, py - ay - t * dy)
+
+def inner_ok(x, y, pt, tracks, islands):
+    return all(seg_dist(x, y, ax, ay, bx, by) >= INNER_GAP + hw for (ax, ay, bx, by, hw) in tracks
+               if min(ax, bx) - 1.5 <= x <= max(ax, bx) + 1.5 and min(ay, by) - 1.5 <= y <= max(ay, by) + 1.5) \
+        and not any(i.Contains(pt) for i in islands)
 
 def pour(board, layer, net):
     acc = pcbnew.SHAPE_POLY_SET()
@@ -52,6 +86,7 @@ def main():
     vias = [(ToMM(t.GetPosition().x), ToMM(t.GetPosition().y)) for t in board.GetTracks() if t.GetClass() == 'PCB_VIA']
     noviaz = [z.GetBoundingBox() for z in list(board.Zones()) + [z for fp in board.GetFootprints() for z in fp.Zones()] if z.GetIsRuleArea() and z.GetDoNotAllowVias()]
     noviaz = [(ToMM(b.GetX()), ToMM(b.GetY()), ToMM(b.GetRight()), ToMM(b.GetBottom())) for b in noviaz]
+    in_tracks, in_islands = inner_obstacles(board)
     bb = board.GetBoardEdgesBoundingBox(); r = VIA / 2
     added = []; mine_xy = []
     y = ToMM(bb.GetY()) + 1.0
@@ -63,6 +98,7 @@ def main():
             ok = ok and all(not (a - r <= x <= c + r and b - r <= y <= d + r) for (a, b, c, d) in noviaz)
             ok = ok and all(math.hypot(max(a - x, 0.0, x - c), max(b - y, 0.0, y - d)) >= r + PAD_GAP for (a, b, c, d) in pads)
             ok = ok and all(math.hypot(x - vx, y - vy) >= VIA_PITCH for (vx, vy) in vias)
+            ok = ok and inner_ok(x, y, pt, in_tracks, in_islands)
             if ok:
                 v = pcbnew.PCB_VIA(board); v.SetPosition(pt); v.SetViaType(pcbnew.VIATYPE_THROUGH)
                 v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(DRILL)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(net)
@@ -95,6 +131,7 @@ def main():
                         ok = ok and all(not (a - r <= x <= c + r and b - r <= y <= d + r) for (a, b, c, d) in noviaz)
                         ok = ok and all(math.hypot(max(a - x, 0.0, x - c), max(b - y, 0.0, y - d)) >= r + PAD_GAP for (a, b, c, d) in pads)
                         ok = ok and all(math.hypot(x - vx, y - vy) >= VIA_PITCH for (vx, vy) in vias)
+                        ok = ok and inner_ok(x, y, pt, in_tracks, in_islands)
                         if ok:
                             v = pcbnew.PCB_VIA(board); v.SetPosition(pt); v.SetViaType(pcbnew.VIATYPE_THROUGH)
                             v.SetWidth(FromMM(VIA)); v.SetDrill(FromMM(DRILL)); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(net)

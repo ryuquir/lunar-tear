@@ -1,7 +1,10 @@
 #!/bin/bash
 # Everything that follows the routing, in the one order that keeps board, archives, notes and drawings in step:
-#   reinforce track ends that only just reach their pad, widen the supply tracks, add ground stitching, rule check
-#   and Gerber files, placement check, BOM, order package,
+#   the board's Value fields follow the design (a value that changed after routing),
+#   give every power island of a plane layer a via of its net (designs with PLANES; an island zone it has to drop must
+#   be taken out of the design's PLANES by hand: the tool names it),
+#   reinforce track ends that only just reach their pad or via, widen the supply tracks, add ground stitching, rule
+#   check and Gerber files, placement check, BOM, order package,
 #   board with edge rails, drawings (SVG and PNG), the two checks of the package, supply drop.
 # Usage (in tools/pcb):  FC_DESIGN=design_revg FC_HW_DIR=../../hardware/revg ./finish_package.sh [width in mm wanted for +5V and GND tracks, default 0.5]
 # Stops at the first step that fails. check_cpl.py and gen_jlc.py need the network (JLCPCB part catalogue, EasyEDA footprints).
@@ -9,6 +12,8 @@ set -e
 cd "$(dirname "$0")"
 : "${FC_DESIGN:?set FC_DESIGN}" "${FC_HW_DIR:?set FC_HW_DIR}"
 B="$FC_HW_DIR/famicart.kicad_pcb"
+python3 sync_values.py "$B"
+python3 island_vias.py "$B" --drop-isolated
 python3 anchor_tracks.py "$B"
 python3 widen_tracks.py "$B" --net +5V="${1:-0.5}" --net GND="${1:-0.5}"
 python3 stitch_gnd.py "$B"
