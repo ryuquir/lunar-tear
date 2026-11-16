@@ -1,16 +1,22 @@
 ** Drc report for /home/user/lunar-tear/famicart/hardware/revh/famicart_rails.kicad_pcb **
-** Created on 2026-11-16 12:56:02 **
+** Created on 2026-11-16 16:19:19 **
 
 ** Found 210 DRC violations **
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 43.2000 mm): Footprint MB9
+    @(-2.9500 mm, 79.1500 mm): Footprint FID3
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(75.2000 mm, 56.6000 mm): Footprint D6
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(67.2000 mm, 56.6000 mm): Footprint D7
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(6.2000 mm, -0.3000 mm): Footprint MB44
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 42.3000 mm): Footprint MB8
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(75.2000 mm, 60.8000 mm): Footprint Q2
@@ -20,27 +26,30 @@
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(64.2000 mm, 60.8000 mm): Footprint R17
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 59.1000 mm): Footprint MB38
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(79.3000 mm, 60.8000 mm): Footprint RN18
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(94.3000 mm, 69.0000 mm): Footprint TH4
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(53.2000 mm, 9.7000 mm): Footprint R42
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 45.0000 mm): Footprint MB32
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(33.0000 mm, 70.0000 mm): Footprint RN7
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 47.7000 mm): Footprint MB14
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 4.5000 mm): Footprint MB4
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(52.0000 mm, 27.5000 mm): Footprint R14
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 7.2000 mm): Footprint MB28
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(5.3000 mm, -0.3000 mm): Footprint MB43
 [lib_footprint_issues]: Footprint 'C_0603_1608Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(38.0000 mm, 64.2000 mm): Footprint C141
@@ -49,10 +58,7 @@
     @(36.6000 mm, 70.0000 mm): Footprint RN17
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(81.2000 mm, -0.3000 mm): Footprint MB58
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(10.7000 mm, -0.3000 mm): Footprint MB49
+    @(-0.1000 mm, 62.7000 mm): Footprint MB21
 [lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(30.6000 mm, 25.8000 mm): Footprint C144
@@ -64,7 +70,7 @@
     @(35.1000 mm, 25.8000 mm): Footprint Q7
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(84.8000 mm, -0.3000 mm): Footprint MB62
+    @(90.1000 mm, 47.7000 mm): Footprint MB35
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(53.6000 mm, 12.7000 mm): Footprint R44
@@ -74,9 +80,18 @@
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(83.6000 mm, 10.4000 mm): Footprint U14
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 45.9000 mm): Footprint MB33
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(9.8000 mm, -0.3000 mm): Footprint MB48
 [lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
     Local override; Severity: warning
     @(57.4000 mm, 30.1000 mm): Footprint D21
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(83.9000 mm, -0.3000 mm): Footprint MB61
 [lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(28.4000 mm, 25.8000 mm): Footprint C143
@@ -85,22 +100,31 @@
     @(64.4000 mm, 36.5000 mm): Footprint U1
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 42.3000 mm): Footprint MB29
+    @(-0.1000 mm, 3.6000 mm): Footprint MB3
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(14.5000 mm, 64.2000 mm): Footprint RN28
 [lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
     Local override; Severity: warning
     @(59.5000 mm, 3.2000 mm): Footprint D11
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 2.7000 mm): Footprint MB2
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(66.0000 mm, 6.7000 mm): Footprint R37
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 7.2000 mm): Footprint MB7
 [lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(3.8500 mm, 70.4000 mm): Footprint C4
 [lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(47.1000 mm, 12.9000 mm): Footprint R39
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 44.1000 mm): Footprint MB31
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(83.2000 mm, 56.6000 mm): Footprint D5
@@ -113,12 +137,6 @@
 [lib_footprint_mismatch]: Footprint 'QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia' does not match copy in library 'famicart'.
     Local override; Severity: warning
     @(25.6000 mm, 41.5000 mm): Footprint U2
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 45.9000 mm): Footprint MB33
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 4.5000 mm): Footprint MB25
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(7.8000 mm, 70.0000 mm): Footprint RN16
@@ -128,12 +146,12 @@
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(40.4000 mm, 9.4000 mm): Footprint U16
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(43.3000 mm, -0.3000 mm): Footprint MB56
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(24.8000 mm, 64.2000 mm): Footprint R29
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 43.2000 mm): Footprint MB30
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(71.2000 mm, 60.8000 mm): Footprint Q3
@@ -142,25 +160,19 @@
     @(73.7000 mm, 70.0000 mm): Footprint RN4
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(80.3000 mm, -0.3000 mm): Footprint MB57
+    @(90.1000 mm, 5.4000 mm): Footprint MB26
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(65.3000 mm, 70.0000 mm): Footprint RN6
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 6.3000 mm): Footprint MB6
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(42.0000 mm, 70.0000 mm): Footprint RN32
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(43.3000 mm, -0.3000 mm): Footprint MB56
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(33.9500 mm, 64.2000 mm): Footprint R26
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 44.1000 mm): Footprint MB10
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 1.8000 mm): Footprint MB22
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(56.7500 mm, 12.7000 mm): Footprint R45
@@ -170,9 +182,6 @@
 [lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(77.6000 mm, 3.5000 mm): Footprint C146
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-4.3000 mm, 69.0000 mm): Footprint TH3
 [lib_footprint_mismatch]: Footprint 'Famicom_CardEdge_60_M' does not match copy in library 'famicart'.
     Local override; Severity: warning
     @(45.0000 mm, 75.0000 mm): Footprint J1
@@ -182,15 +191,24 @@
 [lib_footprint_issues]: Footprint 'D_SOD-123' not found in library 'Diode_SMD'.
     Local override; Severity: warning
     @(3.0000 mm, 66.0000 mm): Footprint D10
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(8.0000 mm, -0.3000 mm): Footprint MB46
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(75.4500 mm, 9.5000 mm): Footprint R16
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 60.0000 mm): Footprint MB18
+    @(38.8000 mm, -0.3000 mm): Footprint MB51
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 57.3000 mm): Footprint MB36
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(6.4000 mm, 27.6000 mm): Footprint U15
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 46.8000 mm): Footprint MB13
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(21.7000 mm, 64.2000 mm): Footprint D9
@@ -205,13 +223,19 @@
     @(69.0000 mm, 11.5000 mm): Footprint R51
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(82.8000 mm, -4.5000 mm): Footprint TH2
+    @(-0.1000 mm, 57.3000 mm): Footprint MB15
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 46.8000 mm): Footprint MB34
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(13.1000 mm, 47.5000 mm): Footprint R2
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(56.6000 mm, 65.4000 mm): Footprint ZA1
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 61.8000 mm): Footprint MB20
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(11.4000 mm, 70.0000 mm): Footprint RN15
@@ -220,7 +244,7 @@
     @(47.5000 mm, 9.7000 mm): Footprint R40
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 1.8000 mm): Footprint MB1
+    @(7.1000 mm, -0.3000 mm): Footprint MB45
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(34.0500 mm, 21.2000 mm): Footprint R32
@@ -233,15 +257,15 @@
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(52.7000 mm, 65.4000 mm): Footprint ZD1
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 57.3000 mm): Footprint MB15
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(63.5000 mm, 65.4000 mm): Footprint ZD2
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(54.6000 mm, 24.5000 mm): Footprint R53
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(81.2000 mm, -0.3000 mm): Footprint MB58
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(27.6000 mm, 31.4000 mm): Footprint U12
@@ -250,25 +274,28 @@
     @(41.6500 mm, 55.8000 mm): Footprint R23
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 60.9000 mm): Footprint MB40
+    @(-0.1000 mm, 1.8000 mm): Footprint MB1
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 44.1000 mm): Footprint MB31
+    @(90.1000 mm, 62.7000 mm): Footprint MB42
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 60.0000 mm): Footprint MB39
+    @(42.4000 mm, -0.3000 mm): Footprint MB55
 [lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
     Local override; Severity: warning
     @(13.1000 mm, 45.0000 mm): Footprint D29
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 3.6000 mm): Footprint MB3
+    @(84.8000 mm, -0.3000 mm): Footprint MB62
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(50.8000 mm, 59.4000 mm): Footprint D8
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 45.0000 mm): Footprint MB32
+    @(-4.3000 mm, 69.0000 mm): Footprint TH3
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 3.6000 mm): Footprint MB24
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(17.5000 mm, 26.4000 mm): Footprint RN26
@@ -278,15 +305,9 @@
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(29.4000 mm, 64.2000 mm): Footprint Q6
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(7.1000 mm, -0.3000 mm): Footprint MB45
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(10.9000 mm, 64.2000 mm): Footprint RN29
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(9.8000 mm, -0.3000 mm): Footprint MB48
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(77.3000 mm, 70.0000 mm): Footprint RN3
@@ -295,22 +316,16 @@
     @(18.6000 mm, 70.0000 mm): Footprint RN11
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 4.5000 mm): Footprint MB4
+    @(-0.1000 mm, 45.9000 mm): Footprint MB12
 [lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
     Local override; Severity: warning
     @(32.6000 mm, 47.9000 mm): Footprint D22
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 59.1000 mm): Footprint MB17
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 47.7000 mm): Footprint MB14
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(7.3000 mm, 64.2000 mm): Footprint RN30
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(7.2000 mm, -4.5000 mm): Footprint TH1
+    @(39.7000 mm, -0.3000 mm): Footprint MB52
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(61.8000 mm, 60.8000 mm): Footprint R18
@@ -325,58 +340,55 @@
     @(63.5000 mm, 18.5000 mm): Footprint SW3
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 61.8000 mm): Footprint MB41
+    @(82.1000 mm, -0.3000 mm): Footprint MB59
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(83.2000 mm, 60.8000 mm): Footprint Q1
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 45.0000 mm): Footprint MB11
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(7.2000 mm, -4.5000 mm): Footprint TH1
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(35.6000 mm, 64.2000 mm): Footprint R25
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(85.7000 mm, -0.3000 mm): Footprint MB63
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 59.1000 mm): Footprint MB38
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(67.3000 mm, 65.4000 mm): Footprint ZA2
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 42.3000 mm): Footprint MB29
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(69.1000 mm, 6.7000 mm): Footprint R36
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 60.9000 mm): Footprint MB19
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 61.8000 mm): Footprint MB20
-[lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
-    Local override; Severity: warning
-    @(40.0000 mm, 30.1000 mm): Footprint D23
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(41.5000 mm, -0.3000 mm): Footprint MB54
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 45.0000 mm): Footprint MB11
-[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
-    Local override; Severity: warning
-    @(25.8000 mm, 70.0000 mm): Footprint RN9
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(37.9000 mm, -0.3000 mm): Footprint MB50
-[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
-    Local override; Severity: warning
-    @(40.0000 mm, 42.8500 mm): Footprint R6
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
     @(-0.1000 mm, 58.2000 mm): Footprint MB16
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(6.2000 mm, -0.3000 mm): Footprint MB44
+    @(83.0000 mm, -0.3000 mm): Footprint MB60
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(83.0000 mm, -0.3000 mm): Footprint MB60
+    @(-0.1000 mm, 60.9000 mm): Footprint MB19
+[lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
+    Local override; Severity: warning
+    @(40.0000 mm, 30.1000 mm): Footprint D23
+[lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(25.8000 mm, 70.0000 mm): Footprint RN9
+[lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
+    Local override; Severity: warning
+    @(40.0000 mm, 42.8500 mm): Footprint R6
 [lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(64.0000 mm, 3.5000 mm): Footprint C145
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(85.7000 mm, -0.3000 mm): Footprint MB63
 [lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
     Local override; Severity: warning
     @(75.4500 mm, 11.9000 mm): Footprint D24
@@ -385,7 +397,7 @@
     @(29.1000 mm, 21.2000 mm): Footprint R30
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(82.1000 mm, -0.3000 mm): Footprint MB59
+    @(-0.1000 mm, 59.1000 mm): Footprint MB17
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(43.6000 mm, 64.2000 mm): Footprint RN19
@@ -394,31 +406,22 @@
     @(25.6500 mm, 17.2000 mm): Footprint R47
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(92.9500 mm, -3.1500 mm): Footprint FID2
+    @(37.9000 mm, -0.3000 mm): Footprint MB50
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-2.9500 mm, -3.1500 mm): Footprint FID1
+    @(-0.1000 mm, 44.1000 mm): Footprint MB10
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(38.8000 mm, -0.3000 mm): Footprint MB51
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 57.3000 mm): Footprint MB36
+    @(90.1000 mm, 60.9000 mm): Footprint MB40
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(45.0000 mm, 46.6000 mm): Footprint U13
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(54.5000 mm, 70.0000 mm): Footprint RN5
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 45.9000 mm): Footprint MB12
 [lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(46.0000 mm, 12.9000 mm): Footprint R38
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 47.7000 mm): Footprint MB35
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(22.2000 mm, 70.0000 mm): Footprint RN10
@@ -433,7 +436,7 @@
     @(61.7000 mm, 70.0000 mm): Footprint RN14
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(94.3000 mm, 69.0000 mm): Footprint TH4
+    @(10.7000 mm, -0.3000 mm): Footprint MB49
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(32.6000 mm, 35.1000 mm): Footprint R4
@@ -443,6 +446,9 @@
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(47.2000 mm, 64.2000 mm): Footprint R20
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(8.9000 mm, -0.3000 mm): Footprint MB47
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(32.4000 mm, 21.2000 mm): Footprint R31
@@ -461,72 +467,78 @@
 [lib_footprint_issues]: Footprint 'SOT-23' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(67.2000 mm, 60.8000 mm): Footprint Q4
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(5.3000 mm, -0.3000 mm): Footprint MB43
 [lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
     Local override; Severity: warning
     @(15.4000 mm, 11.1000 mm): Footprint D25
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 6.3000 mm): Footprint MB6
+    @(-2.9500 mm, -3.1500 mm): Footprint FID1
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 3.6000 mm): Footprint MB24
+    @(90.1000 mm, 6.3000 mm): Footprint MB27
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(8.0000 mm, -0.3000 mm): Footprint MB46
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(39.7000 mm, -0.3000 mm): Footprint MB52
+    @(90.1000 mm, 58.2000 mm): Footprint MB37
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
     @(40.6000 mm, -0.3000 mm): Footprint MB53
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 42.3000 mm): Footprint MB8
+    @(41.5000 mm, -0.3000 mm): Footprint MB54
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(-0.1000 mm, 46.8000 mm): Footprint MB13
+    @(-0.1000 mm, 60.0000 mm): Footprint MB18
 [lib_footprint_mismatch]: Footprint 'QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia' does not match copy in library 'famicart'.
     Local override; Severity: warning
     @(47.0000 mm, 36.5000 mm): Footprint U3
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-2.9500 mm, 79.1500 mm): Footprint FID3
 [lib_footprint_issues]: Footprint 'C_0805_2012Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(3.8500 mm, 68.3000 mm): Footprint C3
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(82.8000 mm, -4.5000 mm): Footprint TH2
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(49.6000 mm, 64.2000 mm): Footprint R19
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 4.5000 mm): Footprint MB25
 [lib_footprint_issues]: Footprint 'R_0402_1005Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(40.0000 mm, 5.0000 mm): Footprint R52
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 1.8000 mm): Footprint MB22
 [lib_footprint_issues]: Footprint 'SW_Push_1P1T_XKB_TS-1187A' not found in library 'Button_Switch_SMD'.
     Local override; Severity: warning
     @(67.5000 mm, 24.5000 mm): Footprint SW2
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(50.9000 mm, 70.0000 mm): Footprint RN13
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 2.7000 mm): Footprint MB23
 [lib_footprint_issues]: Footprint 'SOT-23-5' not found in library 'Package_TO_SOT_SMD'.
     Local override; Severity: warning
     @(22.8000 mm, 21.2000 mm): Footprint U21
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(92.9500 mm, -3.1500 mm): Footprint FID2
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 7.2000 mm): Footprint MB28
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(43.6000 mm, 59.4000 mm): Footprint R21
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(73.5000 mm, 65.4000 mm): Footprint ZA4
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(83.9000 mm, -0.3000 mm): Footprint MB61
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 46.8000 mm): Footprint MB34
 [lib_footprint_mismatch]: Footprint 'QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia' does not match copy in library 'famicart'.
     Local override; Severity: warning
     @(8.4000 mm, 17.5000 mm): Footprint U5
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 61.8000 mm): Footprint MB41
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(30.7500 mm, 21.2000 mm): Footprint R33
@@ -536,9 +548,6 @@
 [lib_footprint_mismatch]: Footprint 'QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia' does not match copy in library 'famicart'.
     Local override; Severity: warning
     @(81.6000 mm, 20.5000 mm): Footprint U4
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 7.2000 mm): Footprint MB7
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(15.0000 mm, 70.0000 mm): Footprint RN12
@@ -551,48 +560,45 @@
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(83.5000 mm, 48.3500 mm): Footprint R10
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 2.7000 mm): Footprint MB23
 [lib_footprint_issues]: Footprint 'LED_0603_1608Metric' not found in library 'LED_SMD'.
     Local override; Severity: warning
     @(52.0000 mm, 25.9000 mm): Footprint D26
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 6.3000 mm): Footprint MB27
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(42.4000 mm, -0.3000 mm): Footprint MB55
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(15.4000 mm, 9.5000 mm): Footprint R12
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 43.2000 mm): Footprint MB30
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(-0.1000 mm, 43.2000 mm): Footprint MB9
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(80.3000 mm, -0.3000 mm): Footprint MB57
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(47.5000 mm, 70.0000 mm): Footprint RN31
 [lib_footprint_issues]: The current configuration does not include the library ''.
     Local override; Severity: warning
-    @(90.1000 mm, 62.7000 mm): Footprint MB42
+    @(-0.1000 mm, 5.4000 mm): Footprint MB5
+[lib_footprint_issues]: The current configuration does not include the library ''.
+    Local override; Severity: warning
+    @(90.1000 mm, 60.0000 mm): Footprint MB39
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(32.3000 mm, 64.2000 mm): Footprint R27
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 62.7000 mm): Footprint MB21
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(83.2000 mm, 31.4000 mm): Footprint U18
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 5.4000 mm): Footprint MB26
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(8.9000 mm, -0.3000 mm): Footprint MB47
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(43.3000 mm, 55.8000 mm): Footprint R24
 [lib_footprint_mismatch]: Footprint 'QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm_NoVia' does not match copy in library 'famicart'.
     Local override; Severity: warning
     @(81.2000 mm, 41.5000 mm): Footprint U8
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 2.7000 mm): Footprint MB2
 [lib_footprint_issues]: Footprint 'R_0603_1608Metric' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(49.1500 mm, 9.7000 mm): Footprint R41
@@ -602,15 +608,9 @@
 [lib_footprint_issues]: Footprint 'SOIC-8_5.23x5.23mm_P1.27mm' not found in library 'Package_SO'.
     Local override; Severity: warning
     @(63.0000 mm, 11.5000 mm): Footprint U7
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(-0.1000 mm, 5.4000 mm): Footprint MB5
 [lib_footprint_issues]: Footprint 'R_Array_Convex_4x0603' not found in library 'Resistor_SMD'.
     Local override; Severity: warning
     @(29.4000 mm, 70.0000 mm): Footprint RN8
-[lib_footprint_issues]: The current configuration does not include the library ''.
-    Local override; Severity: warning
-    @(90.1000 mm, 58.2000 mm): Footprint MB37
 [lib_footprint_issues]: Footprint 'C_0402_1005Metric' not found in library 'Capacitor_SMD'.
     Local override; Severity: warning
     @(84.9000 mm, 21.2000 mm): Footprint C128

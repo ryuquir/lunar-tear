@@ -40,7 +40,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser()
 ap.add_argument('pcb'); ap.add_argument('--dry', action='store_true')
 ap.add_argument('--reach', type=float, default=1.0); ap.add_argument('--loop', type=float, default=3.0)
-args = ap.parse_args()
+args = ap.parse_args() if __name__ == '__main__' else None      # decap_reroute.py imports this file as a library
 import pcbnew
 from pcbnew import ToMM, FromMM, VECTOR2I
 import dsn_export
@@ -502,7 +502,11 @@ def check(path):
     return json.loads([l for l in r.stdout.splitlines() if l.startswith('[')][-1])
 
 def write(path, added):
-    b = pcbnew.LoadBoard(path); nets = {}
+    b = pcbnew.LoadBoard(path); add_items(b, added); pcbnew.SaveBoard(path, b)
+
+def add_items(b, added):
+    """Add the items ('via', x, y, net) / ('track', x1, y1, x2, y2, w, layer, net) to a loaded board."""
+    nets = {}
     for it in added:
         net = it[-1]
         ni = nets.setdefault(net, b.FindNet(net))
@@ -512,7 +516,6 @@ def write(path, added):
         else:
             t = pcbnew.PCB_TRACK(b); t.SetStart(VECTOR2I(FromMM(it[1]), FromMM(it[2]))); t.SetEnd(VECTOR2I(FromMM(it[3]), FromMM(it[4])))
             t.SetWidth(FromMM(it[5])); t.SetLayer(b.GetLayerID(it[6])); t.SetNet(ni); b.Add(t)
-    pcbnew.SaveBoard(path, b)
 
 # ---------------------------------------------------------------------------------------------- main
 def main():

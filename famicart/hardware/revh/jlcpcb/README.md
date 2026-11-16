@@ -15,7 +15,7 @@ Bottom に 1〜30 番。JLCPCB の Bottom（シェルの表、ラベル面）に
 | `rails.png` | 捨て基板の位置の図。JLCPCB への問い合わせに添付する |
 | `parts_check.csv`、`cpl_check.csv` | 部品の区分（宣言した Basic / Extended）・在庫と、部品の向きの検査結果 |
 
-このデータの基板は、配線 9747 本・ビア 1146 個・未接続 0。
+このデータの基板は、配線 9807 本・ビア 1144 個・未接続 0。
 
 ## 1. 注文の種類と、捨て基板
 - 金フィンガー付きの基板は **Economic PCBA では受け付けられない**。**Standard PCBA** で、実装は**両面**（Top 136 点、Bottom 160 点）、
