@@ -50,7 +50,7 @@
 | `design/board.py` | 基板そのもの（外形、JAMMA のタングとキー溝、捨て基板とミシン目、取り付け穴、治具穴、位置合わせマーク、積層、原点、出力の設定）。`kicad/fcjamma.kicad_pcb` はここから作る |
 | `tools/make_board.py` | `design/board.py` から KiCad の基板ファイルを作り、読み直して実測する（タングとキー溝の寸法と位置、タングの横に基板が無いこと、外形の角と溝の形、フィンガーの範囲、J1 の全ピンのネットと回路図とのつながり、穴、捨て基板・つなぎ・ミシン目、治具穴、位置合わせマーク、外形線の有無、積層、出力の設定、縁から部品までの距離など 142 項目。限界値はコネクタの図面と JLCPCB の値を書き直したもの。`build.py` がシステムの Python で呼び、作業用のフォルダのプロジェクトの中で DRC と回路図との照合までかける。ビルド全体が通ったときだけ、プロジェクトごと `kicad/` に入る） |
 | `out/board/` | 基板の図（`fcjamma_board.svg`）、上から見た 3D の絵（`fcjamma_board_top.png`）、DRC と回路図との照合の結果（`drc.json`。配線の残りはネットごと、まだ置いていない部品は一覧） |
-| `ordering/` | 発注代行（GrokBOT）向けの文書の原稿。`owner_memo.txt`（持ち主用の渡し方のメモ）、`grok_instruction.html`（Grok が最初に読む指示書）、`grok_ordering_knowhow.html`（発注のノウハウとバグチェック）、`jlcpcb_support_question.txt`（JLCPCB への質問文）、`make_grok_package.py`（Google ドライブに上げる一式を作る） |
+| `ordering/` | 発注代行（GrokBOT）向けの文書の原稿。`owner_memo.txt`（持ち主用の渡し方のメモ）、`grok_instruction.html`（Grok が最初に読む指示書）、`grok_ordering_knowhow.html`（発注のノウハウとバグチェック）、`jlcpcb_support_question.txt`（JLCPCB への質問文）、`jlcpcb_question_guide.html`（その質問の手引き。質問ごとに何を・なぜ聞くか、十分な答え、聞き直しの決まった英文、報告の形）、`make_grok_package.py`（Google ドライブに上げる一式を作る） |
 
 ```
 sudo tools/setup_env.sh                      # 初回のみ

@@ -143,7 +143,12 @@ def main():
     write("02_【Grok用】発注のノウハウとバグチェック.txt",
           with_header("ファミコンアーキテクチャー基盤　発注のノウハウとバグチェック", version_text, html_to_text(os.path.join(HERE, "grok_ordering_knowhow.html"))))
     shutil.copy(os.path.join(HERE, "jlcpcb_support_question.txt"), os.path.join(out, "03_【Grok用】JLCPCBへの質問文（英語）.txt"))
+    write("04_【Grok用】JLCPCBへの質問の手引き（何を・なぜ・どう聞くか）.txt",
+          with_header("ファミコンアーキテクチャー基盤　JLCPCB への事前質問の手引き（依頼 1）", version_text,
+                      html_to_text(os.path.join(HERE, "jlcpcb_question_guide.html"))))
     shutil.copy(os.path.join(PROJECT, "mech", "board_outline_plan.png"), os.path.join(out, "10_【図】基板の外形と配置の案.png"))
+    shutil.copy(os.path.join(PROJECT, "out", "board", "fcjamma_board_top.png"),
+                os.path.join(out, "11_【図】基板の外形（捨て基板つき・上から見た図）.png"))
     write("20_【参考】設計記録（README）.txt",
           with_header("ファミコンアーキテクチャー基盤　設計記録（README。設計データの説明）", version_text,
                       open(os.path.join(PROJECT, "README.md"), encoding="utf-8").read()))
