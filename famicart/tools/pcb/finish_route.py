@@ -7,7 +7,9 @@ plane nets (GND on In1, +3V3 on the last inner layer) an island may also be fini
 the plane reliably covers. Re-runs zone fill + DRC after each round.
 
   python3 finish_route.py board.kicad_pcb [--track 0.12] [--clear 0.1] [--via 0.5 --drill 0.2]
-Without options the track width, clearance and via size come from the design file (FC_DESIGN) when it defines them.
+Without options the track width, clearance and via size come from the design file (FC_DESIGN) when it defines them;
+nets in the design's NET_WIDTH (supply nets, rev H on) are routed at their own width. A route that starts or ends on a
+track end or a pad / via centre is drawn to that exact point, not to the nearest grid cell.
   --no-rip             only use free room (no track of another net is removed)
   --only NET[,NET]     work on the open connections of these nets only
   --protect NET,NET    tracks of these nets are never removed
@@ -39,6 +41,8 @@ _D = _il.import_module(os.environ.get('FC_DESIGN', 'design'))
 # rule values: the command line, else the design's own (rev G on: TRACK / CLEAR / VIA_DIA / VIA_DRILL), else the old defaults
 def _rule(arg, attr, old): return arg if arg is not None else float(getattr(_D, attr, old))
 G = args.grid; W = _rule(args.track, 'TRACK', 0.1); C = _rule(args.clear, 'CLEAR', 0.1); VR = _rule(args.via, 'VIA_DIA', 0.5) / 2; DR = _rule(args.drill, 'VIA_DRILL', 0.2) / 2
+# supply nets keep the design's wider tracks (NET_WIDTH, rev H on): W is set per connection in main(); W0 is the default
+W0 = W; NET_W = {n: float(w) for n, w in getattr(_D, 'NET_WIDTH', {}).items()}
 BW, BH = 90.0, float(getattr(_D, 'BODY_H', 35.4))   # routable body
 TAB_X0, TAB_X1 = (90.0 - 78.4) / 2, (90.0 + 78.4) / 2  # card-edge tab (gen_pcb.py)
 NX, NY = int(round(BW / G)) + 1, int(round((BH + 10.8) / G)) + 1   # the grid also covers the card-edge tab so finger tracks are representable
@@ -242,6 +246,8 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
     hard |= edge[None]
     vm = int(math.ceil((0.3 + VR) / G)); hard_via[:vm, :] = True; hard_via[:, :vm] = True; hard_via[:, -vm:] = True
     jv = int((BH - 0.3 - VR) / G); hard_via[jv:, :int(math.ceil((TAB_X0 + 0.3 + VR) / G))] = True; hard_via[jv:, int((TAB_X1 - 0.3 - VR) / G) + 1:] = True
+    exact = {}               # cell -> the exact point it stands for (a track end or a point on its centre line, a pad or
+                             # via centre): a track that starts or ends there is drawn to that point
     def cells_of(items, shrink):
         out = set()
         for it in items:
@@ -250,19 +256,44 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
                 if it.GetClass() in ('PCB_TRACK', 'PCB_ARC'):
                     x1, y1, x2, y2, hw = prm; k = LID.get(lay)
                     if k is None: continue
+                    # every cell whose centre lies on the track's copper: a new route may join it anywhere (a T), not
+                    # only at its ends -- in a bus of tracks at minimum spacing the ends can be out of reach
+                    dx, dy = x2 - x1, y2 - y1; L2 = dx * dx + dy * dy; n = int(math.sqrt(L2) / (G / 2)) + 1
+                    for st in range(n + 1):
+                        px, py = x1 + dx * st / n, y1 + dy * st / n
+                        for j in range(int(round(py / G)) - 1, int(round(py / G)) + 2):
+                            for i in range(int(round(px / G)) - 1, int(round(px / G)) + 2):
+                                if not (0 <= j < NY and 0 <= i < NX) or (k, j, i) in exact: continue
+                                u = max(0.0, min(1.0, ((i * G - x1) * dx + (j * G - y1) * dy) / L2)) if L2 > 0 else 0.0
+                                qx, qy = x1 + u * dx, y1 + u * dy
+                                if math.hypot(i * G - qx, j * G - qy) <= hw: out.add((k, j, i)); exact[(k, j, i)] = (qx, qy)
                     for (ex, ey) in ((x1, y1), (x2, y2)):
                         j, i = int(round(ey / G)), int(round(ex / G))
-                        if 0 <= j < NY and 0 <= i < NX: out.add((k, j, i))
+                        if 0 <= j < NY and 0 <= i < NX: out.add((k, j, i)); exact[(k, j, i)] = (ex, ey)
                     continue
+                cx, cy = ((prm[0] + prm[2]) / 2, (prm[1] + prm[3]) / 2) if kind == 'box' else (prm[0], prm[1])
                 if kind == 'box': prm = (prm[0] + shrink, prm[1] + shrink, prm[2] - shrink, prm[3] - shrink)
                 if kind == 'circ': prm = (prm[0], prm[1], max(prm[2] - shrink, 0.0))
                 fl = raster_cells(kind, prm, 0.0)
+                c0 = int(round(cy / G)) * NX + int(round(cx / G))
+                if not len(fl): fl = np.array([c0])           # pad narrower than the track: its centre
                 ls = range(nl) if lay == 'ALL' else ([LID[lay]] if lay in LID else [])
                 for k in ls:
                     for f in fl.tolist(): out.add((k, f // NX, f % NX))
+                    if c0 in fl: exact[(k, c0 // NX, c0 % NX)] = (cx, cy)
         return out
-    src = cells_of(src_items, 0.04); dst = cells_of(dst_items, 0.04) if dst_items else set()
+    # a route may start anywhere in its own pad, minus a margin: with a wide track (supply nets) it must start far
+    # enough inside that the track edge stays within 0.02 mm of the pad edge
+    shrink = max(0.04, W / 2 - 0.02)
+    src = cells_of(src_items, shrink); dst = cells_of(dst_items, shrink) if dst_items else set()
     for (k, j, i) in src | dst: hard[k, j, i] = False; soft[k, j, i] = 0
+    # no new via next to a hole of the net's own (via, pinned pad): the holes would be too close to each other. Where a
+    # route needs to change layer at one, the via or pad already does it.
+    own_holes = [(ToMM(t.GetPosition().x), ToMM(t.GetPosition().y), ToMM(t.GetDrillValue()) / 2) for t in board.GetTracks()
+                 if t.GetClass() == 'PCB_VIA' and t.GetNetname() == net]
+    own_holes += [(ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), ToMM(max(p.GetDrillSize().x, p.GetDrillSize().y)) / 2)
+                  for fp in board.GetFootprints() for p in fp.Pads() if p.GetNetname() == net and p.GetDrillSize().x > 0]
+    for hole in own_holes: raster(hard_via, 'circ', hole, 0.25 + DR + 0.01)
     if not src: return None
     PM = 1.3
     def is_goal(k, j, i):
@@ -300,27 +331,39 @@ def route_job(board, sig_layers, src_items, dst_items, net, plane_goal, allow_ri
     path = [goal]
     while path[-1] in parent: path.append(parent[path[-1]])
     path.reverse()
+    path = path[max(n for n, c in enumerate(path) if c in src):]      # start where the route leaves its own copper
     plane_via = plane_goal and goal not in dst
-    # which soft items does the path (tracks on each layer, vias at layer changes / plane via) run through?
+    # which soft items does the path (tracks on each layer, vias at layer changes / plane via) run through? Cells of
+    # the source and target islands do not count: they lie in the net's own copper, and the start / end of a route
+    # may sit inside another net's clearance band there (its own pad or track end already does) without anything
+    # having to move. Counting them used to rip tracks even in --no-rip mode.
     lay_mask = np.zeros((nl, NY * NX), bool); via_mask = np.zeros(NY * NX, bool)
-    for (k, j, i) in path: lay_mask[k, j * NX + i] = True
+    for (k, j, i) in path:
+        if (k, j, i) not in src and (k, j, i) not in dst: lay_mask[k, j * NX + i] = True
     for a, b in zip(path, path[1:]):
         if a[0] != b[0]: via_mask[a[1] * NX + a[2]] = True
     if plane_via: via_mask[path[-1][1] * NX + path[-1][2]] = True
     rip = []
     for (t, cells, vfl) in soft_items:
         if any(lay_mask[k, fl].any() for k, fl in cells) or (len(vfl) and via_mask[vfl].any()): rip.append(t)
-    return path, plane_via, rip
+    if rip and not allow_rip: return None        # cannot happen (other nets are hard): never remove copper in --no-rip mode
+    # a route that starts or ends on the grid cell of a track end, a track's centre line or a pad / via centre is drawn
+    # to that exact point: the cell is up to 0.035 mm off it, and a wide track (VBUS on a 0.5 mm via) would stick out
+    # of the via on that side. Vias stay on the grid (their clearance was checked there).
+    ends = {c: exact[c] for c in (path[0], path[-1]) if c in exact and not (c == path[-1] and plane_via)}
+    return path, plane_via, rip, ends
 
-def emit(board, path, plane_via, net, sig_layers):
-    ni = board.FindNet(net); n_t = n_v = 0
-    def P(j, i): return VECTOR2I(FromMM(i * G), FromMM(j * G))
+def emit(board, path, plane_via, net, sig_layers, ends=None):
+    ni = board.FindNet(net); n_t = n_v = 0; ends = ends or {}
+    def P(j, i, k=None):
+        if k is not None and (k, j, i) in ends: x, y = ends[(k, j, i)]; return VECTOR2I(FromMM(x), FromMM(y))
+        return VECTOR2I(FromMM(i * G), FromMM(j * G))
     def add_via(j, i):
         nonlocal n_v
         pos = P(j, i)
-        if any(t.GetClass() == 'PCB_VIA' and t.GetNetCode() == ni.GetNetCode() and abs(t.GetPosition().x - pos.x) < FromMM(0.01)
-               and abs(t.GetPosition().y - pos.y) < FromMM(0.01) for t in board.GetTracks()):
-            n_v -= 1; return                                # a via of this net is already there (holes_co_located)
+        if any(t.GetClass() == 'PCB_VIA' and t.GetNetCode() == ni.GetNetCode() and (t.GetPosition() - pos).EuclideanNorm() < t.GetWidth() / 2
+               for t in board.GetTracks()):
+            n_v -= 1; return                                # on a via of this net: it already joins the layers
         v = pcbnew.PCB_VIA(board); v.SetPosition(pos); v.SetViaType(pcbnew.VIATYPE_THROUGH); v.SetWidth(FromMM(2 * VR)); v.SetDrill(FromMM(2 * DR))
         v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu); v.SetNet(ni); board.Add(v)
     run = [path[0]]
@@ -332,7 +375,7 @@ def emit(board, path, plane_via, net, sig_layers):
             if (b[1] - a[1], b[2] - a[2]) != (c[1] - b[1], c[2] - b[2]): pts.append(b)
         pts.append(run[-1])
         for a, b in zip(pts, pts[1:]):
-            t = pcbnew.PCB_TRACK(board); t.SetStart(P(a[1], a[2])); t.SetEnd(P(b[1], b[2])); t.SetWidth(FromMM(W)); t.SetLayer(sig_layers[a[0]]); t.SetNet(ni); board.Add(t); n_t += 1
+            t = pcbnew.PCB_TRACK(board); t.SetStart(P(a[1], a[2], a[0])); t.SetEnd(P(b[1], b[2], b[0])); t.SetWidth(FromMM(W)); t.SetLayer(sig_layers[a[0]]); t.SetNet(ni); board.Add(t); n_t += 1
     for a, b in zip(path, path[1:]):
         if b[0] != a[0]: flush(run); add_via(a[1], a[2]); n_v += 1; run = [b]
         else: run.append(b)
@@ -371,6 +414,7 @@ def cleanup_pass(path):
     return removed
 
 def main():
+    global W
     board = pcbnew.LoadBoard(args.pcb)
     if args.cleanup_only:
         print('cleanup removed', cleanup_pass(args.pcb)); return
@@ -410,18 +454,19 @@ def main():
                 if not pb: jobs.append((ib, None))
                 if not jobs: jobs.append((ia, ib))
             else: jobs.append((ia, ib))
+            W = NET_W.get(net, W0)
             for src, dst in jobs:
                 cover = plane_cover(board, net, plane_ids[net]) if (plane_ids is not None and net in plane_nets) else None
                 res = route_job(board, sig_layers, src, dst or [], net, plane_goal=(net in plane_nets), allow_rip=not args.no_rip, history=history, cover=cover)
                 if res is None: print(f'  {net}: no path'); continue
-                path, pv, rip = res
+                path, pv, rip, ends = res
                 if rip:
                     nets_hit = sorted({t.GetNetname() for t in rip})
                     for t in rip: board.Remove(t)
                     for n_ in nets_hit: history[n_] = history.get(n_, 0) + 1
                     json.dump(history, open(hist_path, 'w'))
                     print(f'  {net}: ripping up {len(rip)} items of {nets_hit}')
-                nt, nv = emit(board, path, pv, net, sig_layers); done += 1
+                nt, nv = emit(board, path, pv, net, sig_layers, ends); done += 1
                 print(f'  {net}: routed {len(path)} cells -> {nt} tracks, {nv} vias' + (' (to plane)' if pv else ''))
                 break      # islands changed: refresh from the saved board before the next job
             pcbnew.SaveBoard(args.pcb, board); board = pcbnew.LoadBoard(args.pcb)
