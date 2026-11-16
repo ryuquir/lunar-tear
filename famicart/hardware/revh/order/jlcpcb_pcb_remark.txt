@@ -1,0 +1,6 @@
+1) This is ONE board with edge rails that I drew myself on the left, right and top edges (one frame, 5.0 mm wide), joined by mouse-bite tabs (5.2 mm wide, 0.6 mm holes) across a 2.0 mm routed gap: panel 103.6 x 92.7 mm, one board per panel. 3 fiducials on each side (top and bottom) and 4 tooling holes (2.0 mm) are on the rails. Please do NOT add other rails and do NOT add V-cut.
+2) Gold fingers are on ONE edge only: the bottom edge with the 78.4 mm wide tab (30 fingers on each side). Please bevel this edge 30 degrees. This edge must stay a free routed edge; the rails end 2.7 mm above it.
+3) If you cannot bevel a board with these rails, do NOT move or change the rails: put the order on hold and contact me.
+4) Stackup JLC06121H-3313, inner copper 0.5 oz. Vias: 0.3 mm holes; the vias with 0.2 mm holes have pads of at least 0.45 mm, so I left "Min via hole size" at 0.3mm/(0.4/0.45mm). All vias epoxy filled and capped, including the vias in the QFN exposed pads.
+5) You may shorten the finger copper to your standard setback for the bevel.
+6) The solder mask window over the gold fingers is intentional. The outline has two side notches, one inner slot and cut corners beside the tab; inner corners are drawn with R 0.5 mm. Please keep them as drawn.

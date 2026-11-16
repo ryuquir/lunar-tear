@@ -1,0 +1,7 @@
+I am going to order a 6-layer board, 1.2 mm, ENIG, gold fingers (30 on each side) with a 30 degree bevel, and Standard PCBA on both sides. Please see the attached drawing. My Gerber file already contains edge rails that I drew myself on the left, right and top edges (one frame, 5.0 mm wide), joined to the board by mouse-bite tabs (5.2 mm wide, 0.6 mm holes) across a 2.0 mm routed gap. There is no V-cut. The rails end 2.7 mm above the gold-finger edge, so that edge is completely free. The rails carry 3 fiducials on each side (top and bottom) and 4 tooling holes (2.0 mm). Panel size 103.6 x 92.7 mm, one board per panel.
+
+1) Can you bevel the gold-finger edge of this board?
+2) Is this rail arrangement accepted for Standard PCBA on both sides?
+3) Which Delivery Format must I select: Single PCB or Panel by Customer (1 x 1)? Is there an extra charge?
+4) The USB-C receptacle TYPE-C-31-M-12 (C165948) has four plated through-hole shell legs. Are they soldered in your assembly process without a hand-soldering charge?
+5) Do you X-ray only the QFN parts (C42415655), or also the crystals (C362368) and the inductors (C135262)?

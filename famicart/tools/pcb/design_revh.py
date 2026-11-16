@@ -58,7 +58,9 @@ LAYERS = 6
 STACKUP = 'JLC06121H-3313'
 SHELL = shells.mirrored(shells.hvc_large(75.0, relief=0.6, side_inset=0.2))
 JLC_RULES = True
-TRACK, CLEAR, VIA_DIA, VIA_DRILL = 0.15, 0.15, 0.5, 0.3      # QFN fan-out at 0.1 / 0.1 is a routing-stage rule (docs/13 "基板")
+# One track / clearance rule for the whole board (docs/13 "配線の決まり"). Same placement, Freerouting 15 passes:
+# 0.15 / 0.15 left 47 connections open, 0.12 / 0.12 15, 0.10 / 0.10 18. JLCPCB multilayer minimum: 0.09 / 0.09.
+TRACK, CLEAR, VIA_DIA, VIA_DRILL = 0.12, 0.12, 0.5, 0.3
 BODY_H = SHELL['body_h']
 H = BODY_H
 ASSEMBLY = 'both'
@@ -95,12 +97,12 @@ def res(val, xp, h, a, b, rot=90, fp=R0603, side='F', ref=None):
     r = ref or nxt('R'); P(r, 'Device', 'R', val, fp, xp, h, rot, side); c(r, 1, a); c(r, 2, b); return r
 def cap(val, fp, xp, h, a, b='GND', rot=90, side='F', ref=None):
     r = ref or nxt('C'); P(r, 'Device', 'C', val, fp, xp, h, rot, side); c(r, 1, a); c(r, 2, b); return r
-def rarr(xp, h, pairs, ref=None, rot=180, side='F'):
-    """1k x4 array; pairs = [(console_net, mcu_net)] x4, top to bottom on the board (None for unused).
+def rarr(xp, h, pairs, ref=None, rot=180, side='F', val='1k x4'):
+    """Resistor array (1k x4 unless `val` says otherwise); pairs = [(console_net, mcu_net)] x4, top to bottom on the board (None for unused).
     Rev G placed its arrays at 0 degrees with the console column on the left; drawn from the back, the mirror image is
     the array at 180 degrees (pins 1-4 on the right column, bottom to top) with the pair list reversed, so every element
     keeps its place relative to the finger it comes from."""
-    r = ref or nxt('RN'); P(r, 'Device', 'R_Pack04', '1k x4', RARR, xp, h, rot, side)
+    r = ref or nxt('RN'); P(r, 'Device', 'R_Pack04', val, RARR, xp, h, rot, side)
     seq = list(pairs)[::-1] if rot % 360 == 180 else list(pairs)
     for i, (a, b) in enumerate(seq): c(r, 1 + i, a); c(r, 8 - i, b)
     return r
@@ -139,7 +141,7 @@ put(g, 29, WL); put(g, 32, xl('H2', 2)); put(g, 35, xl('H2', 'H')); put(g, 38, x
 g.update({44: 'VSEL_S', 45: 'LED2', 46: None, 47: None}); G[2] = g
 g = {i: f'ZA{i}' for i in range(15)}; put(g, 15, [f'ZD{i}' for i in range(8)])
 g.update({23: 'ZM2', 24: 'Z_RW', 25: 'Z_ROMSEL', 26: None, 27: None, 28: 'LINK_C', 29: 'PWM', 30: 'IRQ_G', 31: 'HIRQ',
-          32: 'PA10', 33: 'PA11', 34: 'PA12', 35: 'PA13', 36: 'RD_D', 37: 'NCE_D', 38: 'NA10_D', 39: 'PEV', 40: 'XSTAT0', 41: 'XSTAT1',
+          32: 'PA10', 33: 'PA11', 34: 'PA12', 35: 'PA13', 36: 'RD_D3', 37: 'NCE_D', 38: 'NA10_D', 39: 'PEV', 40: 'XSTAT0', 41: 'XSTAT1',
           42: 'IRQ4', 43: 'IRQ5', 44: 'VSEL_S', 45: 'LED3', 46: None, 47: None}); G[3] = g
 g = {i: f'CA{i}' for i in range(15)}; put(g, 15, [f'XD{i}' for i in range(8)])
 g.update({23: 'C_RW', 24: 'C_M2', 25: 'C_ROMSEL', 26: 'RSEL_D', 27: 'WS_D', 28: 'LINK_D', 29: None, 30: None, 31: None})
@@ -150,11 +152,17 @@ g.update({22: 'RD_D', 23: None, 24: 'P_WE', 25: None, 26: 'PWS_D', 27: 'PLINK_E'
 put(g, 29, WL); put(g, 32, xl('59', 5)); put(g, 35, xl('59', 9)); put(g, 38, xl('25', 5)); put(g, 41, xl('25', 2))
 g.update({44: 'IRQ5', 45: 'VSEL_S', 46: 'LED5', 47: None}); G[5] = g
 g = {}                                                    # U6 hub: no spare pin left (docs/13)
-put(g, 0, WL); put(g, 3, xl('H1', 1)); put(g, 6, xl('H1', 'H')); put(g, 9, xl('H2', 2)); put(g, 12, xl('H2', 'H'))
-g.update({15: 'LINK_F', 16: 'PLINK_F', 17: 'HIRQ', 18: 'SWCLK1', 19: 'SWDIO1', 20: 'SWCLK2', 21: 'SWDIO2', 22: 'SWCLK3', 23: 'SWDIO3',
-          24: 'nRST', 25: 'VSEL_S', 26: 'SD_CLK', 27: 'SD_CMD', 28: 'SD_DAT0', 29: 'SD_DAT1', 30: 'SD_DAT2', 31: 'SD_DAT3', 32: 'SD_CD',
-          33: 'HM2', 34: 'PWM2', 35: 'SWCLK4', 36: 'SWDIO4', 37: 'SWCLK5', 38: 'SWDIO5', 39: 'LED6', 40: 'V5S', 41: 'EXT', 42: 'VBUS_S',
-          43: 'SWCLK8', 44: 'SWDIO8', 45: 'SWCLK9', 46: 'SWDIO9', 47: 'QSPI6_SS1'}); G[6] = g
+# Each group on the side of the QFN that faces where it goes (U6 at 0 degrees; GPIO0-3 on the top side, 4-20 left,
+# 21-32 bottom, 33-47 right): the microSD on SPI0 (GPIO2 SCK, 3 TX, 4 RX) at the corner towards J3, LINK_F next to its
+# array RN25 (top left), WLINK and XLINK-H2 (U2) down the left side, XLINK-H1 (U1) and HIRQ (U3) at the bottom right,
+# the SWD of U5 on the left and of U1 on the right. The first layout (microSD at GPIO26-32 on SPI1, XLINK-H1 at 3-8)
+# crossed both groups round the hub and left 8 connections there that no finishing step could route (docs/13).
+g.update({0: 'LINK_F', 1: 'SD_CD', 2: 'SD_CLK', 3: 'SD_CMD', 4: 'SD_DAT0', 5: 'SD_DAT1', 6: 'SD_DAT2', 7: 'SD_DAT3'})
+put(g, 8, WL); put(g, 11, xl('H2', 2)); put(g, 14, xl('H2', 'H'))
+g.update({17: 'PLINK_F', 18: 'SWCLK5', 19: 'SWDIO5', 20: 'SWCLK2', 21: 'SWDIO2', 22: 'SWCLK3', 23: 'SWDIO3', 24: 'nRST', 25: 'VSEL_S'})
+put(g, 26, xl('H1', 1)); put(g, 29, xl('H1', 'H'))
+g.update({32: 'HIRQ', 33: 'HM2', 34: 'PWM2', 35: 'SWCLK4', 36: 'SWDIO4', 37: 'SWCLK1', 38: 'SWDIO1', 39: 'LED6', 40: 'V5S', 41: 'EXT',
+          42: 'VBUS_S', 43: 'SWCLK8', 44: 'SWDIO8', 45: 'SWCLK9', 46: 'SWDIO9', 47: 'QSPI6_SS1'}); G[6] = g
 for n, (link_out, link_in) in ((8, ('48', '4')), (9, ('59', '5'))):      # U8 / U9: compute only, GPIO0-31 and 46-47 spare
     g = {i: None for i in range(48)}; put(g, 32, xl(link_out, n)); put(g, 35, xl(link_out, link_in))
     put(g, 38, xl('89', n)); put(g, 41, xl('89', 17 - n)); g.update({44: 'VSEL_S', 45: f'LED{n}'}); G[n] = g
@@ -251,31 +259,43 @@ rarr(XA[1], HA, [(f'CPU_A{b}', f'CA{b}') for b in (3, 2, 1, 0)], 'RN1')
 rarr(XA[2], HA, [(f'CPU_A{b}', f'CA{b}') for b in (7, 6, 5, 4)], 'RN2')
 rarr(XA[3], HA, [(f'CPU_A{b}', f'CA{b}') for b in (11, 10, 9, 8)], 'RN3')
 rarr(XA[4], HA, [('M2', 'C_M2'), ('CPU_A12', 'CA12'), ('CPU_A13', 'CA13'), ('CPU_A14', 'CA14')], 'RN4')
-rarr(XA[5], HA, [(f'CPU_D{b}', f'CD{b}') for b in (3, 2, 1, 0)], 'RN5')           # U1 data
-rarr(XA[6], HA, [(f'CPU_D{b}', f'CD{b}') for b in (7, 6, 5, 4)], 'RN6')
+# CPU data: 680 ohm per bit for the three chips that can drive the bus (rev G: 1k). The timing check of the routed board
+# (rev G's model, extended by the read chain M2 -> /ROMSEL -> chip -> data bus): with 1k the bus settles in 80 ns typ and
+# 170 ns in the worst corner, and the worst-case chain ends 52 ns after the latest point for a 100 ns set-up time
+# (rev G in the same model: 70 ns after). 680 ohm takes 52 ns off the worst corner. Value only: same array footprint,
+# no change of the netlist (docs/13 "本体側の回路"). Two chips driving against each other still see 1.36k between them.
+CPU_DATA_R = '680 x4'
+rarr(XA[5], HA, [(f'CPU_D{b}', f'CD{b}') for b in (3, 2, 1, 0)], 'RN5', val=CPU_DATA_R)           # U1 data
+rarr(XA[6], HA, [(f'CPU_D{b}', f'CD{b}') for b in (7, 6, 5, 4)], 'RN6', val=CPU_DATA_R)
 ppu_x = [-(12.0 + 3.6 * i) for i in range(8)]
 rarr(ppu_x[0], HA, [('CIRAM_nCE', 'NCE_D'), ('CIRAM_nCE', 'NCE_D'), ('PPU_A6', 'PA6'), ('PPU_A5', 'PA5')], 'RN7')
 rarr(ppu_x[1], HA, [('PPU_A7', 'PA7'), ('PPU_A4', 'PA4'), ('PPU_A8', 'PA8'), ('PPU_A3', 'PA3')], 'RN8')
 rarr(ppu_x[2], HA, [('PPU_A9', 'PA9'), ('PPU_A2', 'PA2'), ('PPU_A10', 'PA10'), ('PPU_A1', 'PA1')], 'RN9')
 rarr(ppu_x[3], HA, [('PPU_A11', 'PA11'), ('PPU_A0', 'PA0'), ('PPU_A12', 'PA12'), ('PPU_A13', 'PA13')], 'RN10')
-def two(a, b, mod):      # one array for two PPU data bits of one chip: two elements in parallel per bit (500 ohm)
+def two(a, b, mod):      # one array for two PPU data bits of one chip: two elements in parallel per bit
     return [(f'PPU_D{a}', f'{mod}{a}')] * 2 + [(f'PPU_D{b}', f'{mod}{b}')] * 2
+# PPU data: 680 ohm arrays, 340 ohm per bit (rev G: 1k arrays, 500 ohm). The timing check of the routed 0.12 mm board
+# put the PPU read at 500 ohm 0 +- 4 ns from the /RD deadline and 28-38 ns past docs/13's target; docs/13's fallback
+# (333 ohm, 1k x3) needs four more arrays, 680 ohm x2 needs none (docs/13 "本体側の回路")
+PPU_DATA_R = '680 x4'
 PPU_PAIRS = ((0, 1), (2, 3), (6, 7), (4, 5))
-for i in range(2): rarr(ppu_x[4 + i], HA, two(*PPU_PAIRS[i], 'PD'), f'RN{11 + i}')                 # U2 data, bits 0-3
-rarr(XA[13], HA, [(f'CPU_D{b}', f'XD{b}') for b in (3, 2, 1, 0)], 'RN13')                         # U4 data
-rarr(XA[14], HA, [(f'CPU_D{b}', f'XD{b}') for b in (7, 6, 5, 4)], 'RN14')
-for i in range(2): rarr(ppu_x[6 + i], HA, two(*PPU_PAIRS[2 + i], 'PD'), f'RN{15 + i}')             # U2 data, bits 4-7
+for i in range(2): rarr(ppu_x[4 + i], HA, two(*PPU_PAIRS[i], 'PD'), f'RN{11 + i}', val=PPU_DATA_R)  # U2 data, bits 0-3
+rarr(XA[13], HA, [(f'CPU_D{b}', f'XD{b}') for b in (3, 2, 1, 0)], 'RN13', val=CPU_DATA_R)         # U4 data
+rarr(XA[14], HA, [(f'CPU_D{b}', f'XD{b}') for b in (7, 6, 5, 4)], 'RN14', val=CPU_DATA_R)
+for i in range(2): rarr(ppu_x[6 + i], HA, two(*PPU_PAIRS[2 + i], 'PD'), f'RN{15 + i}', val=PPU_DATA_R)   # U2 data, bits 4-7
 rarr(-8.4, HA, [('PPU_nRD', 'RD_D'), ('PPU_nWE', 'PWE_G'), ('CIRAM_A10', 'NA10_D'), ('CIRAM_A10', 'NA10_D')], 'RN17')
 # rev H: raw R/W and /ROMSEL to the 5 V tolerant pins (U1 / U4 GPIO23 / 25 on one node, U3 GPIO24 / 25 on its own),
 # PPU /WE to U2 / U5 GPIO24 (one element used), both by the fingers at the centre
 rarr(2.5, HA, [('CPU_RW', 'C_RW'), ('nROMSEL', 'C_ROMSEL'), ('CPU_RW', 'Z_RW'), ('nROMSEL', 'Z_ROMSEL')], 'RN31')
-rarr(-3.0, HA, [('PPU_nWE', 'P_WE'), (None, None), (None, None), (None, None)], 'RN32')
+# ... and PPU /RD to U3 alone (RD_D3): U3's branch off the shared RD_D node (U2, U5) takes about 8 pF off it, and the
+# PPU read waits on that node (about 2 ns per pF)
+rarr(-3.0, HA, [('PPU_nWE', 'P_WE'), ('PPU_nRD', 'RD_D3'), (None, None), (None, None)], 'RN32')
 # rev H: U3's own branch of the CPU bus (ZA1-ZA4, ZD1-ZD2), a row above the arrays of the same fingers, so that the
 # console-side stubs stay short (docs/13: U1 / U4's address node is not enlarged)
 HZ = 9.6
-rarr(7.7, HZ, [(f'CPU_D{b}', f'ZD{b}') for b in (3, 2, 1, 0)], 'ZD1')
+rarr(7.7, HZ, [(f'CPU_D{b}', f'ZD{b}') for b in (3, 2, 1, 0)], 'ZD1', val=CPU_DATA_R)
 rarr(11.6, HZ, [(f'CPU_A{b}', f'ZA{b}') for b in (3, 2, 1, 0)], 'ZA1')
-rarr(18.5, HZ, [(f'CPU_D{b}', f'ZD{b}') for b in (7, 6, 5, 4)], 'ZD2')
+rarr(18.5, HZ, [(f'CPU_D{b}', f'ZD{b}') for b in (7, 6, 5, 4)], 'ZD2', val=CPU_DATA_R)
 rarr(22.3, HZ, [(f'CPU_A{b}', f'ZA{b}') for b in (7, 6, 5, 4)], 'ZA2')
 rarr(28.5, HZ, [('M2', 'ZM2'), ('CPU_A12', 'ZA12'), ('CPU_A13', 'ZA13'), ('CPU_A14', 'ZA14')], 'ZA4')
 rarr(32.4, HZ, [(f'CPU_A{b}', f'ZA{b}') for b in (11, 10, 9, 8)], 'ZA3')
@@ -306,7 +326,7 @@ res('10k', -9.4, HD, 'CIRAM_nCE', '+3V3')                                       
 res('10k', -11.05, HD, '+5V', 'V5S'); res('10k', -12.7, HD, 'V5S', 'GND')               # console +5V / 2 on hub ADC0 (GPIO40), 10k / 10k
 nfet(-15.6, HD, 'PWE_G', 'PWS_D', 'Q6'); res('2.2k', -18.6, HD, 'PWS_D', '+3V3'); res('2.2k', -20.2, HD, 'PWS_D', '+3V3')   # PWS_D = NOT /WE, 1.1k
 clamp('D9', -23.3, HD, 'PWE_G')
-for i in range(4): rarr(ppu_x[4 + i] - 0.5, HD, two(PPU_PAIRS[i][1], PPU_PAIRS[i][0], 'YD'), f'RN{27 + i}')   # U5 data, 500 ohm
+for i in range(4): rarr(ppu_x[4 + i] - 0.5, HD, two(PPU_PAIRS[i][1], PPU_PAIRS[i][0], 'YD'), f'RN{27 + i}', val=PPU_DATA_R)   # U5 data, 340 ohm
 # +5V entry: pin 30 (B.Cu, x' -37.33) -> 0.8 mm trunk with C3 / C4 -> D10 (D_CON) -> V5_IN; pin 31 tied to +5V with C8
 cap('10u', C0805, -41.15, 6.7, '+5V', rot=0, ref='C3'); cap('10u', C0805, -41.15, 4.6, '+5V', rot=0, ref='C4')
 schottky('D10', -42.0, 9.0, '+5V', 'V5_IN', rot=180)                                   # D_CON: anode on the trunk (left), cathode right
@@ -408,10 +428,15 @@ def _core_island(xp, hc, rot):
 # Layers (docs/13 "層の役目", drawn from the back): F.Cu (6) back, main parts, QFN fan-out, USB; In1 (5) GND; In2 (4)
 # power: the +3V3 plane with +1V1 islands under each chip and at its supply, V5_IN at the two converter inputs;
 # In3 (3) signal; In4 (2) GND; B.Cu (1) front: passives, fingers 1-30, pads. F.Cu and B.Cu get a GND pour (OUTER_GND).
+# +1V1 islands that the routed board leaves without any via of +1V1 (island_vias.py finds no room for one): a floating
+# island would only cut a hole into the +3V3 plane, so the routed board drops it and so does this map ('OUT' = the
+# island at the +1V1 output). Filled in from the routed board (docs/13 "配線の結果"): U3's three DVDD pins and their
+# 100 nF are joined by 0.4 mm tracks on B.Cu, under the chip, with no room for a via into the island.
+ISLANDS_DROPPED = {'U3'}
 PLANES = {'In1.Cu': [('GND', 'board')],
-          'In2.Cu': [('+3V3', 'board')] + [('+1V1', _core_island(*CHIP_XY[u])) for u in sorted(CHIP_XY)]
-                    + [('+1V1', _rect(-20.8, 46.9, -13.2, 51.2)),                    # +1V1 output: L2, 2 x 22 uF
-                       ('V5_IN', _rect(-25.5, 51.6, -18.6, 56.0)),                   # +1V1 converter: VIN, EN, input 10 uF, trunk via
+          'In2.Cu': [('+3V3', 'board')] + [('+1V1', _core_island(*CHIP_XY[u])) for u in sorted(CHIP_XY) if u not in ISLANDS_DROPPED]
+                    + [('+1V1', _rect(-20.8, 46.9, -13.2, 51.2))] * ('OUT' not in ISLANDS_DROPPED)      # +1V1 output: L2, 2 x 22 uF
+                    + [('V5_IN', _rect(-25.5, 51.6, -18.6, 56.0)),                   # +1V1 converter: VIN, EN, input 10 uF, trunk via
                        ('V5_IN', _rect(11.8, 69.4, 24.6, 74.4))],                    # trunk via, D11, +3V3 converter: input 10 uF, VIN, EN
           'In4.Cu': [('GND', 'board')]}
 # Wider tracks for the supply nets the router draws (V5_IN from the trunk to the converter pads, VBUS, the switch nodes,
@@ -419,6 +444,10 @@ PLANES = {'In1.Cu': [('GND', 'board')],
 # +5V is not in it: its other connections (pin 31 / C8, RN18, the BAV99 cathodes, the 2.2k / 100k / 10k pull-ups and V5S)
 # end on 0.4-0.6 mm pads; the supply path itself is pre-routed below (as in rev G).
 NET_WIDTH = {'V5_IN': 0.5, 'VBUS': 0.5, 'SW_1V1': 0.5, 'SW_3V3': 0.5, '+1V1': 0.4}
+# After routing, widen_tracks.py widens +1V1 to 0.8 mm wherever the rule check allows, before the other supply nets and
+# the ground stitching take the room: the far chips' feed (U4: 100 mm of 0.4 mm track) sets the drop of the core supply
+# (docs/13 "配線の結果": 35 mV of the 39 mV budget at 0.4 mm with all eight chips at 240 MHz).
+WIDEN_FIRST = {'+1V1': 0.8}
 # Tracks and vias laid before routing (gen_pcb.py PREROUTE with a layer, PREROUTE_VIAS; the router keeps them):
 #  * +5V trunk (docs/13 "電源"): finger 30 is on B.Cu (x' -37.33). 0.8 mm up from the finger on B and left under the
 #    shoulder to two vias at x' -40.4 / -41.4 (left of finger 60's way up on F), then on F through the +5V pads of C4 and
@@ -532,12 +561,13 @@ LCSC = {
     '10u': ('C15850', 'CL21A106KAYNNNE 10uF 0805'), '22u': ('C45783', 'CL21A226MAQNNNE 22uF 0805'),
     '10k': ('C25804', '0603WAF1002T5E 10k 0603'), '2.2k': ('C4190', '0603WAF2201T5E 2.2k 0603'), '100k': ('C25803', '0603WAF1003T5E 100k 0603'),
     '10n': ('C57112', '0603B103K500NT 10nF 0603'), '1k x4': ('C20197', '4D03WGJ0102T5E 1k x4 0603'), '2N7002': ('C8545', '2N7002 SOT-23'),
+    '680 x4': ('C12035', '4D03WGJ0681T5E 680R x4 0603'),
     'BAV99': ('C2500', 'BAV99,215 SOT-23'), 'B5819W': ('C8598', 'B5819W SOD-123'), 'TS-1187A': ('C318884', 'TS-1187A-B-A-B'),
     'TYPE-C-31-M-12': ('C165948', 'HRO TYPE-C-31-M-12 USB-C'), '27': ('C25100', '0402WGF270JTCE 27R 0402'), 'TF-01A': ('C91145', 'HRO TF-01A microSD'),
     'KT-0603R': ('C2286', 'KT-0603R red LED 0603'),
 }
 LCSC_CLASS = {code: 'Basic' for code, _ in LCSC.values()}
-LCSC_CLASS.update({c_: 'Extended' for c_ in ('C42415655', 'C362368', 'C141836', 'C135262', 'C165948', 'C25100', 'C91145')})
+LCSC_CLASS.update({c_: 'Extended' for c_ in ('C42415655', 'C362368', 'C141836', 'C135262', 'C165948', 'C25100', 'C91145', 'C12035')})
 
 if __name__ == '__main__':
     from collections import Counter

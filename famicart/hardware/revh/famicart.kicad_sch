@@ -11525,7 +11525,7 @@
       )
     )
   )
-  (global_label "RD_D"
+  (global_label "RD_D3"
     (shape bidirectional)
     (at 433.84 103.83 0)
     (fields_autoplaced)
@@ -17890,7 +17890,7 @@
       )
     )
   )
-  (global_label "WL_CK"
+  (global_label "LINK_F"
     (shape bidirectional)
     (at 70 263.59 180)
     (fields_autoplaced)
@@ -17911,7 +17911,7 @@
       )
     )
   )
-  (global_label "WL_D0"
+  (global_label "SD_CD"
     (shape bidirectional)
     (at 70 266.13 180)
     (fields_autoplaced)
@@ -17932,7 +17932,7 @@
       )
     )
   )
-  (global_label "WL_D1"
+  (global_label "SD_CLK"
     (shape bidirectional)
     (at 70 268.67 180)
     (fields_autoplaced)
@@ -17953,7 +17953,7 @@
       )
     )
   )
-  (global_label "XH1_1_CK"
+  (global_label "SD_CMD"
     (shape bidirectional)
     (at 70 271.21 180)
     (fields_autoplaced)
@@ -17974,7 +17974,7 @@
       )
     )
   )
-  (global_label "XH1_1_D0"
+  (global_label "SD_DAT0"
     (shape bidirectional)
     (at 70 273.75 180)
     (fields_autoplaced)
@@ -17995,7 +17995,7 @@
       )
     )
   )
-  (global_label "XH1_1_D1"
+  (global_label "SD_DAT1"
     (shape bidirectional)
     (at 70 276.29 180)
     (fields_autoplaced)
@@ -18016,7 +18016,7 @@
       )
     )
   )
-  (global_label "XH1_H_CK"
+  (global_label "SD_DAT2"
     (shape bidirectional)
     (at 70 278.83 180)
     (fields_autoplaced)
@@ -18037,7 +18037,7 @@
       )
     )
   )
-  (global_label "XH1_H_D0"
+  (global_label "SD_DAT3"
     (shape bidirectional)
     (at 70 281.37 180)
     (fields_autoplaced)
@@ -18058,7 +18058,7 @@
       )
     )
   )
-  (global_label "XH1_H_D1"
+  (global_label "WL_CK"
     (shape bidirectional)
     (at 70 283.91 180)
     (fields_autoplaced)
@@ -18079,7 +18079,7 @@
       )
     )
   )
-  (global_label "XH2_2_CK"
+  (global_label "WL_D0"
     (shape bidirectional)
     (at 70 286.45 180)
     (fields_autoplaced)
@@ -18100,7 +18100,7 @@
       )
     )
   )
-  (global_label "XH2_2_D0"
+  (global_label "WL_D1"
     (shape bidirectional)
     (at 70 288.99 180)
     (fields_autoplaced)
@@ -18121,7 +18121,7 @@
       )
     )
   )
-  (global_label "XH2_2_D1"
+  (global_label "XH2_2_CK"
     (shape bidirectional)
     (at 70 291.53 180)
     (fields_autoplaced)
@@ -18142,7 +18142,7 @@
       )
     )
   )
-  (global_label "XH2_H_CK"
+  (global_label "XH2_2_D0"
     (shape bidirectional)
     (at 70 294.07 180)
     (fields_autoplaced)
@@ -18163,7 +18163,7 @@
       )
     )
   )
-  (global_label "XH2_H_D0"
+  (global_label "XH2_2_D1"
     (shape bidirectional)
     (at 70 296.61 180)
     (fields_autoplaced)
@@ -18184,7 +18184,7 @@
       )
     )
   )
-  (global_label "XH2_H_D1"
+  (global_label "XH2_H_CK"
     (shape bidirectional)
     (at 70 299.15 180)
     (fields_autoplaced)
@@ -18205,7 +18205,7 @@
       )
     )
   )
-  (global_label "LINK_F"
+  (global_label "XH2_H_D0"
     (shape bidirectional)
     (at 70 301.69 180)
     (fields_autoplaced)
@@ -18226,7 +18226,7 @@
       )
     )
   )
-  (global_label "PLINK_F"
+  (global_label "XH2_H_D1"
     (shape bidirectional)
     (at 70 304.23 180)
     (fields_autoplaced)
@@ -18247,7 +18247,7 @@
       )
     )
   )
-  (global_label "HIRQ"
+  (global_label "PLINK_F"
     (shape bidirectional)
     (at 70 306.77 180)
     (fields_autoplaced)
@@ -18268,7 +18268,7 @@
       )
     )
   )
-  (global_label "SWCLK1"
+  (global_label "SWCLK5"
     (shape bidirectional)
     (at 70 309.31 180)
     (fields_autoplaced)
@@ -18289,7 +18289,7 @@
       )
     )
   )
-  (global_label "SWDIO1"
+  (global_label "SWDIO5"
     (shape bidirectional)
     (at 70 311.85 180)
     (fields_autoplaced)
@@ -18436,7 +18436,7 @@
       )
     )
   )
-  (global_label "SD_CLK"
+  (global_label "XH1_1_CK"
     (shape bidirectional)
     (at 151.28 268.67 0)
     (fields_autoplaced)
@@ -18457,7 +18457,7 @@
       )
     )
   )
-  (global_label "SD_CMD"
+  (global_label "XH1_1_D0"
     (shape bidirectional)
     (at 151.28 271.21 0)
     (fields_autoplaced)
@@ -18478,7 +18478,7 @@
       )
     )
   )
-  (global_label "SD_DAT0"
+  (global_label "XH1_1_D1"
     (shape bidirectional)
     (at 151.28 273.75 0)
     (fields_autoplaced)
@@ -18499,7 +18499,7 @@
       )
     )
   )
-  (global_label "SD_DAT1"
+  (global_label "XH1_H_CK"
     (shape bidirectional)
     (at 151.28 276.29 0)
     (fields_autoplaced)
@@ -18520,7 +18520,7 @@
       )
     )
   )
-  (global_label "SD_DAT2"
+  (global_label "XH1_H_D0"
     (shape bidirectional)
     (at 151.28 278.83 0)
     (fields_autoplaced)
@@ -18541,7 +18541,7 @@
       )
     )
   )
-  (global_label "SD_DAT3"
+  (global_label "XH1_H_D1"
     (shape bidirectional)
     (at 151.28 281.37 0)
     (fields_autoplaced)
@@ -18562,7 +18562,7 @@
       )
     )
   )
-  (global_label "SD_CD"
+  (global_label "HIRQ"
     (shape bidirectional)
     (at 151.28 283.91 0)
     (fields_autoplaced)
@@ -18667,7 +18667,7 @@
       )
     )
   )
-  (global_label "SWCLK5"
+  (global_label "SWCLK1"
     (shape bidirectional)
     (at 151.28 296.61 0)
     (fields_autoplaced)
@@ -18688,7 +18688,7 @@
       )
     )
   )
-  (global_label "SWDIO5"
+  (global_label "SWDIO1"
     (shape bidirectional)
     (at 151.28 299.15 0)
     (fields_autoplaced)
@@ -30367,7 +30367,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 276.67 541.8 0)
       (effects
         (font
@@ -30612,7 +30612,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 344.29 541.8 0)
       (effects
         (font
@@ -31837,7 +31837,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 209.05 575.96 0)
       (effects
         (font
@@ -32082,7 +32082,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 276.67 575.96 0)
       (effects
         (font
@@ -32327,7 +32327,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 344.29 575.96 0)
       (effects
         (font
@@ -32572,7 +32572,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 411.91 575.96 0)
       (effects
         (font
@@ -32817,7 +32817,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 479.53 575.96 0)
       (effects
         (font
@@ -33062,7 +33062,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 73.81 610.12 0)
       (effects
         (font
@@ -33865,9 +33865,26 @@
     (at 274.13 613.2)
     (uuid 1505bc97-c502-5960-8914-0b82026ca724)
   )
-  (no_connect
-    (at 276.67 613.2)
+  (global_label "PPU_nRD"
+    (shape bidirectional)
+    (at 276.67 613.2 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
     (uuid df689756-2938-5c7f-9677-931148b74a69)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 276.67 613.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
   )
   (global_label "PPU_nWE"
     (shape bidirectional)
@@ -33911,9 +33928,26 @@
       )
     )
   )
-  (no_connect
-    (at 276.67 603.04)
+  (global_label "RD_D3"
+    (shape bidirectional)
+    (at 276.67 603.04 90)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left)
+    )
     (uuid 41a48b99-858c-5898-8d71-a5719eb2009f)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}"
+      (at 276.67 603.04 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
   )
   (no_connect
     (at 274.13 603.04)
@@ -33940,7 +33974,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 344.29 610.12 0)
       (effects
         (font
@@ -34430,7 +34464,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 479.53 610.12 0)
       (effects
         (font
@@ -36650,7 +36684,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 344.29 678.44 0)
       (effects
         (font
@@ -36895,7 +36929,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 411.91 678.44 0)
       (effects
         (font
@@ -37140,7 +37174,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 479.53 678.44 0)
       (effects
         (font
@@ -37385,7 +37419,7 @@
         (justify left)
       )
     )
-    (property "Value" "1k x4"
+    (property "Value" "680 x4"
       (at 73.81 712.6 0)
       (effects
         (font
