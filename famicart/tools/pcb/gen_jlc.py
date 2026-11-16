@@ -882,7 +882,58 @@ def orientation_notes(b, D):
     if arr: out.append('抵抗アレイ: ' + '、'.join(('%d 個すべて' % len(r) if len(arr) == 1 else _refs(r) + ' は') + '長い辺が%s' % k for k, r in sorted(arr.items())) + '。')
     sw = b.FindFootprintByReference('SW1')
     if sw: out.append('SW1: 足が%s。' % ('上と下' if span(sw) == '縦' else '左と右'))
+    if getattr(D, 'LCSC_CLASS', None):         # rev H on: every polarised kind of part on the Top side, read from the board
+        out = orientation_top(b, D, off, grouped, span)
     return '\n'.join('  %d. %s' % (i + 1, t) for i, t in enumerate(out))
+
+def orientation_top(b, D, off, grouped, span):
+    """The preview check list for designs whose parts are all placed by JLCPCB (rev H on): every kind of part on the Top
+    side that can be placed the wrong way round - QFN, SOIC-8, SOT-23-5, SOT-23, SOD-123, LED, edge connectors, switches,
+    resistor arrays - grouped by the direction of its pin 1 (or cathode, or opening) as seen in the notes' view. The Bottom
+    side carries only parts that work either way round (check_cpl.py checks the angles of both sides)."""
+    import pcbnew
+    top = lambda ref: b.FindFootprintByReference(ref) is not None and not b.FindFootprintByReference(ref).IsFlipped()
+    def kinds(val):
+        return [r for r, q in D.PARTS.items() if q[2].split(' (')[0] == val and top(r)]
+    def group(refs, fn):
+        g = {}
+        for r in refs: g.setdefault(fn(b.FindFootprintByReference(r)), []).append(r)
+        return sorted(g.items(), key=lambda kv: _refs(kv[1]))
+    out = []
+    qfn = kinds('RP2350B')
+    if qfn: out.append('RP2350B（QFN-80）: ' + '、'.join('%s は 1 番ピンの角が**%s**（1〜20 番ピンが%sの辺）' % (_refs(r), k[0], k[1])
+                                                    for k, r in group(qfn, lambda fp: (_dir(*off(fp, '1')), _dir(*off(fp, '10'))))) + '。')
+    def soic(fp):
+        d1, d4 = off(fp, '1'), off(fp, '4'); vertical = abs(d4[1] - d1[1]) > abs(d4[0] - d1[0])
+        row = ('右' if d1[0] > 0 else '左') if vertical else ('下' if d1[1] > 0 else '上')
+        run = ('上から下へ' if d4[1] > d1[1] else '下から上へ') if vertical else ('左から右へ' if d4[0] > d1[0] else '右から左へ')
+        return _dir(*d1), row, run
+    fl = kinds('W25Q128JVSIQ')
+    if fl: out.append('W25Q128JVSIQ（SOIC-8）: ' + '、'.join('%s は 1 番ピンの印が**%s**（1〜4 番ピンが%s側に%s並ぶ）' % ((_refs(r),) + k)
+                                                         for k, r in group(fl, soic)) + '。')
+    sot5 = kinds('TLV62569DBVR')
+    if sot5: out.append('TLV62569（SOT-23-5）: ' + '、'.join('%s は 1 番ピンが**%s**（足 3 本の側が%s）' % (_refs(r), k[0], k[1])
+                                                     for k, r in group(sot5, lambda fp: (_dir(*off(fp, '1')), _dir(*off(fp, '2'))))) + '。')
+    sot3 = kinds('2N7002') + kinds('BAV99')
+    if sot3: out.append('2N7002 と BAV99（SOT-23）: ' + '、'.join('%s は足 1 本の側が**%s**' % (_refs(r), k)
+                                                           for k, r in group(sot3, lambda fp: _dir(*off(fp, '3')))) + '。')
+    sch = kinds('B5819W')
+    if sch: out.append('B5819W（SOD-123）: ' + '、'.join('%s はカソードの帯が**%s**' % (_refs(r), k) for k, r in group(sch, lambda fp: _dir(*off(fp, '1')))) + '。')
+    leds = [r for r, q in D.PARTS.items() if q[1].startswith('LED') and top(r)]
+    if leds: out.append('LED: ' + '、'.join('%s はカソード（K）の印が**%s**' % (_refs(r), k) for k, r in group(leds, lambda fp: _dir(*off(fp, '1')))) + '。')
+    bb = b.GetBoardEdgesBoundingBox()
+    def opening(fp):
+        x, y = fp.GetPosition().x, fp.GetPosition().y
+        d = {'左': x - bb.GetX(), '右': bb.GetRight() - x, '上': y - bb.GetY(), '下': bb.GetBottom() - y}
+        return min(d, key=d.get)
+    edge = [r for r in getattr(D, 'EDGE_CONNECTORS', ()) if top(r)]
+    if edge: out.append('差し込み口: ' + '、'.join('%s は口が**%s**（基板の端）' % (_refs(r), k) for k, r in group(edge, opening)) + '。')
+    sws = kinds('TS-1187A')
+    if sws: out.append('タクトスイッチ: ' + '、'.join('%s は足が%s' % (_refs(r), '上と下' if k == '縦' else '左と右') for k, r in group(sws, span)) + '。')
+    arr = [r for r, q in D.PARTS.items() if 'R_Array' in q[3] and top(r)]
+    if arr: out.append('抵抗アレイ（Top）: ' + '、'.join(('%d 個すべて' % len(r) if len(set(map(lambda x: span(b.FindFootprintByReference(x)), arr))) == 1 else _refs(r) + ' は') + '長い辺が%s' % k
+                                                  for k, r in group(arr, span)) + '。')
+    return out
 
 def _boxes(b, layer, only=None):
     out = []
