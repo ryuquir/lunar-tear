@@ -92,9 +92,11 @@ def npth_hole(pad):
     return pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH or pad.GetDrillSize().x > 0
 
 def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clearance=0.2, pad_clearance=0.25, via_via=0.3, planes=False, net_width=None, plane_map=None,
-           own_via_padstacks=False):
+           own_via_padstacks=False, free=None):
     """plane_map: the design's PLANES (layer roles, set_layers); planes: B.Cu zones as Specctra planes (old option);
-    own_via_padstacks: existing vias of another size than via_dia / via_drill get a padstack of their own."""
+    own_via_padstacks: existing vias of another size than via_dia / via_drill get a padstack of their own;
+    free: a test item -> True for existing tracks / vias the router may rip up and route again (local_reroute.py);
+    all others are fixed ("protect") wiring, as always."""
     set_layers(board, plane_map)
     new_rules = plane_map is not None or own_via_padstacks   # rev H on; older designs keep their DSN byte-identical
     padstacks = {}
@@ -240,16 +242,17 @@ def export(board, path, outline_mm, via_dia=0.6, via_drill=0.3, track=0.25, clea
             cname = 'kicad_default' if abs(w - track) < 1e-9 else 'w%d' % int(round(w * 1000))
             out.append(f'    (class {cname} ' + ' '.join(q(n) for n in ns) + f' (circuit (use_via {q(via_name)})) (rule (width {U(w)}) (clearance {U(clearance)})))')
     out.append('  )')
-    # existing tracks/vias -> fixed ("protect") wiring so the autorouter keeps them
+    # existing tracks/vias -> fixed ("protect") wiring so the autorouter keeps them (except the ones `free` hands back)
     wires = []
     for t in board.GetTracks():
+        typ = '' if free is not None and free(t) else ' (type protect)'
         if t.GetClass() == 'PCB_VIA':
-            wires.append(f'    (via {q(via_of.get(t.m_Uuid.AsString(), via_name))} {U(ToMM(t.GetPosition().x))} {-U(ToMM(t.GetPosition().y))} (net {q(t.GetNetname())}) (type protect))')
+            wires.append(f'    (via {q(via_of.get(t.m_Uuid.AsString(), via_name))} {U(ToMM(t.GetPosition().x))} {-U(ToMM(t.GetPosition().y))} (net {q(t.GetNetname())}){typ})')
         elif t.GetClass() == 'PCB_TRACK':
             if t.GetLayer() not in dict(LAYERS): continue
             lname = lname_of(t.GetLayer())
             s_, e_ = t.GetStart(), t.GetEnd()
-            wires.append(f'    (wire (path {lname} {U(ToMM(t.GetWidth()))} {U(ToMM(s_.x))} {-U(ToMM(s_.y))} {U(ToMM(e_.x))} {-U(ToMM(e_.y))}) (net {q(t.GetNetname())}) (type protect))')
+            wires.append(f'    (wire (path {lname} {U(ToMM(t.GetWidth()))} {U(ToMM(s_.x))} {-U(ToMM(s_.y))} {U(ToMM(e_.x))} {-U(ToMM(e_.y))}) (net {q(t.GetNetname())}){typ})')
     out.append('  (wiring')
     out.extend(wires)
     out.append('  )')
