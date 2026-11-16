@@ -11,7 +11,7 @@ Seven footprints:
   Trimmer_Bourns_3362P RV1 BOCHEN 3362P-1-103 trimmer (C118956), Bourns 3362P pin pattern
   SW_DIP_x04_...     SW3  copy of KiCad's 4-way DIP switch with 1.0 mm holes for HRO DS-04RP (C92645)
   RaspberryPi_Pico2_SMD_TP7KeepOut  U25-U27  copy of KiCad's Pico SMD footprint with the Pico 2 TP7 keep-out
-  BreakLine_8h_D0.6mm_P0.9mm_KeepOut  MB*  mouse bites that join an edge rail to the board, with a 5 mm keep-out
+  BreakLine_7h_D0.6mm_P0.9mm_KeepOut  MB*  mouse bites that join an edge rail to the board, with a 5 mm keep-out
   ToolingHole_2.0mm_NPTH              TH*  the edge rails' tooling holes
 
 The keep-out areas carry names.  On a board whose project finds this library, KiCad 10.0.8's DRC does not report
@@ -35,7 +35,8 @@ CART = "Famicom_Cart_60"
 TRIM = "Trimmer_Bourns_3362P"
 DIP = "SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm"
 PICO = "RaspberryPi_Pico2_SMD_TP7KeepOut"
-BREAK = "BreakLine_8h_D0.6mm_P0.9mm_KeepOut"
+BREAK_D, BREAK_P, BREAK_N = 0.6, 0.9, 7      # mouse bites: hole, pitch, number of holes (sources in the edge rails section)
+BREAK = f"BreakLine_{BREAK_N}h_D{BREAK_D:g}mm_P{BREAK_P:g}mm_KeepOut"      # the name follows the values
 TOOL = "ToolingHole_2.0mm_NPTH"
 
 # The JLCPCB part each footprint was drawn for (tools/build.py checks that the circuit uses it with that part).
@@ -51,8 +52,9 @@ SILK_MIN = 0.15        # JLCPCB legend: 'Minimum Line Width ≥0.15mm', 'Minimum
 # ADC-016737-72-02; Sullins EBM28D; JLCPCB help 'JLCPCB Gold Fingers' and 'Instructions for Chamfering Gold Fingers'.
 # Origin: on the board tip line, at the centre of finger 1/A.  +X towards 28/f.  The board lies at negative Y.
 JAMMA_PITCH = 3.96                 # 106.92 between 1 and 28 meets JST 106.92 ± 0.05 and Hirose 106.98 ± 0.08
-JAMMA_SETBACK = 1.6                # no copper within 1.6 of the tip: JLCPCB's bevel reaches about 1.13 (30° on 1.6 mm); its ±5°, the
-                                   # board's ±10 % and the routing's ±0.2 add about 0.36 (root-sum-square); JLCPCB is asked (3d)
+JAMMA_SETBACK = 1.6                # no copper within 1.6 of the tip: JLCPCB's set-back is 1.13 for 30° on 1.6 mm, which is the bevel
+                                   # (0.93 for the 0.53 residual its order page shows) plus about 0.2; the angle's ±5°, the board's
+                                   # ±10 % and the outline's ±0.2 add about 0.33 (root-sum-square, 1.46); see jamma_setback_right()
 JAMMA_FINGER = (2.30, 8.40)        # width: Hirose 2.3 ± 0.1 (JST prints '2.3 ±0.35 (.091 ±.001)'); length: 1.6 to 10.0 from the tip
 JAMMA_FINGER_Y = -5.8              # centre; the mating contact touches 5.3 ± 0.4 from the tip (Hirose), well on the finger
 JAMMA_LETTERS = "ABCDEFHJKLMNPRSTUVWXYZabcdef"   # solder side; G, I, O, Q are not used (Hirose, Sullins)
@@ -283,26 +285,30 @@ def pico2():
 # ---------------------------------------------------------------------------------------------- edge rails
 # Sources (read 2026-11-16): JLCPCB capabilities, 'Mouse bites Panel': 'Panel board spacing: 1.6 or 2 mm', 'Recommended
 # diameter of mouse bite is 0.5mm-0.8mm; Recommended distance between the two mouse-bites is 0.2-0.3mm', 'For breakaway
-# with mouse-bites, the minimum width is 5mm', 'For SMT assembly at JLCPCB, use 5 mm tooling edges, 2 mm tooling holes,
-# and 1 mm fiducials centered at 3.85 mm from the panel edges'.  JLCPCB's mouse-bite guide (updated 2026-11-10): '5 to 8
-# holes with a diameter of 0.60 mm', 'hole edge to hole edge 0.35-0.4 mm. A minimum spacing of 0.3 mm'.  Holes of 0.6 that
-# are 0.3 apart meet both pages.  (KiCad's own Panelization library uses 0.5 holes at 0.85.)
-# Break line: 8 holes along Y, centred on the origin, spanning 6.9.  design/board.py puts the line on the body's side of
+# with mouse-bites, the minimum width is 5mm', 'Dimension tolerance for non-mouse-bite board edges: ±0.2 mm (regular
+# precision)', 'For SMT assembly at JLCPCB, use 5 mm tooling edges, 2 mm tooling holes, and 1 mm fiducials centered at
+# 3.85 mm from the panel edges'.  JLCPCB, 'Technical Guidance: Mouse Bite Panelization Guide' (updated 2026-11-10,
+# https://jlcpcb.com/blog/mouse-bite-panelization-guide): 'It is recommended to use sets of 5 to 8 holes with a diameter
+# of 0.60 mm each', 'The distance from hole edge to hole edge should be 0.35-0.4 mm. A minimum spacing of 0.3 mm should be
+# ensured for sufficient connection strength', 'It is recommended to add a set of mouse bites every 50-60 mm'.  Holes of
+# 0.6 that are 0.3 apart sit inside the capabilities page's 0.2-0.3 and at the guide's minimum, the only spacing both
+# pages allow.  (KiCad's own Panelization library uses 0.5 holes at 0.85.)
+# Break line: 7 holes along Y, centred on the origin, spanning 6.0.  design/board.py puts the line on the body's side of
 # the edge, the holes touching the edge from inside (0.3 in), so that the stubs left after breaking stay inside the
-# outline, and turns it by 180° on the right-hand rail.  The tab is wider than the line at the body's edge, so a thin web
-# is left at each end of the line; it breaks with the rest.  The keep-out (+X, the board's side) keeps parts, pads, vias,
-# tracks and pour 5 mm away from every hole, where snapping the rail bends the board; board rules make the DRC report
-# vias, pads and parts in it.
-BREAK_D, BREAK_P, BREAK_N = 0.6, 0.9, 8
+# outline, and turns it by 180° on the right-hand rail.  The slots' round ends bulge towards the end holes: on a 5.5 mm
+# tab, 7 holes leave 0.37 of board between an end hole and the slot (8 holes would leave 0.13, less than the routing's
+# ±0.2); tools/make_board.py measures it.  The keep-out (+X, the board's side) keeps parts, pads, vias, tracks and pour
+# 5 mm away from every hole, where snapping the rail bends the board; board rules make the DRC report vias, pads, tracks
+# and parts in it.
 BREAK_ZONE = "Breakaway tab: keep clear"
-BREAK_KEEP = (-0.3, 5.3, 8.5)              # from the board's edge (0.3 behind the holes) to 5 mm past them, and 5 mm past the end holes
+BREAK_KEEP = (-0.3, 5.3, 8.5)              # from the board's edge (0.3 behind the holes) to 5 mm past them, and 5.5 past the end holes
 TOOL_D = 2.0                               # tooling hole (JLCPCB: '2 mm tooling holes')
 
 
 def break_line():
-    fp = F.Footprint(BREAK, "Mouse bites joining an edge rail to the board (JLCPCB): 8 holes of 0.6 at 0.9 (0.3 apart), not plated, "
-                     "for a tab between 2 mm slots; keep-out 5 mm around the holes on the board's side (+X): no parts, pads, vias, "
-                     "tracks or pour",
+    fp = F.Footprint(BREAK, f"Mouse bites joining an edge rail to the board (JLCPCB): {BREAK_N} holes of {BREAK_D:g} at {BREAK_P:g} "
+                     f"({BREAK_P - BREAK_D:.1f} apart), not plated, for a tab between 2 mm slots; keep-out 5 mm around the holes on "
+                     "the board's side (+X): no parts, pads, vias, tracks or pour",
                      "mousebite break line edge rail tab JLCPCB",
                      attr=("board_only", "exclude_from_pos_files", "exclude_from_bom"), ref_at=(2.0, 0), value_at=(3.0, 0))
     for k in range(BREAK_N):
@@ -334,10 +340,18 @@ def insert_before_pads(tree, items):
 
 # ---------------------------------------------------------------------------------------------- board rules
 # Written by tools/build.py as kicad/fcjamma.kicad_dru.  Each rule was tried with kicad-cli 10.0.8, and tools/check_rules.py
-# proves on every build that it reports a probe placed where it forbids.  The JLCPCB rules (capabilities page, read
-# 2026-11-15: 'Pad To Silkscreen 0.15mm', 'Pad Hole-to-Hole Spacing 0.45mm', 'PTH annular ring ... Recommended 0.25 mm')
-# only make KiCad's defaults stricter; the silkscreen rule leaves out paste-only stencil openings, which are not copper.
-# The mouse bites (references MB*) are 0.3 apart, as JLCPCB recommends for them; the 0.45 rule is for pad holes.
+# proves on every build that it reports a probe placed where it forbids (for a value, one just inside the limit, and not
+# one just outside it), and that the footprints the circuit uses break none of them.  JLCPCB's values (capabilities page,
+# read 2026-11-15 and 2026-11-16): 'Pad To Silkscreen 0.15mm', 'Pad Hole-to-Hole Spacing 0.45mm', 'PTH annular ring
+# ≧0.20mm ... 2-layer: 1 oz: Recommended 0.25 mm or above; absolute minimum 0.18 mm', 'SMD pad to pad clearance (different
+# nets) 0.15mm'.
+# - silkscreen: paste-only stencil openings are not copper.  KiCad's test-point footprints (TP*) draw their circle 0.14
+#   from the pad; JLCPCB trims silkscreen near pads, so a test point's own circle is let through.
+# - pad holes: the mouse bites (MB*) are 0.3 apart (JLCPCB's mouse-bite values, edge rails above).
+# - rings: JLCPCB's recommended 0.25 on every through-hole pad but the mechanical ones (the USB-C shell's slots, 0.20 in
+#   KiCad's footprint), which keep JLCPCB's 0.20.
+# - SMD pads: 0.15 between pads of different nets (the TSOP RAMs leave 0.17); KiCad's default clearance of 0.2 stays for
+#   everything else.
 JAMMA_AREAS = ("JAMMA tip: no copper", "JAMMA contact band: fingers only", "JAMMA finger roots: no vias or pour")
 BOARD_RULES = """(version 1)
 
@@ -363,7 +377,7 @@ BOARD_RULES = """(version 1)
     (condition "A.Type == 'Via' && (A.intersectsCourtyard('U25') || A.intersectsCourtyard('U26') || A.intersectsCourtyard('U27')) && (A.Front_tenting == 'Not tented' || A.Back_tenting == 'Not tented')"))
 
 (rule "JLCPCB: silkscreen 0.15 from copper pads"
-    (condition "A.existsOnLayer('F.Cu') || A.existsOnLayer('B.Cu') || B.existsOnLayer('F.Cu') || B.existsOnLayer('B.Cu')")
+    (condition "(A.existsOnLayer('F.Cu') || A.existsOnLayer('B.Cu') || B.existsOnLayer('F.Cu') || B.existsOnLayer('B.Cu')) && !(A.memberOfFootprint('TP*') && B.memberOfFootprint('TP*'))")
     (constraint silk_clearance (min 0.15mm)))
 
 (rule "JLCPCB: pad holes 0.45 apart"
@@ -375,8 +389,16 @@ BOARD_RULES = """(version 1)
     (condition "A.intersectsArea('Breakaway tab: keep clear') && !A.memberOfFootprint('MB*')"))
 
 (rule "JLCPCB: annular ring of through-hole pads 0.25"
-    (condition "A.Type == 'Pad'")
+    (condition "A.Type == 'Pad' && A.Fabrication_Property != 'Mechanical pad'")
     (constraint annular_width (min 0.25mm)))
+
+(rule "JLCPCB: annular ring of mechanical pads 0.20"
+    (condition "A.Type == 'Pad' && A.Fabrication_Property == 'Mechanical pad'")
+    (constraint annular_width (min 0.20mm)))
+
+(rule "JLCPCB: SMD pads of different nets 0.15 apart"
+    (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Pad_Type == 'SMD' && B.Pad_Type == 'SMD'")
+    (constraint clearance (min 0.15mm)))
 """
 
 
@@ -482,15 +504,21 @@ def facts(exp, trees):
     fact("JAMMA: three keep-outs on both copper layers: no copper in the bevel (0-1.6), fingers only in the contact band "
          "(1.6-9.0), no vias or pour at the finger roots (9.0-11.0)", jamma_keepouts_right)
     def jamma_setback_right():
-        nominal = 1.13                                      # JLCPCB: the 30° bevel of a 1.6 mm board reaches about 1.13 mm
-        flat = 1.6 - 2 * nominal * math.tan(math.radians(30))           # the tip the bevel leaves (about 0.30)
-        reach = lambda t, a: (t - flat) / 2 / math.tan(math.radians(a))
-        angle = reach(1.6, 25) - nominal                    # ±5°: the shallow end reaches further
-        thick = reach(1.76, 30) - nominal                   # +10 % board
-        rss = nominal + math.sqrt(angle ** 2 + thick ** 2 + 0.2 ** 2)  # with the routed tip ±0.2
-        return rss <= JAMMA_SETBACK and all(p["y"] + p["h"] / 2 <= -JAMMA_SETBACK + 1e-9 for p in _one(exp, JAMMA).values())
-    fact("JAMMA: no copper within 1.6 of the tip, which covers JLCPCB's bevel (about 1.13 at 30° on 1.6 mm) with its ±5°, the "
-         "board's ±10 % and the routing's ±0.2 added as a root-sum-square (about 1.49)", jamma_setback_right)
+        # JLCPCB 'JLCPCB Gold Fingers': a 1.6 mm board needs about 1.13 of set-back at 30° and about 0.74 at 45°; its order page
+        # shows 'd (depth): 1.13mm / tr (residual thickness): 0.53mm' for 30° on 1.6 mm (reference/02_jamma_interface.md 1.3).
+        # The bevel that leaves 0.53 reaches (1.6 - 0.53) / 2 / tan 30° = 0.93; JLCPCB's 1.13 is that plus about 0.2, and the
+        # same 0.2 on the 45° bevel gives JLCPCB's 0.74: one model fits all three figures.
+        tr, d30, d45 = 0.53, 1.13, 0.74
+        reach = lambda t, a: (t - tr) / 2 / math.tan(math.radians(a))
+        margin = d30 - reach(1.6, 30)                           # about 0.20, which JLCPCB keeps on top of the bevel
+        fits = abs(reach(1.6, 45) + margin - d45) <= 0.01       # the 45° figure, from the same model
+        angle = reach(1.6, 25) - reach(1.6, 30)                 # ±5°: the shallow end reaches 0.22 further
+        thick = reach(1.76, 30) - reach(1.6, 30)                # +10 % board: 0.14 further
+        rss = d30 + math.sqrt(angle ** 2 + thick ** 2 + 0.2 ** 2)    # with the outline's ±0.2: about 1.46
+        return fits and rss <= JAMMA_SETBACK and all(p["y"] + p["h"] / 2 <= -JAMMA_SETBACK + 1e-9 for p in _one(exp, JAMMA).values())
+    fact("JAMMA: no copper within 1.6 of the tip: JLCPCB's set-back (1.13 at 30° on 1.6 mm, the bevel of its 0.53 residual plus about "
+         "0.2, which also gives its 0.74 at 45°) with the angle's ±5°, the board's ±10 % and the outline's ±0.2 added as a "
+         "root-sum-square (about 1.46)", jamma_setback_right)
 
     def jamma_courtyard_right():
         # written out again: 5 mm past the outer fingers' copper (finger 1 at 0, finger 28 at 27 x 3.96, half width 1.15)

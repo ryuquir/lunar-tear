@@ -6,8 +6,8 @@
 Dimensions are millimetres.  Origin: lower left corner of the bounding box, seen from the parts side with the
 JAMMA fingers pointing down; y = 0 is the tip of the fingers, x runs to the right, y upwards.
 Before it draws, the script checks that the large parts lie inside the outline and do not overlap each other,
-the mounting holes or the space the cartridge shell needs, and that no part or zone reaches into the JAMMA band or the
-keep-out beside a rail tab.  tools/build.py runs the same check and compares the dimensions with design/board.py.
+the mounting holes or the space the cartridge shell needs, that the through-hole parts keep 2.5 mm from the body's edges,
+and that no part or zone reaches into the JAMMA band or the keep-out beside a rail tab.  tools/build.py runs the same check and compares the dimensions with design/board.py.
 
 Where the fixed dimensions come from
 - JAMMA edge: research_notes/ファミコン JAMMA 基板 仕様調査/reference/02_jamma_interface.md section 1.2.3
@@ -76,8 +76,10 @@ ZONES = {
     "dumpL": (8.0, 133.0, 46.0, 25.0, "読み出し回路\n（CPU 側）"),
     "dumpR": (166.0, 133.0, 46.0, 25.0, "読み出し回路\n（PPU 側）"),
 }
-HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 100.0), (216.0, 100.0), (110.0, 121.0)]   # M3, 3.2 mm
+HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 99.0), (216.0, 99.0), (110.0, 121.0)]   # M3, 3.2 mm
 GUIDE_HOLES = [(52.0, 149.5), (168.0, 149.5)]   # for a bracket that holds the cartridge (not plated)
+THT = ("U1", "U6", "J8", "SW3", "RV1")         # the through-hole parts (README chapter 8: at least 2.5 mm from the board's edges)
+THT_EDGE = 2.5
 
 
 def check():
@@ -112,6 +114,11 @@ def check():
         problems.append("no room beside the tongue for the ears of the cabinet's connector")
     if PARTS["J10"][0] < 0.0:
         problems.append("the USB socket must not stick out over the edge: the edge rail is attached there")
+    for n in THT:
+        x, y, w, h = PARTS[n][:4]
+        d = min(x, BODY_W - (x + w), y - Y0, TOP - (y + h))
+        if d < THT_EDGE:
+            problems.append(f"{n} (through hole) is {d:.2f} mm from the body's edge, less than {THT_EDGE:g}")
     # the JAMMA band: J1's courtyard, to 15 mm above the tip and 5 mm past the outer fingers' copper
     band = (FINGER1_X - FINGER_W / 2 - 5.0, 0.0, 27 * PITCH + FINGER_W + 10.0, JAMMA_KEEP)
     keep = [(x0, t - TAB_KEEP_H, TAB_KEEP, 2 * TAB_KEEP_H) for t in TABS for x0 in (0.0, BODY_W - TAB_KEEP)]

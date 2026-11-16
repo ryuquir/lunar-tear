@@ -3,8 +3,9 @@
 tools/make_board.py turns this into kicad/fcjamma.kicad_pcb; tools/build.py runs it and checks the result.
 Parts other than the JAMMA edge (J1) are placed in stage 2-2, after the cartridge-slot sample and JLCPCB's answers.
 
-Frame (the same as mech/floorplan.py): millimetres, origin at the lower-left corner of the board's body (without the rails),
-seen from the parts side with the JAMMA fingers pointing down; y = 0 is the tip of the fingers, x to the right, y upwards.
+Frame (the same as mech/floorplan.py): millimetres, seen from the parts side with the JAMMA fingers pointing down; x = 0 is
+the body's left edge (the rails lie at negative x), y = 0 the tip of the fingers, x to the right, y upwards.  The origin is
+where the body's left edge meets the tip line; the body itself starts 12 mm higher, at Y0.
 In KiCad the board sits on the default A4 sheet with y downwards: x_k = ORIGIN[0] + x, y_k = ORIGIN[1] + (TOP - y).
 The drill/place (auxiliary) origin is the lower-left corner of the panel (the left rail's outer edge, the tip line), so that
 no coordinate is negative; the Gerbers, the drill files and the position file all use it (PLOT below, README chapter 8).
@@ -18,8 +19,11 @@ would do (to be redrawn then).
 Sources: research_notes/ファミコン JAMMA 基板 仕様調査/footprint_specs.md section 1 (the JAMMA tongue, key slot and
 shoulder, drawn here on Edge.Cuts because the footprint holds only the fingers), reference/02_jamma_interface.md 1.2.3
 (mounting holes: M3, at least 4 mm from the edges, none within 12 mm of the tip; 1.6 mm FR-4; ENIG with gold fingers,
-bevelled), mech/floorplan.py (body size, hole positions); JLCPCB capabilities, 'Mouse bites Panel' and 'How to Add Edge
-Rails and Fiducials' (read 2026-11-16; quoted in design/footprints.py at the break line).
+bevelled), mech/floorplan.py (body size, hole positions); JLCPCB (read 2026-11-16): the capabilities page, 'Mouse bites
+Panel', and the mouse-bite guide (both quoted in design/footprints.py at the edge rails); 'Design Optimization:
+Specifications for Adding Process Edges and Positioning Holes' (5 mm rails, 2 mm tooling holes 'Centered on process
+edge', 1 mm fiducials 3.85 from the edge; a tooling hole near a milling path weakens the rail); 'How to Add Edge Rails
+and Fiducials' (fiducial copper 3.35 from the board edge).
 """
 import math
 
@@ -41,26 +45,32 @@ RAIL_GAP = 2.0                                   # routed slot between rail and 
 PANEL_X = (-RAIL_GAP - RAIL_W, BODY_W + RAIL_GAP + RAIL_W)    # -7 .. 227: the rails run the full height, 0 .. TOP
 TAB_W = 5.5                                      # at its narrowest; JLCPCB: 'For breakaway with mouse-bites, the minimum width is
                                                  # 5mm', and the slots' ends may lie 0.2 off (routing ±0.2)
-# tab centres (y), the same on both sides: clear of the mounting holes (y 16, 100, 158), of U27 at the left edge (y 60-83),
+# tab centres (y), the same on both sides: clear of the mounting holes (y 16, 99, 158), of U27 at the left edge (y 60-83),
 # of the USB-C socket J10 (y 85-94), which faces the left slot, and of the IC sockets' pins; their keep-outs (5 mm around
-# the mouse bites) stay clear of all of these.  JLCPCB's guide asks for a set every 50-60 mm: here 16-64 mm apart, the
-# 64 mm gap on the left being where U27 and J10 sit.
+# the mouse bites) stay clear of all of these.  JLCPCB's guide asks for a set every 50-60 mm: here 15-64 mm apart, the
+# 64 mm gap on the left being where U27 and J10 sit.  The first tab could go about 4 mm lower before its keep-out meets
+# H1's courtyard (y 16 + 3.45); the rail's free end below it would then be about 25 mm instead of 29.
 TABS = (32.0, 48.0, 112.0, 130.0, 145.0)
 BITE_INSET = FPL.BREAK_D / 2                     # mouse-bite line on the body's side, the holes touching the edge from inside
 BREAK_FOOTPRINT = "fcjamma:" + FPL.BREAK
 TOOLING_FOOTPRINT = "fcjamma:" + FPL.TOOL
-# 2.0 mm tooling holes centred on the rails, 5 mm from their ends (JLCPCB: near the corners, as far apart as possible)
+# 2.0 mm tooling holes centred on the rails (JLCPCB's figure: 'Centered on process edge', which leaves 1.5 mm of rail on each
+# side), 5 mm from the rails' ends: near the panel's corners, our choice (JLCPCB gives no position).  Below the first tab the
+# rail's inner edge is routed: JLCPCB warns that a tooling hole next to a milling path weakens the rail, so the holes keep
+# the same 1.5 mm there as on the outer edge, and JLCPCB is asked (support question 3a).
 TOOLING = [(PANEL_X[0] + RAIL_W / 2, 5.0), (PANEL_X[0] + RAIL_W / 2, TOP - 5.0),
            (PANEL_X[1] - RAIL_W / 2, 5.0), (PANEL_X[1] - RAIL_W / 2, TOP - 5.0)]
 
 # M3, 3.2 mm, not plated (KiCad MountingHole_3.2mm_M3): the four corners, two beside the IC sockets and one between them,
 # where pressing a chip into its socket (nearly 10 kg) needs the board to be supported.
 HOLE_FOOTPRINT = "MountingHole:MountingHole_3.2mm_M3"
-HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 100.0), (216.0, 100.0), (110.0, 121.0)]
+HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 99.0), (216.0, 99.0), (110.0, 121.0)]
 
 # Fiducials for the assembly machine, on the rails: 1 mm copper, 2 mm mask opening, centred 3.85 from the panel's outer
-# edge (JLCPCB's figures; the copper then keeps its 3.35 mm from the edge); three, not symmetric.  They sit level with the
-# lowest and the highest tab, where the rail is held, not on the rails' free ends, and away from the slots' edges.
+# edge (JLCPCB's figures; the copper then keeps its 3.35 mm from the edge, which the conveyor's clamps hold); three, not
+# symmetric.  They sit level with the lowest and the highest tab, where the rail is held, not on the rails' free ends.
+# There the nearest routed edge is the round end of a slot beside the tab: 2.82 from the copper, 2.32 from the mask
+# opening (nothing clamps there; JLCPCB is asked, support question 3a).
 FIDUCIAL_FOOTPRINT = "Fiducial:Fiducial_1mm_Mask2mm"
 FIDUCIALS = [(PANEL_X[0] + 3.85, TABS[0]), (PANEL_X[0] + 3.85, TABS[-1]), (PANEL_X[1] - 3.85, TABS[-1])]
 
@@ -193,7 +203,7 @@ def outline():
 
 
 def break_lines():
-    """(x, y, rotation) of each line of mouse bites: 0.25 inside the body's edge, at each tab, on both sides."""
+    """(x, y, rotation) of each line of mouse bites: BITE_INSET (0.3) inside the body's edge, at each tab, on both sides."""
     return [(x, t, rot) for t in TABS for x, rot in ((BITE_INSET, 0.0), (BODY_W - BITE_INSET, 180.0))]
 
 

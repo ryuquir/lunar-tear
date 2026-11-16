@@ -22,7 +22,7 @@
     (condition "A.Type == 'Via' && (A.intersectsCourtyard('U25') || A.intersectsCourtyard('U26') || A.intersectsCourtyard('U27')) && (A.Front_tenting == 'Not tented' || A.Back_tenting == 'Not tented')"))
 
 (rule "JLCPCB: silkscreen 0.15 from copper pads"
-    (condition "A.existsOnLayer('F.Cu') || A.existsOnLayer('B.Cu') || B.existsOnLayer('F.Cu') || B.existsOnLayer('B.Cu')")
+    (condition "(A.existsOnLayer('F.Cu') || A.existsOnLayer('B.Cu') || B.existsOnLayer('F.Cu') || B.existsOnLayer('B.Cu')) && !(A.memberOfFootprint('TP*') && B.memberOfFootprint('TP*'))")
     (constraint silk_clearance (min 0.15mm)))
 
 (rule "JLCPCB: pad holes 0.45 apart"
@@ -34,5 +34,13 @@
     (condition "A.intersectsArea('Breakaway tab: keep clear') && !A.memberOfFootprint('MB*')"))
 
 (rule "JLCPCB: annular ring of through-hole pads 0.25"
-    (condition "A.Type == 'Pad'")
+    (condition "A.Type == 'Pad' && A.Fabrication_Property != 'Mechanical pad'")
     (constraint annular_width (min 0.25mm)))
+
+(rule "JLCPCB: annular ring of mechanical pads 0.20"
+    (condition "A.Type == 'Pad' && A.Fabrication_Property == 'Mechanical pad'")
+    (constraint annular_width (min 0.20mm)))
+
+(rule "JLCPCB: SMD pads of different nets 0.15 apart"
+    (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Pad_Type == 'SMD' && B.Pad_Type == 'SMD'")
+    (constraint clearance (min 0.15mm)))

@@ -21,10 +21,12 @@ Steps
  8. write out/ (BOM with sourcing, net list, reports, cost estimate)
  9. out/footprints/: KiCad reads the board's footprints back (tools/check_footprints.py, with the
     system Python's pcbnew) and draws them (SVG), the 1:1 check print of the cartridge slot (PDF)
-    and an overview picture (PNG)
-10. kicad/fcjamma.kicad_pcb from design/board.py (tools/make_board.py): outline, the JAMMA edge,
-    mounting holes, fiducials, stackup; its checks, KiCad's DRC with the board rules, and the
-    drawings in out/board/
+    and an overview picture (PNG); the board rules are proved on test boards (tools/check_rules.py)
+10. the board from design/board.py (tools/make_board.py): outline, edge rails, the JAMMA edge,
+    mounting holes, tooling holes, fiducials, stackup; its checks, KiCad's DRC with the board rules
+    and the schematic parity, run on a copy of kicad/.  Only when the whole build has no problem
+    does it become kicad/fcjamma.kicad_pcb, with its drawings and DRC summary in out/board/;
+    otherwise it is left in out/board/fcjamma_failed.kicad_pcb
 """
 import csv
 import datetime
@@ -550,7 +552,7 @@ def write_outputs(design, outdir):
                 w.writerow([p.sheet, p.ref, p.value, num, nm, net if net is not None else "(NC)"])
 
 
-def footprint_outputs(expected, env, kdir, odir, problems, warnings):
+def footprint_outputs(expected, env, kdir, odir, netlist, problems, warnings):
     """kicad/fcjamma.kicad_dru and out/footprints/: KiCad's read-back of the board's footprints, the proof that the board
     rules report what the keep-outs forbid, the footprints' drawings and the cartridge check print.  An output that
     cannot be made is left as it was (and the build says so), never deleted."""
@@ -568,7 +570,7 @@ def footprint_outputs(expected, env, kdir, odir, problems, warnings):
         if rc:
             problems += [f"footprint read back by KiCad: {x}" for x in out.splitlines()[:-1]] or [f"footprint read-back failed: {out[-300:]}"]
         with tempfile.TemporaryDirectory(prefix="fcjamma-rules-") as work:
-            rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "check_rules.py"), kdir, os.path.join(work, "board")], env, ROOT)
+            rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "check_rules.py"), kdir, os.path.join(work, "board"), netlist], env, ROOT)
         lines.append(out.splitlines()[-1] if out else "no output from check_rules.py")
         if rc:
             problems += [f"board rule: {x}" for x in out.splitlines()[:-1]] or [f"board-rule check failed: {out[-300:]}"]
@@ -660,7 +662,9 @@ def check_plan(problems):
                        ("pitch", FPL.JAMMA_PITCH, plan.PITCH), ("finger width", FPL.JAMMA_FINGER[0], plan.FINGER_W),
                        ("start of the fingers", FPL.JAMMA_SETBACK, plan.FINGER_Y[0]), ("end of the fingers", finger_top, plan.FINGER_Y[1]),
                        ("parts keep-out above the tip", -FPL.JAMMA_TOP, plan.JAMMA_KEEP), ("rail width", BRD.RAIL_W, plan.RAIL_W),
-                       ("slot beside the rails", BRD.RAIL_GAP, plan.RAIL_GAP), ("tab width", BRD.TAB_W, plan.TAB_W)):
+                       ("slot beside the rails", BRD.RAIL_GAP, plan.RAIL_GAP), ("tab width", BRD.TAB_W, plan.TAB_W),
+                       ("tab keep-out's depth from the body's edge", BRD.BITE_INSET + FPL.BREAK_KEEP[1], plan.TAB_KEEP),
+                       ("tab keep-out's half height", FPL.BREAK_KEEP[2], plan.TAB_KEEP_H)):
         if abs(a - b) > 1e-9:
             problems.append(f"design/board.py and mech/floorplan.py disagree on the {what}: {a:.6g} and {b:.6g}")
     if [tuple(h) for h in BRD.HOLES] != [tuple(h) for h in plan.HOLES]:
@@ -739,38 +743,55 @@ def _board_outputs(design, env, kdir, odir, problems, warnings):
         "break_footprint": BRD.BREAK_FOOTPRINT, "break_lines": [list(k((x, y))) + [rot] for x, y, rot in BRD.break_lines()],
         "j1": {"footprint": FPL.JAMMA, "value": j1.value, "at": list(k(BRD.J1_AT)), "path": paths["J1"], "nets": nets,
                "fields": fields},
-        "failed_path": os.path.join(odir, "board", "fcjamma_failed.kicad_pcb"),
     }
-    with tempfile.TemporaryDirectory(prefix="fcjamma-board-") as tmp:
-        sp = os.path.join(tmp, "board.json")
-        fp_sheets.write_json(spec, sp)
-        rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "make_board.py"), kdir, sp], env, ROOT)
-    lines = out.splitlines() or ["no output from make_board.py"]
-    if rc:
-        problems += [x for x in lines if x.startswith(("board check failed:", "make_board.py stopped:"))] or [f"make_board.py failed: {lines[-1]}"]
-        return lines[-1]
-    summary = [lines[-1]]
     pcb = os.path.join(kdir, "fcjamma.kicad_pcb")
     bdir = os.path.join(odir, "board")
+    failed_path = os.path.join(bdir, "fcjamma_failed.kicad_pcb")
+    # The new board is made and checked in a copy of kicad/ (KiCad's DRC and the schematic parity need the project, the
+    # rules, the footprint library and the schematic beside it).  It replaces kicad/fcjamma.kicad_pcb only when the whole
+    # build has no problem, so that kicad/ and out/board/ always hold the last board that passed every check; a board
+    # that fails is left in out/board/fcjamma_failed.kicad_pcb to be looked at.
+    with tempfile.TemporaryDirectory(prefix="fcjamma-board-") as tmp:
+        cdir = os.path.join(tmp, "kicad")
+        shutil.copytree(kdir, cdir, ignore=shutil.ignore_patterns("fcjamma.kicad_pcb", "*.kicad_prl", "~*.lck", "*-backups",
+                                                                   "fp-info-cache", "_autosave-*", "#auto_saved_files#", "*-bak"))
+        cand = os.path.join(cdir, "fcjamma.kicad_pcb")
+        sp = os.path.join(tmp, "board.json")
+        fp_sheets.write_json(spec, sp)
+        rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "make_board.py"), kdir, sp, cand], env, ROOT)
+        lines = out.splitlines() or ["no output from make_board.py"]
+        summary, report = [lines[-1]], None
+        if rc:
+            problems += [x for x in lines if x.startswith(("board check failed:", "make_board.py stopped:"))] or [f"make_board.py failed: {lines[-1]}"]
+        else:
+            placed = set(re.findall(r'\(property "Reference" "([^"]+)"', open(cand, encoding="utf-8").read()))
+            raw = os.path.join(tmp, "drc.json")
+            rc, out = run(["kicad-cli", "pcb", "drc", "--schematic-parity", "--severity-all", "--format", "json", "-o", raw, cand], env, cdir)
+            data = json.load(open(raw, encoding="utf-8")) if (rc == 0 and os.path.exists(raw)) else None
+            if data is None:
+                problems.append("kicad-cli pcb drc failed: " + out[-300:])
+            else:
+                report = drc_summary(data, cand, placed)
+                problems += [f"board DRC: {x.get('type')}: {x.get('description', '')[:140]}" for x in report["violations"]]
+                problems += [f"board and schematic differ: {x.get('type')}: {x.get('description', '')[:100]} "
+                             f"({'; '.join(i.get('description', '')[:60] for i in x.get('items', []))})" for x in report["schematic_parity"]]
+                summary.append(f"DRC {len(report['violations'])} violations, {sum(n['connections'] for n in report['to_route'].values())} "
+                               f"connections still to route; schematic parity: {len(report['schematic_parity'])} differences, "
+                               f"{len(report['not_on_the_board_yet'])} parts not placed yet")
+        if problems or report is None:
+            if os.path.exists(cand):
+                os.makedirs(bdir, exist_ok=True)
+                shutil.copy(cand, failed_path)
+                summary.append("this board was not taken: it is in out/board/fcjamma_failed.kicad_pcb, and kicad/ and out/board/ "
+                               "keep the last board that passed")
+            return "; ".join(summary)
+        shutil.copy(cand, pcb)
     os.makedirs(bdir, exist_ok=True)
-    placed = set(re.findall(r'\(property "Reference" "([^"]+)"', open(pcb, encoding="utf-8").read()))
-    with tempfile.TemporaryDirectory(prefix="fcjamma-drc-") as tmp:
-        raw = os.path.join(tmp, "drc.json")
-        rc, out = run(["kicad-cli", "pcb", "drc", "--schematic-parity", "--severity-all", "--format", "json", "-o", raw, pcb], env, kdir)
-        data = json.load(open(raw, encoding="utf-8")) if (rc == 0 and os.path.exists(raw)) else None
-    if data is None:
-        problems.append("kicad-cli pcb drc failed: " + out[-300:])
-    else:
-        report = drc_summary(data, pcb, placed)
-        problems += [f"board DRC: {x.get('type')}: {x.get('description', '')[:140]}" for x in report["violations"]]
-        problems += [f"board and schematic differ: {x.get('type')}: {x.get('description', '')[:100]} "
-                     f"({'; '.join(i.get('description', '')[:60] for i in x.get('items', []))})" for x in report["schematic_parity"]]
-        summary.append(f"DRC {len(report['violations'])} violations, {sum(n['connections'] for n in report['to_route'].values())} "
-                       f"connections still to route; schematic parity: {len(report['schematic_parity'])} differences, "
-                       f"{len(report['not_on_the_board_yet'])} parts not placed yet")
-        with open(os.path.join(bdir, "drc.json"), "w", encoding="utf-8") as f:
-            json.dump(report, f, indent=1, sort_keys=True, ensure_ascii=False)
-            f.write("\n")
+    if os.path.exists(failed_path):
+        os.remove(failed_path)
+    with open(os.path.join(bdir, "drc.json"), "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=1, sort_keys=True, ensure_ascii=False)
+        f.write("\n")
     with tempfile.TemporaryDirectory(prefix="fcjamma-boardsvg-") as tmp:
         svg = os.path.join(tmp, "board.svg")
         rc, out = run(["kicad-cli", "pcb", "export", "svg", "--mode-single", "--page-size-mode", "2", "--exclude-drawing-sheet",
@@ -866,7 +887,7 @@ def main():
         write_outputs(design, odir)
     except Exception as e:      # for example a part that is missing from the data files; the list below says which
         problems.append(f"writing out/ failed: {type(e).__name__}: {e}")
-    fp_line = footprint_outputs(fp_expected, env, kdir, odir, problems, warnings)
+    fp_line = footprint_outputs(fp_expected, env, kdir, odir, os.path.join(odir, f"{design.name}.net"), problems, warnings)
     board_line = board_outputs(design, env, kdir, odir, problems, warnings)
 
     by = {}

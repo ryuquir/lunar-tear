@@ -8,3 +8,7 @@ out/*.png
 !tools/
 kicad/~*.lck
 out/board/fcjamma_failed.kicad_pcb
+# KiCad's own autosave and backup files, if the board is opened in KiCad
+kicad/_autosave-*
+kicad/#auto_saved_files#
+kicad/*-bak

@@ -1,10 +1,12 @@
 #!/usr/bin/python3
-"""Build kicad/fcjamma.kicad_pcb from design/board.py, then read it back and check it.
+"""Build the board file from design/board.py, then read it back and check it.
 
-    /usr/bin/python3 tools/make_board.py <kicad project folder> <board.json>
+    /usr/bin/python3 tools/make_board.py <kicad project folder> <board.json> <board file to write>
 
 tools/build.py writes board.json from design/board.py, the circuit and KiCad's netlist (J1's nets, path and fields) and runs
-this script with the system Python, which has KiCad's pcbnew module.  The board holds, so far: the outline (body, JAMMA
+this script with the system Python, which has KiCad's pcbnew module.  The board is written whether or not it passes;
+tools/build.py then runs KiCad's DRC and the schematic parity on it and puts it into kicad/ only when the whole build has
+no problem (otherwise into out/board/fcjamma_failed.kicad_pcb).  The board holds, so far: the outline (body, JAMMA
 tongue and key slot, and the edge rails, joined by mouse bites), the JAMMA edge J1 placed on the tongue, the mounting holes,
 the rails' tooling holes and fiducials, the stackup (ENIG, bevelled edge connector), via tenting, the plot settings, the
 title block and the drill/place origin.  The other parts come in stage 2-2.  Every item gets an identifier derived from its
@@ -51,9 +53,15 @@ FINGER = (2.30, 1.6, 10.0)      # width; copper from 1.6 (JLCPCB's 30 ± 5° bev
 UNWIRED = {"5", "6", "11", "E", "F", "M"}       # JAMMA positions this board leaves open (README chapter 8)
 RAIL = 5.0                      # JLCPCB: 5 mm tooling edges
 RAIL_SLOT = (1.6, 2.0)          # JLCPCB mouse-bite panels: board spacing 1.6 or 2 mm
-TAB = 5.0                       # JLCPCB: a breakaway tab with mouse bites at least 5 mm wide
+ROUTING = 0.2                   # JLCPCB: routed board edges ±0.2 (regular precision)
+TAB = 5.0                       # JLCPCB: a breakaway tab with mouse bites at least 5 mm wide,
+TAB_MIN = TAB + 2 * ROUTING     # and either slot end may lie 0.2 off: 5.4 as drawn
+BITE_WEB = 0.3                  # JLCPCB's mouse-bite guide: at least 0.3 of board between holes; kept between an end hole and the slot
 TOOLING_HOLE = 2.0              # JLCPCB: 2 mm tooling holes
-FIDUCIAL_EDGE = 3.35            # JLCPCB: fiducial copper at least 3.35 mm from the board's edge
+HOLE_WALL = 1.0                 # our choice: no hole's wall within 1 mm of a routed edge (JLCPCB: a tooling hole near a milling path
+                                # weakens the rail); the tooling holes keep 1.5, the mounting holes 2.4
+FIDUCIAL_EDGE = 3.35            # JLCPCB: fiducial copper at least 3.35 mm from the board's edge (where the conveyor holds the panel)
+FIDUCIAL_CLEAR = 1.0            # our choice: nothing routed or drilled within 1 mm of a fiducial's mask opening
 HOLE_EDGE = 4.0                 # mounting holes at least 4 mm from the edges (02_jamma_interface.md 1.2.3)
 HOLE_TIP = 12.0                 # and not within 12 mm of the tip
 PANEL_MAX = 250.0               # JLCPCB: PCBA panels up to 250 x 250 mm
@@ -218,6 +226,25 @@ def edge_dist(contours, p):
     return min(seg_dist(p, a, b) for pts in contours for a, b in zip(pts, pts[1:] + pts[:1]))
 
 
+def _ccw_within(a, lo, hi):
+    """Is the angle a on the counter-clockwise sweep from lo to hi?"""
+    return (a - lo) % (2 * math.pi) <= (hi - lo) % (2 * math.pi) + 1e-12
+
+
+def arc_dist(p, c, r, s, m, e):
+    """Distance from p to the arc about c of radius r from s through m to e (exact, not the polygon's chords)."""
+    ang = lambda q: math.atan2(q[1] - c[1], q[0] - c[0])
+    a0, am, a1, ap = ang(s), ang(m), ang(e), ang(p)
+    on = _ccw_within(ap, a0, a1) if _ccw_within(am, a0, a1) else _ccw_within(ap, a1, a0)
+    return abs(math.dist(p, c) - r) if on else min(math.dist(p, s), math.dist(p, e))
+
+
+def outline_dist(items, p):
+    """Distance from p to the nearest Edge.Cuts line or arc."""
+    return min([seg_dist(p, it[1], it[2]) for it in items if it[0] == "line"]
+               + [arc_dist(p, *it[1:6]) for it in items if it[0] == "arc"] or [float("inf")])
+
+
 def facts(path, spec):
     """Read the board back and measure it."""
     board = pcbnew.LoadBoard(path)
@@ -264,13 +291,29 @@ def facts(path, spec):
     n_slots = 2 * (len(BRD.TABS) - 1)
     holes_n = poly.HoleCount(0) if ok and poly.OutlineCount() else 0
     fact(ok and poly.OutlineCount() == 1 and holes_n == n_slots,
-         f"the board is one piece: one outer contour and {n_slots} slots between the rails and the body ({holes_n} slots)")
+         f"the board is one piece: one outer contour and {n_slots} slots between the rails and the body "
+         f"({poly.OutlineCount() if ok else 0} contours, {holes_n} slots)")
+    # the Edge.Cuts items themselves, in the design frame, for exact distances and the shape of the corners
+    items, others = [], 0
+    for d in board.GetDrawings():
+        if d.GetLayer() != pcbnew.Edge_Cuts:
+            continue
+        pt = lambda q: design((mm(q.x), mm(q.y)))
+        if d.GetShape() == pcbnew.SHAPE_T_SEGMENT:
+            items.append(("line", pt(d.GetStart()), pt(d.GetEnd())))
+        elif d.GetShape() == pcbnew.SHAPE_T_ARC:
+            items.append(("arc", pt(d.GetCenter()), mm(d.GetRadius()), pt(d.GetStart()), pt(d.GetArcMid()), pt(d.GetEnd()),
+                          abs(d.GetArcAngle().AsDegrees())))
+        else:
+            others += 1
+    fact(others == 0, f"the outline is drawn with lines and arcs only ({others} other shapes)")
     bb = poly.BBox() if ok else None
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
     j1 = fps.get("J1")
     if bb:
         fact(abs(mm(bb.GetLeft()) - aox) < 1e-3 and abs(mm(bb.GetBottom()) - aoy) < 1e-3,
-             "the drill/place origin is the panel's lower-left corner")
+             f"the drill/place origin is the panel's lower-left corner (origin {aox:.3f}, {aoy:.3f}; corner "
+             f"{mm(bb.GetLeft()):.3f}, {mm(bb.GetBottom()):.3f} on the sheet)")
         w, h = mm(bb.GetWidth()), mm(bb.GetHeight())
         fact(abs(w - (BRD.PANEL_X[1] - BRD.PANEL_X[0])) < 1e-3 and abs(h - BRD.TOP) < 1e-3 and max(w, h) <= PANEL_MAX,
              f"the panel is {w:.3f} x {h:.3f} mm, as designed ({BRD.PANEL_X[1] - BRD.PANEL_X[0]:g} x {BRD.TOP:g}: the body "
@@ -278,9 +321,12 @@ def facts(path, spec):
         if j1 is not None:
             low = aoy - mm(bb.GetBottom())
             fact(abs(at_of(j1)[1] - low) < 1e-3,
-                 "the finger tips are the lowest edge of the board: nothing lies below the tip line, so the bevel can reach it")
-    fact(ds.GetGridOrigin().x == ao.x and ds.GetGridOrigin().y == ao.y, "the grid origin is the drill/place origin")
-    fact(j1 is not None and j1.GetFPID().GetUniStringLibId() == "fcjamma:" + spec["j1"]["footprint"], "J1 is the JAMMA edge")
+                 f"the finger tips are the lowest edge of the board: nothing lies below the tip line, so the bevel can reach it "
+                 f"(tip line y {at_of(j1)[1]:.3f}, lowest edge y {low:.3f})")
+    go = ds.GetGridOrigin()
+    fact(go.x == ao.x and go.y == ao.y, f"the grid origin is the drill/place origin ({mm(go.x):.3f}, {mm(go.y):.3f})")
+    j1_id = j1.GetFPID().GetUniStringLibId() if j1 is not None else "(no J1)"
+    fact(j1_id == "fcjamma:" + spec["j1"]["footprint"], f"J1 is the JAMMA edge ({j1_id})")
 
     # ---- the JAMMA tongue, measured on the outline 6 mm above the tip (between the body's edges only)
     t_cuts = [x for x in crossings(conts, 1, 6.0) if 0.0 < x < BRD.BODY_W]
@@ -305,23 +351,35 @@ def facts(path, spec):
                 fact(min(c6, c8) >= SLOT_TO_COPPER - 1e-3,
                      f"fingers 6 and 8 keep their copper {SLOT_TO_COPPER} from the key slot's walls ({c6:.3f}, {c8:.3f})")
             else:
-                fact(False, "J1 has fingers 1, 6, 8 and 28")
+                fact(False, f"J1 has fingers 1, 6, 8 and 28 (it has {len(px)} pads)")
     for side, x0, x1, xo in (("left", 0.0, BRD.TONGUE_X0, BRD.TONGUE_X0 - 1.0),
                              ("right", BRD.TONGUE_X0 + BRD.TONGUE_W, BRD.BODY_W, BRD.TONGUE_X0 + BRD.TONGUE_W + 1.0)):
         a = area_in(x0, 0.0, x1, SHOULDER)
         fact(a < 1e-3 and inside((xo, SHOULDER + 0.05)),
              f"{side} of the tongue there is no board up to {SHOULDER:g} mm above the tip ({a:.3f} mm² of board there), "
-             f"and the body starts there (room for the connector's housing)")
-    fact(inside((BRD.BODY_W / 2, 6.0)) and inside((BRD.BODY_W / 2, (BRD.Y0 + BRD.TOP) / 2)), "the tongue and the body are board")
+             f"and the body starts there ({'board' if inside((xo, SHOULDER + 0.05)) else 'no board'} at {SHOULDER + 0.05:g})")
+    tongue_in, body_in = inside((BRD.BODY_W / 2, 6.0)), inside((BRD.BODY_W / 2, (BRD.Y0 + BRD.TOP) / 2))
+    fact(tongue_in and body_in, f"the tongue and the body are board (tongue: {tongue_in}, body: {body_in})")
 
-    # ---- the shape of the outline: corners and slot ends
-    arcs = [d for d in board.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts and d.GetShape() == pcbnew.SHAPE_T_ARC]
-    kinds = {round(BRD.CORNER_R, 3): 90.0, 0.5: 90.0, round(BRD.RAIL_GAP / 2, 3): 180.0}
-    odd = [(round(mm(d.GetRadius()), 3), round(abs(d.GetArcAngle().AsDegrees()), 2)) for d in arcs
-           if kinds.get(round(mm(d.GetRadius()), 3)) is None
-           or abs(abs(d.GetArcAngle().AsDegrees()) - kinds[round(mm(d.GetRadius()), 3)]) > 0.01]
-    fact(not odd, f"every arc of the outline is a 90° corner (R{BRD.CORNER_R:g}, R0.5) or a half-round slot end "
-                  f"(R{BRD.RAIL_GAP / 2:g}) ({len(odd)} others: {odd[:3]})")
+    # ---- the shape of the outline: every arc is a convex corner, a corner of the key slot or a slot's round end, by its
+    # radius, its sweep and the side its centre lies on (on the board for a convex corner, off it for the others)
+    kinds = {"convex corner": (BRD.CORNER_R, 90.0, True), "key-slot corner": (0.5, 90.0, False),
+             "slot end": (BRD.RAIL_GAP / 2, 180.0, False)}
+    counts, odd = {k: 0 for k in kinds}, []
+    for it in [it for it in items if it[0] == "arc"]:
+        c, r, sweep = it[1], it[2], it[6]
+        on_board = inside(c)
+        kind = next((k for k, (wr, wa, wc) in kinds.items() if abs(r - wr) < 1e-3 and abs(sweep - wa) < 0.01 and on_board == wc), None)
+        if kind:
+            counts[kind] += 1
+        else:
+            odd.append((round(r, 3), round(sweep, 2), "centre on the board" if on_board else "centre off the board",
+                        (round(c[0], 2), round(c[1], 2))))
+    expect = {"convex corner": 8 if BRD.CORNER_R > 0 else 0, "key-slot corner": 2, "slot end": 2 * n_slots + 4}
+    fact(not odd and counts == expect,
+         f"the outline's arcs: {counts['convex corner']} convex corners R{BRD.CORNER_R:g}, {counts['key-slot corner']} R0.5 corners "
+         f"at the bottom of the key slot, {counts['slot end']} half-round slot ends R{BRD.RAIL_GAP / 2:g} (expected "
+         f"{expect['convex corner']}, 2, {expect['slot end']}; {len(odd)} others{': ' + str(odd[:2]) if odd else ''})")
     bad_slots = []
     for k in range(holes_n):
         c = poly.CHole(0, k)
@@ -329,12 +387,15 @@ def facts(path, spec):
         sw, sh = mm(hb.GetWidth()), mm(hb.GetHeight())
         want = sw * (sh - sw) + math.pi * (sw / 2) ** 2
         if abs(abs(c.Area()) / 1e12 - want) > 0.05 or abs(sw - BRD.RAIL_GAP) > 1e-3:
-            bad_slots.append(k)
-    fact(holes_n and not bad_slots, f"every slot is {BRD.RAIL_GAP:g} mm wide with half-round ends ({len(bad_slots)} not)")
+            bad_slots.append((round(sw, 3), round(abs(c.Area()) / 1e12, 2), round(want, 2)))
+    fact(holes_n and not bad_slots, f"every slot is {BRD.RAIL_GAP:g} mm wide with half-round ends ({len(bad_slots)} not"
+         + (f"; e.g. width, area, a slot's area {bad_slots[0]})" if bad_slots else ")"))
 
     if j1 is not None:
-        fact(abs(j1.GetOrientation().AsDegrees()) < 1e-6 and j1.GetLayer() == pcbnew.F_Cu and j1.IsLocked(),
-             "J1 is not turned, on the parts side, locked")
+        deg = j1.GetOrientation().AsDegrees()
+        fact(abs(deg) < 1e-6 and j1.GetLayer() == pcbnew.F_Cu and j1.IsLocked(),
+             f"J1 is not turned, on the parts side, locked ({deg:g}°, {board.GetLayerName(j1.GetLayer())}, "
+             f"{'locked' if j1.IsLocked() else 'not locked'})")
         pads = list(j1.Pads())
         spans = []
         for p in pads:
@@ -345,36 +406,46 @@ def facts(path, spec):
         fact(len(pads) == 54 and not wrong,
              f"all 54 fingers are {FINGER[0]} wide and run from {FINGER[1]} to {FINGER[2]} mm above the tip ({len(pads)} fingers"
              + (f"; e.g. {wrong[0][2]} wide, {wrong[0][0]}-{wrong[0][1]})" if wrong else ")"))
-        fact(all(inside(at_of(p)) for p in pads), "every finger lies on the tongue")
+        off = sorted(p.GetNumber() for p in pads if not inside(at_of(p)))
+        fact(not off, f"every finger lies on the tongue ({len(off)} do not{': ' + ', '.join(off[:5]) if off else ''})")
         nets = {p.GetNumber(): p.GetNetname() for p in pads}
         want = spec["j1"]["nets"]
-        fact(len(want) == 54 and nets == want,
-             "every finger carries the net KiCad's netlist gives it, and no other (KiCad's schematic parity checks it again)")
-        fact({n for n, net in nets.items() if net.startswith("unconnected-(J1-")} == UNWIRED,
-             "exactly the six open JAMMA positions (5, 6, 11, E, F, M) are left unconnected")
+        diff = sorted(k for k in set(nets) | set(want) if nets.get(k) != want.get(k))
+        fact(len(want) == 54 and not diff,
+             f"every finger carries the net KiCad's netlist gives it, and no other (KiCad's schematic parity checks it again) "
+             f"({len(want)} pins in the netlist, {len(diff)} differ"
+             + (f"; pad {diff[0]}: board '{nets.get(diff[0])}', netlist '{want.get(diff[0])}')" if diff else ")"))
+        open_ = sorted(n for n, net in nets.items() if net.startswith("unconnected-(J1-"))
+        fact(set(open_) == UNWIRED, f"exactly the six open JAMMA positions (5, 6, 11, E, F, M) are left unconnected ({', '.join(open_) or 'none'})")
         path_s, props = schematic_symbol(spec["schematic_dir"])
-        fact(str(j1.GetPath().AsString()) == path_s,
-             "J1 is linked to the J1 symbol of the jamma sheet (identifiers read from the schematic files)")
+        path_b = str(j1.GetPath().AsString())
+        fact(path_b == path_s, f"J1 is linked to the J1 symbol of the jamma sheet (board {path_b or '(none)'}, schematic {path_s})")
         fields = spec["j1"]["fields"]
-        fact(bool(fields) and all(j1.HasField(k) and j1.GetFieldText(k) == props.get(k) for k in fields),
-             "J1 carries its symbol's fields, as the schematic file has them")
+        bad = [k for k in fields if not (j1.HasField(k) and j1.GetFieldText(k) == props.get(k))]
+        fact(bool(fields) and not bad, f"J1 carries its symbol's fields, as the schematic file has them ({len(fields)} fields"
+             + (f"; {bad[0]}: board '{j1.GetFieldText(bad[0]) if j1.HasField(bad[0]) else '(missing)'}', schematic '{props.get(bad[0])}')"
+                if bad else ")"))
 
     # ---- mounting holes: compared with design/board.py, on the body, clear of every edge and of the tip
     holes = sorted((f for r, f in fps.items() if re.fullmatch(r"H\d+", r)), key=lambda f: int(f.GetReference()[1:]))
     got = [at_of(h) for h in holes]
-    fact(len(holes) == len(BRD.HOLES) == 7 and all(math.dist(a, b) < 1e-4 for a, b in zip(got, BRD.HOLES)),
-         f"{len(holes)} mounting holes, where design/board.py puts them (7)")
+    moved = [f"{h.GetReference()} at ({a[0]:g}, {a[1]:g})" for h, a, b in zip(holes, got, BRD.HOLES) if math.dist(a, b) >= 1e-4]
+    fact(len(holes) == len(BRD.HOLES) == 7 and not moved,
+         f"{len(holes)} mounting holes, where design/board.py puts them (7{'; ' + ', '.join(moved[:3]) if moved else ''})")
     for h, at in zip(holes, got):
         pads = list(h.Pads())
-        fact(len(pads) == 1 and pads[0].GetAttribute() == pcbnew.PAD_ATTRIB_NPTH and abs(mm(pads[0].GetDrillSize().x) - 3.2) < 1e-6,
-             f"{h.GetReference()}: M3 hole of 3.2 mm, not plated")
+        drills = [round(mm(p.GetDrillSize().x), 3) for p in pads]
+        npth = all(p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH for p in pads)
+        fact(len(pads) == 1 and npth and abs(drills[0] - 3.2) < 1e-6,
+             f"{h.GetReference()}: M3 hole of 3.2 mm, not plated ({len(pads)} hole of {drills}, {'not plated' if npth else 'plated'})")
         on = inside(at) and 0.0 <= at[0] <= BRD.BODY_W
         d = edge_dist(conts, at) if conts else 0.0
         fact(on and d >= HOLE_EDGE - 1e-6, f"{h.GetReference()}: on the body, at least {HOLE_EDGE:g} mm from every edge "
              + (f"({d:.2f})" if on else f"(it lies off the body, at ({at[0]:g}, {at[1]:g}))"))
         fact(at[1] - 1.6 >= HOLE_TIP, f"{h.GetReference()}: not within {HOLE_TIP:g} mm of the tip ({at[1] - 1.6:.2f})")
     for cx, cy in ((0.0, BRD.Y0), (BRD.BODY_W, BRD.Y0), (0.0, BRD.TOP), (BRD.BODY_W, BRD.TOP)):
-        fact(any(math.dist(at, (cx, cy)) <= 8.0 for at in got), f"a mounting hole near the body's corner ({cx:g}, {cy:g})")
+        near = min((math.dist(at, (cx, cy)) for at in got), default=99.0)
+        fact(near <= 8.0, f"a mounting hole near the body's corner ({cx:g}, {cy:g}) (the nearest {near:.1f} mm away)")
 
     # ---- the rails, the slots and the tabs, measured on the outline
     xl, xr = BRD.PANEL_X
@@ -390,7 +461,8 @@ def facts(path, spec):
     for side, x_rail, x_slot, x_edge, x_far in (("left", xl + RAIL / 2, -BRD.RAIL_GAP / 2, -0.05, -BRD.RAIL_GAP + 0.05),
                                                 ("right", xr - RAIL / 2, BRD.BODY_W + BRD.RAIL_GAP / 2, BRD.BODY_W + 0.05,
                                                  BRD.BODY_W + BRD.RAIL_GAP - 0.05)):
-        fact(inside((x_rail, 0.5)) and inside((x_rail, BRD.TOP - 0.5)), f"{side} rail: runs from the tip line to the top")
+        ends = (inside((x_rail, 0.5)), inside((x_rail, BRD.TOP - 0.5)))
+        fact(all(ends), f"{side} rail: runs from the tip line to the top (board at y 0.5: {ends[0]}, at y {BRD.TOP - 0.5:g}: {ends[1]})")
         ys = crossings(conts, 0, x_slot)
         tabs = [(a, b) for a, b in zip(ys[0::2], ys[1::2]) if inside((x_slot, (a + b) / 2))]
         tab_centres[side] = [(a + b) / 2 for a, b in tabs]
@@ -398,70 +470,109 @@ def facts(path, spec):
         fact(len(tabs) == len(BRD.TABS) and all(abs(c - t) < 0.05 for c, t in zip(tab_centres[side], BRD.TABS)),
              f"{side}: {len(tabs)} tabs at y {', '.join(f'{c:.1f}' for c in tab_centres[side])} (design/board.py "
              f"{', '.join(f'{t:g}' for t in BRD.TABS)})")
-        fact(tabs and narrow >= TAB - 1e-3, f"{side}: the tabs are at least {TAB:g} mm wide (JLCPCB) (narrowest {narrow:.2f})")
-        fact(all(inside((x, c)) for c in tab_centres[side] for x in (x_edge, x_slot, x_far)),
-             f"{side}: every tab bridges the whole slot, from the rail to the body")
+        fact(tabs and narrow >= TAB_MIN - 1e-3, f"{side}: the tabs are at least {TAB_MIN:g} mm wide (JLCPCB {TAB:g}, and ±{ROUTING:g} "
+             f"on each slot end) (narrowest {narrow:.3f})")
+        loose = [f"{c:.1f}" for c in tab_centres[side] if not all(inside((x, c)) for x in (x_edge, x_slot, x_far))]
+        fact(tabs and not loose, f"{side}: every tab bridges the whole slot, from the rail to the body ({len(loose)} do not"
+             + (f": y {', '.join(loose)})" if loose else ")"))
 
     # ---- mouse bites: one line on each measured tab, on the body's side of the edge, its keep-out on the body
     bites = sorted((f for r, f in fps.items() if re.fullmatch(r"MB\d+", r)), key=lambda f: int(f.GetReference()[2:]))
     fact(len(bites) == 2 * len(BRD.TABS), f"{len(bites)} lines of mouse bites ({2 * len(BRD.TABS)}: one on each tab)")
-    seen = {"left": [], "right": []}
+    seen, mb_y = {"left": [], "right": []}, {"left": [], "right": []}
     for mb in bites:
         at = at_of(mb)
         side = "left" if at[0] < BRD.BODY_W / 2 else "right"
         inset = at[0] if side == "left" else BRD.BODY_W - at[0]
         rot = round(mb.GetOrientation().AsDegrees()) % 360
         hx = [at_of(p) for p in mb.Pads()]
+        drills = sorted({round(mm(p.GetDrillSize().x), 3) for p in mb.Pads()})
         tab = [c for c in tab_centres.get(side, []) if abs(c - at[1]) < 0.01]
         seen[side] += tab
+        mb_y[side].append(at[1])
         zones = [z for z in mb.Zones() if z.GetZoneName() == "Breakaway tab: keep clear"]
         zb = [design((mm(z.GetBoundingBox().GetLeft()), 0))[0] for z in zones] + \
              [design((mm(z.GetBoundingBox().GetRight()), 0))[0] for z in zones]
         on_body = bool(zones) and (min(zb) >= -0.01 and max(zb) <= 6.0 if side == "left"
                                    else min(zb) >= BRD.BODY_W - 6.0 and max(zb) <= BRD.BODY_W + 0.01)
         fact(len(tab) == 1 and 0.0 < inset <= 0.5 and rot == (0 if side == "left" else 180),
-             f"{mb.GetReference()}: on a tab ({side}), {inset:.2f} mm inside the body's edge, turned {rot}°")
-        fact(5 <= len(hx) <= 8 and all(p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH for p in mb.Pads())
-             and all(0.0 <= x <= BRD.BODY_W and inside((x, y)) for x, y in hx),
-             f"{mb.GetReference()}: {len(hx)} holes, not plated, every one in the body")
-        fact(on_body, f"{mb.GetReference()}: its keep-out lies on the body's side")
+             f"{mb.GetReference()}: on a tab ({side}, y {at[1]:.2f}), {inset:.2f} mm inside the body's edge, turned {rot}°")
+        npth = all(p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH for p in mb.Pads())
+        fact(5 <= len(hx) <= 8 and npth and all(0.0 <= x <= BRD.BODY_W and inside((x, y)) for x, y in hx),
+             f"{mb.GetReference()}: {len(hx)} holes of {drills}, {'not plated' if npth else 'plated'}, every one in the body")
+        web = min((outline_dist(items, (x, y)) - mm(p.GetDrillSize().x) / 2 for (x, y), p in zip(hx, mb.Pads())), default=0.0)
+        fact(web >= BITE_WEB - 1e-6, f"{mb.GetReference()}: every hole keeps {BITE_WEB:g} mm of board from the routed edges, the slots' "
+             f"round ends included (JLCPCB's least spacing of mouse bites) ({web:.3f})")
+        fact(on_body, f"{mb.GetReference()}: its keep-out lies on the body's side"
+             + (f" (x {min(zb):.2f} to {max(zb):.2f})" if zones else " (no keep-out)"))
     for side in ("left", "right"):
         fact(sorted(seen[side]) == sorted(tab_centres.get(side, [])) and len(set(seen[side])) == len(seen[side]),
-             f"{side}: exactly one line of mouse bites on every tab")
+             f"{side}: exactly one line of mouse bites on every tab (lines at y {', '.join(f'{y:.1f}' for y in sorted(mb_y[side]))}; "
+             f"tabs at {', '.join(f'{y:.1f}' for y in sorted(tab_centres.get(side, [])))})")
 
     # ---- tooling holes and fiducials
     tools = sorted((f for r, f in fps.items() if re.fullmatch(r"TH\d+", r)), key=lambda f: int(f.GetReference()[2:]))
     tat = [at_of(t) for t in tools]
-    fact(len(tools) == len(BRD.TOOLING) == 4 and all(math.dist(a, b) < 1e-4 for a, b in zip(tat, BRD.TOOLING)),
-         f"{len(tools)} tooling holes, where design/board.py puts them (4)")
+    moved = [f"{t.GetReference()} at ({a[0]:g}, {a[1]:g})" for t, a, b in zip(tools, tat, BRD.TOOLING) if math.dist(a, b) >= 1e-4]
+    fact(len(tools) == len(BRD.TOOLING) == 4 and not moved,
+         f"{len(tools)} tooling holes, where design/board.py puts them (4{'; ' + ', '.join(moved[:2]) if moved else ''})")
     for th, at in zip(tools, tat):
         pads = list(th.Pads())
+        drill = mm(pads[0].GetDrillSize().x) if pads else 0.0
+        npth = bool(pads) and all(p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH for p in pads)
         on_rail = min(abs(at[0] - (xl + RAIL / 2)), abs(at[0] - (xr - RAIL / 2))) < 1e-3
-        fact(len(pads) == 1 and pads[0].GetAttribute() == pcbnew.PAD_ATTRIB_NPTH and abs(mm(pads[0].GetDrillSize().x) - TOOLING_HOLE) < 1e-6
-             and on_rail and inside(at), f"{th.GetReference()}: {TOOLING_HOLE:g} mm, not plated, centred on a rail")
+        fact(len(pads) == 1 and npth and abs(drill - TOOLING_HOLE) < 1e-6 and on_rail and inside(at),
+             f"{th.GetReference()}: {TOOLING_HOLE:g} mm, not plated, centred on a rail ({len(pads)} hole of {drill:g} mm, "
+             f"{'not plated' if npth else 'plated'}, at x {at[0]:.2f})")
+        wall = outline_dist(items, at) - drill / 2 if inside(at) else -1.0
+        fact(wall >= HOLE_WALL - 1e-6, f"{th.GetReference()}: its wall at least {HOLE_WALL:g} mm from every routed edge ({wall:.2f})")
     fids = sorted((f for r, f in fps.items() if re.fullmatch(r"FID\d+", r)), key=lambda f: int(f.GetReference()[3:]))
     fat = [at_of(f) for f in fids]
-    fact(len(fids) == 3 and all(math.dist(a, b) < 1e-4 for a, b in zip(fat, BRD.FIDUCIALS)),
-         f"{len(fids)} fiducials, where design/board.py puts them (3)")
+    moved = [f"{f.GetReference()} at ({a[0]:g}, {a[1]:g})" for f, a, b in zip(fids, fat, BRD.FIDUCIALS) if math.dist(a, b) >= 1e-4]
+    fact(len(fids) == 3 and not moved, f"{len(fids)} fiducials, where design/board.py puts them (3{'; ' + ', '.join(moved[:2]) if moved else ''})")
     if len(fat) == 3:
         (ax, ay), (bx, by), (cx, cy) = fat
-        fact(abs((bx - ax) * (cy - ay) - (by - ay) * (cx - ax)) > 100.0, "the fiducials are not on one line")
+        area2 = abs((bx - ax) * (cy - ay) - (by - ay) * (cx - ax))
+        fact(area2 > 100.0, f"the fiducials are not on one line (twice the triangle's area {area2:.0f} mm²)")
     for f, at in zip(fids, fat):
         ref = f.GetReference()
         copper = [p for p in f.Pads() if p.IsOnLayer(pcbnew.F_Cu)]
         r = mm(copper[0].GetSize().x) / 2 if copper else 0.0
         opening = 2 * r + 2 * mm(copper[0].GetSolderMaskExpansion(pcbnew.F_Mask)) if copper else 0.0
         outer = min(at[0] - xl, xr - at[0])
-        clear = min((math.dist(at, at_of(o)) for o in tools + holes), default=99.0)
-        fact(inside(at) and (at[0] < -BRD.RAIL_GAP or at[0] > BRD.BODY_W + BRD.RAIL_GAP), f"{ref}: on a rail")
+        side = "left" if at[0] < BRD.BODY_W / 2 else "right"
+        fact(inside(at) and (at[0] < -BRD.RAIL_GAP or at[0] > BRD.BODY_W + BRD.RAIL_GAP), f"{ref}: on a rail (at {at[0]:.2f}, {at[1]:.2f})")
         fact(abs(r - 0.5) < 1e-6 and abs(opening - 2.0) < 1e-6, f"{ref}: 1 mm copper, 2 mm mask opening (JLCPCB) ({2 * r:g}, {opening:g})")
         fact(outer - r >= FIDUCIAL_EDGE - 1e-6, f"{ref}: its copper {outer - r:.2f} mm from the panel's outer edge (JLCPCB 3.35)")
-        fact(BRD.TABS[0] - BRD.TAB_W / 2 <= at[1] <= BRD.TABS[-1] + BRD.TAB_W / 2 and clear >= 3.0,
-             f"{ref}: on the held part of its rail (between the first and the last tab), clear of the holes ({clear:.1f})")
+        dy = min((abs(at[1] - t) for t in tab_centres.get(side, [])), default=99.0)
+        fact(dy <= TAB / 2, f"{ref}: level with a tab, where the rail is held ({dy:.2f} from the nearest tab's centre)")
+        routed = outline_dist(items, at)
+        drilled = min((math.dist(at, at_of(o)) - mm(list(o.Pads())[0].GetDrillSize().x) / 2 for o in tools + holes if list(o.Pads())),
+                      default=99.0)
+        fact(min(routed, drilled) - opening / 2 >= FIDUCIAL_CLEAR - 1e-6,
+             f"{ref}: nothing routed or drilled within {FIDUCIAL_CLEAR:g} mm of its mask opening (routed edge {routed - opening / 2:.2f}, "
+             f"hole {drilled - opening / 2:.1f}; the copper is {routed - r:.2f} from the nearest routed edge)")
 
-    # ---- every part has a courtyard (KiCad's DRC only checks courtyards it is given)
+    # ---- every part has a courtyard (KiCad's DRC only checks courtyards it is given), and lies on the body: not on a rail,
+    # over a slot or off the board (J1's reaches 0.5 past the tip on purpose; the tooling holes and fiducials are checked above)
     bare = [r for r, f in fps.items() if f.GetCourtyard(pcbnew.F_CrtYd).OutlineCount() + f.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() == 0]
     fact(not bare, f"every footprint has a courtyard ({', '.join(sorted(bare)[:5]) or 'all do'})")
+    astray = []
+    for ref, f in sorted(fps.items()):
+        if ref == "J1" or re.fullmatch(r"(TH|FID)\d+", ref):
+            continue
+        for layer in (pcbnew.F_CrtYd, pcbnew.B_CrtYd):
+            crt = f.GetCourtyard(layer)
+            if crt.OutlineCount() == 0:
+                continue
+            off_board = pcbnew.SHAPE_POLY_SET(crt)
+            off_board.BooleanSubtract(poly)
+            cb = crt.BBox()
+            cx0, cx1 = design((mm(cb.GetLeft()), 0))[0], design((mm(cb.GetRight()), 0))[0]
+            if off_board.Area() / 1e12 > 1e-3 or cx0 < -0.1 or cx1 > BRD.BODY_W + 0.1:
+                astray.append(f"{ref} x {cx0:.2f}-{cx1:.2f}, {off_board.Area() / 1e12:.2f} mm² off the board")
+    fact(not astray, f"every part's courtyard lies on the body, between its left and right edges and inside the outline "
+         f"({'; '.join(astray[:3]) or 'all do'})")
 
     # ---- settings
     fact(board.GetCopperLayerCount() == 2, f"two copper layers ({board.GetCopperLayerCount()})")
@@ -470,15 +581,18 @@ def facts(path, spec):
     stack = re.search(r"\(stackup(.*?)\n\t\t\)", text, re.S)
     layers = re.findall(r"\(thickness ([0-9.]+)\)", stack.group(1)) if stack else []
     fact(len(layers) == 5 and abs(sum(float(x) for x in layers) - THICKNESS) < 1e-6,
-         f"the stackup adds up to the board's {THICKNESS} mm ({sum(float(x) for x in layers):.3f})")
-    fact(bool(stack) and '(copper_finish "ENIG")' in stack.group(1) and "(edge_connector bevelled)" in stack.group(1),
-         "stackup: ENIG finish and a bevelled edge connector (gold fingers)")
-    fact(ds.m_TentViasFront and ds.m_TentViasBack, "vias are tented on both sides")
+         f"the stackup adds up to the board's {THICKNESS} mm ({sum(float(x) for x in layers):.3f} in {len(layers)} layers)")
+    finish = re.search(r'\(copper_finish "([^"]*)"\)', stack.group(1)) if stack else None
+    edge = re.search(r"\(edge_connector (\w+)\)", stack.group(1)) if stack else None
+    fact(bool(finish and edge) and finish.group(1) == "ENIG" and edge.group(1) == "bevelled",
+         f"stackup: ENIG finish and a bevelled edge connector (gold fingers) ({finish.group(1) if finish else 'no finish'}, "
+         f"{edge.group(1) if edge else 'no edge connector'})")
+    fact(ds.m_TentViasFront and ds.m_TentViasBack, f"vias are tented on both sides (front {ds.m_TentViasFront}, back {ds.m_TentViasBack})")
     opts = board.GetPlotOptions()
-    fact(opts.GetUseGerberProtelExtensions(), "plot settings: Protel file names (JLCPCB's KiCad guide)")
-    fact(opts.GetUseAuxOrigin(), "plot settings: Gerbers from the drill/place origin, the frame of the drill and position files")
+    fact(opts.GetUseGerberProtelExtensions(), f"plot settings: Protel file names (JLCPCB's KiCad guide) ({opts.GetUseGerberProtelExtensions()})")
+    fact(opts.GetUseAuxOrigin(), f"plot settings: Gerbers from the drill/place origin, the frame of the drill and position files "
+         f"({opts.GetUseAuxOrigin()})")
     return out
-
 
 def schematic_symbol(sch_dir):
     """The path KiCad gives J1's footprint (the jamma sheet's identifier, then the J1 symbol's) and the J1 symbol's
@@ -499,31 +613,18 @@ def schematic_symbol(sch_dir):
 
 
 def main():
-    project, spec_path = sys.argv[1], sys.argv[2]
+    project, spec_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
     spec = json.load(open(spec_path, encoding="utf-8"))
-    final = os.path.join(project, "fcjamma.kicad_pcb")
-    failed_copy = spec.get("failed_path")
-    # build and check in a scratch folder: kicad/ only ever holds a board that passed every check, so that it never
-    # disagrees with out/board/; a board that fails is kept at failed_path to be looked at
+    # built in a scratch folder without a project file, so that the saved bytes do not depend on where it is checked
     with tempfile.TemporaryDirectory(prefix="fcjamma-make-board-") as tmp:
         path = write(project, spec, os.path.join(tmp, "fcjamma.kicad_pcb"))
         results = facts(path, spec)
-        failed = [what for ok, what in results if not ok]
-        if failed:
-            if failed_copy:
-                os.makedirs(os.path.dirname(failed_copy), exist_ok=True)
-                shutil.copy(path, failed_copy)
-        else:
-            shutil.copy(path, final)
-            if failed_copy and os.path.exists(failed_copy):
-                os.remove(failed_copy)
+        shutil.copy(path, out_path)
+    failed = [what for ok, what in results if not ok]
     for what in failed:
         print("board check failed:", what)
-    print(f"board: {len(results) - len(failed)}/{len(results)} checks hold"
-          + (f"; the board that failed is in {os.path.relpath(failed_copy, os.path.dirname(project))}, kicad/ keeps the last good one"
-             if failed and failed_copy else ""))
+    print(f"board: {len(results) - len(failed)}/{len(results)} checks hold")
     sys.exit(1 if failed else 0)
-
 
 if __name__ == "__main__":
     try:

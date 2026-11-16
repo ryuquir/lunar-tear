@@ -2,7 +2,7 @@
 <head><meta charset="utf-8"><title>01 発注のノウハウとバグチェック</title></head>
 <body>
 <h1>基板屋（JLCPCB）への発注のノウハウとバグチェック　ファミコンアーキテクチャー基盤 rev 0.3</h1>
-<p>版: 2026-11-14。JLCPCB の公開ページ（各節の末尾と 13 章に、ページと更新日を記載）と、この基板の設計記録をもとに書いています。</p>
+<p>版: 2026-11-16（捨て基板の備考、Different Design、銅の後退の説明を更新）。JLCPCB の公開ページ（各節の末尾と 13 章に、ページと更新日を記載）と、この基板の設計記録をもとに書いています。</p>
 
 <h2>0. この文書の使い方</h2>
 <ul>
@@ -67,7 +67,7 @@
 <tr><td>Dimensions</td><td>自動で読み取られた値</td><td>確認記録に書かれた外形寸法（捨て基板を含む。案では 234 × 162 mm、捨て基板を除くと 220 × 162 mm）と、縦・横とも 1 mm 以内で一致すること。外れたら<b>止まる</b></td></tr>
 <tr><td>PCB Qty</td><td>5</td><td>試作の枚数（依頼者の指示があればその数）</td></tr>
 <tr><td>Product Type</td><td>Industrial/Consumer electronics</td><td>標準</td></tr>
-<tr><td>Different Design</td><td>1</td><td>1 種類の基板</td></tr>
+<tr><td>Different Design</td><td>依頼 1 の回答（質問 3b）のとおり。回答が無ければ<b>止まる</b>（1 と決めつけない）</td><td>基板は 1 種類。ただし JLCPCB は、溝や穴でつないで切り離す面付けを「複数の設計」と同じに扱うと書いている（「PCB Panelization」）。捨て基板がそれに当たるかを質問 3b で聞いている。当たる場合は、部品実装の段取り料も 1 設計あたり 25.56 米ドル増える（7 章）</td></tr>
 <tr><td>Delivery Format</td><td>依頼 1 の回答（質問 3b）のとおり</td><td>基板は 1 枚で、左右に自分で描いた捨て基板がミシン目でつながっている。金フィンガーは基板の外周に出す必要がある。JLCPCB が「Panel by Customer」を選ぶよう答えたら、それに従う（縦横 1 × 1）。回答が無い、または「Panel by JLCPCB」しか選べないときは<b>止まって</b>依頼者に聞く（Single PCB と決めつけない）</td></tr>
 <tr><td>PCB Thickness</td><td>1.6 mm</td><td>JAMMA のコネクタは 1.6 mm の基板用。GrokBOT はこの値を変えない</td></tr>
 <tr><td>PCB Color</td><td>Green</td><td>安くて早い。別の色は依頼者の指示があるときだけ</td></tr>
@@ -80,12 +80,12 @@
 <tr><td>Mark on PCB</td><td>付けない</td><td>2026 年 5 月以降、何も選ばなければ印は付かない</td></tr>
 <tr><td>Confirm Production File</td><td>Yes</td><td>製造前に JLCPCB の技術者が作ったデータを確かめる（9 章）</td></tr>
 <tr><td>Castellated Holes、Edge Plating、Impedance Control など、ほかの特別な加工</td><td>No</td><td>使わない</td></tr>
-<tr><td>PCB Remark（PCB 側の備考）</td><td>次の英文をそのまま貼る: <i>Edge rails: our Gerber already has them (left and right, 5 mm, joined by mouse bites), with four 2.0 mm NPTH tooling holes and three fiducials. Please keep them as drawn. Do not add rails or V-cuts on the gold-finger edge: it must stay an outer edge for the 30 degree bevel. If our rails are not acceptable, please ask us before changing them.</i></td><td>面取りと外形は基板の工程なので、捨て基板をそのまま使うことは PCB 側にも書く。JLCPCB は、捨て基板が「合わない」と見ると、断りなく付け直すことがある（組立の規約 5.5）。ほかの指定は部品実装の備考に書く（4 章）</td></tr>
+<tr><td>PCB Remark（PCB 側の備考）</td><td>次の英文をそのまま貼る: <i>Edge rails: our Gerber already has them, on the two edges perpendicular to the gold-finger edge (5 mm wide, joined to the board by mouse bites), with four 2.0 mm NPTH tooling holes and three fiducials. Please use them as drawn and do not add rails, tooling holes, fiducials or V-cuts on any edge: the gold-finger edge must stay an outer edge for the 30 degree bevel. Your internal check marks on our rails are fine. If our rails are not acceptable, please ask us before changing them.</i>（依頼 1 の回答によって変わることがあり、そのときは設計者がこの文書を更新する）</td><td>面取りと外形は基板の工程なので、捨て基板をそのまま使うことは PCB 側にも書く。JLCPCB は、捨て基板が「合わない」と見ると、断りなく付け直すことがある（組立の規約 5.5）。ほかの指定は部品実装の備考に書く（4 章）</td></tr>
 </table>
 <p><b>確認</b></p>
 <ul>
 <li>寸法と層数が確認記録と同じ。</li>
-<li>金フィンガーの面取りの図が表示され、角度が 30° になっている。参考: 厚さ 1.6 mm の基板を 30° で面取りするときは、先端から約 1.13 mm に銅を置いてはいけない（JLCPCB の Copper Setback）。この基板は 1.6 mm 空けてある（面取りの角度の公差 ±5° と外形の公差 ±0.2 mm を見込んだ）。</li>
+<li>金フィンガーの面取りの図が表示され、角度が 30° になっている。参考: 厚さ 1.6 mm の基板を 30° で面取りするときは、先端から約 1.13 mm に銅を置いてはいけない（JLCPCB の Copper Setback）。この基板は 1.6 mm 空けてある（面取りの角度の公差 ±5°、板厚の公差 ±10 %、外形の公差 ±0.2 mm を二乗和で見込むと約 1.46 mm。すべてが同時に最悪になる場合に足りるかは、質問 3d で聞いている）。</li>
 <li>選べない値や、見当たらない項目が無い。捨て基板の取り外し（Depanel、Remove edge rails など）は選んでいない。</li>
 </ul>
 <p>根拠: JLCPCB「Gold Fingers」（2026-11-10 更新）、「How to mark on PCB」（2026-05-22 更新）、「How to confirm the production file」（2026-11-10 更新）。</p>
@@ -107,7 +107,7 @@
 <p>2. Please protect the gold fingers with high-temperature tape during reflow and through-hole soldering. No solder or flux on the fingers.</p>
 <p>3. Through-hole parts (U1, U6: C2874018 sockets; J8: C5173310; SW3: C92645; RV1: C118956): please keep flux and solder out of the socket and connector contacts.</p>
 <p>4. Please send us the X-ray images of U25, U26 and U27.</p>
-<p>5. Edge rails: our Gerber already has them (left and right, 5 mm, joined by mouse bites), with four 2.0 mm NPTH tooling holes and three fiducials. Please keep them as drawn. Do not add rails or V-cuts on the gold-finger edge: it must stay an outer edge for the 30 degree bevel. If our rails are not acceptable, please ask us before changing them.</p>
+<p>5. Edge rails: our Gerber already has them, on the two edges perpendicular to the gold-finger edge (5 mm wide, joined to the board by mouse bites), with four 2.0 mm NPTH tooling holes and three fiducials. Please use them as drawn and do not add rails, tooling holes, fiducials or V-cuts on any edge: the gold-finger edge must stay an outer edge for the 30 degree bevel. Your internal check marks on our rails are fine. If our rails are not acceptable, please ask us before changing them.</p>
 </blockquote>
 <p>JLCPCB は「英語の備考があると審査に時間がかかる」と書いています。それでも、この基板では必要です。</p>
 <p>次に、部品表（BOM）と部品の位置の表（CPL）をアップロードします。</p>
@@ -184,6 +184,7 @@
 <li>挿入部品 4 種の装着料（Feeder Loading。4 × 1.53 = 6.12。請求される場合）</li>
 <li>ステンシルの保管（Stencil Storage 4.93。選ばない）</li>
 <li>歩留まり用に多めに請求される部品</li>
+<li>捨て基板が別の設計と数えられた場合の段取り料（25.56 ×（設計の数 − 1）。質問 3b。2 本とも数えられると 51.12 増え、合計は約 406 になる）</li>
 </ul>
 <p>PCB の製造費（約 234 × 162 mm（捨て基板を含む）、2 層、ENIG、金フィンガー）、送料、輸入時の税は別です。</p>
 <p><b>確認</b>: 部品と実装の合計が 270〜450 米ドルの範囲に入っている。外れるときは、内訳の写しを撮って<b>止まる</b>。</p>
@@ -265,7 +266,7 @@
   <li>ソケットの穴が汚れていないか</li>
   </ul>
 </li>
-<li><b>捨て基板を外す。</b>左右それぞれ 5 か所のミシン目（小さな穴の列）に沿って、1 か所ずつ折ります。基板を大きく曲げないでください。Pico 2 の近くは特に注意します。折った跡の小さな出っ張りは、やすりで落とします。捨て基板は付けたままでも筐体に入ります（左右に 7 mm ずつ広いだけ）。</li>
+<li><b>捨て基板を外す。</b>左右それぞれ 5 か所のミシン目（小さな穴の列）に沿って、1 か所ずつ折ります。基板を大きく曲げないでください。Pico 2 の近くは特に注意します。折った跡の小さな出っ張りは、やすりで落とします。捨て基板を付けたままで筐体に入るかは確かめていません（左右に 7 mm ずつ広く、下の端は金フィンガーの先端と同じ高さまであります）。</li>
 <li><b>電源だけを確かめる。</b>CPU と PPU はまだ挿しません。手順は「20_【参考】設計記録（README）」の 7 章にあります。</li>
 <li><b>USB を確かめる。</b>Type-C 端子でパソコンにつなぎ、USB ドライブが見えるかを見ます。見えれば、Pico C（U27）の裏側のパッド（TP2・TP3）が正しくはんだ付けされています。Pico A・B（U25、U26）の確認は、設計記録 7 章の手順で行います。</li>
 <li>以降は、設計記録 7 章の順で確かめます。</li>
@@ -276,7 +277,7 @@
 <h2>11. よくある失敗と、この基板での対策（ノウハウ集）</h2>
 <table border="1">
 <tr><th>#</th><th>よくある失敗</th><th>この基板での対策</th></tr>
-<tr><td>1</td><td>金フィンガーの面取りの範囲に銅がある。面取りで削られて、銅が露出する</td><td>設計で、先端から 1.6 mm には銅を置かない（30° の面取りで約 1.13 mm 削られる。角度と外形の公差を見込んだ）</td></tr>
+<tr><td>1</td><td>金フィンガーの面取りの範囲に銅がある。面取りで削られて、銅が露出する</td><td>設計で、先端から 1.6 mm には銅を置かない（JLCPCB の銅の後退は 30° で約 1.13 mm。角度 ±5°、板厚 ±10 %、外形 ±0.2 mm を二乗和で見込むと約 1.46 mm。すべてが同時に最悪になる場合は質問 3d で聞いている）</td></tr>
 <tr><td>2</td><td>金フィンガーを面付けの内側に置く。面取りできない</td><td>Delivery Format は質問 3b の回答のとおり（Single PCB、または Panel by Customer の 1 × 1）。Panel by JLCPCB と「Added by JLCPCB」の捨て基板は選ばない。捨て基板は設計者が金フィンガーの辺と直角な左右の 2 辺だけに描いてある。備考で、そのまま使うよう頼む</td></tr>
 <tr><td>3</td><td>表面処理に HASL を選ぶ。金フィンガーが錫になる</td><td>ENIG を選ぶ</td></tr>
 <tr><td>4</td><td>Economic PCBA を選ぶ</td><td>金フィンガーのある基板は Standard PCBA で発注する</td></tr>
@@ -332,7 +333,11 @@
 <li>JLCPCB 発注の注意: https://jlcpcb.com/help/article/instructions-for-ordering</li>
 <li>JLCPCB 部品表の形式（2026-09-09 更新）: https://jlcpcb.com/help/article/bill-of-materials-for-pcb-assembly</li>
 <li>JLCPCB 部品の位置の表の形式（2026-09-09 更新）: https://jlcpcb.com/help/article/pick-place-file-for-pcb-assembly</li>
-<li>JLCPCB KiCad からの Gerber の出し方（2026-11-10 更新）: https://jlcpcb.com/help/article/how-to-generate-gerber-and-drill-files-in-kicad-8</li>
+<li>JLCPCB KiCad からの Gerber の出し方（2026-11-10 更新）: https://jlcpcb.com/help/article/how-to-generate-gerber-and-drill-files-in-kicad-8 と、KiCad 9 版（2026-11-10 更新。めっきあり・なしの穴を別のファイルにする）: https://jlcpcb.com/help/article/how-to-generate-gerber-and-drill-files-in-kicad-9</li>
+<li>JLCPCB 面付け（2026-11-10 更新。溝や穴で切り離す面付けは複数の設計と同じ扱い）: https://jlcpcb.com/help/article/pcb-panelization</li>
+<li>JLCPCB ミシン目の手引き「Technical Guidance: Mouse Bite Panelization Guide」（2026-11-10 更新）: https://jlcpcb.com/blog/mouse-bite-panelization-guide</li>
+<li>JLCPCB 捨て基板と治具穴の作り方（2026-09-09 更新。5 mm のレール、2 mm の治具穴をレールの中央に、マークは縁から 3.85 mm。治具穴が削った縁に近いと折れやすい）: https://jlcpcb.com/help/article/specifications-for-adding-process-edges-and-positioning-holes</li>
+<li>JLCPCB 金フィンガーの面取りの説明（2025-04-24 更新。機械の溝に通して辺の全体を面取りする）: https://jlcpcb.com/help/article/instructions-for-chamfering-gold-fingers</li>
 <li>JLCPCB 部品実装の FAQ（手で挿す部品は手作業、納期 +1 日）: https://jlcpcb.com/help/article/pcb-assembly-faqs</li>
 <li>JLCPCB 部品の購入と事前購入: https://jlcpcb.com/help/article/what-is-jlcpcb-parts-pre-order-service</li>
 <li>Raspberry Pi Pico 2 データシート（3.2 節と図 6、表面実装での使い方）: https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf</li>
