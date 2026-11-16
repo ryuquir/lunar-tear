@@ -1,0 +1,290 @@
+{
+ "$schema": "https://schemas.kicad.org/drc.v1.json",
+ "coordinate_units": "mm",
+ "ignored_checks": [
+  {
+   "description": "Footprint has no courtyard defined",
+   "key": "missing_courtyard"
+  },
+  {
+   "description": "Track endpoint not centered on via",
+   "key": "track_not_centered_on_via"
+  },
+  {
+   "description": "Tuning profile track geometries",
+   "key": "tuning_profile_track_geometries"
+  },
+  {
+   "description": "Footprint doesn't match symbol's footprint filters",
+   "key": "footprint_filters_mismatch"
+  },
+  {
+   "description": "Footprint component type doesn't match footprint pads",
+   "key": "footprint_type_mismatch"
+  }
+ ],
+ "included_severities": [
+  "error",
+  "warning",
+  "exclusion"
+ ],
+ "kicad_version": "10.0.8",
+ "schematic_parity": [],
+ "source": "fcjamma.kicad_pcb",
+ "unconnected_items": [
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 1 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 76.54,
+      "y": 176.4
+     },
+     "uuid": "319441e2-427f-5f7d-a1a6-f6ecfde88098"
+    },
+    {
+     "description": "Pad 2 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 80.5,
+      "y": 176.4
+     },
+     "uuid": "f58b3d9a-f3d2-5116-82c8-48932ed0f85f"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 1 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 76.54,
+      "y": 176.4
+     },
+     "uuid": "319441e2-427f-5f7d-a1a6-f6ecfde88098"
+    },
+    {
+     "description": "Pad A [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 76.54,
+      "y": 176.4
+     },
+     "uuid": "b80062cc-e1ab-5633-82d3-d54998e7455b"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 14 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 128.02,
+      "y": 176.4
+     },
+     "uuid": "0a00d537-7f88-59f3-bcd0-6bd2f0fb1e38"
+    },
+    {
+     "description": "Pad 2 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 80.5,
+      "y": 176.4
+     },
+     "uuid": "f58b3d9a-f3d2-5116-82c8-48932ed0f85f"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 14 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 128.02,
+      "y": 176.4
+     },
+     "uuid": "0a00d537-7f88-59f3-bcd0-6bd2f0fb1e38"
+    },
+    {
+     "description": "Pad e [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 179.5,
+      "y": 176.4
+     },
+     "uuid": "7055896f-b447-5b4f-9cf4-ec6918975bf4"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 2 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 80.5,
+      "y": 176.4
+     },
+     "uuid": "f58b3d9a-f3d2-5116-82c8-48932ed0f85f"
+    },
+    {
+     "description": "Pad B [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 80.5,
+      "y": 176.4
+     },
+     "uuid": "3d434b30-243a-5768-a7f1-e81cabf042f3"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 27 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 179.5,
+      "y": 176.4
+     },
+     "uuid": "03764209-d87c-5cc3-a8e6-ae48f2877095"
+    },
+    {
+     "description": "Pad e [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 179.5,
+      "y": 176.4
+     },
+     "uuid": "7055896f-b447-5b4f-9cf4-ec6918975bf4"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 28 [GND] of J1 on F.Cu",
+     "pos": {
+      "x": 183.46,
+      "y": 176.4
+     },
+     "uuid": "91af435c-de16-5ea7-ba71-0976779d64ce"
+    },
+    {
+     "description": "Pad f [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 183.46,
+      "y": 176.4
+     },
+     "uuid": "f6018597-22c8-54ba-8e9d-0e0c9eb26b87"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 3 [+5V_IN] of J1 on F.Cu",
+     "pos": {
+      "x": 84.46,
+      "y": 176.4
+     },
+     "uuid": "c9680791-933b-5f06-9d3b-eb3b9ceba1ba"
+    },
+    {
+     "description": "Pad 4 [+5V_IN] of J1 on F.Cu",
+     "pos": {
+      "x": 88.42,
+      "y": 176.4
+     },
+     "uuid": "f49b1bac-d89a-5d2b-bda9-e2018f87a6d0"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 3 [+5V_IN] of J1 on F.Cu",
+     "pos": {
+      "x": 84.46,
+      "y": 176.4
+     },
+     "uuid": "c9680791-933b-5f06-9d3b-eb3b9ceba1ba"
+    },
+    {
+     "description": "Pad C [+5V_IN] of J1 on B.Cu",
+     "pos": {
+      "x": 84.46,
+      "y": 176.4
+     },
+     "uuid": "fc66a592-10a9-54ce-8ae5-969d22ab5940"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad 4 [+5V_IN] of J1 on F.Cu",
+     "pos": {
+      "x": 88.42,
+      "y": 176.4
+     },
+     "uuid": "f49b1bac-d89a-5d2b-bda9-e2018f87a6d0"
+    },
+    {
+     "description": "Pad D [+5V_IN] of J1 on B.Cu",
+     "pos": {
+      "x": 88.42,
+      "y": 176.4
+     },
+     "uuid": "2cc5b2d5-86e2-5863-953f-747bd9b4b9bf"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  },
+  {
+   "description": "Missing connection between items",
+   "items": [
+    {
+     "description": "Pad e [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 179.5,
+      "y": 176.4
+     },
+     "uuid": "7055896f-b447-5b4f-9cf4-ec6918975bf4"
+    },
+    {
+     "description": "Pad f [GND] of J1 on B.Cu",
+     "pos": {
+      "x": 183.46,
+      "y": 176.4
+     },
+     "uuid": "f6018597-22c8-54ba-8e9d-0e0c9eb26b87"
+    }
+   ],
+   "severity": "error",
+   "type": "unconnected_items"
+  }
+ ],
+ "violations": []
+}
