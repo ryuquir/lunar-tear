@@ -21,8 +21,8 @@ I am preparing a Standard PCBA order of 5 boards (possibly 10 later) and would l
 
 3) Edge rails, tooling holes and fiducials: we have drawn two 5 mm rails ourselves, on the left and right edges of the 220 x 150 mm body (the two edges perpendicular to the gold-finger edge), so that the bevelled gold-finger edge stays an outer edge. The rails run the full height, from the tip of the gold fingers to the top edge, and are joined to the body by mouse bites: a 2 mm routed slot with five tabs per side (5.5 mm at the narrowest), each tab with seven 0.6 mm non-plated holes, 0.3 mm apart, just inside the body's edge (the end holes keep 0.37 mm of board from the slots' round ends). Each rail carries two 2.0 mm non-plated tooling holes (centred on the rail, 5 mm from its ends), and there are 3 fiducials (1 mm copper, 2 mm mask opening) on the rails, centred 3.85 mm from the outer edge and level with the first and last tabs. The size is then 234 x 162 mm.
 3a) Is this acceptable for Standard PCBA with "Edge Rails/Fiducials: Added by Customer" (and "Tooling holes: Added by Customer")? In particular:
-- The rails hang free for about 29 mm below the first tab and 14 mm above the last one (we could shorten the lower end to about 25 mm). Is that a problem in the SMT line or in the chamfering machine?
-- The tooling holes sit on those free ends. Below the first tab the rail's inner edge is routed too, so each hole has 1.5 mm of rail on both sides, next to a milling path. Is that strong enough?
+- The rails hang free for about 29 mm below the first tab and 14 mm above the last one (we could shorten the lower end to about 26 mm). Is that a problem in the SMT line or in the chamfering machine?
+- The tooling holes sit on those free ends. On both free ends the rail's inner edge is routed too, so each of the four holes has 1.5 mm of rail on both sides, next to a milling path. Is that strong enough?
 - Each fiducial's copper is 3.35 mm from the outer edge, but 2.8 mm from the round end of the slot beside the tab (its mask opening 2.3 mm). Is that acceptable?
 3b) Should the order use Delivery Format "Single PCB" or "Panel by Customer" (1 x 1), and what should we enter as "Different Design"? Will the two rails be counted as additional designs, for the PCB or for the PCBA setup fee ("$25.56 x (number of designs -1)" on your price page)?
 3c) Could the rails be joined by V-cut instead (no slot, 230 x 162 mm), and would the gold fingers then still be bevelled? Your gold-finger page says that fingers in a V-cut panel cannot be chamfered; here the fingers would stay on an outer edge.
@@ -31,6 +31,6 @@ I am preparing a Standard PCBA order of 5 boards (possibly 10 later) and would l
 
 4) Does anything above require assembly on both sides, or add to the lead time?
 
-5) Tolerances at the edge connector: can you keep the board thickness at the gold fingers within 1.6 +/- 0.15 mm, and the width of the tongue between 114.4 and 114.6 mm (drawn 114.4 mm, so +0.2/-0 mm)? The regular outline tolerance of +/-0.2 mm could make it 114.2 mm. If this needs an option (for example the high-precision outline tolerance of +/-0.1 mm), which one, and what does it cost?
+5) Tolerances at the edge connector: can you keep the board thickness at the gold fingers within 1.6 +/- 0.15 mm, and the width of the tongue between 114.4 and 114.6 mm (drawn 114.4 mm, so +0.2/-0 mm)? The regular outline tolerance of +/-0.2 mm could make it 114.2 mm. If this needs an option, which one, and what does it cost? For example, should we redraw the tongue at 114.5 mm and order the high-precision outline tolerance of +/-0.1 mm (114.4 to 114.6 mm)? On the 114.4 mm drawing, +/-0.1 mm alone would still allow 114.3 mm.
 
 Thank you very much for your help.

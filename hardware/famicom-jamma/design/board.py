@@ -23,7 +23,11 @@ bevelled), mech/floorplan.py (body size, hole positions); JLCPCB (read 2026-11-1
 Panel', and the mouse-bite guide (both quoted in design/footprints.py at the edge rails); 'Design Optimization:
 Specifications for Adding Process Edges and Positioning Holes' (5 mm rails, 2 mm tooling holes 'Centered on process
 edge', 1 mm fiducials 3.85 from the edge; a tooling hole near a milling path weakens the rail); 'How to Add Edge Rails
-and Fiducials' (fiducial copper 3.35 from the board edge).
+and Fiducials' (fiducial copper 3.35 from the board edge); the blog 'What Are Fiducial Marks? How They Improve SMT
+Assembly Accuracy' (https://jlcpcb.com/blog/fiducial-marks, updated 2026-09-09: the 3.35 mm keeps the marks from being
+'obscured by the clamps, rails, or tooling fixtures that hold the PCB in place on the conveyor'); 'Terms and Conditions
+of JLCPCB Assembly Service' 2.3 (parts' bodies 2.5 mm from the board's edge, checked in mech/floorplan.py and
+tools/make_board.py).
 """
 import math
 
@@ -48,16 +52,18 @@ TAB_W = 5.5                                      # at its narrowest; JLCPCB: 'Fo
 # tab centres (y), the same on both sides: clear of the mounting holes (y 16, 99, 158), of U27 at the left edge (y 60-83),
 # of the USB-C socket J10 (y 85-94), which faces the left slot, and of the IC sockets' pins; their keep-outs (5 mm around
 # the mouse bites) stay clear of all of these.  JLCPCB's guide asks for a set every 50-60 mm: here 15-64 mm apart, the
-# 64 mm gap on the left being where U27 and J10 sit.  The first tab could go about 4 mm lower before its keep-out meets
-# H1's courtyard (y 16 + 3.45); the rail's free end below it would then be about 25 mm instead of 29.
+# 64 mm gap on the left being where U27 and J10 sit.  The first tab could go down to 29 mm and still keep its keep-out 1 mm
+# from H1's courtyard (y 16 + 3.45), as H5 and H6 keep theirs; the rail's free end below it would then be about 26 mm
+# instead of 29 (support question 3a).
 TABS = (32.0, 48.0, 112.0, 130.0, 145.0)
 BITE_INSET = FPL.BREAK_D / 2                     # mouse-bite line on the body's side, the holes touching the edge from inside
 BREAK_FOOTPRINT = "fcjamma:" + FPL.BREAK
 TOOLING_FOOTPRINT = "fcjamma:" + FPL.TOOL
 # 2.0 mm tooling holes centred on the rails (JLCPCB's figure: 'Centered on process edge', which leaves 1.5 mm of rail on each
-# side), 5 mm from the rails' ends: near the panel's corners, our choice (JLCPCB gives no position).  Below the first tab the
-# rail's inner edge is routed: JLCPCB warns that a tooling hole next to a milling path weakens the rail, so the holes keep
-# the same 1.5 mm there as on the outer edge, and JLCPCB is asked (support question 3a).
+# side), 5 mm from the rails' ends: near the panel's corners, our choice (JLCPCB gives no position).  On both free ends of
+# the rail (below the first tab and above the last) its inner edge is routed: JLCPCB warns that a tooling hole next to a
+# milling path weakens the rail, so all four holes keep the same 1.5 mm there as on the outer edge, and JLCPCB is asked
+# (support question 3a).
 TOOLING = [(PANEL_X[0] + RAIL_W / 2, 5.0), (PANEL_X[0] + RAIL_W / 2, TOP - 5.0),
            (PANEL_X[1] - RAIL_W / 2, 5.0), (PANEL_X[1] - RAIL_W / 2, TOP - 5.0)]
 

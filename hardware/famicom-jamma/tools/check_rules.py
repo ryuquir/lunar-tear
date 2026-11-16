@@ -12,8 +12,10 @@ library table, footprint library, rules and project file into the work folder an
 - two Pico 2 copies, the JAMMA edge, the cartridge slot and a line of mouse bites with probes in forbidden places:
   every probe must be reported by the rule meant for it (or by KiCad's own check, where the project relies on it: J1's
   courtyard beside the tongue's root, a part without a courtyard).  A rule with a value (0.45, 0.25, 0.20, 0.15) has a
-  probe just inside its limit, which it must report, and one just outside, which no rule may report; so a weakened value
-  fails here too.  A via in a free place may be reported by none of them.  Every rule in the rules file has a probe.
+  probe just inside its limit, which it must report, and one just outside, which it must not report (nor, for the SMD
+  pads, KiCad's own clearance); so a value made weaker or stronger fails here too.  A via in a free place may be reported
+  by none of them.  The rule names are read from the rules file: every rule there must be one this script knows and
+  probes, and every rule it knows must be there.
 tools/build.py runs it on every build.  Exit status 1 and one line per failure.
 """
 import collections
@@ -317,6 +319,10 @@ def main():
             problems.append(f"the rule '{RULES[key]}' reports a via in a free place")
     unproved = sorted(set(RULES) - {k for _, k, _ in probes.values()})
     problems += [f"the rule '{RULES[k]}' has no probe" for k in unproved]
+    in_file = re.findall(r'\(rule "([^"]+)"', open(os.path.join(project, "fcjamma.kicad_dru"), encoding="utf-8").read())
+    problems += [f"the rules file has a rule this script does not probe: '{n}'" for n in in_file if n not in RULES.values()]
+    problems += [f"the rule '{n}' is not in the rules file" for n in RULES.values() if n not in in_file]
+    problems += [f"the rules file has the rule '{n}' {in_file.count(n)} times" for n in sorted(set(in_file)) if in_file.count(n) > 1]
     for p in problems:
         print(p)
     missed = len([p for p in problems if "does not report" in p])

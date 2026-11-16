@@ -184,6 +184,8 @@ JLCPCB(リジッド FR-4)は電解硬質金を提供せず、フィンガは ENI
 
 ## 6. 推奨 KiCad フットプリント仕様(このまま作図可能な寸法)
 
+> 2026-11-16 追記: この節の値は古い。基板に使っている値は `reference/02_jamma_interface.md` 1.2.3 の表（2026-11-16 更新）と `footprint_specs.md`、正本は `hardware/famicom-jamma/design/footprints.py`。主な違いは、フィンガーが先端から 1.6〜10.0mm（この節は 1.2〜10.0）、先端から 1.6mm までの銅禁止（同 1.2mm）、マスク開口が先端〜10.1mm（同 10.5mm）、部品禁止が先端から 15mm まで（同 12mm）。5 節の「先端〜1.2mm は銅禁止」も同じく 1.6mm に変わった。
+
 ### Takeaway
 下表の値で、パーツ面(F.Cu)1–28・ハンダ面(B.Cu)A–f の両面 SMD パッドと Edge.Cuts を作れば、Hirose/Sullins 両図面と JLCPCB(ENIG・30°面取り)の制約を同時に満たす。各値の採用理由は右列(推論を含む)。
 

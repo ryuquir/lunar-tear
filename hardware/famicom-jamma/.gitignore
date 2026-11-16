@@ -7,7 +7,8 @@ out/*.png
 # the repository root ignores every "tools/" directory; this one holds the generator
 !tools/
 kicad/~*.lck
-out/board/fcjamma_failed.kicad_pcb
+# the KiCad project of a build that failed (tools/build.py), to be looked at
+out/failed/
 # KiCad's own autosave and backup files, if the board is opened in KiCad
 kicad/_autosave-*
 kicad/#auto_saved_files#

@@ -4,9 +4,10 @@
     /usr/bin/python3 tools/make_board.py <kicad project folder> <board.json> <board file to write>
 
 tools/build.py writes board.json from design/board.py, the circuit and KiCad's netlist (J1's nets, path and fields) and runs
-this script with the system Python, which has KiCad's pcbnew module.  The board is written whether or not it passes;
-tools/build.py then runs KiCad's DRC and the schematic parity on it and puts it into kicad/ only when the whole build has
-no problem (otherwise into out/board/fcjamma_failed.kicad_pcb).  The board holds, so far: the outline (body, JAMMA
+this script with the system Python, which has KiCad's pcbnew module, on the project it stages: the board is written there
+whether or not it passes (before the checks, so that even a crash in them leaves it to look at); tools/build.py then
+runs KiCad's DRC and the schematic parity on it, and the staged project replaces kicad/ only when the whole build has no
+problem (otherwise it is kept in out/failed/kicad/).  The board holds, so far: the outline (body, JAMMA
 tongue and key slot, and the edge rails, joined by mouse bites), the JAMMA edge J1 placed on the tongue, the mounting holes,
 the rails' tooling holes and fiducials, the stackup (ENIG, bevelled edge connector), via tenting, the plot settings, the
 title block and the drill/place origin.  The other parts come in stage 2-2.  Every item gets an identifier derived from its
@@ -62,6 +63,8 @@ HOLE_WALL = 1.0                 # our choice: no hole's wall within 1 mm of a ro
                                 # weakens the rail); the tooling holes keep 1.5, the mounting holes 2.4
 FIDUCIAL_EDGE = 3.35            # JLCPCB: fiducial copper at least 3.35 mm from the board's edge (where the conveyor holds the panel)
 FIDUCIAL_CLEAR = 1.0            # our choice: nothing routed or drilled within 1 mm of a fiducial's mask opening
+EDGE_PARTS = 2.5                # JLCPCB assembly terms, 2.3: 'The distance between the body of the components and the edge of the
+                                # board must be equal or greater than 2.5mm'; the rails give it on the left and right edges
 HOLE_EDGE = 4.0                 # mounting holes at least 4 mm from the edges (02_jamma_interface.md 1.2.3)
 HOLE_TIP = 12.0                 # and not within 12 mm of the tip
 PANEL_MAX = 250.0               # JLCPCB: PCBA panels up to 250 x 250 mm
@@ -466,7 +469,15 @@ def facts(path, spec):
         ys = crossings(conts, 0, x_slot)
         tabs = [(a, b) for a, b in zip(ys[0::2], ys[1::2]) if inside((x_slot, (a + b) / 2))]
         tab_centres[side] = [(a + b) / 2 for a, b in tabs]
-        narrow = min((b - a for a, b in tabs), default=0.0)
+        # the narrowest width of a tab lies on the slot's centre line, between the round slot ends that face each other
+        # across it: measured on those arcs themselves, not on the outline's polygon (whose chords read about 0.005 wide)
+        ends = sorted(it[1][1] for it in items if it[0] == "arc" and abs(it[2] - BRD.RAIL_GAP / 2) < 1e-3
+                      and abs(it[6] - 180.0) < 0.01 and abs(it[1][0] - x_slot) < 1e-3)
+        widths_t = []
+        for c in tab_centres[side]:
+            below, above = [y for y in ends if y < c], [y for y in ends if y > c]
+            widths_t.append(min(above) - max(below) - BRD.RAIL_GAP if below and above else 0.0)
+        narrow = min(widths_t, default=0.0)
         fact(len(tabs) == len(BRD.TABS) and all(abs(c - t) < 0.05 for c, t in zip(tab_centres[side], BRD.TABS)),
              f"{side}: {len(tabs)} tabs at y {', '.join(f'{c:.1f}' for c in tab_centres[side])} (design/board.py "
              f"{', '.join(f'{t:g}' for t in BRD.TABS)})")
@@ -547,7 +558,7 @@ def facts(path, spec):
         dy = min((abs(at[1] - t) for t in tab_centres.get(side, [])), default=99.0)
         fact(dy <= TAB / 2, f"{ref}: level with a tab, where the rail is held ({dy:.2f} from the nearest tab's centre)")
         routed = outline_dist(items, at)
-        drilled = min((math.dist(at, at_of(o)) - mm(list(o.Pads())[0].GetDrillSize().x) / 2 for o in tools + holes if list(o.Pads())),
+        drilled = min((math.dist(at, at_of(p)) - mm(p.GetDrillSize().x) / 2 for o in tools + holes + bites for p in o.Pads()),
                       default=99.0)
         fact(min(routed, drilled) - opening / 2 >= FIDUCIAL_CLEAR - 1e-6,
              f"{ref}: nothing routed or drilled within {FIDUCIAL_CLEAR:g} mm of its mask opening (routed edge {routed - opening / 2:.2f}, "
@@ -557,7 +568,7 @@ def facts(path, spec):
     # over a slot or off the board (J1's reaches 0.5 past the tip on purpose; the tooling holes and fiducials are checked above)
     bare = [r for r, f in fps.items() if f.GetCourtyard(pcbnew.F_CrtYd).OutlineCount() + f.GetCourtyard(pcbnew.B_CrtYd).OutlineCount() == 0]
     fact(not bare, f"every footprint has a courtyard ({', '.join(sorted(bare)[:5]) or 'all do'})")
-    astray = []
+    astray, near_edge = [], []
     for ref, f in sorted(fps.items()):
         if ref == "J1" or re.fullmatch(r"(TH|FID)\d+", ref):
             continue
@@ -571,8 +582,17 @@ def facts(path, spec):
             cx0, cx1 = design((mm(cb.GetLeft()), 0))[0], design((mm(cb.GetRight()), 0))[0]
             if off_board.Area() / 1e12 > 1e-3 or cx0 < -0.1 or cx1 > BRD.BODY_W + 0.1:
                 astray.append(f"{ref} x {cx0:.2f}-{cx1:.2f}, {off_board.Area() / 1e12:.2f} mm² off the board")
+            if re.fullmatch(r"(H|MB)\d+", ref):          # holes and mouse bites are not parts with a body
+                continue
+            cy0, cy1 = design((0, mm(cb.GetBottom())))[1], design((0, mm(cb.GetTop())))[1]
+            beside = cx0 < BRD.TONGUE_X0 or cx1 > BRD.TONGUE_X0 + BRD.TONGUE_W     # over the body's lower edge, not the tongue
+            gap = min(BRD.TOP - cy1, cy0 - BRD.Y0 if beside else 99.0)
+            if gap < EDGE_PARTS - 1e-6:
+                near_edge.append(f"{ref} {gap:.2f} mm")
     fact(not astray, f"every part's courtyard lies on the body, between its left and right edges and inside the outline "
          f"({'; '.join(astray[:3]) or 'all do'})")
+    fact(not near_edge, f"every part's courtyard keeps {EDGE_PARTS:g} mm from the edges without a rail: the top edge and the "
+         f"body's lower edge beside the tongue (JLCPCB) ({'; '.join(near_edge[:3]) or 'all do'})")
 
     # ---- settings
     fact(board.GetCopperLayerCount() == 2, f"two copper layers ({board.GetCopperLayerCount()})")
@@ -618,8 +638,8 @@ def main():
     # built in a scratch folder without a project file, so that the saved bytes do not depend on where it is checked
     with tempfile.TemporaryDirectory(prefix="fcjamma-make-board-") as tmp:
         path = write(project, spec, os.path.join(tmp, "fcjamma.kicad_pcb"))
+        shutil.copy(path, out_path)            # before the checks, so that a crash in them still leaves the board to look at
         results = facts(path, spec)
-        shutil.copy(path, out_path)
     failed = [what for ok, what in results if not ok]
     for what in failed:
         print("board check failed:", what)

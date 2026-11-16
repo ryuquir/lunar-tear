@@ -6,8 +6,10 @@
 Dimensions are millimetres.  Origin: lower left corner of the bounding box, seen from the parts side with the
 JAMMA fingers pointing down; y = 0 is the tip of the fingers, x runs to the right, y upwards.
 Before it draws, the script checks that the large parts lie inside the outline and do not overlap each other,
-the mounting holes or the space the cartridge shell needs, that the through-hole parts keep 2.5 mm from the body's edges,
-and that no part or zone reaches into the JAMMA band or the keep-out beside a rail tab.  tools/build.py runs the same check and compares the dimensions with design/board.py.
+the mounting holes or the space the cartridge shell needs, that the through-hole parts keep 2.5 mm from the body's edges
+and every part and zone 2.5 mm from the edges without a rail (JLCPCB), and that no part or zone reaches into the JAMMA
+band or the keep-out beside a rail tab.  tools/build.py runs the same check and compares the dimensions with
+design/board.py.
 
 Where the fixed dimensions come from
 - JAMMA edge: research_notes/ファミコン JAMMA 基板 仕様調査/reference/02_jamma_interface.md section 1.2.3
@@ -80,6 +82,7 @@ HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 99.0), 
 GUIDE_HOLES = [(52.0, 149.5), (168.0, 149.5)]   # for a bracket that holds the cartridge (not plated)
 THT = ("U1", "U6", "J8", "SW3", "RV1")         # the through-hole parts (README chapter 8: at least 2.5 mm from the board's edges)
 THT_EDGE = 2.5
+EDGE_PARTS = 2.5     # JLCPCB assembly terms 2.3: every part's body 2.5 mm from the board's edge; the rails give it on the left and right
 
 
 def check():
@@ -119,6 +122,13 @@ def check():
         d = min(x, BODY_W - (x + w), y - Y0, TOP - (y + h))
         if d < THT_EDGE:
             problems.append(f"{n} (through hole) is {d:.2f} mm from the body's edge, less than {THT_EDGE:g}")
+    for n, box in [(n, PARTS[n][:4]) for n in PARTS] + [(f"zone '{n}'", ZONES[n][:4]) for n in ZONES]:
+        x, y, w, h = box
+        beside = x < TONGUE_X0 or x + w > TONGUE_X0 + TONGUE_W          # over the body's lower edge, not over the tongue
+        d = min(TOP - (y + h), (y - Y0) if beside else 99.0)
+        if d < EDGE_PARTS:
+            problems.append(f"{n} is {d:.2f} mm from an edge without a rail (the top, or the body's lower edge beside the "
+                            f"tongue), less than {EDGE_PARTS:g}")
     # the JAMMA band: J1's courtyard, to 15 mm above the tip and 5 mm past the outer fingers' copper
     band = (FINGER1_X - FINGER_W / 2 - 5.0, 0.0, 27 * PITCH + FINGER_W + 10.0, JAMMA_KEEP)
     keep = [(x0, t - TAB_KEEP_H, TAB_KEEP, 2 * TAB_KEEP_H) for t in TABS for x0 in (0.0, BODY_W - TAB_KEEP)]

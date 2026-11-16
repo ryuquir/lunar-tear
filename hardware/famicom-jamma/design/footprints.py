@@ -346,7 +346,9 @@ def insert_before_pads(tree, items):
 # ≧0.20mm ... 2-layer: 1 oz: Recommended 0.25 mm or above; absolute minimum 0.18 mm', 'SMD pad to pad clearance (different
 # nets) 0.15mm'.
 # - silkscreen: paste-only stencil openings are not copper.  KiCad's test-point footprints (TP*) draw their circle 0.14
-#   from the pad; JLCPCB trims silkscreen near pads, so a test point's own circle is let through.
+#   from the pad; JLCPCB trims silkscreen near pads, so silkscreen between test points (a TP*'s silkscreen against a TP*'s
+#   pad, its own or another's) is let through.  Two test points' courtyards (R1.25) overlap, an error, long before one's
+#   circle (R0.95) could come that near another's pad, and silkscreen on a pad itself is still reported by KiCad's own check.
 # - pad holes: the mouse bites (MB*) are 0.3 apart (JLCPCB's mouse-bite values, edge rails above).
 # - rings: JLCPCB's recommended 0.25 on every through-hole pad but the mechanical ones (the USB-C shell's slots, 0.20 in
 #   KiCad's footprint), which keep JLCPCB's 0.20.
