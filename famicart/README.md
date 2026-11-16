@@ -42,6 +42,9 @@ make -j
 # rev C 基板は 2 つ書く: 主 MCU（J3 を挿し SW2 を押しながら SW1 を離す）と XIAO（XIAO 自身の USB-C と BOOT ボタン）
 cmake -S . -B build-rp2350b   -DFC_BOARD=rp2350b   && cmake --build build-rp2350b   # -> RP2350B へ
 cmake -S . -B build-xiao_audio -DFC_BOARD=xiao_audio && cmake --build build-xiao_audio # -> XIAO RP2040 へ
+
+# rev H の待機用プログラム（チップごと。FC_REVH_CHIP = 1〜6・8・9、6 はハブ。docs/13 の「ファームの土台」）
+cmake -S . -B build-revh_u6 -DFC_BOARD=revh -DFC_REVH_CHIP=6 && cmake --build build-revh_u6   # ピンのヘッダーの確認: python3 tools/fw/gen_revh_pins.py --check
 ```
 
 ## ROM の書き込み（自動判別）

@@ -1,6 +1,6 @@
 # 13 rev H（RP2350B ×8。JLCPCB の実装だけで完成する rev G の上位互換）
 
-2026-11-14 作成。**状態: 基板は 6 層で配線済み、注文データあり（2026-11-16）。ファームウェアはまだ。** rev G は [12](12_rev_g_plan.md)、ファミコン本体の仕様は [11](11_famicom_reference.md)。
+2026-11-14 作成。**状態: 基板は 6 層で配線済み、注文データあり（2026-11-16）。ファームウェアは土台（ピンのヘッダー、ボードヘッダー、待機用のプログラム）だけ（[ファームの土台](#ファームの土台2026-11-16)）。** rev G は [12](12_rev_g_plan.md)、ファミコン本体の仕様は [11](11_famicom_reference.md)。
 
 依頼: 「RP2350B をふんだんに使って rev G の上位互換の基板を作る。JLCPCB の実装だけで完成すること」。手はんだ・秋月のモジュール・事前の書き込みを無くし、部品はすべて JLCPCB が載せる。部品選定のルール（安く実際に作れること、在庫が豊富なこと、種類と点数を減らすこと）は従来どおり。JLCPCB の Standard PCBA では Basic と Extended のフィーダー料金が同じ（1 種類 $1.53）なので、必要な所は Extended 部品を使う。
 
@@ -507,7 +507,7 @@ rev H で加わる決まり（本文の各節から）:
 移植の一覧: 
 - rev G のピン番号（U1・U2・U4・U5 は同じ番号、U3 とハブは新しい番号）。`src/` は rev E のコードなので、実際には rev E からの移植になる。
 - チップごとのボードヘッダーを作る: `PICO_RP2350A 0`（pico2.h・seeed_xiao_rp2350.h は 1 にするので、GPIO32〜47 が使えず、ADC が 26 からになる）、フラッシュ 16 MB、SDK の既定のピン（LED 25 は VSEL_S、UART 0/1 は LINK_F/SD_CD、I2C 4/5 は SD_DAT0/1 など）は未定義にする。
-- ハブのピン: LINK 0、SD_CD 1、SPI0 の SCK 2・TX 3（CMD）・RX 4（DAT0）、CS は GPIO7 を SIO で（SPI0 の CSn は GPIO1/5 にしか出ない）、WLINK 受信 8〜10、XLINK-H2 受信 11〜13・送信 14〜16、PLINK 17、SWD（SIO）U5 18/19・U2 20/21・U3 22/23・U4 35/36・U1 37/38・U8 43/44・U9 45/46、nRST 24（オープンドレイン）、VSEL 25、XLINK-H1 受信 26〜28・送信 29〜31、HIRQ 32、HM2 33（PWM 8B 入力）、PWM2 34（PWM 9A）、LED 39、ADC は V5S 40（0 ch）・EXT 41（1 ch）・VBUS_S 42（2 ch）、CS1 47（XIP_CS1。QMI の m[1] のタイミングを別に設定）。
+- ハブのピン: LINK 0、SD_CD 1、SPI0 の SCK 2・TX 3（CMD）・RX 4（DAT0）、CS は GPIO7 を SIO で（SPI0 の CSn が出るのは GPIO1・5・17・21・33・37 だけで、ハブではどれもほかに使っている）、WLINK 受信 8〜10、XLINK-H2 受信 11〜13・送信 14〜16、PLINK 17、SWD（SIO）U5 18/19・U2 20/21・U3 22/23・U4 35/36・U1 37/38・U8 43/44・U9 45/46、nRST 24（オープンドレイン）、VSEL 25、XLINK-H1 受信 26〜28・送信 29〜31、HIRQ 32、HM2 33（PWM 8B 入力）、PWM2 34（PWM 9A）、LED 39、ADC は V5S 40（0 ch）・EXT 41（1 ch）・VBUS_S 42（2 ch）、CS1 47（XIP_CS1。QMI の m[1] のタイミングを別に設定）。
 - ハブが救済リセットで相手の RP-AP の CTRL を書くときは、ビット 1:0 を 0 のままにする（JTAG にすると TDO が GPIO3 に出て、1 kΩ の先の CA3・ZA3・PA3 にぶつかる）。
 - `reve_linkhw.c` は clk_sys を 8 × 12.5 MHz で割るので、LINK を受けるチップは 100 MHz 以上が要る（12〜48 MHz で待機している U4・U5 は LINK を受けられない）。
 - rev E のコードで変わるピン: U1・U3 の PIN_LED 25 は生の /ROMSEL になったので駆動しない。U1 の GPIO26/27 は H で有効の RSEL_D/WS_D（`wait` の向きと /ROMSEL のビットを反転）。U2 は GPIO26/27（PWS_D と PLINK_B）を駆動しない。U3 は LINK 28、PWM 29、IRQ のゲート 30、M2 23、/RD 36、PA12/13 34/35、CIRAM は in_base 32・side-set 37/38、M2 と R/W の並びは U1 と逆（23 が M2、24 が R/W）。
@@ -515,6 +515,57 @@ rev H で加わる決まり（本文の各節から）:
 - 150 MHz で起動したときの時間の定数を計算し直す（CIRAM の応答は 240 MHz で 45〜70 ns。150 MHz では 10〜15 ns 遅くなるが、余裕 62 ns の内側）。
 - ハブのファーム（USB、SWD での書き込み、XLINK、保存、電源管理）は rev G と同じく新しく書く。
 - U8・U9 のファーム（XLINK の輪、郵便受け、受け持つ機能）は新しく書く。U8・U9 が無くても、同じ機能はハブで動く。
+
+### ファームの土台（2026-11-16）
+
+マッパーの処理はまだ無い。8 個のチップに共通の土台と、実機で配線と電源を確かめるための待機用のプログラムだけ。
+
+| ファイル | 中身 |
+|---|---|
+| `tools/fw/gen_revh_pins.py` | `tools/pcb/design_revh.py` のネットリスト（`NETS` を `GPIO_PIN` で引き、`G[n]` と一致することも確かめる）から下の 9 個のヘッダーを作る。`--check` は作り直した内容とファイルを比べ、古い・無い・余分なファイルがあれば 1 で終わる（設計を変えてヘッダーが古いまま残るのを防ぐ） |
+| `src/revh/pins_u1.h`〜`pins_u9.h`（U7 以外の 8 個、生成物） | 接続のある GPIO ごとに `PIN_<ネット名>`（`PIN_C_ROMSEL`、`PIN_SD_CLK` など。コメントに QFN のピン番号とネットの先）、空きピン、本体の端子に届くネットのピン `REVH_CONSOLE_MASK`、PIO で続けて使う群（バス、`CPU_BUS`・`PPU_BUS`・`CIRAM`、リンクの 3 本組、SWD の 2 本組、microSD など）の `_BASE`／`_COUNT` と、連続していることを確かめる `_Static_assert`、群が入る PIO の窓（GPIOBASE 0 か 16）。リンクは自分が送る側を `_TX_BASE`、受ける側を `_RX_BASE` でも引ける |
+| `src/revh/pins_hub.h`（生成物） | ハブの機能をこの文書の名前で: microSD の SPI0（CS は GPIO7 を SIO で）、ADC のチャンネル（V5S 0・EXT 1・VBUS_S 2、ADC_BASE_PIN 40）と分圧の抵抗値、ADC の基準（+3V3 の公称 3.327 V）、HM2（PWM8 B）・PWM2（PWM9 A）、7 個の SWD の組（配列と、`REVH_CONSOLE_MASK` と比べるためのマスク）、nRST・VSEL、QMI CS1（GPIO47）。機能番号は SDK の `io_bank0.h` の名前で引くので、その機能の無いピンに変わるとビルドが止まる |
+| `boards/famicart_revh.h` | 8 個共通のボードヘッダー。`PICO_RP2350A 0`、フラッシュ 16 MB（リンカーの領域も 16 MB）、12 MHz、水晶の起動待ちは SDK の既定の 6 ms を明示（理由はファイルに。`#ifndef` で囲んだので、ビルドごとにコンパイラの -D で変えられる）、`SYS_CLK_VREG_VOLTAGE_AUTO_ADJUST 0`。`pico2.h` を取り込まず、LED・UART・I2C・SPI などの既定のピンは定義しない |
+| `src/revh/revh_start.c`・`.h` | 全プログラムが最初に呼ぶ `revh_start()`: VREG を高インピーダンスにし、clk_sys が 150 MHz を超えていれば下げる（上げない）。GPIO には触れない。ほかに、本体側のピンをプルなしの入力にする `revh_pins_float()`、12 MHz の水晶だけで動かし PLL を止める `revh_clock_standby()`。U8・U9 のビルドでは SDK のクロックの初期化（`runtime_init_clocks`）を置き換え、PLL を動かさずに 12 MHz の水晶で起動する（決まり 9） |
+| `src/revh/main_idle.c` | 待機用のプログラム（チップごとにビルド） |
+
+ビルド（`FC_REVH_CHIP` は 1〜6・8・9、既定は 6 ＝ハブ。ハブだけ USB の stdio が入る）:
+
+```sh
+cd famicart && cmake -S . -B build-revh_u6 -DPICO_SDK_PATH=/path/to/pico-sdk -DFC_BOARD=revh -DFC_REVH_CHIP=6 && cmake --build build-revh_u6
+```
+
+8 個ともビルドが通り、警告は 0（pico-sdk 2.3.1。text はハブ 31.5 KB、U8・U9 11.3 KB、ほか 11.4 KB）。ほかの FC_BOARD の出力は変わらない（reve_cpu を変更前の CMakeLists.txt と作り比べ、.bin が 1 バイト単位で一致）。
+
+コア電圧の手順の実装:
+
+- VREG_CTRL の UNLOCK と VREG の HIZ は、SDK と同じく atomic な set の別名アドレスに、上位 16 ビットのパスワード 0x5AFE を付けて書く。VREG_CTRL にそのまま 0x5AFE<<16 | UNLOCK を書くと RST_N（ビット 15、0 で電源を起動時の設定に戻す）と HT_TH も 0 になり、VREG にそのまま書くと VSEL が 0.55 V になるため。
+- 実行は main の前、クロックの設定より前（SDK の初期化の順番 00010。クロックは 00500）。`revh_start()` が同じ手順を呼び、済んでいることを確かめる。
+- SDK でコア電圧を変えるのは、クロックの初期化の自動調整（RP2350 の 150 MHz では既定で無効。ボードヘッダーでも 0 にし、1 ならビルドを止める）と `pico_low_power`（リンクしない）だけ。さらに rev H のビルドは `vreg_set_voltage`・`vreg_disable_voltage_limit` をリンカーの `--wrap` で包み、包む側の関数を作っていないので、どこかで呼ぶとリンクが失敗する（呼び出しを足して失敗することを確かめた）。
+- 内蔵の電源で DVDD を作る基板（Pico 2 など）に rev H のビルドを書くと、HIZ でチップがリセットされ、起動を繰り返す（データシート §6.3.1.3）。BOOTSEL で戻す。
+
+待機用のプログラムがすること:
+
+- 全チップ: 本体の端子に届くネットのピン（`REVH_CONSOLE_MASK`: CPU・PPU のバス、生の R/W・M2・/ROMSEL・/WE、RSEL_D・WS_D・PWS_D、/IRQ の FET のゲート、CIRAM /CE・A10、音声の PWM、ハブの M2 の枝）をプルなしの入力にし、何も出さない（rev G の決まり「ピンのプルを切る」。リセット直後はプルダウンが入っている）。U3 の CIRAM /CE は 10 kΩ で H のまま（本体の VRAM は選ばれない）、/IRQ は Q5 のゲートの 2.2 kΩ で解放のまま。
+- 全チップ: LED を 1 秒に 1 回短く点ける。VSEL_S が H の間は 2 回。VSEL_S はプルなしの入力で読む。
+- それ以外のピン（LINK、PLINK、WLINK、XLINK、XSTAT、PEV、HIRQ、IRQ4・5、空き）はリセット直後のまま。
+- U1〜U5: SDK のクロックの初期化で main までは 150 MHz で動き（電源の決まり 1 の内側）、そのあと clk_sys を 12 MHz の水晶に切り替え、PLL を 2 つとも止める（電源の決まり 2 の待機）。
+- U8・U9: SDK のクロックの初期化を `revh_start.c` の関数で置き換え、起動から 12 MHz の水晶で動く。PLL は一度も動かさない（決まり 9、U8・U9 の待機の決まり 1・2）。USB・ADC・HSTX のクロックも起動の間は水晶から出し（SDK はこのあと全ブロックのリセットを解き、クロックが動いている前提で完了を待つため）、main で止める。
+- ハブ（150 MHz のまま）: SWCLK を L、SWDIO をプルアップ（上の「決まり」）。nRST は解放（入力、パッドのプルなし。基板の 10 kΩ で H）。VSEL は L のまま（入力、パッドのプルなし。基板の 100 kΩ で Q7 は切れたまま）。microSD はカード検出をパッドのプルアップで読み、CMD・DAT0〜3 はパッドのプルを外して基板のプルアップで H にする（CLK はリセット直後のまま L）。カードの初期化はしない。
+- ハブ: 最初に D+ のプルアップを切り、USB_PWR を「VBUS なし」にする（SDK の起動処理は USB の回路をリセットしないので、デバッガーからのコアだけのリセットのあとでは、前の実行のプルアップが残っていることがある）。VBUS_S が 1.5 V 以上を 3 回（30 ms）続けて読んでから USB の CDC を始め（1.5 V 未満を 1 回でも読んだら数え直す）、1.4 V を下回ったら D+ のプルアップを切る（`tud_disconnect`）。VBUS_S は ADC のピンで USB の VBUS_DETECT 入力ではないので、USB_PWR の VBUS 検出の上書きを VBUS_S に合わせて書く。データシートには上書きでプルアップが切れるとは書いていないので、プルアップは明示的に切る。TinyUSB の初期化はプルアップを入れてしまうので、VBUS を初めて見るまで初期化しない。
+- ハブ: 1 秒ごとに USB に 1 行出す: V5S・EXT・VBUS_S（ピンの電圧と分圧の前の電圧。抵抗値は設計から）、VSEL_S・SD_CD・nRST の値、clk_sys、VREG の状態、U7 の先頭 4 バイト。
+- ハブ: U7 は QMI の窓 1 を 03h のシリアル読み出し（clk_sys / 6 ＝ 25 MHz）にし、キャッシュもアドレス変換も通らない別名（0x1D000000）で読むだけ。
+- ハブ: USB から BOOTSEL に入るとき（picotool、1200 baud）の動作表示を、ハブの LED（GPIO39）に固定した。ホストが GPIO25（VSEL）や 24（nRST）を指定できないようにするため。
+
+しないこと: バスに答えない。**U1 は待機用の $4C を出さないので、決まり 1 を満たさない。** 電源の入った本体では、CPU は電源投入から約 17 ms でリセットが解けて暴走する。U1・U3・U4 のどれかにリセット直後のプルダウンが残っている間（ブート ROM、水晶の起動待ち、SDK の初期化の間。プログラムの無いチップではずっと）は $00 を読み、3 個とも待機用のプログラムに入ったあとは何も駆動されないバスを読む。カートリッジは本体の信号を何も駆動しない（バスのピンはプルなしの入力、CIRAM /CE は R25 の 10 kΩ で H、/IRQ は Q5 のゲートの R21 で解放）ので、本体とぶつかることはなく、部品が傷むことはない。画面と音がでたらめになるだけ。U1 の待機用のビルドは、本体なしで USB から給電して使うか、本体に挿すときはリセットボタンを押したままにする（立ち上げで V5S を読むときも、この方法がよい）。ほかに、リンク、SWD での書き込み、microSD の読み書き、保存、電源の監視による制限、クロックを 150 MHz より上げることや VSEL を上げることもしない。U7 の FLASH_DEVINFO は設定しない（読むだけなら要らない。消去と書き込みには `flash_devinfo_set_cs_size(1, FLASH_DEVINFO_SIZE_16M)`・`flash_devinfo_set_cs_gpio(1, 47)` と、フラッシュの操作のたびに窓 1 を設定し直す関数（`flash_set_qmi_cs1_setup_function`）が要る）。
+
+まだのこと・確かめること:
+
+- 実機で動かしていない。立ち上げの手順 2・3 のあと、まず 8 個の LED と、ハブの USB の出力（+5V・VBUS の値、VSEL_S、SD_CD、nRST、U7）を見る。VREG が「hiz」であること。+5V（V5S）は本体の電源が入っているときだけ 0 でなくなるので、本体のリセットボタンを押したまま読む（上の「しないこと」）。
+- ADC の換算は +3V3 の公称値なので、+3V3 の誤差（3.21〜3.45 V）がそのまま入る。SD_CD のカードありの向きは TF-01A の資料で確かめていない（生の値を出す）。
+- 水晶の起動待ち 6 ms で足りるか（立ち上げの手順 3）。
+- 各チップの VSEL_S の配線を LED の 2 回点滅で確かめるには、VSEL を上げるハブのファームが要る。
+- 次の工程: U1 の電源投入 8 ms 以内の $4C、LINK・WLINK・XLINK の PIO、ハブの SWD での書き込み、電源管理。
 
 ## 立ち上げの手順と合格基準
 
