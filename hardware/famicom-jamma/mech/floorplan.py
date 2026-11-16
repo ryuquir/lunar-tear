@@ -18,7 +18,7 @@ Where the fixed dimensions come from
 - Famicom cartridge shell: about 108 x 17 mm seen from above, about 70 mm tall (published figures differ; to be measured)
 - Raspberry Pi Pico 2: KiCad courtyard of Module:RaspberryPi_Pico_SMD, 53.9 x 23.1; DIP-40 socket courtyard 51.4 x 18.3
 - USB-C HRO TYPE-C-31-M-12: about 8.9 wide, 7.3 deep
-- edge rails (design/board.py): 5 mm on the left and right, a 2 mm slot, joined by 5 mm tabs with mouse bites
+- edge rails (design/board.py): 5 mm on the left and right, a 2 mm slot, joined by tabs (5.5 mm at the narrowest) with mouse bites
 """
 import os
 import subprocess
@@ -38,9 +38,9 @@ FINGER1_X = TONGUE_X0 + 3.74           # centre of finger 1
 KEY_X, KEY_W, KEY_D = FINGER1_X + 6 * PITCH, 3.0, 11.5
 RAIL_W = 5.0                           # JLCPCB edge rails (manufacturing only), on the left and right sides
 RAIL_GAP = 2.0                         # routed slot between the rail and the body
-TAB_W = 5.0                            # tabs with mouse bites that join the rails to the body
+TAB_W = 5.5                            # tabs with mouse bites that join the rails to the body (narrowest width)
 TABS = (32.0, 48.0, 112.0, 130.0, 145.0)   # tab centres (y), the same on both sides
-TAB_KEEP, TAB_KEEP_H = 5.0, 6.5        # no part within 5 mm of a tab's mouse bites (into the body, ±6.5 along the edge)
+TAB_KEEP, TAB_KEEP_H = 5.6, 8.5        # no part within 5 mm of a tab's mouse bites (into the body, ±8.5 along the edge)
 
 # ------------------------------------------------------------------ large parts: name -> (x, y, w, h, kind, label, height above the board)
 PARTS = {
@@ -362,7 +362,7 @@ def build_svg():
     title = "ファミコン JAMMA 基板　外形と部品配置の案（部品面から見た図・単位 mm）"
     notes = [
         "・外形: 本体 220 × 150 mm の下に、JAMMA 端子の差し込み部（幅 114.4 × 長さ 12）。全体で 220 × 162 mm です。A5 用紙（210 × 148）より少し大きい程度です。捨て基板を含めると 234 × 162 mm です。",
-        "・部品はすべて表面に載ります。大きな部品は実寸で、点線の枠は小さな部品を置く予定の範囲です。左右の灰色の帯は製造時だけ付く捨て基板（幅 5 mm、本体との間に 2 mm の溝、5 か所のミシン目でつながる）で、ミシン目の横の赤い枠には部品を置きません。",
+        "・部品はすべて表面に載ります。大きな部品は実寸で、点線の枠は小さな部品を置く予定の範囲です。左右の灰色の帯は製造時だけ付く捨て基板（幅 5 mm、本体との間に 2 mm の溝、5 か所のミシン目でつながる）で、ミシン目の横の赤い枠（穴から 5 mm）には部品を置きません。",
         "・これは段階 2（部品配置）の出発点となる案です。配置と配線を進める中で、外形の寸法（目安 ±20 mm）と部品の位置は変わることがあります。",
         "・カセットは基板から垂直に立ちます（高さ 約 80 mm）。カセットの殻の寸法は資料によって 2 mm ほど違うので、端子のサンプルと実物のカセットで確かめてから確定します。",
     ]

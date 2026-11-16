@@ -662,7 +662,7 @@ def check_plan(problems):
                        ("parts keep-out above the tip", -FPL.JAMMA_TOP, plan.JAMMA_KEEP), ("rail width", BRD.RAIL_W, plan.RAIL_W),
                        ("slot beside the rails", BRD.RAIL_GAP, plan.RAIL_GAP), ("tab width", BRD.TAB_W, plan.TAB_W)):
         if abs(a - b) > 1e-9:
-            problems.append(f"design/board.py and mech/floorplan.py disagree on the {what}: {a} and {b}")
+            problems.append(f"design/board.py and mech/floorplan.py disagree on the {what}: {a:.6g} and {b:.6g}")
     if [tuple(h) for h in BRD.HOLES] != [tuple(h) for h in plan.HOLES]:
         problems.append("design/board.py and mech/floorplan.py place the mounting holes differently")
     if tuple(BRD.TABS) != tuple(plan.TABS):
@@ -689,13 +689,16 @@ def drc_summary(data, pcb, placed):
     for e in viol:
         e["items"] = sorted(e.get("items", []), key=lambda i: (i.get("description", ""), i.get("uuid", "")))
     out["violations"] = sorted(viol, key=lambda e: json.dumps(e, sort_keys=True))
-    by_net = {}
+    by_net, count = {}, {}
     for e in data.get("unconnected_items", []):
+        nets = [m.group(1) for i in e.get("items", []) for m in [re.search(r"\[([^\]]+)\]", i.get("description", ""))] if m]
+        if nets:
+            count[nets[0]] = count.get(nets[0], 0) + 1          # one connection still to route
         for item in e.get("items", []):
             m = re.match(r"Pad (\S+) \[([^\]]*)\] of (\S+)", item.get("description", ""))
             if m:
                 by_net.setdefault(m.group(2), set()).add(f"{m.group(3)}-{m.group(1)}")
-    out["to_route"] = {net: {"pads": sorted(pads), "connections": len(pads) - 1} for net, pads in sorted(by_net.items())}
+    out["to_route"] = {net: {"connections": count[net], "pads": sorted(by_net.get(net, ()))} for net in sorted(count)}
     missing, other = [], []
     for e in data.get("schematic_parity", []):
         m = re.match(r"Missing footprint (\S+) ", e.get("description", ""))      # 'Missing footprint R95 (470)'
@@ -736,6 +739,7 @@ def _board_outputs(design, env, kdir, odir, problems, warnings):
         "break_footprint": BRD.BREAK_FOOTPRINT, "break_lines": [list(k((x, y))) + [rot] for x, y, rot in BRD.break_lines()],
         "j1": {"footprint": FPL.JAMMA, "value": j1.value, "at": list(k(BRD.J1_AT)), "path": paths["J1"], "nets": nets,
                "fields": fields},
+        "failed_path": os.path.join(odir, "board", "fcjamma_failed.kicad_pcb"),
     }
     with tempfile.TemporaryDirectory(prefix="fcjamma-board-") as tmp:
         sp = os.path.join(tmp, "board.json")
@@ -897,7 +901,8 @@ def main():
         for p in problems:
             print("  -", p)
         sys.exit(1)
-    print("OK: model and KiCad netlist agree; parts rule satisfied")
+    print("OK: model and KiCad netlist agree; parts rule satisfied" + ("" if "not built" not in board_line else
+          "; the board was NOT built or checked (no pcbnew)"))
 
 
 if __name__ == "__main__":

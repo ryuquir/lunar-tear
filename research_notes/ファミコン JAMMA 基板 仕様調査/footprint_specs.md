@@ -49,7 +49,7 @@
 | 原点 | 基板の先端の線と、1/A 番の中心線の交点。+X は 28/f 番の向き、基板は −Y 側 | JST GEC「PC board layout (viewed from component side)」 |
 | パッド | 種類 connect（金フィンガー用。銅とマスクだけで、ペーストなし）。表 1〜28（7 なし）、裏 A〜f（H なし）で、各 27 本 | JAMMA56 の記号、Hirose・Sullins（G, I, O, Q は使わない） |
 | ピッチ | 3.96。1〜28 番の間は 106.92 | JST 106.92 ± 0.05、Hirose 106.98 ± 0.08 の両方に入る |
-| フィンガー | 幅 2.30、先端から 1.6〜10.0（長さ 8.4、中心 Y −5.8）。2026-11-16 までは 1.2〜10.0 | 幅: Hirose 2.3 ± 0.1（JST の図面は「2.3 ±0.35 (.091 ±.001)」と、mm とインチで公差が食い違う）。1.6: JLCPCB の 30° 面取りでの後退は約 1.13（図「30 ± 5° / Approx. 1.13 mm」）。同じ深さで 25° になると 1.13 × tan30° ÷ tan25° ≒ 1.40、さらに外形の公差 ±0.2 で先端が 0.2 内側に来ると 1.60。相手の接点は先端から 5.3 ± 0.4（Hirose）なので、1.6 でもフィンガーの上に乗る |
+| フィンガー | 幅 2.30、先端から 1.6〜10.0（長さ 8.4、中心 Y −5.8）。2026-11-16 までは 1.2〜10.0 | 幅: Hirose 2.3 ± 0.1（JST の図面は「2.3 ±0.35 (.091 ±.001)」と、mm とインチで公差が食い違う）。1.6: JLCPCB の 30° 面取りでの後退は約 1.13（図「30 ± 5° / Approx. 1.13 mm」）。先端に残る平らな部分を同じとして、25° なら 1.40（+0.27）、板厚 +10 %（1.76）なら 1.27（+0.14）、外形の公差で先端が 0.2 内側。二乗和で 1.13 + 0.36 ≒ 1.49、全部が同時に最悪だと約 1.77（2 回目のレビューの指摘。JLCPCB に聞く、事前質問 3d）。相手の接点は先端から 5.3 ± 0.4（Hirose）なので、1.6 でもフィンガーの上に乗る |
 | 表裏の対応 | 同じ X に置く（A は 1 の真裏、f は 28 の真裏） | 公開されている 3 設計、国内の配線表 |
 | マスク | 表裏とも (−4.24, 0.5)〜(111.16, −10.1) を全面開口。フィンガーの根元から 0.1 mm で止める（はじめは −10.5。レビューで、根元の先を横に走る線が露出しても DRC が見つけないと分かったので縮めた） | JLCPCB「The gold finger area must have the solder mask fully opened」 |
 | 禁止域 | 次の 3 帯（表裏の銅） | JLCPCB「this area can not have copper」（推論で範囲を決めた） |
@@ -271,12 +271,12 @@
 
 | 項目 | 値 | 出典 |
 |---|---|---|
-| ミシン目（`BreakLine_9h_D0.5mm_P0.8mm_KeepOut`） | めっき無しの穴 0.5 mm を 9 個、Y 方向に 0.8 mm 間隔（穴と穴の間 0.3 mm）、全長 6.9 mm | JLCPCB の能力表「Mouse bites Panel」: 「Recommended diameter of mouse bite is 0.5mm-0.8mm; Recommended distance between the two mouse-bites is 0.2-0.3mm」。KiCad 付属の Panelization ライブラリは 0.85 間隔（間 0.35）なので使わなかった |
-| つなぎの幅 | いちばん細いところで 5 mm。溝の端は半円（溝の幅 2 mm）なので、本体の縁の線上では 7 mm | 同「For breakaway with mouse-bites, the minimum width is 5mm」「Panel board spacing: 1.6 or 2 mm」 |
-| 穴の列の位置 | 本体の縁から 0.25 mm 内側（折った跡の出っ張りが外形から出ないように） | 推論（KiKit の通例と同じ） |
-| 禁止域 | 名前「Breakaway tab: keep clear」。本体側に 5 mm、列の中心から ±6.5 mm。部品・パッド・ビア・線・ベタを置かない（折るときに基板が曲がる）。基板の規則「Breakaway tabs: …」で DRC が報告する | 推論 |
+| ミシン目（`BreakLine_8h_D0.6mm_P0.9mm_KeepOut`。2026-11-16 のはじめは 0.5 mm の穴 9 個を 0.8 間隔にしていた） | めっき無しの穴 0.6 mm を 8 個、Y 方向に 0.9 mm 間隔（穴と穴の間 0.3 mm）、全長 6.9 mm | JLCPCB の能力表「Mouse bites Panel」: 「Recommended diameter of mouse bite is 0.5mm-0.8mm; Recommended distance between the two mouse-bites is 0.2-0.3mm」。JLCPCB のミシン目の手引き（2026-11-10 更新）: 「5 to 8 holes with a diameter of 0.60 mm」「hole edge to hole edge 0.35-0.4 mm. A minimum spacing of 0.3 mm」「a set of mouse bites every 50-60 mm」。両方に合うのは直径 0.6、間 0.3。KiCad 付属の Panelization ライブラリは 0.5 の穴を 0.85 間隔にしている |
+| つなぎの幅 | いちばん細いところで 5.5 mm（最小 5 mm に、溝の端の位置の公差 ±0.2 を見込んだ）。溝の端は半円（溝の幅 2 mm）なので、本体の縁の線上では 7.5 mm。左は U27 と J10 があるので、48 mm と 112 mm のつなぎの間が 64 mm 空く（手引きは 50〜60 mm ごと） | 能力表「For breakaway with mouse-bites, the minimum width is 5mm」「Panel board spacing: 1.6 or 2 mm」 |
+| 穴の列の位置 | 本体の側で、穴が内側から縁に接する（列の中心が縁から 0.3 mm 内側）。折った跡の出っ張りが外形から出ない。列の両端と溝の端の間には薄い板が残り、一緒に折れる | 推論（KiKit の通例と同じ側。手引きは「枠の中心線上、または基板に 3 分の 1 かかる位置」とする） |
+| 禁止域 | 名前「Breakaway tab: keep clear」。どの穴からも 5 mm（本体の縁から 5.6 mm、列の中心から ±8.5 mm）。部品・パッド・ビア・線・ベタを置かない（折るときに基板が曲がる）。基板の規則「Breakaway tabs: …」で DRC が報告する（はじめは本体側 5 mm × ±6.5 mm で、列の端の先では 3 mm しかなかった） | 推論 |
 | 治具穴（`ToolingHole_2.0mm_NPTH`） | めっき無し 2.0 mm。レールの幅の中央 | JLCPCB「For SMT assembly at JLCPCB, use 5 mm tooling edges, 2 mm tooling holes, and 1 mm fiducials centered at 3.85 mm from the panel edges」、図「Tooling hole: 2 mm diameter, Centered on process edge」 |
-| 位置合わせマーク | KiCad の `Fiducial_1mm_Mask2mm`。外側の縁から中心まで 3.85 mm（銅の縁まで 3.35 mm） | JLCPCB「How to Add Edge Rails and Fiducials」: 銅 1 mm、マスクの開口はその 2 倍、3〜4 個、縁から 3.35 mm 以上（図では銅の縁まで測っている） |
+| 位置合わせマーク | KiCad の `Fiducial_1mm_Mask2mm`。外側の縁から中心まで 3.85 mm（銅の縁まで 3.35 mm）。いちばん下といちばん上のつなぎの高さ（レールが支えられている所）に置く | JLCPCB「How to Add Edge Rails and Fiducials」: 銅 1 mm、マスクの開口はその 2 倍、3〜4 個、縁から 3.35 mm 以上（文は「keep-out area を含めて」とするが、図では銅の縁まで測っている。5 mm のレールで 2 mm の開口の縁まで 3.35 mm は取れない） |
 | 属性 | ミシン目と治具穴は基板だけの部品（`board_only`）、部品表と位置ファイルから外す | — |
 
 基板の規則「JLCPCB: pad holes 0.45 apart」は、ミシン目（参照番号 MB）の穴どうしを除く。JLCPCB がミシン目に勧める間隔（0.2〜0.3 mm）より広い規則なので。

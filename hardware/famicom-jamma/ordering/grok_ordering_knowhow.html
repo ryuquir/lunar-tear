@@ -68,7 +68,7 @@
 <tr><td>PCB Qty</td><td>5</td><td>試作の枚数（依頼者の指示があればその数）</td></tr>
 <tr><td>Product Type</td><td>Industrial/Consumer electronics</td><td>標準</td></tr>
 <tr><td>Different Design</td><td>1</td><td>1 種類の基板</td></tr>
-<tr><td>Delivery Format</td><td>依頼 1 の回答のとおり（回答が無ければ Single PCB）</td><td>基板は 1 枚で、左右に自分で描いた捨て基板がミシン目でつながっている。金フィンガーは基板の外周に出す必要がある。JLCPCB が「Panel by Customer」を選ぶよう答えたら、それに従う（縦横 1 × 1）</td></tr>
+<tr><td>Delivery Format</td><td>依頼 1 の回答（質問 3b）のとおり</td><td>基板は 1 枚で、左右に自分で描いた捨て基板がミシン目でつながっている。金フィンガーは基板の外周に出す必要がある。JLCPCB が「Panel by Customer」を選ぶよう答えたら、それに従う（縦横 1 × 1）。回答が無い、または「Panel by JLCPCB」しか選べないときは<b>止まって</b>依頼者に聞く（Single PCB と決めつけない）</td></tr>
 <tr><td>PCB Thickness</td><td>1.6 mm</td><td>JAMMA のコネクタは 1.6 mm の基板用。GrokBOT はこの値を変えない</td></tr>
 <tr><td>PCB Color</td><td>Green</td><td>安くて早い。別の色は依頼者の指示があるときだけ</td></tr>
 <tr><td>Silkscreen</td><td>White</td><td>標準</td></tr>
@@ -80,7 +80,7 @@
 <tr><td>Mark on PCB</td><td>付けない</td><td>2026 年 5 月以降、何も選ばなければ印は付かない</td></tr>
 <tr><td>Confirm Production File</td><td>Yes</td><td>製造前に JLCPCB の技術者が作ったデータを確かめる（9 章）</td></tr>
 <tr><td>Castellated Holes、Edge Plating、Impedance Control など、ほかの特別な加工</td><td>No</td><td>使わない</td></tr>
-<tr><td>PCB Remark（PCB 側の備考）</td><td>空欄</td><td>必要なことは、部品実装の備考に書く（4 章）</td></tr>
+<tr><td>PCB Remark（PCB 側の備考）</td><td>次の英文をそのまま貼る: <i>Edge rails: our Gerber already has them (left and right, 5 mm, joined by mouse bites), with four 2.0 mm NPTH tooling holes and three fiducials. Please keep them as drawn. Do not add rails or V-cuts on the gold-finger edge: it must stay an outer edge for the 30 degree bevel. If our rails are not acceptable, please ask us before changing them.</i></td><td>面取りと外形は基板の工程なので、捨て基板をそのまま使うことは PCB 側にも書く。JLCPCB は、捨て基板が「合わない」と見ると、断りなく付け直すことがある（組立の規約 5.5）。ほかの指定は部品実装の備考に書く（4 章）</td></tr>
 </table>
 <p><b>確認</b></p>
 <ul>
@@ -107,6 +107,7 @@
 <p>2. Please protect the gold fingers with high-temperature tape during reflow and through-hole soldering. No solder or flux on the fingers.</p>
 <p>3. Through-hole parts (U1, U6: C2874018 sockets; J8: C5173310; SW3: C92645; RV1: C118956): please keep flux and solder out of the socket and connector contacts.</p>
 <p>4. Please send us the X-ray images of U25, U26 and U27.</p>
+<p>5. Edge rails: our Gerber already has them (left and right, 5 mm, joined by mouse bites), with four 2.0 mm NPTH tooling holes and three fiducials. Please keep them as drawn. Do not add rails or V-cuts on the gold-finger edge: it must stay an outer edge for the 30 degree bevel. If our rails are not acceptable, please ask us before changing them.</p>
 </blockquote>
 <p>JLCPCB は「英語の備考があると審査に時間がかかる」と書いています。それでも、この基板では必要です。</p>
 <p>次に、部品表（BOM）と部品の位置の表（CPL）をアップロードします。</p>
@@ -184,7 +185,7 @@
 <li>ステンシルの保管（Stencil Storage 4.93。選ばない）</li>
 <li>歩留まり用に多めに請求される部品</li>
 </ul>
-<p>PCB の製造費（約 220 × 162 mm、2 層、ENIG、金フィンガー）、送料、輸入時の税は別です。</p>
+<p>PCB の製造費（約 234 × 162 mm（捨て基板を含む）、2 層、ENIG、金フィンガー）、送料、輸入時の税は別です。</p>
 <p><b>確認</b>: 部品と実装の合計が 270〜450 米ドルの範囲に入っている。外れるときは、内訳の写しを撮って<b>止まる</b>。</p>
 <p>根拠: JLCPCB 部品実装の料金表（2026-10-22 更新）、Pico 2 の部品ページ（「X-ray Inspection: Required」）。</p>
 
@@ -215,6 +216,7 @@
   <ul>
   <li>金フィンガー（長さが短くされていないか、面取り、キー溝）</li>
   <li>外形と穴</li>
+  <li>捨て基板が描いたとおりか（左右の 2 辺だけ、ミシン目、治具穴 4 個、位置合わせマーク 3 個）。金フィンガーの辺に捨て基板や V カットが足されていないか</li>
   </ul>
 </li>
 <li>直してほしい点があるときは、依頼者の指示を受けて「not good, modification needed」を選び、指示の内容を書きます。</li>
@@ -275,7 +277,7 @@
 <table border="1">
 <tr><th>#</th><th>よくある失敗</th><th>この基板での対策</th></tr>
 <tr><td>1</td><td>金フィンガーの面取りの範囲に銅がある。面取りで削られて、銅が露出する</td><td>設計で、先端から 1.6 mm には銅を置かない（30° の面取りで約 1.13 mm 削られる。角度と外形の公差を見込んだ）</td></tr>
-<tr><td>2</td><td>金フィンガーを面付けの内側に置く。面取りできない</td><td>単品（Single PCB）で発注する。捨て基板は、金フィンガーの辺と直角な左右の 2 辺だけに付ける</td></tr>
+<tr><td>2</td><td>金フィンガーを面付けの内側に置く。面取りできない</td><td>Delivery Format は質問 3b の回答のとおり（Single PCB、または Panel by Customer の 1 × 1）。Panel by JLCPCB と「Added by JLCPCB」の捨て基板は選ばない。捨て基板は設計者が金フィンガーの辺と直角な左右の 2 辺だけに描いてある。備考で、そのまま使うよう頼む</td></tr>
 <tr><td>3</td><td>表面処理に HASL を選ぶ。金フィンガーが錫になる</td><td>ENIG を選ぶ</td></tr>
 <tr><td>4</td><td>Economic PCBA を選ぶ</td><td>金フィンガーのある基板は Standard PCBA で発注する</td></tr>
 <tr><td>5</td><td>部品の向き（回転）を誤る</td><td>配置の確認画面で確かめる（6 章）。設計者は、回転の補正表を作って確かめる</td></tr>

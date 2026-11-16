@@ -1,5 +1,5 @@
 {
- "BreakLine_9h_D0.5mm_P0.8mm_KeepOut": {
+ "BreakLine_8h_D0.6mm_P0.9mm_KeepOut": {
   "attr": [
    "board_only",
    "exclude_from_pos_files",
@@ -43,12 +43,12 @@
     "layer": "Cmts.User",
     "pts": [
      [
-      -0.25,
-      -6.5
+      -0.3,
+      -8.5
      ],
      [
-      4.75,
-      6.5
+      5.3,
+      8.5
      ]
     ],
     "text": null,
@@ -62,10 +62,10 @@
   },
   "keepout_boxes": [
    [
-    -0.25,
-    -6.5,
-    4.75,
-    6.5
+    -0.3,
+    -8.5,
+    5.3,
+    8.5
    ]
   ],
   "keepout_layers": [
@@ -88,10 +88,10 @@
   ],
   "keepouts": 1,
   "pads": {
-   "(no number) 0.000,-0.800": [
+   "(no number) 0.000,-0.450": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -99,15 +99,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": -0.8
+     "y": -0.45
     }
    ],
-   "(no number) 0.000,-1.600": [
+   "(no number) 0.000,-1.350": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -115,15 +115,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": -1.6
+     "y": -1.35
     }
    ],
-   "(no number) 0.000,-2.400": [
+   "(no number) 0.000,-2.250": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -131,15 +131,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": -2.4
+     "y": -2.25
     }
    ],
-   "(no number) 0.000,-3.200": [
+   "(no number) 0.000,-3.150": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -147,15 +147,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": -3.2
+     "y": -3.15
     }
    ],
-   "(no number) 0.000,0.000": [
+   "(no number) 0.000,0.450": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -163,15 +163,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": 0.0
+     "y": 0.45
     }
    ],
-   "(no number) 0.000,0.800": [
+   "(no number) 0.000,1.350": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -179,15 +179,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": 0.8
+     "y": 1.35
     }
    ],
-   "(no number) 0.000,1.600": [
+   "(no number) 0.000,2.250": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -195,15 +195,15 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": 1.6
+     "y": 2.25
     }
    ],
-   "(no number) 0.000,2.400": [
+   "(no number) 0.000,3.150": [
     {
-     "drill": 0.5,
-     "h": 0.5,
+     "drill": 0.6,
+     "h": 0.6,
      "kind": "np_thru_hole",
      "layers": [
       "*.Cu",
@@ -211,25 +211,9 @@
      ],
      "rot": 0.0,
      "shape": "circle",
-     "w": 0.5,
+     "w": 0.6,
      "x": 0.0,
-     "y": 2.4
-    }
-   ],
-   "(no number) 0.000,3.200": [
-    {
-     "drill": 0.5,
-     "h": 0.5,
-     "kind": "np_thru_hole",
-     "layers": [
-      "*.Cu",
-      "*.Mask"
-     ],
-     "rot": 0.0,
-     "shape": "circle",
-     "w": 0.5,
-     "x": 0.0,
-     "y": 3.2
+     "y": 3.15
     }
    ]
   }

@@ -247,12 +247,13 @@ def write_project(design, outdir, power_flag_nets):
     with open(os.path.join(outdir, "fp-lib-table"), "w") as f:
         f.write('(fp_lib_table\n  (version 7)\n  (lib (name "fcjamma")(type "KiCad")(uri "${KIPRJMOD}/fcjamma.pretty")(options "")(descr "Famicom JAMMA board footprints"))\n)\n')
     pro = os.path.join(outdir, f"{name}.kicad_pro")
-    if not os.path.exists(pro):
-        with open(pro, "w") as f:
-            # the embedded copies of library symbols are written by the generator and differ
-            # cosmetically from the library, so that one check is switched off
-            f.write('{"erc":{"rule_severities":{"lib_symbol_mismatch":"ignore"}},"meta":{"filename":"%s.kicad_pro","version":3},'
-                    '"schematic":{"legacy_lib_dir":"","legacy_lib_list":[]},"sheets":[],"text_variables":{}}\n' % name)
+    with open(pro, "w") as f:
+        # written on every build.  The embedded copies of library symbols are written by the generator and differ
+        # cosmetically from the library, so that one ERC check is switched off.  On the board, a part without a courtyard
+        # is an error: the JAMMA band and the tab keep-outs are enforced through courtyards (KiCad ignores it by default).
+        f.write('{"board":{"design_settings":{"rule_severities":{"missing_courtyard":"error"}}},'
+                '"erc":{"rule_severities":{"lib_symbol_mismatch":"ignore"}},"meta":{"filename":"%s.kicad_pro","version":3},'
+                '"schematic":{"legacy_lib_dir":"","legacy_lib_list":[]},"sheets":[],"text_variables":{}}\n' % name)
 
     cache = ksa.get_symbol_cache()
     cache.add_library_path(os.path.abspath(symlib))

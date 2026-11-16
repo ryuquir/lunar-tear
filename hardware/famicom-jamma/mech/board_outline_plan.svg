@@ -4,29 +4,29 @@
 <text x="850.0" y="38.0" font-size="24" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">ファミコン JAMMA 基板　外形と部品配置の案（部品面から見た図・単位 mm）</text>
 <rect x="135.0" y="110.0" width="25.0" height="810.0" fill="#f3f3f3" stroke="#999" stroke-width="1.0" rx="0" fill-opacity="1.0" stroke-dasharray="6 4"/>
 <rect x="1280.0" y="110.0" width="25.0" height="810.0" fill="#f3f3f3" stroke="#999" stroke-width="1.0" rx="0" fill-opacity="1.0" stroke-dasharray="6 4"/>
-<rect x="160.0" y="747.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="1270.0" y="747.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="160.0" y="667.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="1270.0" y="667.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="160.0" y="347.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="1270.0" y="347.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="160.0" y="257.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="1270.0" y="257.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="160.0" y="182.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
-<rect x="1270.0" y="182.5" width="10.0" height="25.0" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="160.0" y="746.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="1270.0" y="746.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="160.0" y="666.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="1270.0" y="666.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="160.0" y="346.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="1270.0" y="346.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="160.0" y="256.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="1270.0" y="256.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="160.0" y="181.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
+<rect x="1270.0" y="181.2" width="10.0" height="27.5" fill="#f3f3f3" stroke="#999" stroke-width="0.8" rx="0" fill-opacity="1.0"/>
 <text x="147.5" y="520.0" font-size="12" text-anchor="middle" font-weight="normal" fill="#777" dominant-baseline="middle" transform="rotate(-90 147.5 520.0)">捨て基板（製造用。ミシン目で折って外す）</text>
 <text x="1292.5" y="520.0" font-size="12" text-anchor="middle" font-weight="normal" fill="#777" dominant-baseline="middle" transform="rotate(90 1292.5 520.0)">捨て基板（製造用。ミシン目で折って外す）</text>
 <path d="M 180.0 860.0 L 434.0 860.0 L 434.0 917.5 L 436.5 920.0 L 564.0 920.0 L 564.0 862.5 L 579.0 862.5 L 579.0 920.0 L 1003.5 920.0 L 1006.0 917.5 L 1006.0 860.0 L 1260.0 860.0 Q 1270.0 860.0 1270.0 850.0 L 1270.0 120.0 Q 1270.0 110.0 1260.0 110.0 L 180.0 110.0 Q 170.0 110.0 170.0 120.0 L 170.0 850.0 Q 170.0 860.0 180.0 860.0 Z" fill="#e2efdf" stroke="#1d4d1d" stroke-width="2.6"/>
-<rect x="170.0" y="727.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="1245.0" y="727.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="170.0" y="647.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="1245.0" y="647.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="170.0" y="327.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="1245.0" y="327.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="170.0" y="237.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="1245.0" y="237.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="170.0" y="162.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
-<rect x="1245.0" y="162.5" width="25.0" height="65.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="170.0" y="717.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="1242.0" y="717.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="170.0" y="637.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="1242.0" y="637.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="170.0" y="317.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="1242.0" y="317.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="170.0" y="227.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="1242.0" y="227.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="170.0" y="152.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
+<rect x="1242.0" y="152.5" width="28.0" height="85.0" fill="#fbe3e3" stroke="#c88" stroke-width="0.6" rx="0" fill-opacity="0.8" stroke-dasharray="2 2"/>
 <rect x="215.0" y="670.0" width="215.0" height="170.0" fill="#ffffff" stroke="#6a8f6a" stroke-width="1.0" rx="6" fill-opacity="0.6" stroke-dasharray="6 4"/>
 <text x="322.5" y="740.0" font-size="12" text-anchor="middle" font-weight="normal" fill="#2f5d2f" dominant-baseline="middle">電源</text>
 <text x="322.5" y="755.0" font-size="12" text-anchor="middle" font-weight="normal" fill="#2f5d2f" dominant-baseline="middle">ヒューズ・保護・</text>
@@ -197,7 +197,7 @@
 <circle cx="1392" cy="371" r="6" fill="#fff" stroke="#b33" stroke-width="1.6"/>
 <text x="1421.0" y="371.0" font-size="13" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">カセットを支える金具用の穴</text>
 <text x="70.0" y="1016.0" font-size="15" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">・外形: 本体 220 × 150 mm の下に、JAMMA 端子の差し込み部（幅 114.4 × 長さ 12）。全体で 220 × 162 mm です。A5 用紙（210 × 148）より少し大きい程度です。捨て基板を含めると 234 × 162 mm です。</text>
-<text x="70.0" y="1042.0" font-size="15" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">・部品はすべて表面に載ります。大きな部品は実寸で、点線の枠は小さな部品を置く予定の範囲です。左右の灰色の帯は製造時だけ付く捨て基板（幅 5 mm、本体との間に 2 mm の溝、5 か所のミシン目でつながる）で、ミシン目の横の赤い枠には部品を置きません。</text>
+<text x="70.0" y="1042.0" font-size="15" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">・部品はすべて表面に載ります。大きな部品は実寸で、点線の枠は小さな部品を置く予定の範囲です。左右の灰色の帯は製造時だけ付く捨て基板（幅 5 mm、本体との間に 2 mm の溝、5 か所のミシン目でつながる）で、ミシン目の横の赤い枠（穴から 5 mm）には部品を置きません。</text>
 <text x="70.0" y="1068.0" font-size="15" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">・これは段階 2（部品配置）の出発点となる案です。配置と配線を進める中で、外形の寸法（目安 ±20 mm）と部品の位置は変わることがあります。</text>
 <text x="70.0" y="1094.0" font-size="15" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">・カセットは基板から垂直に立ちます（高さ 約 80 mm）。カセットの殻の寸法は資料によって 2 mm ほど違うので、端子のサンプルと実物のカセットで確かめてから確定します。</text>
 <text x="120.0" y="1182.0" font-size="16" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">横から見た図（高さの目安）</text>

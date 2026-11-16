@@ -39,14 +39,17 @@ ORIGIN = (27.0, 20.0)                            # where the frame's (0, TOP) li
 RAIL_W = 5.0                                     # JLCPCB: 'use 5 mm tooling edges'
 RAIL_GAP = 2.0                                   # routed slot between rail and body (JLCPCB mouse-bite panels: 1.6 or 2 mm)
 PANEL_X = (-RAIL_GAP - RAIL_W, BODY_W + RAIL_GAP + RAIL_W)    # -7 .. 227: the rails run the full height, 0 .. TOP
-TAB_W = 5.0                                      # JLCPCB: 'For breakaway with mouse-bites, the minimum width is 5mm'
+TAB_W = 5.5                                      # at its narrowest; JLCPCB: 'For breakaway with mouse-bites, the minimum width is
+                                                 # 5mm', and the slots' ends may lie 0.2 off (routing ±0.2)
 # tab centres (y), the same on both sides: clear of the mounting holes (y 16, 100, 158), of U27 at the left edge (y 60-83),
-# of the USB-C socket J10 (y 85-94), which faces the left slot, and of the IC sockets' pins
+# of the USB-C socket J10 (y 85-94), which faces the left slot, and of the IC sockets' pins; their keep-outs (5 mm around
+# the mouse bites) stay clear of all of these.  JLCPCB's guide asks for a set every 50-60 mm: here 16-64 mm apart, the
+# 64 mm gap on the left being where U27 and J10 sit.
 TABS = (32.0, 48.0, 112.0, 130.0, 145.0)
-BITE_INSET = 0.25                                # mouse-bite line 0.25 inside the body's edge (KiKit's usual offset)
+BITE_INSET = FPL.BREAK_D / 2                     # mouse-bite line on the body's side, the holes touching the edge from inside
 BREAK_FOOTPRINT = "fcjamma:" + FPL.BREAK
 TOOLING_FOOTPRINT = "fcjamma:" + FPL.TOOL
-# 2.0 mm tooling holes centred on the rails, 5 mm from their ends
+# 2.0 mm tooling holes centred on the rails, 5 mm from their ends (JLCPCB: near the corners, as far apart as possible)
 TOOLING = [(PANEL_X[0] + RAIL_W / 2, 5.0), (PANEL_X[0] + RAIL_W / 2, TOP - 5.0),
            (PANEL_X[1] - RAIL_W / 2, 5.0), (PANEL_X[1] - RAIL_W / 2, TOP - 5.0)]
 
@@ -56,9 +59,10 @@ HOLE_FOOTPRINT = "MountingHole:MountingHole_3.2mm_M3"
 HOLES = [(4.0, 16.0), (216.0, 16.0), (4.0, 158.0), (216.0, 158.0), (4.0, 100.0), (216.0, 100.0), (110.0, 121.0)]
 
 # Fiducials for the assembly machine, on the rails: 1 mm copper, 2 mm mask opening, centred 3.85 from the panel's outer
-# edge (JLCPCB; the copper then keeps its 3.35 mm from the edge); three, not symmetric.
+# edge (JLCPCB's figures; the copper then keeps its 3.35 mm from the edge); three, not symmetric.  They sit level with the
+# lowest and the highest tab, where the rail is held, not on the rails' free ends, and away from the slots' edges.
 FIDUCIAL_FOOTPRINT = "Fiducial:Fiducial_1mm_Mask2mm"
-FIDUCIALS = [(PANEL_X[0] + 3.85, 12.0), (PANEL_X[0] + 3.85, TOP - 12.0), (PANEL_X[1] - 3.85, TOP - 12.0)]
+FIDUCIALS = [(PANEL_X[0] + 3.85, TABS[0]), (PANEL_X[0] + 3.85, TABS[-1]), (PANEL_X[1] - 3.85, TABS[-1])]
 
 TITLE = "Famicom JAMMA board (fcjamma)"
 

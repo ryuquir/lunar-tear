@@ -6,3 +6,5 @@ kicad/fp-info-cache
 out/*.png
 # the repository root ignores every "tools/" directory; this one holds the generator
 !tools/
+kicad/~*.lck
+out/board/fcjamma_failed.kicad_pcb
