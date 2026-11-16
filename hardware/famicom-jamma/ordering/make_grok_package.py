@@ -4,8 +4,10 @@
     python3 ordering/make_grok_package.py OUTPUT_DIR [--date YYYY-MM-DD]
 
 OUTPUT_DIR must not exist yet.  Needs pandoc (HTML -> Markdown text).
-Every text file for Grok carries the version line on line 2, so that Grok and the owner can tell
-old copies from new ones.  Before it finishes, the script scans every file (and every member of the
+Every text file except 03 carries the version line on line 2, so that Grok and the owner can tell
+old copies from new ones.  03 is copied unchanged and has no version
+line, because everything after its "Subject:" line is sent to JLCPCB as it is; 04 tells Grok how to
+recognise it by its content.  Before it finishes, the script scans every file (and every member of the
 zip files) for e-mail addresses and for the words in the environment variable
 GROK_PACKAGE_FORBIDDEN (comma separated, for example a user name); it fails if it finds one.
 """
@@ -70,7 +72,11 @@ def design_rev():
 
 def html_to_text(path):
     r = subprocess.run(["pandoc", "-f", "html", "-t", "gfm", "--wrap=none", path], capture_output=True, text=True, check=True)
-    return r.stdout
+    # pandoc escapes ASCII punctuation for Markdown ("\\[依頼者の名前\\]", "zz\\_旧版", "Part \\#", "1\\. U25").
+    # Grok reads the text as plain text and copies some of it into JLCPCB's forms, so drop those
+    # backslashes.  The HTML sources hold no backslash of their own; "\\|" is kept, as it would split a
+    # table cell.
+    return re.sub(r"\\([!-/:-@\[-`{}~])", r"\1", r.stdout)
 
 
 def with_header(title, version, body):
