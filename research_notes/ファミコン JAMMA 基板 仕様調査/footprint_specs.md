@@ -1,8 +1,9 @@
-# 自作フットプリント 5 種の寸法（段階 2-1・2026-11-15）
+# 自作フットプリント 7 種の寸法（段階 2-1・2026-11-15、2026-11-16 に追補）
 
 ## 0. この資料について
 
-基板の自作フットプリント 5 種の寸法と、その出典をまとめる。
+基板の自作フットプリント 7 種（部品用 5 種と、2026-11-16 に足した捨て基板用の 2 種）の寸法と、その出典をまとめる。
+2026-11-16 の変更（段階 2-2a のレビューによる）: JAMMA の金フィンガーを先端から 1.6 mm に下げた。JAMMA の部品の禁止範囲を、タングの根元の横でフィンガーから 5 mm まで広げた。捨て基板のミシン目と治具穴を足した（9 章）。
 寸法の正本は `hardware/famicom-jamma/design/footprints.py` で、`tools/build.py` が毎回 `kicad/fcjamma.pretty` を書き出す。
 
 **調べ方**
@@ -23,7 +24,7 @@
 - 作ったあと、3 人の担当が独立にレビューした（7 章）。下の値と検査は、その指摘を直したあとのもの。
 
 **ビルドが毎回確かめること**
-- 出典の値（23 項目）が、描いた図形で成り立つこと。
+- 出典の値（28 項目）が、描いた図形で成り立つこと。
   - 全パッドの位置・大きさ・形・角度、番号の並び（JAMMA の文字の並びは別に書き起こした表と照合）、穴と環幅。
   - マスクの開口、禁止域の層と規則、部品の禁止範囲。
   - シルクの線の太さと文字の高さ。
@@ -31,8 +32,8 @@
   - 1 つでも評価できない事実（パッドが無い、二重にある）は失敗として扱う。
 - KiCad 自身が、生成器が書いたとおりに読めること（`tools/check_footprints.py`）。パッドの形と角度、禁止域の層と規則、図形と文字の位置、属性まで比べる。
 - 基板の規則（`kicad/fcjamma.kicad_dru`）が効くこと（`tools/check_rules.py`）。
-  - 禁止の場所に置いた 9 個の試し（ビア、線、マスクの開口、シルク）が、それぞれの規則に引っかかること。
-  - 5 種だけを並べた基板は、規則に 1 つも触れないこと。
+  - 禁止の場所に置いた 12 個の試し（ビア、線、マスクの開口、シルク、小さな部品）が、それぞれの規則に引っかかること。
+  - 7 種だけを並べた基板は、規則に 1 つも触れないこと。
 - 記号のすべてのピンにパッドがあること。
 - 各フットプリントが、描いた対象の部品（JLCPCB の品番）にだけ使われていること。
 
@@ -48,18 +49,18 @@
 | 原点 | 基板の先端の線と、1/A 番の中心線の交点。+X は 28/f 番の向き、基板は −Y 側 | JST GEC「PC board layout (viewed from component side)」 |
 | パッド | 種類 connect（金フィンガー用。銅とマスクだけで、ペーストなし）。表 1〜28（7 なし）、裏 A〜f（H なし）で、各 27 本 | JAMMA56 の記号、Hirose・Sullins（G, I, O, Q は使わない） |
 | ピッチ | 3.96。1〜28 番の間は 106.92 | JST 106.92 ± 0.05、Hirose 106.98 ± 0.08 の両方に入る |
-| フィンガー | 幅 2.30、先端から 1.2〜10.0（長さ 8.8、中心 Y −5.6） | 幅: Hirose 2.3 ± 0.1（JST の図面は「2.3 ±0.35 (.091 ±.001)」と、mm とインチで公差が食い違う）。1.2: JLCPCB の 30° 面取りでの後退が約 1.13 |
+| フィンガー | 幅 2.30、先端から 1.6〜10.0（長さ 8.4、中心 Y −5.8）。2026-11-16 までは 1.2〜10.0 | 幅: Hirose 2.3 ± 0.1（JST の図面は「2.3 ±0.35 (.091 ±.001)」と、mm とインチで公差が食い違う）。1.6: JLCPCB の 30° 面取りでの後退は約 1.13（図「30 ± 5° / Approx. 1.13 mm」）。同じ深さで 25° になると 1.13 × tan30° ÷ tan25° ≒ 1.40、さらに外形の公差 ±0.2 で先端が 0.2 内側に来ると 1.60。相手の接点は先端から 5.3 ± 0.4（Hirose）なので、1.6 でもフィンガーの上に乗る |
 | 表裏の対応 | 同じ X に置く（A は 1 の真裏、f は 28 の真裏） | 公開されている 3 設計、国内の配線表 |
 | マスク | 表裏とも (−4.24, 0.5)〜(111.16, −10.1) を全面開口。フィンガーの根元から 0.1 mm で止める（はじめは −10.5。レビューで、根元の先を横に走る線が露出しても DRC が見つけないと分かったので縮めた） | JLCPCB「The gold finger area must have the solder mask fully opened」 |
 | 禁止域 | 次の 3 帯（表裏の銅） | JLCPCB「this area can not have copper」（推論で範囲を決めた） |
 | 外形線（基板側で描く） | タング 114.4（X −3.74〜110.66）、角 C0.5。キー溝は中心 X 23.76、幅 3.0、深さ 11.5、入口 C0.5、奥 R0.5。肩は Y −12.0 | 02_jamma_interface.md 1.2.3。公称 114.4 は、外形公差 +0.2 でも JST の上限 114.6 を超えないための値。Hirose の推奨はタング 114.6〜114.8（114.8 +0/−0.2）、キー溝 2.5 +0.1/0 × 11 +0.5/0、先端から肩まで 10。114.4 と 3.0 はどちらも余裕の側で、ぶつからない（横に最大約 0.5 mm 遊ぶ）。キー溝は Sullins のキー 2.36 と Hirose CR1-GPIN 2.0 を両方通す |
-| 部品の禁止範囲 | 表裏とも先端から 15 mm まで（JLCPCB の挿入部品を金フィンガーから 5 mm 以上離す決まりを DRC で守る。はじめは 12 mm で、自分のシルクの文字も外に出ていた） | README 8 章 |
+| 部品の禁止範囲 | 表裏とも先端から 15 mm まで。タングの部分はタング + 0.5 mm、肩から上（Y −12〜−15）は外側のフィンガーの銅から 5 mm（X −6.15〜113.07）まで広げた多角形（挿入部品を金フィンガーから 5 mm 以上離す決まりを DRC で守る。はじめは 12 mm で、自分のシルクの文字も外に出ていた。長方形のままだと、タングの根元の横でフィンガーから 3.7 mm まで部品が寄れることがレビューで分かった） | README 8 章 |
 | 属性 | 部品表と位置ファイルから外す（`exclude_from_bom`、`exclude_from_pos_files`）。マスクの橋は許す（`allow_soldermask_bridges`） | この属性がないと DRC でマスクの橋のエラーが 199 件出る（KiCad 10.0.8 で試した） |
 | シルク | 表に「1」「28」「JAMMA PARTS SIDE 1-28」、裏に（鏡像で）「A」「f」「SOLDER SIDE A-f」。Y −13.4、高さ 1.2 | 慣行 |
 
 禁止域の 3 帯:
-- Y 0.5〜−1.2: 銅は一切だめ。
-- Y −1.2〜−9.0: フィンガー以外はだめ。
+- Y 0.5〜−1.6: 銅は一切だめ。
+- Y −1.6〜−9.0: フィンガー以外はだめ。
 - Y −9.0〜−11.0: ビアとベタはだめ。
 
 検証での訂正（配線の決まり。段階 3 で守る）:
@@ -186,9 +187,9 @@
 3. DIP スイッチの原点は 1 番のパッド（本体の中心は (3.81, 3.81)）。位置ファイルを書くときは、JLCPCB の部品データの中心に合わせて補正する。
    Pico 2 は、JLCPCB の部品データ（EasyEDA、C41407547）が KiCad と 90° 違ううえに、原点がモジュールの中心から長い辺の方向に 0.315 mm（20 番ピン、SWD の端の側）ずれている。KiCad の座標では (0, +0.315)。補正しないと、モジュールが USB の側へ約 0.3 mm ずれて載る（パッド 1.6 mm に対しては、はんだは付く範囲）。
 4. JLCPCB への事前質問に足すとよいこと（発注の前に）。
-   - 金フィンガーの銅の後退を 1.2 mm で足りるとするか、1.5 mm にするか。
+   - 金フィンガーの銅の後退 1.6 mm で足りるか（2026-11-16 に 1.2 から変えた。事前質問の 3d）。
    - 220 mm の本体から 12 mm 突き出したタングを、面取りの機械で削れるか。
-   - 端材のレールは、左右の 2 辺だけに付くか。
+   - 自分で描いた捨て基板（左右、ミシン目）でよいか、発注の Delivery Format、V カットでも面取りできるか（事前質問の 3a〜3c）。
    - 挿入部品の足を切るか（半固定抵抗の足は 4.4 mm 以上出る）。
    - 裏の金フィンガーをはんだから守る方法（耐熱テープか選択はんだか）。
 5. タングの幅 114.4 に通常の外形公差 ±0.2 がつくと、114.2 になることがある。これは JST の下限 114.4 より細い。JLCPCB の高精度ルーター（±0.1）で公称 114.5 にする手もある。費用と条件を確かめてから決める。Hirose の推奨（114.6〜114.8）も合わせて考える。
@@ -263,3 +264,25 @@
 21. このリポジトリ: `reference/02_jamma_interface.md` 1.2・1.3、`jamma_edge_geometry.md`、`reference/01_famicom_hardware.md`、`famicom_pinout_reverification.md`、`hardware/famicom-jamma/mech/floorplan.py`
 22. Hirose CR7 シリーズのカタログ（PCB Dimensions 3.96 pitch、A11 ページ。レビューで確認） — https://s1.dtsheet.com/store/data/000282833.pdf
 23. JLCPCB の部品データ（EasyEDA）: C92645（DS-04RP）、C41407547（Pico 2） — https://easyeda.com/api/products/C41407547/components
+
+## 9. 捨て基板のミシン目と治具穴（2026-11-16 に追加）
+
+段階 2-2a のレビューで、捨て基板を JLCPCB に任せると金フィンガーの辺に付きうると分かった。そこで基板ファイルに自分で描くことにし、そのための 2 種を足した。基板側の寸法（レールの幅、溝、つなぎの位置）は `hardware/famicom-jamma/design/board.py` と README 8 章にある。
+
+| 項目 | 値 | 出典 |
+|---|---|---|
+| ミシン目（`BreakLine_9h_D0.5mm_P0.8mm_KeepOut`） | めっき無しの穴 0.5 mm を 9 個、Y 方向に 0.8 mm 間隔（穴と穴の間 0.3 mm）、全長 6.9 mm | JLCPCB の能力表「Mouse bites Panel」: 「Recommended diameter of mouse bite is 0.5mm-0.8mm; Recommended distance between the two mouse-bites is 0.2-0.3mm」。KiCad 付属の Panelization ライブラリは 0.85 間隔（間 0.35）なので使わなかった |
+| つなぎの幅 | いちばん細いところで 5 mm。溝の端は半円（溝の幅 2 mm）なので、本体の縁の線上では 7 mm | 同「For breakaway with mouse-bites, the minimum width is 5mm」「Panel board spacing: 1.6 or 2 mm」 |
+| 穴の列の位置 | 本体の縁から 0.25 mm 内側（折った跡の出っ張りが外形から出ないように） | 推論（KiKit の通例と同じ） |
+| 禁止域 | 名前「Breakaway tab: keep clear」。本体側に 5 mm、列の中心から ±6.5 mm。部品・パッド・ビア・線・ベタを置かない（折るときに基板が曲がる）。基板の規則「Breakaway tabs: …」で DRC が報告する | 推論 |
+| 治具穴（`ToolingHole_2.0mm_NPTH`） | めっき無し 2.0 mm。レールの幅の中央 | JLCPCB「For SMT assembly at JLCPCB, use 5 mm tooling edges, 2 mm tooling holes, and 1 mm fiducials centered at 3.85 mm from the panel edges」、図「Tooling hole: 2 mm diameter, Centered on process edge」 |
+| 位置合わせマーク | KiCad の `Fiducial_1mm_Mask2mm`。外側の縁から中心まで 3.85 mm（銅の縁まで 3.35 mm） | JLCPCB「How to Add Edge Rails and Fiducials」: 銅 1 mm、マスクの開口はその 2 倍、3〜4 個、縁から 3.35 mm 以上（図では銅の縁まで測っている） |
+| 属性 | ミシン目と治具穴は基板だけの部品（`board_only`）、部品表と位置ファイルから外す | — |
+
+基板の規則「JLCPCB: pad holes 0.45 apart」は、ミシン目（参照番号 MB）の穴どうしを除く。JLCPCB がミシン目に勧める間隔（0.2〜0.3 mm）より広い規則なので。
+
+出典（2026-11-16 に読んだ）:
+- JLCPCB「PCB Manufacturing & Assembly Capabilities」（Mouse bites Panel、V-Cut）: https://jlcpcb.com/capabilities/pcb-capabilities
+- JLCPCB「How to Add Edge Rails and Fiducials for PCB Assembly Orders」（2026-09-09 更新）: https://jlcpcb.com/help/article/how-to-add-edge-rails-fiducials-for-pcb-assembly-order
+- JLCPCB「Design Optimization: Specifications for Adding Process Edges and Positioning Holes」（2026-09-09 更新）
+- JLCPCB「JLCPCB Gold Fingers」（2026-11-10 更新。V カットの面付けではフィンガーを面取りできない、銅の後退の図）

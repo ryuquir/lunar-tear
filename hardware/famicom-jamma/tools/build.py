@@ -619,76 +619,153 @@ def footprint_paths(netlist):
     return out
 
 
-def board_outputs(design, env, kdir, odir, problems, warnings):
-    """kicad/fcjamma.kicad_pcb (tools/make_board.py), KiCad's DRC on it, and out/board/."""
-    if not (os.path.exists(SYSTEM_PYTHON) and run([SYSTEM_PYTHON, "-c", "import pcbnew"], env, ROOT)[0] == 0):
-        if os.environ.get("FCJAMMA_WITHOUT_PCBNEW") != "1":
-            problems.append("KiCad's pcbnew module is not available to the system Python, so the board cannot be built")
-        return "board not built (no pcbnew)"
-    # the placement plan (mech/floorplan.py) and the board must describe the same board
+def netlist_part(netlist, ref):
+    """({pin: net}, {field: value}) of one part in KiCad's netlist: every pin, including 'unconnected-(...)' nets, and the
+    symbol's own fields (not Footprint, Datasheet or Description, which the footprint has anyway)."""
+    tree = sx_parse(open(netlist, encoding="utf-8").read())
+    nets = {}
+    for net in sx_find(sx_first(tree, "nets"), "net"):
+        name = str(sx_first(net, "name")[1])
+        for node in sx_find(net, "node"):
+            if str(sx_first(node, "ref")[1]) == ref:
+                nets[str(sx_first(node, "pin")[1])] = name
+    fields = {}
+    for comp in sx_find(sx_first(tree, "components"), "comp"):
+        if str(sx_first(comp, "ref")[1]) == ref:
+            for f in sx_find(sx_first(comp, "fields"), "field"):
+                name = str(sx_first(f, "name")[1])
+                if name not in ("Footprint", "Datasheet", "Description") and len(f) > 2:
+                    fields[name] = str(f[2])
+    return nets, fields
+
+
+def load_plan():
     import importlib.util
     spec_fp = importlib.util.spec_from_file_location("floorplan", os.path.join(ROOT, "mech", "floorplan.py"))
     plan = importlib.util.module_from_spec(spec_fp)
     spec_fp.loader.exec_module(plan)
+    return plan
+
+
+def check_plan(problems):
+    """The placement plan (mech/floorplan.py) and design/board.py must describe the same board, and the plan's own check
+    (parts inside the body, apart, clear of the holes, the JAMMA band and the tabs) must pass.  Needs no pcbnew."""
+    plan = load_plan()
     k0, k1, kd = BRD.key_slot()
+    finger_top = -(FPL.JAMMA_FINGER_Y - FPL.JAMMA_FINGER[1] / 2)
     for what, a, b in (("body width", BRD.BODY_W, plan.BODY_W), ("body height", BRD.BODY_H, plan.BODY_H),
                        ("tongue width", BRD.TONGUE_W, plan.TONGUE_W), ("tongue length", BRD.Y0, plan.TONGUE_L),
                        ("finger 1", BRD.J1_AT[0], plan.FINGER1_X), ("key slot centre", (k0 + k1) / 2, plan.KEY_X),
                        ("key slot width", k1 - k0, plan.KEY_W), ("key slot depth", kd, plan.KEY_D),
-                       ("pitch", FPL.JAMMA_PITCH, plan.PITCH)):
+                       ("pitch", FPL.JAMMA_PITCH, plan.PITCH), ("finger width", FPL.JAMMA_FINGER[0], plan.FINGER_W),
+                       ("start of the fingers", FPL.JAMMA_SETBACK, plan.FINGER_Y[0]), ("end of the fingers", finger_top, plan.FINGER_Y[1]),
+                       ("parts keep-out above the tip", -FPL.JAMMA_TOP, plan.JAMMA_KEEP), ("rail width", BRD.RAIL_W, plan.RAIL_W),
+                       ("slot beside the rails", BRD.RAIL_GAP, plan.RAIL_GAP), ("tab width", BRD.TAB_W, plan.TAB_W)):
         if abs(a - b) > 1e-9:
             problems.append(f"design/board.py and mech/floorplan.py disagree on the {what}: {a} and {b}")
     if [tuple(h) for h in BRD.HOLES] != [tuple(h) for h in plan.HOLES]:
         problems.append("design/board.py and mech/floorplan.py place the mounting holes differently")
+    if tuple(BRD.TABS) != tuple(plan.TABS):
+        problems.append(f"design/board.py and mech/floorplan.py place the rails' tabs differently: {BRD.TABS} and {plan.TABS}")
+    problems += [f"mech/floorplan.py: {p}" for p in plan.check()]
+
+
+def board_outputs(design, env, kdir, odir, problems, warnings):
+    """kicad/fcjamma.kicad_pcb (tools/make_board.py), KiCad's DRC and schematic parity on it, and out/board/."""
+    try:
+        return _board_outputs(design, env, kdir, odir, problems, warnings)
+    except Exception as e:             # a fault in this step is a problem on the list, not a traceback after it
+        problems.append(f"the board step stopped: {type(e).__name__}: {e}")
+        return "board step stopped"
+
+
+def drc_summary(data, pcb, placed):
+    """KiCad's report in a form that does not change between runs or checkouts: no date or absolute path, a fixed order,
+    the connections still to route as one line per net (KiCad picks which pads to pair at random among equal lengths),
+    and the parts the schematic has but the board does not yet as one sorted list."""
+    out = {"source": os.path.basename(data.get("source", pcb)), "kicad_version": data.get("kicad_version", ""),
+           "coordinate_units": data.get("coordinate_units", "")}
+    viol = data.get("violations", [])
+    for e in viol:
+        e["items"] = sorted(e.get("items", []), key=lambda i: (i.get("description", ""), i.get("uuid", "")))
+    out["violations"] = sorted(viol, key=lambda e: json.dumps(e, sort_keys=True))
+    by_net = {}
+    for e in data.get("unconnected_items", []):
+        for item in e.get("items", []):
+            m = re.match(r"Pad (\S+) \[([^\]]*)\] of (\S+)", item.get("description", ""))
+            if m:
+                by_net.setdefault(m.group(2), set()).add(f"{m.group(3)}-{m.group(1)}")
+    out["to_route"] = {net: {"pads": sorted(pads), "connections": len(pads) - 1} for net, pads in sorted(by_net.items())}
+    missing, other = [], []
+    for e in data.get("schematic_parity", []):
+        m = re.match(r"Missing footprint (\S+) ", e.get("description", ""))      # 'Missing footprint R95 (470)'
+        if e.get("type") == "missing_footprint" and m and m.group(1) not in placed:
+            missing.append(m.group(1))
+        else:
+            e["items"] = sorted(e.get("items", []), key=lambda i: (i.get("description", ""), i.get("uuid", "")))
+            other.append(e)
+    out["schematic_parity"] = sorted(other, key=lambda e: json.dumps(e, sort_keys=True))
+    out["not_on_the_board_yet"] = sorted(set(missing), key=lambda r: (re.sub(r"\d", "", r), int(re.sub(r"\D", "", r) or 0)))
+    return out
+
+
+def _board_outputs(design, env, kdir, odir, problems, warnings):
+    check_plan(problems)
+    if not (os.path.exists(SYSTEM_PYTHON) and run([SYSTEM_PYTHON, "-c", "import pcbnew"], env, ROOT)[0] == 0):
+        if os.environ.get("FCJAMMA_WITHOUT_PCBNEW") != "1":
+            problems.append("KiCad's pcbnew module is not available to the system Python, so the board cannot be built")
+        else:
+            warnings.append("the board was not rebuilt or checked (no pcbnew): kicad/fcjamma.kicad_pcb and out/board/ are "
+                            "from an earlier build")
+        return "board not built (no pcbnew)"
     k = BRD.to_kicad
-    t0 = BRD.TONGUE_X0
     j1 = design.parts["J1"]
-    paths = footprint_paths(os.path.join(odir, f"{design.name}.net"))
+    netlist = os.path.join(odir, f"{design.name}.net")
+    paths = footprint_paths(netlist)
+    if "J1" not in paths:
+        problems.append("KiCad's netlist has no J1, so the board cannot link it to its symbol")
+        return "board not built (no J1 in the netlist)"
+    nets, fields = netlist_part(netlist, "J1")
     spec = {
         "outline": [[seg[0]] + [list(k(p)) for p in seg[1:]] for seg in BRD.outline()],
-        "origin": list(BRD.ORIGIN), "body_w": BRD.BODY_W, "body_h": BRD.BODY_H, "top": BRD.TOP, "tongue_l": BRD.Y0,
-        "thickness": BRD.THICKNESS, "aux_origin": list(k((0.0, 0.0))), "title": BRD.TITLE, "revision": design.rev,
-        "stackup": BRD.STACKUP, "kicad_fp": KICAD_FP,
+        "thickness": BRD.THICKNESS, "aux_origin": list(k(BRD.aux_origin())), "title": BRD.TITLE, "revision": design.rev,
+        "stackup": BRD.STACKUP, "plot": BRD.PLOT, "kicad_fp": KICAD_FP, "schematic_dir": kdir,
         "hole_footprint": BRD.HOLE_FOOTPRINT, "holes": [list(k(h)) for h in BRD.HOLES],
         "fiducial_footprint": BRD.FIDUCIAL_FOOTPRINT, "fiducials": [list(k(f)) for f in BRD.FIDUCIALS],
-        "j1": {"footprint": FPL.JAMMA, "value": j1.value, "at": list(k(BRD.J1_AT)), "path": paths.get("J1", ""),
-               "nets": {str(n): net for n, net in sorted(j1.conn.items()) if net}},
-        "kicad": {"tongue_centre": list(k((t0 + BRD.TONGUE_W / 2, 6.0))), "beside_tongue_left": list(k((t0 - 5.0, 6.0))),
-                  "beside_tongue_right": list(k((t0 + BRD.TONGUE_W + 5.0, 6.0))), "in_key_slot": list(k(((k0 + k1) / 2, 6.0))),
-                  "above_key_slot": list(k(((k0 + k1) / 2, kd + 0.3))),
-                  "body_centre": list(k((BRD.BODY_W / 2, (BRD.Y0 + BRD.TOP) / 2)))},
+        "tooling_footprint": BRD.TOOLING_FOOTPRINT, "tooling": [list(k(t)) for t in BRD.TOOLING],
+        "break_footprint": BRD.BREAK_FOOTPRINT, "break_lines": [list(k((x, y))) + [rot] for x, y, rot in BRD.break_lines()],
+        "j1": {"footprint": FPL.JAMMA, "value": j1.value, "at": list(k(BRD.J1_AT)), "path": paths["J1"], "nets": nets,
+               "fields": fields},
     }
     with tempfile.TemporaryDirectory(prefix="fcjamma-board-") as tmp:
         sp = os.path.join(tmp, "board.json")
         fp_sheets.write_json(spec, sp)
         rc, out = run([SYSTEM_PYTHON, os.path.join(HERE, "make_board.py"), kdir, sp], env, ROOT)
-    lines = [out.splitlines()[-1] if out else "no output from make_board.py"]
+    lines = out.splitlines() or ["no output from make_board.py"]
     if rc:
-        problems += [x for x in out.splitlines()[:-1]] or [f"make_board.py failed: {out[-300:]}"]
-        return "; ".join(lines)
+        problems += [x for x in lines if x.startswith(("board check failed:", "make_board.py stopped:"))] or [f"make_board.py failed: {lines[-1]}"]
+        return lines[-1]
+    summary = [lines[-1]]
     pcb = os.path.join(kdir, "fcjamma.kicad_pcb")
     bdir = os.path.join(odir, "board")
     os.makedirs(bdir, exist_ok=True)
-    report = os.path.join(bdir, "drc.json")
-    rc, out = run(["kicad-cli", "pcb", "drc", "--severity-all", "--format", "json", "-o", report, pcb], env, kdir)
-    if rc or not os.path.exists(report):
+    placed = set(re.findall(r'\(property "Reference" "([^"]+)"', open(pcb, encoding="utf-8").read()))
+    with tempfile.TemporaryDirectory(prefix="fcjamma-drc-") as tmp:
+        raw = os.path.join(tmp, "drc.json")
+        rc, out = run(["kicad-cli", "pcb", "drc", "--schematic-parity", "--severity-all", "--format", "json", "-o", raw, pcb], env, kdir)
+        data = json.load(open(raw, encoding="utf-8")) if (rc == 0 and os.path.exists(raw)) else None
+    if data is None:
         problems.append("kicad-cli pcb drc failed: " + out[-300:])
     else:
-        data = json.load(open(report, encoding="utf-8"))
-        viol = data.get("violations", [])
-        problems += [f"board DRC: {x.get('type')}: {x.get('description', '')[:140]}" for x in viol]
-        lines.append(f"DRC {len(viol)} violations, {len(data.get('unconnected_items', []))} connections still to route")
-        # keep rebuilds identical: no date and no absolute path in the committed report, and a fixed order
-        # (KiCad lists the two ends of a connection still to route in either order)
-        data.pop("date", None)
-        data["source"] = os.path.basename(data.get("source", pcb))
-        for key in ("violations", "unconnected_items", "schematic_parity"):
-            entries = data.get(key, [])
-            for e in entries:
-                e["items"] = sorted(e.get("items", []), key=lambda i: (i.get("description", ""), i.get("uuid", "")))
-            data[key] = sorted(entries, key=lambda e: json.dumps(e, sort_keys=True))
-        with open(report, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=1, sort_keys=True, ensure_ascii=False)
+        report = drc_summary(data, pcb, placed)
+        problems += [f"board DRC: {x.get('type')}: {x.get('description', '')[:140]}" for x in report["violations"]]
+        problems += [f"board and schematic differ: {x.get('type')}: {x.get('description', '')[:100]} "
+                     f"({'; '.join(i.get('description', '')[:60] for i in x.get('items', []))})" for x in report["schematic_parity"]]
+        summary.append(f"DRC {len(report['violations'])} violations, {sum(n['connections'] for n in report['to_route'].values())} "
+                       f"connections still to route; schematic parity: {len(report['schematic_parity'])} differences, "
+                       f"{len(report['not_on_the_board_yet'])} parts not placed yet")
+        with open(os.path.join(bdir, "drc.json"), "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=1, sort_keys=True, ensure_ascii=False)
             f.write("\n")
     with tempfile.TemporaryDirectory(prefix="fcjamma-boardsvg-") as tmp:
         svg = os.path.join(tmp, "board.svg")
@@ -700,21 +777,24 @@ def board_outputs(design, env, kdir, odir, problems, warnings):
             text = re.sub(r" date \d{4}-\d{2}-\d{2}T[\d:]+ ", " ", open(svg, encoding="utf-8").read())
             with open(os.path.join(bdir, "fcjamma_board.svg"), "w", encoding="utf-8") as f:
                 f.write(text)
-        # KiCad's 3D renderer varies the pixels a little from run to run: render only when the board file changed
+        # KiCad's 3D renderer varies the pixels a little from run to run: render only when the board, the way it is
+        # rendered or KiCad's version changed
         import hashlib
-        digest = hashlib.sha256(open(pcb, "rb").read()).hexdigest()
+        render = ["kicad-cli", "pcb", "render", "--side", "top", "--quality", "basic", "-w", "1600", "-h", "1200",
+                  "--background", "opaque"]
+        version = run(["kicad-cli", "version"], env, kdir)[1].strip()
+        digest = hashlib.sha256(open(pcb, "rb").read() + " ".join(render + [version]).encode()).hexdigest()
         stamp, final = os.path.join(bdir, "fcjamma_board_top.png.source"), os.path.join(bdir, "fcjamma_board_top.png")
         if not (os.path.exists(final) and os.path.exists(stamp) and (open(stamp).read().split() or [""])[0] == digest):
             png = os.path.join(tmp, "top.png")
-            rc, out = run(["kicad-cli", "pcb", "render", "--side", "top", "--quality", "basic", "-w", "1600", "-h", "1200",
-                           "--background", "opaque", "-o", png, pcb], env, kdir)
+            rc, out = run(render + ["-o", png, pcb], env, kdir)
             if rc or not os.path.exists(png):
                 warnings.append("the 3D view of the board was not rendered; the old one is kept: " + out[-200:])
             else:
                 shutil.copy(png, final)
                 with open(stamp, "w") as f:
-                    f.write(digest + "  (sha256 of kicad/fcjamma.kicad_pcb this picture was rendered from)\n")
-    return "; ".join(lines)
+                    f.write(digest + f"  (sha256 of kicad/fcjamma.kicad_pcb, the render options and KiCad {version})\n")
+    return "; ".join(summary)
 
 
 def main():
@@ -765,6 +845,7 @@ def main():
     else:
         npath = os.path.join(odir, f"{design.name}.net")
         text = re.sub(r'\(date "[^"]*"\)', '(date "")', open(npath, encoding="utf-8").read())   # keep rebuilds identical
+        text = re.sub(r'\(source "[^"]*/([^"/]+)"\)', r'(source "\1")', text, count=1)          # and the same in any checkout
         open(npath, "w", encoding="utf-8").write(text)
         kn, kc = parse_netlist(npath)
         compare(design, kn, kc, problems)

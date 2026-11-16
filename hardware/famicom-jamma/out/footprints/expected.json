@@ -1,4 +1,239 @@
 {
+ "BreakLine_9h_D0.5mm_P0.8mm_KeepOut": {
+  "attr": [
+   "board_only",
+   "exclude_from_pos_files",
+   "exclude_from_bom"
+  ],
+  "drawings": [
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      -0.35,
+      -3.55
+     ],
+     [
+      0.35,
+      3.55
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "B.CrtYd",
+    "pts": [
+     [
+      -0.35,
+      -3.55
+     ],
+     [
+      0.35,
+      3.55
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   },
+   {
+    "fill": false,
+    "layer": "Cmts.User",
+    "pts": [
+     [
+      -0.25,
+      -6.5
+     ],
+     [
+      4.75,
+      6.5
+     ]
+    ],
+    "text": null,
+    "type": "fp_rect"
+   }
+  ],
+  "graphics": {
+   "B.CrtYd": 1,
+   "Cmts.User": 1,
+   "F.CrtYd": 1
+  },
+  "keepout_boxes": [
+   [
+    -0.25,
+    -6.5,
+    4.75,
+    6.5
+   ]
+  ],
+  "keepout_layers": [
+   [
+    "B.Cu",
+    "F.Cu"
+   ]
+  ],
+  "keepout_names": [
+   "Breakaway tab: keep clear"
+  ],
+  "keepout_rules": [
+   {
+    "copperpour": "not_allowed",
+    "footprints": "not_allowed",
+    "pads": "not_allowed",
+    "tracks": "not_allowed",
+    "vias": "not_allowed"
+   }
+  ],
+  "keepouts": 1,
+  "pads": {
+   "(no number) 0.000,-0.800": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": -0.8
+    }
+   ],
+   "(no number) 0.000,-1.600": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": -1.6
+    }
+   ],
+   "(no number) 0.000,-2.400": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": -2.4
+    }
+   ],
+   "(no number) 0.000,-3.200": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": -3.2
+    }
+   ],
+   "(no number) 0.000,0.000": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": 0.0
+    }
+   ],
+   "(no number) 0.000,0.800": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": 0.8
+    }
+   ],
+   "(no number) 0.000,1.600": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": 1.6
+    }
+   ],
+   "(no number) 0.000,2.400": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": 2.4
+    }
+   ],
+   "(no number) 0.000,3.200": [
+    {
+     "drill": 0.5,
+     "h": 0.5,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 0.5,
+     "x": 0.0,
+     "y": 3.2
+    }
+   ]
+  }
+ },
  "Famicom_Cart_60": {
   "attr": [
    "through_hole"
@@ -1272,11 +1507,35 @@
      ],
      [
       111.16,
+      0.5
+     ],
+     [
+      111.16,
+      -12.0
+     ],
+     [
+      113.07,
+      -12.0
+     ],
+     [
+      113.07,
       -15.0
+     ],
+     [
+      -6.15,
+      -15.0
+     ],
+     [
+      -6.15,
+      -12.0
+     ],
+     [
+      -4.24,
+      -12.0
      ]
     ],
     "text": null,
-    "type": "fp_rect"
+    "type": "fp_poly"
    },
    {
     "fill": false,
@@ -1288,11 +1547,35 @@
      ],
      [
       111.16,
+      0.5
+     ],
+     [
+      111.16,
+      -12.0
+     ],
+     [
+      113.07,
+      -12.0
+     ],
+     [
+      113.07,
       -15.0
+     ],
+     [
+      -6.15,
+      -15.0
+     ],
+     [
+      -6.15,
+      -12.0
+     ],
+     [
+      -4.24,
+      -12.0
      ]
     ],
     "text": null,
-    "type": "fp_rect"
+    "type": "fp_poly"
    },
    {
     "fill": false,
@@ -1600,7 +1883,7 @@
   "keepout_boxes": [
    [
     -4.24,
-    -1.2,
+    -1.6,
     111.16,
     0.5
    ],
@@ -1608,7 +1891,7 @@
     -4.24,
     -9.0,
     111.16,
-    -1.2
+    -1.6
    ],
    [
     -4.24,
@@ -1664,7 +1947,7 @@
    "1": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1674,13 +1957,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 0.0,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "10": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1690,13 +1973,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 35.64,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "11": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1706,13 +1989,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 39.6,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "12": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1722,13 +2005,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 43.56,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "13": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1738,13 +2021,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 47.52,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "14": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1754,13 +2037,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 51.48,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "15": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1770,13 +2053,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 55.44,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "16": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1786,13 +2069,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 59.4,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "17": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1802,13 +2085,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 63.36,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "18": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1818,13 +2101,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 67.32,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "19": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1834,13 +2117,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 71.28,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "2": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1850,13 +2133,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 3.96,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "20": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1866,13 +2149,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 75.24,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "21": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1882,13 +2165,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 79.2,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "22": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1898,13 +2181,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 83.16,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "23": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1914,13 +2197,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 87.12,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "24": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1930,13 +2213,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 91.08,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "25": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1946,13 +2229,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 95.04,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "26": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1962,13 +2245,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 99.0,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "27": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1978,13 +2261,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 102.96,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "28": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -1994,13 +2277,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 106.92,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "3": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -2010,13 +2293,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 7.92,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "4": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -2026,13 +2309,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 11.88,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "5": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -2042,13 +2325,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 15.84,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "6": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -2058,13 +2341,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 19.8,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "8": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -2074,13 +2357,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 27.72,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "9": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "F.Cu",
@@ -2090,13 +2373,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 31.68,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "A": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2106,13 +2389,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 0.0,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "B": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2122,13 +2405,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 3.96,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "C": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2138,13 +2421,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 7.92,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "D": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2154,13 +2437,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 11.88,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "E": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2170,13 +2453,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 15.84,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "F": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2186,13 +2469,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 19.8,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "J": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2202,13 +2485,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 27.72,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "K": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2218,13 +2501,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 31.68,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "L": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2234,13 +2517,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 35.64,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "M": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2250,13 +2533,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 39.6,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "N": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2266,13 +2549,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 43.56,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "P": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2282,13 +2565,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 47.52,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "R": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2298,13 +2581,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 51.48,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "S": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2314,13 +2597,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 55.44,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "T": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2330,13 +2613,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 59.4,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "U": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2346,13 +2629,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 63.36,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "V": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2362,13 +2645,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 67.32,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "W": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2378,13 +2661,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 71.28,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "X": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2394,13 +2677,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 75.24,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "Y": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2410,13 +2693,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 79.2,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "Z": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2426,13 +2709,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 83.16,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "a": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2442,13 +2725,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 87.12,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "b": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2458,13 +2741,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 91.08,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "c": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2474,13 +2757,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 95.04,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "d": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2490,13 +2773,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 99.0,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "e": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2506,13 +2789,13 @@
      "shape": "rect",
      "w": 2.3,
      "x": 102.96,
-     "y": -5.6
+     "y": -5.8
     }
    ],
    "f": [
     {
      "drill": 0.0,
-     "h": 8.8,
+     "h": 8.4,
      "kind": "connect",
      "layers": [
       "B.Cu",
@@ -2522,7 +2805,7 @@
      "shape": "rect",
      "w": 2.3,
      "x": 106.92,
-     "y": -5.6
+     "y": -5.8
     }
    ]
   }
@@ -6195,6 +6478,74 @@
      "shape": "circle",
      "w": 1.7,
      "x": 7.62,
+     "y": 0.0
+    }
+   ]
+  }
+ },
+ "ToolingHole_2.0mm_NPTH": {
+  "attr": [
+   "board_only",
+   "exclude_from_pos_files",
+   "exclude_from_bom"
+  ],
+  "drawings": [
+   {
+    "fill": false,
+    "layer": "F.CrtYd",
+    "pts": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      1.25,
+      0.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   },
+   {
+    "fill": false,
+    "layer": "B.CrtYd",
+    "pts": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      1.25,
+      0.0
+     ]
+    ],
+    "text": null,
+    "type": "fp_circle"
+   }
+  ],
+  "graphics": {
+   "B.CrtYd": 1,
+   "F.CrtYd": 1
+  },
+  "keepout_boxes": [],
+  "keepout_layers": [],
+  "keepout_names": [],
+  "keepout_rules": [],
+  "keepouts": 0,
+  "pads": {
+   "(no number) 0.000,0.000": [
+    {
+     "drill": 2.0,
+     "h": 2.0,
+     "kind": "np_thru_hole",
+     "layers": [
+      "*.Cu",
+      "*.Mask"
+     ],
+     "rot": 0.0,
+     "shape": "circle",
+     "w": 2.0,
+     "x": 0.0,
      "y": 0.0
     }
    ]

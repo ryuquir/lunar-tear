@@ -169,7 +169,7 @@ def check_one(name, want, fp, problems):
 
     attrs = fp.GetAttributes()
     for flag, bit in (("exclude_from_pos_files", pcbnew.FP_EXCLUDE_FROM_POS_FILES), ("exclude_from_bom", pcbnew.FP_EXCLUDE_FROM_BOM),
-                      ("through_hole", pcbnew.FP_THROUGH_HOLE), ("smd", pcbnew.FP_SMD)):
+                      ("through_hole", pcbnew.FP_THROUGH_HOLE), ("smd", pcbnew.FP_SMD), ("board_only", pcbnew.FP_BOARD_ONLY)):
         if (flag in want["attr"]) != bool(attrs & bit):
             problems.append(f"{name}: attribute {flag} is {'set' if attrs & bit else 'not set'}")
     if ("allow_soldermask_bridges" in want["attr"]) != fp.AllowSolderMaskBridges():

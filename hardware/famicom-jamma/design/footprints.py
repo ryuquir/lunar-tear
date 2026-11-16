@@ -5,12 +5,14 @@ Every dimension below names its source.  The sources were read, and each value c
 independent reader, on 2026-11-15; the full record (quotes, measurements, open points) is
 research_notes/ファミコン JAMMA 基板 仕様調査/footprint_specs.md.
 
-Five footprints:
+Seven footprints:
   JAMMA_Edge_56      J1   the 56-way gold-finger edge of this board (no part is fitted)
   Famicom_Cart_60    J8   WingTAT ED60BGFBK 60-way 2.54 mm card-edge slot (C5173310), Famicom numbering
   Trimmer_Bourns_3362P RV1 BOCHEN 3362P-1-103 trimmer (C118956), Bourns 3362P pin pattern
   SW_DIP_x04_...     SW3  copy of KiCad's 4-way DIP switch with 1.0 mm holes for HRO DS-04RP (C92645)
   RaspberryPi_Pico2_SMD_TP7KeepOut  U25-U27  copy of KiCad's Pico SMD footprint with the Pico 2 TP7 keep-out
+  BreakLine_9h_D0.5mm_P0.8mm_KeepOut  MB*  mouse bites that join an edge rail to the board, with a 5 mm keep-out
+  ToolingHole_2.0mm_NPTH              TH*  the edge rails' tooling holes
 
 The keep-out areas carry names.  On a board whose project finds this library, KiCad 10.0.8's DRC does not report
 vias (or other parts' pads) inside a footprint's keep-out, only tracks and pour; the rules in BOARD_RULES below,
@@ -33,10 +35,12 @@ CART = "Famicom_Cart_60"
 TRIM = "Trimmer_Bourns_3362P"
 DIP = "SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm"
 PICO = "RaspberryPi_Pico2_SMD_TP7KeepOut"
+BREAK = "BreakLine_9h_D0.5mm_P0.8mm_KeepOut"
+TOOL = "ToolingHole_2.0mm_NPTH"
 
 # The JLCPCB part each footprint was drawn for (tools/build.py checks that the circuit uses it with that part).
 # None: the footprint is part of the bare board itself.
-PART_OF = {JAMMA: None, CART: "C5173310", TRIM: "C118956", DIP: "C92645", PICO: "C41407547"}
+PART_OF = {JAMMA: None, CART: "C5173310", TRIM: "C118956", DIP: "C92645", PICO: "C41407547", BREAK: None, TOOL: None}
 
 SILK_MIN = 0.15        # JLCPCB legend: 'Minimum Line Width ≥0.15mm', 'Minimum text height 40 mil (1.0mm)', pad to silk 0.15
 
@@ -47,21 +51,25 @@ SILK_MIN = 0.15        # JLCPCB legend: 'Minimum Line Width ≥0.15mm', 'Minimum
 # ADC-016737-72-02; Sullins EBM28D; JLCPCB help 'JLCPCB Gold Fingers' and 'Instructions for Chamfering Gold Fingers'.
 # Origin: on the board tip line, at the centre of finger 1/A.  +X towards 28/f.  The board lies at negative Y.
 JAMMA_PITCH = 3.96                 # 106.92 between 1 and 28 meets JST 106.92 ± 0.05 and Hirose 106.98 ± 0.08
-JAMMA_FINGER = (2.30, 8.80)        # width: Hirose 2.3 ± 0.1 (JST prints '2.3 ±0.35 (.091 ±.001)'); length: 1.2 to 10.0 from the tip
-JAMMA_FINGER_Y = -5.6              # centre; copper 1.2 from the tip (JLCPCB 30° bevel set-back about 1.13)
+JAMMA_SETBACK = 1.6                # no copper within 1.6 of the tip: JLCPCB's 30 ± 5° bevel on a 1.6 mm board needs about 1.13 at 30°;
+                                   # at 25° the same bevel reaches 1.40, and the routed tip may lie 0.2 further in (±0.2)
+JAMMA_FINGER = (2.30, 8.40)        # width: Hirose 2.3 ± 0.1 (JST prints '2.3 ±0.35 (.091 ±.001)'); length: 1.6 to 10.0 from the tip
+JAMMA_FINGER_Y = -5.8              # centre; the mating contact touches 5.3 ± 0.4 from the tip (Hirose), well on the finger
 JAMMA_LETTERS = "ABCDEFHJKLMNPRSTUVWXYZabcdef"   # solder side; G, I, O, Q are not used (Hirose, Sullins)
 JAMMA_KEY_INDEX = 6                # position 7/H is the key slot
 JAMMA_TONGUE = (-3.74, 110.66)     # 114.4 nominal, so that +0.2 routing never exceeds JST's 114.6 maximum (Hirose: 114.6-114.8)
 JAMMA_KEY = (23.76, 3.0, 11.5)     # key slot centre, width, depth: covers every key (Sullins 2.36, Hirose CR1 2.0; Hirose slot 2.5 x 11)
-JAMMA_SHOULDER = -12.0             # body wider than the tongue from 12 mm up: the housing's ears reach 10.5
+JAMMA_SHOULDER = -12.0             # body wider than the tongue from 12 mm up: JST asks for a notch at least 10 deep; the housing's
+                                   # face is 8.5 (Hirose) or 6.73 (Sullins) above the tip, its ears reach about 10.5 sideways
 JAMMA_MASK_END = -10.1             # the open mask band ends 0.1 past the fingers, so that no track can run bare across it
 JAMMA_TOP = -15.0                  # courtyard: no part within 15 mm of the tip (through-hole parts 5 mm from the fingers)
 JAMMA_X = (-4.24, 111.16)          # the tongue plus 0.5 mm on each side
+JAMMA_THT_X = (-6.15, 113.07)      # beside the tongue's root the courtyard widens to 5 mm past the outer fingers' copper
 
 
 def jamma_edge():
     names = [(i, str(i + 1), JAMMA_LETTERS[i]) for i in range(28) if i != JAMMA_KEY_INDEX]
-    fp = F.Footprint(JAMMA, "JAMMA 56-way card edge of this board: 2x27 gold fingers 2.30 x 8.80, pitch 3.96, 1.2-10.0 mm from the tip, "
+    fp = F.Footprint(JAMMA, "JAMMA 56-way card edge of this board: 2x27 gold fingers 2.30 x 8.40, pitch 3.96, 1.6-10.0 mm from the tip, "
                      "1-28 on F.Cu, A-f on B.Cu, 7/H key slot; the tongue (114.4 x 12) and the key slot (3.0 x 11.5) are drawn on "
                      "Edge.Cuts by the board generator; mates JST GEC, Hirose CR7E-56 and Sullins EBM28D",
                      "JAMMA card edge gold finger 3.96mm 56",
@@ -76,11 +84,16 @@ def jamma_edge():
         fp.rect((x0, 0.5), (x1, JAMMA_MASK_END), layer, width=0, fill=True)
     band = lambda y0, y1: [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     # the bevelled strip ('this area can not have copper'), the contact band (fingers only), the finger roots (no vias)
-    fp.keepout(["F.Cu", "B.Cu"], band(0.5, -1.2), "JAMMA tip: no copper")
-    fp.keepout(["F.Cu", "B.Cu"], band(-1.2, -9.0), "JAMMA contact band: fingers only", pads=False)
+    fp.keepout(["F.Cu", "B.Cu"], band(0.5, -JAMMA_SETBACK), "JAMMA tip: no copper")
+    fp.keepout(["F.Cu", "B.Cu"], band(-JAMMA_SETBACK, -9.0), "JAMMA contact band: fingers only", pads=False)
     fp.keepout(["F.Cu", "B.Cu"], band(-9.0, -11.0), "JAMMA finger roots: no vias or pour", tracks=False, pads=False)
+    # courtyard: the tongue (0.5 wider on each side) and, where the body starts, 5 mm past the outer fingers' copper, so that
+    # no part's courtyard can come within 5 mm of a finger beside the tongue's root either
+    tx0, tx1 = JAMMA_THT_X
+    crt = [(x0, 0.5), (x1, 0.5), (x1, JAMMA_SHOULDER), (tx1, JAMMA_SHOULDER), (tx1, JAMMA_TOP), (tx0, JAMMA_TOP),
+           (tx0, JAMMA_SHOULDER), (x0, JAMMA_SHOULDER)]
     for layer in ("F.CrtYd", "B.CrtYd"):
-        fp.rect((x0, 0.5), (x1, JAMMA_TOP), layer, width=0.05)
+        fp.poly(crt, layer, width=0.05, fill=False)
     kx, kw, kd = JAMMA_KEY
     t0, t1 = JAMMA_TONGUE
     fp.polyline([(t0, JAMMA_SHOULDER), (t0, -0.5), (t0 + 0.5, 0), (kx - kw / 2 - 0.5, 0), (kx - kw / 2, -0.5), (kx - kw / 2, -kd),
@@ -90,7 +103,7 @@ def jamma_edge():
         fp.text(text, (x, -13.4), "F.SilkS", 1.2, 0.18)
     for text, x in (("A", -2.4), ("f", 109.3), ("SOLDER SIDE A-f", 53.46)):
         fp.text(text, (x, -13.4), "B.SilkS", 1.2, 0.18, mirror=True)
-    fp.line((-6.15, JAMMA_TOP), (113.07, JAMMA_TOP), "Cmts.User", 0.10)
+    fp.line((JAMMA_THT_X[0], JAMMA_TOP), (JAMMA_THT_X[1], JAMMA_TOP), "Cmts.User", 0.10)
     fp.text("THT parts beyond this line (>= 5 mm from the fingers)", (53.46, JAMMA_TOP - 0.8), "Cmts.User", 1.0, 0.15)
     return fp.tree()
 
@@ -267,6 +280,50 @@ def pico2():
                     "opening there (Pico 2 datasheet, Figure 5; enforced by the board rules in kicad/fcjamma.kicad_dru)", edit)
 
 
+# ---------------------------------------------------------------------------------------------- edge rails
+# Sources: JLCPCB capabilities, 'Mouse bites Panel' (read 2026-11-16): 'Panel board spacing: 1.6 or 2 mm', 'Recommended
+# diameter of mouse bite is 0.5mm-0.8mm; Recommended distance between the two mouse-bites is 0.2-0.3mm', 'For breakaway
+# with mouse-bites, the minimum width is 5mm', 'For SMT assembly at JLCPCB, use 5 mm tooling edges, 2 mm tooling holes,
+# and 1 mm fiducials centered at 3.85 mm from the panel edges'.  KiCad's own Panelization library uses the same 0.5 holes
+# at 0.85 (0.35 apart); 0.8 keeps to JLCPCB's 0.2-0.3.
+# Break line: the holes run along Y, centred on the origin.  A 5 mm tab between two 2 mm slots with round ends is 7.0 wide
+# on the board's edge; the 9 holes span 6.9 of it.  design/board.py puts the line 0.25 inside the board's edge, so that the
+# stubs left after breaking stay inside the outline, and turns it by 180° on the right-hand rail.  The keep-out (+X, the
+# board's side) keeps parts, pads, vias, tracks and pour 5 mm away from the break line, where snapping the rail bends the
+# board; board rules make the DRC report vias, pads and parts in it.
+BREAK_D, BREAK_P, BREAK_N = 0.5, 0.8, 9
+BREAK_ZONE = "Breakaway tab: keep clear"
+BREAK_KEEP = (-0.25, 4.75, 6.5)            # from the board's edge (0.25 behind the holes) 5 mm into the board, ±6.5 along the edge
+TOOL_D = 2.0
+
+
+def break_line():
+    fp = F.Footprint(BREAK, "Mouse bites joining an edge rail to the board (JLCPCB mouse-bite panel): 9 holes of 0.5 at 0.8, not plated, "
+                     "for a 5 mm tab between 2 mm slots; keep-out 5 mm into the board (+X): no parts, pads, vias, tracks or pour",
+                     "mousebite break line edge rail tab JLCPCB",
+                     attr=("board_only", "exclude_from_pos_files", "exclude_from_bom"), ref_at=(2.0, 0), value_at=(3.0, 0))
+    for k in range(BREAK_N):
+        fp.pad("", "np_thru_hole", "circle", (0, BREAK_P * (k - (BREAK_N - 1) / 2)), (BREAK_D, BREAK_D), ["*.Cu", "*.Mask"],
+               drill=BREAK_D)
+    half = BREAK_P * (BREAK_N - 1) / 2 + BREAK_D / 2 + 0.1
+    for layer in ("F.CrtYd", "B.CrtYd"):
+        fp.rect((-0.35, -half), (0.35, half), layer, width=0.05)
+    x0, x1, h = BREAK_KEEP
+    fp.keepout(["F.Cu", "B.Cu"], [(x0, -h), (x1, -h), (x1, h), (x0, h)], BREAK_ZONE, footprints=True)
+    fp.rect((x0, -h), (x1, h), "Cmts.User", 0.10)
+    return fp.tree()
+
+
+def tooling_hole():
+    fp = F.Footprint(TOOL, "Tooling hole of an edge rail: 2.0 mm, not plated, centred on the 5 mm rail (JLCPCB: '5 mm tooling edges, "
+                     "2 mm tooling holes')", "tooling hole NPTH edge rail JLCPCB",
+                     attr=("board_only", "exclude_from_pos_files", "exclude_from_bom"), ref_at=(0, -2.0), value_at=(0, 2.0))
+    fp.pad("", "np_thru_hole", "circle", (0, 0), (TOOL_D, TOOL_D), ["*.Cu", "*.Mask"], drill=TOOL_D)
+    for layer in ("F.CrtYd", "B.CrtYd"):
+        fp.circle((0, 0), TOOL_D / 2 + 0.25, layer, width=0.05)
+    return fp.tree()
+
+
 def insert_before_pads(tree, items):
     idx = next(i for i, x in enumerate(tree) if isinstance(x, list) and x and x[0] == "pad")
     tree[idx:idx] = items
@@ -277,6 +334,7 @@ def insert_before_pads(tree, items):
 # proves on every build that it reports a probe placed where it forbids.  The JLCPCB rules (capabilities page, read
 # 2026-11-15: 'Pad To Silkscreen 0.15mm', 'Pad Hole-to-Hole Spacing 0.45mm', 'PTH annular ring ... Recommended 0.25 mm')
 # only make KiCad's defaults stricter; the silkscreen rule leaves out paste-only stencil openings, which are not copper.
+# The mouse bites (references MB*) are 0.3 apart, as JLCPCB recommends for them; the 0.45 rule is for pad holes.
 JAMMA_AREAS = ("JAMMA tip: no copper", "JAMMA contact band: fingers only", "JAMMA finger roots: no vias or pour")
 BOARD_RULES = """(version 1)
 
@@ -306,8 +364,12 @@ BOARD_RULES = """(version 1)
     (constraint silk_clearance (min 0.15mm)))
 
 (rule "JLCPCB: pad holes 0.45 apart"
-    (condition "A.Type == 'Pad' && B.Type == 'Pad'")
+    (condition "A.Type == 'Pad' && B.Type == 'Pad' && !(A.memberOfFootprint('MB*') && B.memberOfFootprint('MB*'))")
     (constraint hole_to_hole (min 0.45mm)))
+
+(rule "Breakaway tabs: no parts, pads, vias or tracks within 5 mm"
+    (constraint disallow footprint pad via track)
+    (condition "A.intersectsArea('Breakaway tab: keep clear') && !A.memberOfFootprint('MB*')"))
 
 (rule "JLCPCB: annular ring of through-hole pads 0.25"
     (condition "A.Type == 'Pad'")
@@ -316,7 +378,7 @@ BOARD_RULES = """(version 1)
 
 
 # ---------------------------------------------------------------------------------------------- library and facts
-BUILDERS = {JAMMA: jamma_edge, CART: cart60, TRIM: trimmer, DIP: dip_switch, PICO: pico2}
+BUILDERS = {JAMMA: jamma_edge, CART: cart60, TRIM: trimmer, DIP: dip_switch, PICO: pico2, BREAK: break_line, TOOL: tooling_hole}
 
 
 def write_library(libdir):
@@ -384,11 +446,11 @@ def facts(exp, trees):
             x = 3.96 * (int(num) - 1)
             for key, layers in ((num, ["F.Cu", "F.Mask"]), (letter, ["B.Cu", "B.Mask"])):
                 p = j[key]
-                if not (p["kind"] == "connect" and p["shape"] == "rect" and _near(p["x"], x) and _near(p["y"], -5.6)
-                        and _near(p["w"], 2.30) and _near(p["h"], 8.80) and _near(p["rot"], 0) and p["layers"] == layers):
+                if not (p["kind"] == "connect" and p["shape"] == "rect" and _near(p["x"], x) and _near(p["y"], -5.8)
+                        and _near(p["w"], 2.30) and _near(p["h"], 8.40) and _near(p["rot"], 0) and p["layers"] == layers):
                     return False
         return True
-    fact("JAMMA: 54 fingers 2.30 x 8.80 at 3.96, 1.2-10.0 mm from the tip, 1-28 on the parts side and A-f behind them "
+    fact("JAMMA: 54 fingers 2.30 x 8.40 at 3.96, 1.6-10.0 mm from the tip, 1-28 on the parts side and A-f behind them "
          "(G, I, O, Q unused, 7/H the key), no paste, not turned", jamma_pads_right)
     fact("JAMMA: 1 to 28 is 106.92 (JST 106.92 ± 0.05, Hirose 106.98 ± 0.08)",
          lambda: _near(_one(exp, JAMMA)["28"]["x"] - _one(exp, JAMMA)["1"]["x"], 106.92))
@@ -399,9 +461,9 @@ def facts(exp, trees):
 
     def jamma_keepouts_right():
         e = exp[JAMMA]
-        want = {"JAMMA tip: no copper": ([0.5, -1.2], {"tracks": "not_allowed", "vias": "not_allowed", "pads": "not_allowed",
+        want = {"JAMMA tip: no copper": ([0.5, -1.6], {"tracks": "not_allowed", "vias": "not_allowed", "pads": "not_allowed",
                                                          "copperpour": "not_allowed", "footprints": "allowed"}),
-                "JAMMA contact band: fingers only": ([-1.2, -9.0], {"tracks": "not_allowed", "vias": "not_allowed", "pads": "allowed",
+                "JAMMA contact band: fingers only": ([-1.6, -9.0], {"tracks": "not_allowed", "vias": "not_allowed", "pads": "allowed",
                                                                      "copperpour": "not_allowed", "footprints": "allowed"}),
                 "JAMMA finger roots: no vias or pour": ([-9.0, -11.0], {"tracks": "allowed", "vias": "not_allowed", "pads": "allowed",
                                                                          "copperpour": "not_allowed", "footprints": "allowed"})}
@@ -414,11 +476,29 @@ def facts(exp, trees):
                     and _near(box[2], 111.16) and _near(box[1], min(ya, yb)) and _near(box[3], max(ya, yb))):
                 return False
         return True
-    fact("JAMMA: three keep-outs on both copper layers: no copper in the bevel (0-1.2), fingers only in the contact band "
-         "(1.2-9.0), no vias or pour at the finger roots (9.0-11.0)", jamma_keepouts_right)
-    fact("JAMMA: courtyard on both sides to 15 mm from the tip (through-hole parts at least 5 mm from the fingers)",
-         lambda: all(any(_rect_is(d, -4.24, 0.5, 111.16, -15.0) for d in _drawings(exp, JAMMA, "fp_rect", layer))
-                     for layer in ("F.CrtYd", "B.CrtYd")))
+    fact("JAMMA: three keep-outs on both copper layers: no copper in the bevel (0-1.6), fingers only in the contact band "
+         "(1.6-9.0), no vias or pour at the finger roots (9.0-11.0)", jamma_keepouts_right)
+    def jamma_setback_right():
+        depth = 1.13 * math.tan(math.radians(30))          # JLCPCB: the 30° bevel of a 1.6 mm board reaches about 1.13 mm
+        worst = depth / math.tan(math.radians(25)) + 0.2   # the same depth at 30 - 5°, on a tip routed 0.2 short (±0.2)
+        return worst <= 1.6 and all(p["y"] + p["h"] / 2 <= -1.6 + 1e-9 for p in _one(exp, JAMMA).values())
+    fact("JAMMA: no copper within 1.6 of the tip, which covers JLCPCB's bevel (about 1.13 at 30°, 1.40 at 25°) on a tip routed "
+         "0.2 short", jamma_setback_right)
+
+    def jamma_courtyard_right():
+        # written out again: 5 mm past the outer fingers' copper (finger 1 at 0, finger 28 at 27 x 3.96, half width 1.15)
+        tx0, tx1 = -1.15 - 5.0, 27 * 3.96 + 1.15 + 5.0
+        want = [(-4.24, 0.5), (111.16, 0.5), (111.16, -12.0), (tx1, -12.0), (tx1, -15.0), (tx0, -15.0), (tx0, -12.0), (-4.24, -12.0)]
+        for layer in ("F.CrtYd", "B.CrtYd"):
+            polys = _drawings(exp, JAMMA, "fp_poly", layer)
+            if len(polys) != 1 or len(_drawings(exp, JAMMA, layer=layer)) != 1 or polys[0]["fill"]:
+                return False
+            got = polys[0]["pts"]
+            if len(got) != len(want) or not all(_near(a[0], b[0]) and _near(a[1], b[1]) for a, b in zip(got, want)):
+                return False
+        return True
+    fact("JAMMA: courtyard on both sides to 15 mm from the tip, and beside the tongue's root (12-15 mm) 5 mm past the outer fingers, "
+         "so that no part comes within 5 mm of a finger", jamma_courtyard_right)
     fact("JAMMA: left out of the BOM and the position file, mask bridges allowed between fingers",
          lambda: sorted(exp[JAMMA]["attr"]) == ["allow_soldermask_bridges", "exclude_from_bom", "exclude_from_pos_files"])
 
@@ -506,6 +586,34 @@ def facts(exp, trees):
          lambda: not any(math.hypot(max(abs(p["x"] - 1.0) - p["w"] / 2, 0), max(abs(p["y"] + 5.0) - p["h"] / 2, 0)) < 1.25
                          for v in exp[PICO]["pads"].values() for p in v
                          if any(layer in ("F.Cu", "F.Mask", "*.Cu", "*.Mask") for layer in p["layers"])))
+
+    # ---- edge rails: mouse bites and tooling holes
+    def break_right():
+        holes = [p for v in exp[BREAK]["pads"].values() for p in v]
+        if len(holes) != 9 or not all(p["kind"] == "np_thru_hole" and p["shape"] == "circle" and _near(p["drill"], 0.5)
+                                      and _near(p["w"], 0.5) and _near(p["x"], 0) for p in holes):
+            return False
+        ys = sorted(p["y"] for p in holes)
+        gaps = [b - a - 0.5 for a, b in zip(ys, ys[1:])]
+        return all(0.2 - 1e-9 <= g <= 0.3 + 1e-9 for g in gaps) and _near(ys[0], -ys[-1]) and 6.5 <= ys[-1] - ys[0] + 0.5 <= 7.0
+    fact("mouse bites: 9 holes of 0.5, not plated, 0.2-0.3 apart (JLCPCB), in one line along Y across about 7 mm "
+         "(a 5 mm tab between 2 mm slots with round ends)", break_right)
+
+    def break_keepout_right():
+        e = exp[BREAK]
+        if e["keepout_names"] != [BREAK_ZONE] or e["keepout_layers"] != [["B.Cu", "F.Cu"]]:
+            return False
+        if e["keepout_rules"][0] != {"tracks": "not_allowed", "vias": "not_allowed", "pads": "not_allowed",
+                                     "copperpour": "not_allowed", "footprints": "not_allowed"}:
+            return False
+        x0, y0, x1, y1 = e["keepout_boxes"][0]
+        return _near(x0, -0.25) and _near(x1, 4.75) and _near(y0, -6.5) and _near(y1, 6.5)
+    fact("mouse bites: a keep-out from the board's edge 5 mm into the board (+X), ±6.5 along the edge, forbidding parts, pads, "
+         "vias, tracks and pour", break_keepout_right)
+    fact("tooling hole: one hole of 2.0, not plated (JLCPCB: 2 mm tooling holes)",
+         lambda: [(p["kind"], p["drill"], p["x"], p["y"]) for v in exp[TOOL]["pads"].values() for p in v] == [("np_thru_hole", 2.0, 0.0, 0.0)])
+    fact("mouse bites and tooling hole: on the board only, left out of the BOM and the position file",
+         lambda: all(sorted(exp[n]["attr"]) == ["board_only", "exclude_from_bom", "exclude_from_pos_files"] for n in (BREAK, TOOL)))
 
     # ---- silkscreen on every footprint
     def silk_ok():

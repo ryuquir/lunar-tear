@@ -2,7 +2,7 @@ Subject: Questions before a Standard PCBA order (Raspberry Pi Pico 2 modules, go
 
 Hello,
 
-I am preparing a Standard PCBA order of 5 boards (possibly 10 later) and would like to confirm a few points before I finish the layout. The board is 2 layers (4 if the routing needs it), 1.6 mm, ENIG, about 220 x 162 mm without rails (a 220 x 150 mm body plus a 114.4 mm wide, 12 mm long edge-connector tongue; 230 x 162 mm with the two edge rails of question 3), with gold fingers on that tongue (a JAMMA edge connector: 28 positions on each side at 3.96 mm pitch, one position is a key slot) and a 30 degree bevel on that edge. All parts are on the top side.
+I am preparing a Standard PCBA order of 5 boards (possibly 10 later) and would like to confirm a few points before I finish the layout. The board is 2 layers (4 if the routing needs it), 1.6 mm, ENIG, about 220 x 162 mm without rails (a 220 x 150 mm body plus a 114.4 mm wide, 12 mm long edge-connector tongue; 234 x 162 mm with the two edge rails of question 3), with gold fingers on that tongue (a JAMMA edge connector: 28 positions on each side at 3.96 mm pitch, one position is a key slot) and a 30 degree bevel on that edge. All parts are on the top side.
 
 1) Raspberry Pi Pico 2 module, JLCPCB part C41407547 (your part page says "SMT Assembly", "Standard Only", "X-ray Inspection: Required"). Each board carries three of them, soldered flat on the top side by their castellated edge pads.
 1a) Is the module placed by machine and soldered by reflow, or soldered by hand? I need reflow, because pads under the module must be soldered too (see 1c).
@@ -18,7 +18,11 @@ I am preparing a Standard PCBA order of 5 boards (possibly 10 later) and would l
 2c) Are these parts soldered by hand or by wave at this quantity? Is flux residue kept out of the socket and connector contacts, or cleaned?
 2d) Is the feeder loading fee charged for these through-hole parts as well, or only for the SMT parts?
 
-3) Edge rails and fiducials: we plan to add two 5 mm rails ourselves, on the left and right edges of the 220 x 150 mm body (the two 150 mm edges, perpendicular to the gold-finger edge), so that the bevelled gold-finger edge stays an outer edge. The size is then 230 x 162 mm. Is this acceptable for Standard PCBA, and should the rails be joined by V-cut or by mouse bites? We will put 3 fiducials (1 mm) on the rails.
+3) Edge rails, tooling holes and fiducials: we have drawn two 5 mm rails ourselves, on the left and right edges of the 220 x 150 mm body (the two edges perpendicular to the gold-finger edge), so that the bevelled gold-finger edge stays an outer edge. The rails run the full height, from the tip of the gold fingers to the top edge, and are joined to the body by mouse bites: a 2 mm routed slot with five 5 mm tabs per side, each tab with nine 0.5 mm non-plated holes at 0.8 mm pitch. Each rail carries two 2.0 mm non-plated tooling holes (centred on the rail, 5 mm from its ends), and there are 3 fiducials (1 mm copper, 2 mm mask opening) on the rails, centred 3.85 mm from the outer edge. The size is then 234 x 162 mm.
+3a) Is this acceptable for Standard PCBA with "Edge Rails/Fiducials: Added by Customer" (and "Tooling holes: Added by Customer")?
+3b) Should the order use Delivery Format "Single PCB" or "Panel by Customer" (1 x 1)?
+3c) Could the rails be joined by V-cut instead (no slot, 230 x 162 mm), and would the gold fingers then still be bevelled? Your gold-finger page says that fingers in a V-cut panel cannot be chamfered; here the fingers would stay on an outer edge.
+3d) Our gold fingers start 1.6 mm from the board edge (your figure gives about 1.13 mm for a 30 degree bevel on 1.6 mm). Is 1.6 mm enough, so that you do not need to shorten the fingers?
 
 4) Does anything above require assembly on both sides, or add to the lead time?
 

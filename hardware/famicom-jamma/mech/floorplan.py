@@ -6,16 +6,19 @@
 Dimensions are millimetres.  Origin: lower left corner of the bounding box, seen from the parts side with the
 JAMMA fingers pointing down; y = 0 is the tip of the fingers, x runs to the right, y upwards.
 Before it draws, the script checks that the large parts lie inside the outline and do not overlap each other,
-the mounting holes or the space the cartridge shell needs.
+the mounting holes or the space the cartridge shell needs, and that no part or zone reaches into the JAMMA band or the
+keep-out beside a rail tab.  tools/build.py runs the same check and compares the dimensions with design/board.py.
 
 Where the fixed dimensions come from
 - JAMMA edge: research_notes/ファミコン JAMMA 基板 仕様調査/reference/02_jamma_interface.md section 1.2.3
-  (pitch 3.96, tongue 114.4 wide, key slot 3.0 x 11.5 at finger 7, outer finger 3.74 from the side,
-  fingers from 1.2 to 10.0, nothing but fingers within 12 mm of the tip)
+  (pitch 3.96, tongue 114.4 wide, key slot 3.0 x 11.5 at finger 7, outer finger 3.74 from the side);
+  design/footprints.py (fingers from 1.6 to 10.0; no part within 15 mm of the tip, nor within 5 mm of a finger
+  beside the tongue's root)
 - 60-pin connector ED60BGFBK (C5173310): maker's drawing, body 82.49 x 9.25, 15.6 high
 - Famicom cartridge shell: about 108 x 17 mm seen from above, about 70 mm tall (published figures differ; to be measured)
 - Raspberry Pi Pico 2: KiCad courtyard of Module:RaspberryPi_Pico_SMD, 53.9 x 23.1; DIP-40 socket courtyard 51.4 x 18.3
-- USB-C HRO TYPE-C-31-M-12: about 8.9 wide, 7.3 deep; edge rails: JLCPCB Standard PCBA, 5 mm on two parallel sides
+- USB-C HRO TYPE-C-31-M-12: about 8.9 wide, 7.3 deep
+- edge rails (design/board.py): 5 mm on the left and right, a 2 mm slot, joined by 5 mm tabs with mouse bites
 """
 import os
 import subprocess
@@ -29,10 +32,15 @@ TONGUE_W, TONGUE_L = 114.4, 12.0       # JAMMA tongue with the gold fingers, bel
 TONGUE_X0 = (BODY_W - TONGUE_W) / 2    # 52.8
 Y0 = TONGUE_L                          # the body starts 12 mm above the finger tips
 TOP = Y0 + BODY_H                      # 162
-PITCH, FINGER_W, FINGER_Y = 3.96, 2.30, (1.2, 10.0)
+PITCH, FINGER_W, FINGER_Y = 3.96, 2.30, (1.6, 10.0)
+JAMMA_KEEP = 15.0                      # no part within 15 mm of the tip (J1's courtyard)
 FINGER1_X = TONGUE_X0 + 3.74           # centre of finger 1
 KEY_X, KEY_W, KEY_D = FINGER1_X + 6 * PITCH, 3.0, 11.5
 RAIL_W = 5.0                           # JLCPCB edge rails (manufacturing only), on the left and right sides
+RAIL_GAP = 2.0                         # routed slot between the rail and the body
+TAB_W = 5.0                            # tabs with mouse bites that join the rails to the body
+TABS = (32.0, 48.0, 112.0, 130.0, 145.0)   # tab centres (y), the same on both sides
+TAB_KEEP, TAB_KEEP_H = 5.0, 6.5        # no part within 5 mm of a tab's mouse bites (into the body, ±6.5 along the edge)
 
 # ------------------------------------------------------------------ large parts: name -> (x, y, w, h, kind, label, height above the board)
 PARTS = {
@@ -58,9 +66,9 @@ CART_TOP = 80.0                         # top of an inserted cartridge above the
 # areas for the small parts of each function: name -> (x, y, w, h, label)
 ZONES = {
     "power": (9.0, 16.0, 43.0, 34.0, "電源\nヒューズ・保護・\n電源スイッチ・3.3V"),
-    "coil":  (56.0, 14.0, 44.0, 10.0, "コイン用出力（4 本）"),
+    "coil":  (56.0, 15.5, 44.0, 8.5, "コイン用出力（4 本）"),
     "audio": (56.0, 26.0, 44.0, 24.0, "音声\nミキサー・アンプ"),
-    "jamma": (104.0, 14.0, 108.0, 36.0, "JAMMA の入力 25 本と出力\n抵抗・コンデンサ・シフトレジスタ"),
+    "jamma": (104.0, 15.5, 108.0, 34.5, "JAMMA の入力 25 本と出力\n抵抗・コンデンサ・シフトレジスタ"),
     "dac":   (84.0, 54.0, 54.0, 18.0, "映像 DAC（RGB・同期）"),
     "mcu":   (58.0, 54.0, 22.0, 44.0, "Pico 間の\n配線部品"),
     "cpu":   (60.0, 102.0, 47.0, 37.0, "CPU まわり\nRAM・デコーダ・\nバスの抵抗"),
@@ -104,6 +112,19 @@ def check():
         problems.append("no room beside the tongue for the ears of the cabinet's connector")
     if PARTS["J10"][0] < 0.0:
         problems.append("the USB socket must not stick out over the edge: the edge rail is attached there")
+    # the JAMMA band: J1's courtyard, to 15 mm above the tip and 5 mm past the outer fingers' copper
+    band = (FINGER1_X - FINGER_W / 2 - 5.0, 0.0, 27 * PITCH + FINGER_W + 10.0, JAMMA_KEEP)
+    keep = [(x0, t - TAB_KEEP_H, TAB_KEEP, 2 * TAB_KEEP_H) for t in TABS for x0 in (0.0, BODY_W - TAB_KEEP)]
+    for n, box in [(n, PARTS[n][:4]) for n in PARTS] + [(f"zone '{n}'", ZONES[n][:4]) for n in ZONES]:
+        if overlap(box, band):
+            problems.append(f"{n} reaches into the JAMMA band (no part within {JAMMA_KEEP:g} mm of the tip)")
+        if any(overlap(box, kb) for kb in keep):
+            problems.append(f"{n} is within {TAB_KEEP:g} mm of a rail tab's mouse bites")
+    for t in TABS:
+        if not (Y0 + 2.0 + TAB_W / 2 + RAIL_GAP / 2 <= t <= TOP - 2.0 - TAB_W / 2 - RAIL_GAP / 2):
+            problems.append(f"the tab at y {t:g} does not fit between the body's rounded corners")
+    if any(b - a < TAB_W + RAIL_GAP + 2.0 for a, b in zip(TABS, TABS[1:])):
+        problems.append("two tabs are too close to leave a slot between them")
     return problems
 
 
@@ -192,12 +213,18 @@ def outline_path():
 # ------------------------------------------------------------------ views
 def top_view():
     o = []
-    # edge rails (manufacturing only)
-    for rx in (-RAIL_W, BODY_W):
-        o.append(rect(rx, Y0, RAIL_W, BODY_H, "#f3f3f3", "#999", 1.0, dash="6 4"))
-    o.append(text(X(-RAIL_W / 2), Y(128), "捨て基板（製造用。届いたら折って外す）", 12, fill="#777", rot=-90))
-    o.append(text(X(BODY_W + RAIL_W / 2), Y(128), "捨て基板（製造用。届いたら折って外す）", 12, fill="#777", rot=90))
+    # edge rails (manufacturing only), the slot beside them and the tabs that join them to the body
+    for rx in (-RAIL_GAP - RAIL_W, BODY_W + RAIL_GAP):
+        o.append(rect(rx, 0.0, RAIL_W, TOP, "#f3f3f3", "#999", 1.0, dash="6 4"))
+    for t in TABS:
+        for tx in (-RAIL_GAP, BODY_W):
+            o.append(rect(tx, t - TAB_W / 2, RAIL_GAP, TAB_W, "#f3f3f3", "#999", 0.8))
+    o.append(text(X(-RAIL_GAP - RAIL_W / 2), Y(80), "捨て基板（製造用。ミシン目で折って外す）", 12, fill="#777", rot=-90))
+    o.append(text(X(BODY_W + RAIL_GAP + RAIL_W / 2), Y(80), "捨て基板（製造用。ミシン目で折って外す）", 12, fill="#777", rot=90))
     o.append(f'<path d="{outline_path()}" fill="#e2efdf" stroke="#1d4d1d" stroke-width="2.6"/>')
+    for t in TABS:                       # no part within 5 mm of a tab's mouse bites
+        for kx in (0.0, BODY_W - TAB_KEEP):
+            o.append(rect(kx, t - TAB_KEEP_H, TAB_KEEP, 2 * TAB_KEEP_H, "#fbe3e3", "#c88", 0.6, dash="2 2", opacity=0.8))
     for x, y, w, h, label in ZONES.values():
         o.append(rect(x, y, w, h, "#ffffff", "#6a8f6a", 1.0, dash="6 4", rx=6, opacity=0.6))
         o.append(text(X(x + w / 2), Y(y + h / 2), label, 12, fill="#2f5d2f"))
@@ -236,7 +263,7 @@ def top_view():
     o.append(dim_h(TONGUE_X0, TONGUE_X0 + TONGUE_W, 0, f"JAMMA 差し込み部 {TONGUE_W}", 46))
     o.append(dim_h(0, TONGUE_X0, 0, f"{TONGUE_X0:.1f}", 46))
     o.append(dim_h(TONGUE_X0 + TONGUE_W, BODY_W, 0, f"{BODY_W - TONGUE_X0 - TONGUE_W:.1f}", 46))
-    xx = X(BODY_W + RAIL_W) + 22
+    xx = X(BODY_W + RAIL_GAP + RAIL_W) + 22
     o.append(arrow_line(xx, Y(0), xx, Y(Y0)))
     o.append(f'<line x1="{X(TONGUE_X0 + TONGUE_W):.1f}" y1="{Y(0):.1f}" x2="{xx + 8:.1f}" y2="{Y(0):.1f}" stroke="#b00" stroke-width="0.8"/>')
     o.append(text(xx + 10, (Y(0) + Y(Y0)) / 2, f"{TONGUE_L:.0f}", 15, anchor="start", fill="#b00", weight="bold"))
@@ -334,8 +361,8 @@ def oblique_view(ox, oy, s):
 def build_svg():
     title = "ファミコン JAMMA 基板　外形と部品配置の案（部品面から見た図・単位 mm）"
     notes = [
-        "・外形: 本体 220 × 150 mm の下に、JAMMA 端子の差し込み部（幅 114.4 × 長さ 12）。全体で 220 × 162 mm です。A5 用紙（210 × 148）より少し大きい程度です。",
-        "・部品はすべて表面に載ります。大きな部品は実寸で、点線の枠は小さな部品を置く予定の範囲です。左右の灰色の帯は製造時だけ付く捨て基板です。",
+        "・外形: 本体 220 × 150 mm の下に、JAMMA 端子の差し込み部（幅 114.4 × 長さ 12）。全体で 220 × 162 mm です。A5 用紙（210 × 148）より少し大きい程度です。捨て基板を含めると 234 × 162 mm です。",
+        "・部品はすべて表面に載ります。大きな部品は実寸で、点線の枠は小さな部品を置く予定の範囲です。左右の灰色の帯は製造時だけ付く捨て基板（幅 5 mm、本体との間に 2 mm の溝、5 か所のミシン目でつながる）で、ミシン目の横の赤い枠には部品を置きません。",
         "・これは段階 2（部品配置）の出発点となる案です。配置と配線を進める中で、外形の寸法（目安 ±20 mm）と部品の位置は変わることがあります。",
         "・カセットは基板から垂直に立ちます（高さ 約 80 mm）。カセットの殻の寸法は資料によって 2 mm ほど違うので、端子のサンプルと実物のカセットで確かめてから確定します。",
     ]
@@ -347,7 +374,7 @@ def build_svg():
          f'<rect width="{PAGE_W}" height="{PAGE_H}" fill="#ffffff"/>',
          text(PAGE_W / 2, 38, title, 24, weight="bold"),
          top_view(),
-         legend(int(X(BODY_W + RAIL_W)) + 70, int(Y(TOP)) + 10)]
+         legend(int(X(BODY_W + RAIL_GAP + RAIL_W)) + 70, int(Y(TOP)) + 10)]
     y = Y(0) + 96
     for i, line in enumerate(notes):
         o.append(text(70, y + i * 26, line, 15, anchor="start"))

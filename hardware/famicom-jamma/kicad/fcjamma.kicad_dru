@@ -26,8 +26,12 @@
     (constraint silk_clearance (min 0.15mm)))
 
 (rule "JLCPCB: pad holes 0.45 apart"
-    (condition "A.Type == 'Pad' && B.Type == 'Pad'")
+    (condition "A.Type == 'Pad' && B.Type == 'Pad' && !(A.memberOfFootprint('MB*') && B.memberOfFootprint('MB*'))")
     (constraint hole_to_hole (min 0.45mm)))
+
+(rule "Breakaway tabs: no parts, pads, vias or tracks within 5 mm"
+    (constraint disallow footprint pad via track)
+    (condition "A.intersectsArea('Breakaway tab: keep clear') && !A.memberOfFootprint('MB*')"))
 
 (rule "JLCPCB: annular ring of through-hole pads 0.25"
     (condition "A.Type == 'Pad'")

@@ -6,10 +6,11 @@
 On a board whose project finds the footprint library, KiCad 10.0.8's DRC does not report vias inside a footprint's
 keep-out area (only tracks and pour), so the board relies on named-area rules.  This script copies the project's
 library table, footprint library, rules and project file into the work folder and builds two test boards there:
-- the five footprints alone, apart: the DRC with the board rules must find nothing (silkscreen 0.15 from copper,
-  pad holes 0.45 apart, rings 0.25, ...);
-- two Pico 2 copies, the JAMMA edge and the cartridge slot with one probe in each forbidden place: every probe must be
-  reported by the rule meant for it, and a via in a free place by none of them.
+- the seven footprints alone, apart: the DRC with the board rules must find nothing (silkscreen 0.15 from copper,
+  pad holes 0.45 apart but the mouse bites 0.3, rings 0.25, ...);
+- two Pico 2 copies, the JAMMA edge, the cartridge slot and a line of mouse bites with one probe in each forbidden place:
+  every probe must be reported by the rule meant for it (or, for J1's courtyard beside the tongue's root, by KiCad's own
+  courtyard check), and a via in a free place by none of them.
 tools/build.py runs it on every build.  Exit status 1 and one line per failure.
 """
 import json
@@ -27,15 +28,20 @@ U25, U26, J1 = (60.0, 60.0), (120.0, 60.0), (40.0, 150.0)      # board positions
 TP7 = (1.0, -5.0)
 RULES = {"tp7": "TP7 keep-out: no via, pad or track", "mask": "TP7 keep-out: solder mask stays closed",
          "jvia": "JAMMA fingers: no vias near the fingers", "jtrack": "JAMMA fingers: no tracks in the tip and contact bands",
-         "tent": "Vias under a Pico are tented", "silk": "JLCPCB: silkscreen 0.15 from copper pads"}
+         "tent": "Vias under a Pico are tented", "silk": "JLCPCB: silkscreen 0.15 from copper pads",
+         "tab": "Breakaway tabs: no parts, pads, vias or tracks within 5 mm"}
+BUILT_IN = {"courtyard": "courtyards_overlap"}      # KiCad's own checks some probes rely on
 J8 = (150.0, 120.0)
+MB = (190.0, 40.0)                                             # a line of mouse bites, its keep-out to +X
 CLEAN = {"JAMMA_Edge_56": ("J1", (10.0, 190.0)), "Famicom_Cart_60": ("J8", (110.0, 30.0)), "Trimmer_Bourns_3362P": ("RV1", (30.0, 80.0)),
-         "SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm": ("SW3", (60.0, 75.0)), "RaspberryPi_Pico2_SMD_TP7KeepOut": ("U25", (160.0, 100.0))}
+         "SW_DIP_x04_HRO_DS-04RP_W7.62mm_P2.54mm_Drill1.0mm": ("SW3", (60.0, 75.0)), "RaspberryPi_Pico2_SMD_TP7KeepOut": ("U25", (160.0, 100.0)),
+         "BreakLine_9h_D0.5mm_P0.8mm_KeepOut": ("MB1", (205.0, 60.0)), "ToolingHole_2.0mm_NPTH": ("TH1", (205.0, 20.0))}
+R0402 = ("/usr/share/kicad/footprints/Resistor_SMD.pretty", "R_0402_1005Metric")   # a small part as a probe
 
 
-def place(board, lib, name, ref, at):
+def place(board, lib, name, ref, at, lib_name="fcjamma"):
     fp = pcbnew.FootprintLoad(lib, name)
-    fp.SetFPID(pcbnew.LIB_ID("fcjamma", name))
+    fp.SetFPID(pcbnew.LIB_ID(lib_name, name))
     fp.SetReference(ref)
     fp.SetPosition(pcbnew.VECTOR2I(MM(at[0]), MM(at[1])))
     board.Add(fp)
@@ -124,6 +130,7 @@ def main():
     place(board, lib, PICO, "U26", U26)
     place(board, lib, JAMMA, "J1", J1)
     place(board, lib, "Famicom_Cart_60", "J8", J8)
+    place(board, lib, "BreakLine_9h_D0.5mm_P0.8mm_KeepOut", "MB1", MB)
     outline(board, 220, J1[1])
 
     t7a = (U25[0] + TP7[0], U25[1] + TP7[1])
@@ -140,6 +147,10 @@ def main():
         "track in the JAMMA contact band": ((gap2, J1[1] - 5.5), "jtrack", "Track"),
         "untented via under a Pico": ((U26[0] - 3.0, U26[1] + 10.0), "tent", "Via"),
         "silkscreen line 0.1 mm from a cartridge pad": ((J8[0] - 36.83, J8[1] + 2.54 + 0.95), "silk", "Segment"),
+        # beside the tongue's root (12-15 mm above the tip), within 5 mm of finger 1: only J1's widened courtyard covers it
+        "small part beside the root of finger 1": ((J1[0] - 5.2, J1[1] - 13.5), "courtyard", "Footprint"),
+        "via 2 mm from a line of mouse bites": ((MB[0] + 2.0, MB[1] + 2.0), "tab", "Via"),
+        "small part 2.5 mm from a line of mouse bites": ((MB[0] + 2.5, MB[1] - 3.0), "tab", "Footprint"),
     }
     via(board, t7a)
     track(board, (t7b[0] - 2.0, t7b[1] + 0.3), (t7b[0] + 2.0, t7b[1] + 0.3))
@@ -156,6 +167,9 @@ def main():
     silk.SetLayer(pcbnew.F_SilkS)
     silk.SetWidth(MM(0.15))
     board.Add(silk)
+    place(board, *R0402, "R1", probes["small part beside the root of finger 1"][0], lib_name="Resistor_SMD")
+    via(board, probes["via 2 mm from a line of mouse bites"][0])
+    place(board, *R0402, "R2", probes["small part 2.5 mm from a line of mouse bites"][0], lib_name="Resistor_SMD")
     free = (200.0, 20.0)
     via(board, free, tented=False)                # a free place: no rule may report it
 
@@ -165,7 +179,10 @@ def main():
 
     def reported(rule_key, at, kind, radius=2.6):
         for v in violations:
-            if RULES[rule_key] not in v.get("description", ""):
+            if rule_key in BUILT_IN:
+                if v.get("type") != BUILT_IN[rule_key]:
+                    continue
+            elif RULES[rule_key] not in v.get("description", ""):
                 continue
             for item in v.get("items", []):
                 pos = item.get("pos", {})
@@ -176,7 +193,7 @@ def main():
 
     for name, (at, rule_key, kind) in probes.items():
         if not reported(rule_key, at, kind):
-            problems.append(f"the rule '{RULES[rule_key]}' does not report the probe '{name}'")
+            problems.append(f"the rule '{RULES.get(rule_key, BUILT_IN.get(rule_key))}' does not report the probe '{name}'")
     for key in RULES:
         if reported(key, free, "Via", radius=1.0):
             problems.append(f"the rule '{RULES[key]}' reports a via in a free place")
@@ -184,7 +201,7 @@ def main():
         print(p)
     missed = len([p for p in problems if "does not report" in p])
     print(f"board rules: {len(probes) - missed}/{len(probes)} probes reported by their rule, "
-          f"{len([p for p in problems if 'footprints alone' in p])} findings on the five footprints alone")
+          f"{len([p for p in problems if 'footprints alone' in p])} findings on the {len(CLEAN)} footprints alone")
     sys.exit(1 if problems else 0)
 
 
