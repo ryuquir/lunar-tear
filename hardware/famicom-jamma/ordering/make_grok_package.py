@@ -155,6 +155,9 @@ def main():
     shutil.copy(os.path.join(PROJECT, "mech", "board_outline_plan.png"), os.path.join(out, "10_【図】基板の外形と配置の案.png"))
     shutil.copy(os.path.join(PROJECT, "out", "board", "fcjamma_board_top.png"),
                 os.path.join(out, "11_【図】基板の外形（捨て基板つき・上から見た図）.png"))
+    write("30_【参考】famicart rev H のまとめ（mk2 の検討用）.txt",
+          with_header("ファミコンアーキテクチャー基盤　famicart rev H のまとめと mk2 の論点", version_text,
+                      open(os.path.join(RESEARCH[1], "famicart_revh_for_mk2.md"), encoding="utf-8").read()))
     write("20_【参考】設計記録（README）.txt",
           with_header("ファミコンアーキテクチャー基盤　設計記録（README。設計データの説明）", version_text,
                       open(os.path.join(PROJECT, "README.md"), encoding="utf-8").read()))
